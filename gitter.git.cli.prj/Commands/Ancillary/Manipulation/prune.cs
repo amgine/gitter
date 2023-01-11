@@ -29,16 +29,16 @@ using gitter.Framework;
 sealed class PruneCommand : Command
 {
 	public static ICommandArgument DryRun()
-		=> CommandFlag.DryRun();
+		=> CommandFlag.DryRun;
 
 	public static ICommandArgument Verbose()
-		=> CommandFlag.Verbose();
+		=> CommandFlag.Verbose;
 
 	public static ICommandArgument Expire(DateTime expire)
 		=> new CommandParameterValue("--expire", Utility.FormatDate(expire, DateFormat.UnixTimestamp), ' ');
 
 	public static ICommandArgument NoMoreOptions()
-		=> CommandFlag.NoMoreOptions();
+		=> CommandFlag.NoMoreOptions;
 
 	public PruneCommand()
 		: base("prune")

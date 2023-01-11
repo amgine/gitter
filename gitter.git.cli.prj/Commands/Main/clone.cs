@@ -58,7 +58,7 @@ public sealed class CloneCommand : Command
 
 	/// <summary>Display the progressbar, even in case the standard output is not a terminal.</summary>
 	public static ICommandArgument Verbose()
-		=> CommandFlag.Verbose();
+		=> CommandFlag.Verbose;
 
 	/// <summary>Set up a mirror of the remote repository. This implies --bare.</summary>
 	public static ICommandArgument Mirror()
@@ -74,7 +74,7 @@ public sealed class CloneCommand : Command
 		=> new CommandParameterValue("--template", template.AssureDoubleQuotes(), '=');
 
 	public static ICommandArgument NoMoreOptions()
-		=> CommandFlag.NoMoreOptions();
+		=> CommandFlag.NoMoreOptions;
 
 	public CloneCommand()
 		: base("clone")

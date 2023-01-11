@@ -82,7 +82,7 @@ public class NotifySortedCollection<T> : NotifyCollection<T>
 			{
 				var oldOrder = _sortOrder;
 				_sortOrder = value;
-				if(_sortOrder != SortOrder.None && _comparison != null)
+				if(_sortOrder != SortOrder.None && _comparison is not null)
 				{
 					if(oldOrder == SortOrder.None)
 					{
@@ -109,7 +109,7 @@ public class NotifySortedCollection<T> : NotifyCollection<T>
 
 	#region Methods
 
-	/// <summary>Inverts <see cref="M:Comparison"/>.</summary>
+	/// <summary>Inverts <see cref="Comparison"/>.</summary>
 	/// <param name="item1">First compared item.</param>
 	/// <param name="item2">Second compared item.</param>
 	/// <returns>Comparison result.</returns>
@@ -164,9 +164,9 @@ public class NotifySortedCollection<T> : NotifyCollection<T>
 
 	/// <summary>Adds range of items to this collection.</summary>
 	/// <param name="list">Items to add.</param>
-	/// <exception cref="T:System.NullReferenceException"><paramref name="list"/> == <c>null</c>.</exception>
-	/// <exception cref="T:System.ArgumentException">
-	/// Some of the items in <paramref name="list"/> didn't pass <see cref="VerifyItem"/> check.
+	/// <exception cref="NullReferenceException"><paramref name="list"/> == <c>null</c>.</exception>
+	/// <exception cref="ArgumentException">
+	/// Some of the items in <paramref name="list"/> didn't pass <see cref="NotifyCollection{T}.VerifyItem"/> check.
 	/// </exception>
 	public override void AddRange(IEnumerable<T> list)
 	{
@@ -184,13 +184,13 @@ public class NotifySortedCollection<T> : NotifyCollection<T>
 		}
 	}
 
-	/// <summary>Inserts range of items. Index may be altered by <see cref="M:Comparison"/>.</summary>
+	/// <summary>Inserts range of items. Index may be altered by <see cref="Comparison"/>.</summary>
 	/// <param name="index">Starting index.</param>
 	/// <param name="list">Items to insert.</param>
-	/// <exception cref="T:System.NullReferenceException"><paramref name="list"/> == <c>null</c>.</exception>
-	/// <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="index"/> is out of range.</exception>
-	/// <exception cref="T:System.ArgumentException">
-	/// Some of the items in <paramref name="list"/> didn't pass <see cref="VerifyItem"/> check.
+	/// <exception cref="NullReferenceException"><paramref name="list"/> == <c>null</c>.</exception>
+	/// <exception cref="ArgumentOutOfRangeException"><paramref name="index"/> is out of range.</exception>
+	/// <exception cref="ArgumentException">
+	/// Some of the items in <paramref name="list"/> didn't pass <see cref="NotifyCollection{T}.VerifyItem"/> check.
 	/// </exception>
 	public override void InsertRange(int index, IEnumerable<T> list)
 	{
@@ -212,7 +212,9 @@ public class NotifySortedCollection<T> : NotifyCollection<T>
 	/// <summary>Called on insert item request.</summary>
 	/// <param name="index">Item index.</param>
 	/// <param name="item">Inserted item.</param>
-	/// <exception cref="T:System.ArgumentException"><paramref name="item"/> didn't pass <see cref="VerifyItem"/> check.</exception>
+	/// <exception cref="ArgumentException">
+	/// <paramref name="item"/> didn't pass <see cref="NotifyCollection{T}.VerifyItem"/> check.
+	/// </exception>
 	protected override void InsertItem(int index, T item)
 	{
 		if(_comparison is null)
@@ -224,7 +226,9 @@ public class NotifySortedCollection<T> : NotifyCollection<T>
 	/// <summary>Called on set item request.</summary>
 	/// <param name="index">Item index.</param>
 	/// <param name="item">Inserted item.</param>
-	/// <exception cref="T:System.ArgumentException"><paramref name="item"/> didn't pass <see cref="VerifyItem"/> check.</exception>
+	/// <exception cref="ArgumentException">
+	/// <paramref name="item"/> didn't pass <see cref="NotifyCollection{T}.VerifyItem"/> check.
+	/// </exception>
 	protected override void SetItem(int index, T item)
 	{
 		if(_comparison is null)

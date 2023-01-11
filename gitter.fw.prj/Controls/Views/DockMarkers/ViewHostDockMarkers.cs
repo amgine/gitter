@@ -20,6 +20,8 @@
 
 namespace gitter.Framework.Controls;
 
+#nullable enable
+
 /// <summary>Dock markers of <see cref="ViewHost"/>.</summary>
 sealed class ViewHostDockMarkers : DockMarkers<ViewHostDockMarker>
 {

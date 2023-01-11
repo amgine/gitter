@@ -228,6 +228,13 @@ partial class CloneDialog : GitDialogBase, IExecutableDialog, ICloneView
 
 	public IUserInputErrorNotifier ErrorNotifier => _errorNotifier;
 
+	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		base.OnLoad(e);
+		BeginInvoke(_txtUrl.Focus);
+	}
+
 	private void Localize()
 	{
 		Text = Resources.StrCloneRepository;

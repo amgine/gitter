@@ -31,5 +31,6 @@ public sealed class RepositoryProviderPicker : CustomObjectPicker<CustomListBox,
 	{
 	}
 
+	/// <inheritdoc/>
 	protected override IRepositoryProvider GetValue(RepositoryProviderListItem item) => item?.DataContext;
 }

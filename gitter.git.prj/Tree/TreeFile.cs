@@ -36,12 +36,12 @@ using Resources = gitter.Git.Properties.Resources;
 /// <summary>Represents a file in a directory.</summary>
 public sealed class TreeFile : TreeItem
 {
-	public TreeFile(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name)
+	public TreeFile(Repository repository, string relativePath, TreeDirectory? parent, FileStatus status, string name)
 		: base(repository, relativePath, parent, status, name)
 	{
 	}
 
-	public TreeFile(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name, long size)
+	public TreeFile(Repository repository, string relativePath, TreeDirectory? parent, FileStatus status, string name, long size)
 		: base(repository, relativePath, parent, status, name)
 	{
 		Size = size;

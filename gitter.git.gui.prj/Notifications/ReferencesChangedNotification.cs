@@ -94,7 +94,7 @@ sealed class ReferencesChangedNotification : NotificationContent
 		var conv = new DpiConverter(this);
 		int x = conv.ConvertX(HorizontalMargin);
 		int y = conv.ConvertY(VerticalMargin);
-		using var brush = new SolidBrush(ForeColor);
+		using var brush = SolidBrushCache.Get(ForeColor);
 		if(_changes is not { Length: > 0 })
 		{
 			GitterApplication.TextRenderer.DrawText(

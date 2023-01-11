@@ -27,6 +27,8 @@ using Autofac;
 using gitter.Framework;
 using gitter.Framework.Controls;
 
+#nullable enable
+
 abstract class GitViewFactoryBase : ViewFactoryBase
 {
 	protected GitViewFactoryBase(Guid guid, string name, IImageProvider imageProvider, bool singleton = false)
@@ -34,7 +36,7 @@ abstract class GitViewFactoryBase : ViewFactoryBase
 	{
 	}
 
-	public ILifetimeScope Scope { get; set; }
+	public ILifetimeScope? Scope { get; set; }
 }
 
 class GitViewFactoryBase<T> : GitViewFactoryBase where T : ViewBase
@@ -44,6 +46,26 @@ class GitViewFactoryBase<T> : GitViewFactoryBase where T : ViewBase
 	{
 	}
 
+	/// <inheritdoc/>
 	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		=> Scope.Resolve<T>();
+	{
+		if(Scope is null)
+		{
+			throw new InvalidOperationException();
+		}
+
+		ViewBase view;
+		var scope = Scope.BeginLifetimeScope();
+		try
+		{
+			view = scope.Resolve<T>();
+			view.Disposed += (_, _) => scope.Dispose();
+		}
+		catch
+		{
+			scope.Dispose();
+			throw;
+		}
+		return view;
+	}
 }

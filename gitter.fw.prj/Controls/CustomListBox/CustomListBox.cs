@@ -1302,66 +1302,73 @@ public class CustomListBox : ScrollableControl
 		_lastClickedItemIndex = itemIndex;
 		var item = _itemPlainList[itemIndex];
 		int c = item.IsSelected ? _selectedItems.Count : _selectedItems.Count + 1;
-		int[] indices = new int[c];
-		int j = 0;
-		if(!item.IsSelected)
+		var indices = System.Buffers.ArrayPool<int>.Shared.Rent(c);
+		try
 		{
-			indices[j++] = itemIndex;
-		}
-		for(int i = 0; i < _selectedItems.Count; ++i)
-		{
-			int id = _itemPlainList.IndexOf(_selectedItems[i]);
-			indices[j++] = id;
-		}
-		_selectedItems.Clear();
-		_selectedItems.Add(item);
-		var d = EnsureVisible(_itemFocus.Index);
-		if(Math.Abs(d) <= _itemsArea.Height)
-		{
-			var rect = _itemsArea;
-			if(d > 0)
+			int selectedIntemsCount = 0;
+			if(!item.IsSelected)
 			{
-				rect.Height -= d;
+				indices[selectedIntemsCount++] = itemIndex;
 			}
-			else
+			for(int i = 0; i < _selectedItems.Count; ++i)
 			{
-				rect.Y -= d;
-				rect.Height += d;
+				int id = _itemPlainList.IndexOf(_selectedItems[i]);
+				indices[selectedIntemsCount++] = id;
 			}
-			Array.Sort<int>(indices);
-			var rc = Rectangle.Empty;
-			bool rc_active = false;
-			var itemHeight = CurrentItemHeight;
-			for(int i = 0; i < indices.Length; ++i)
+			_selectedItems.Clear();
+			_selectedItems.Add(item);
+			var d = EnsureVisible(_itemFocus.Index);
+			if(Math.Abs(d) <= _itemsArea.Height)
 			{
-				int y1 = GetItemY1Offset(indices[i]);
-				int y2 = y1 + itemHeight;
-				if(y2 < 0) continue;
-				if(y1 >= _itemsArea.Height) break;
-				if(!rc_active)
+				var rect = _itemsArea;
+				if(d > 0)
 				{
-					rc = new Rectangle(_itemsArea.X, _itemsArea.Y + y1, _itemWidth, itemHeight);
-					rc_active = true;
+					rect.Height -= d;
 				}
 				else
 				{
-					if(indices[i - 1] != indices[i] + 1)
+					rect.Y -= d;
+					rect.Height += d;
+				}
+				Array.Sort(indices, 0, selectedIntemsCount);
+				var rc = Rectangle.Empty;
+				bool rc_active = false;
+				var itemHeight = CurrentItemHeight;
+				for(int i = 0; i < selectedIntemsCount; ++i)
+				{
+					int y1 = GetItemY1Offset(indices[i]);
+					int y2 = y1 + itemHeight;
+					if(y2 < 0) continue;
+					if(y1 >= _itemsArea.Height) break;
+					if(!rc_active)
 					{
-						rc = Rectangle.Intersect(rc, rect);
-						Invalidate(rc);
 						rc = new Rectangle(_itemsArea.X, _itemsArea.Y + y1, _itemWidth, itemHeight);
+						rc_active = true;
 					}
 					else
 					{
-						rc.Height += itemHeight;
+						if(indices[i - 1] != indices[i] + 1)
+						{
+							rc = Rectangle.Intersect(rc, rect);
+							Invalidate(rc);
+							rc = new Rectangle(_itemsArea.X, _itemsArea.Y + y1, _itemWidth, itemHeight);
+						}
+						else
+						{
+							rc.Height += itemHeight;
+						}
 					}
 				}
+				if(rc_active)
+				{
+					rc = Rectangle.Intersect(rc, rect);
+					Invalidate(rc);
+				}
 			}
-			if(rc_active)
-			{
-				rc = Rectangle.Intersect(rc, rect);
-				Invalidate(rc);
-			}
+		}
+		finally
+		{
+			System.Buffers.ArrayPool<int>.Shared.Return(indices);
 		}
 	}
 
@@ -1378,6 +1385,7 @@ public class CustomListBox : ScrollableControl
 		EnsureVisible(itemIndex);
 	}
 
+	/// <inheritdoc/>
 	protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
 	{
 		e.IsInputKey = true;

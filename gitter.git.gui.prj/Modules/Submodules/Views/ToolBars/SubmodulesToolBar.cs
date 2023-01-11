@@ -53,7 +53,7 @@ internal sealed class SubmodulesToolbar : ToolStrip
 		var dpiBindings = new DpiBindings(this);
 		var factory = new GuiItemFactory(dpiBindings);
 
-		Items.Add(factory.CreateRefreshContentButton(submodulesView));
+		Items.Add(_btnRefresh = factory.CreateRefreshContentButton(submodulesView));
 		Items.Add(new ToolStripSeparator());
 		Items.Add(_btnAddSubmodule = new ToolStripButton(Resources.StrAddSubmodule, null,
 			(_, _) =>

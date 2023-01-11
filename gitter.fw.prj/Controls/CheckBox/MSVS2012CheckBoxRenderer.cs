@@ -102,7 +102,7 @@ sealed class MSVS2012CheckBoxRenderer : CustomCheckBoxRenderer
 			foregroundColor = ColorTable.ForegroundDisabled;
 		}
 		var rcCheckBox = new Rectangle(1, 1 + (checkBox.Height - checkBoxSize.Height) / 2, checkBoxSize.Height - 2, checkBoxSize.Height - 2);
-		using(var brush = new SolidBrush(highlight ? ColorTable.CheckBackgroundHighlight : ColorTable.CheckBackground))
+		using(var brush = SolidBrushCache.Get(highlight ? ColorTable.CheckBackgroundHighlight : ColorTable.CheckBackground))
 		{
 			graphics.FillRectangle(brush, rcCheckBox);
 		}

@@ -178,14 +178,14 @@ public partial class CliOptionsPage : PropertyPage, IExecutableDialog
 
 	private void _cmdAutoDetect_Click(object sender, EventArgs e)
 	{
-		_txtmSysGitPath.Text = GitProcess.DetectGitExePath();
+		_txtmSysGitPath.Text = GitFinder.DetectGitExePath();
 	}
 
 	private void _cmdBrowse_Click(object sender, EventArgs e)
 	{
 		_openFileDialog.Filter = "Git Executable|git.exe";
 		_openFileDialog.FileName = "git.exe";
-		var path = GitProcess.DetectGitExePath();
+		var path = GitFinder.DetectGitExePath();
 		if(!string.IsNullOrEmpty(path))
 		{
 			path = Path.GetDirectoryName(path);

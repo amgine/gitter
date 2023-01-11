@@ -118,5 +118,12 @@ public partial class AddRemoteDialog : GitDialogBase, IAsyncExecutableDialog, IA
 	public IUserInputErrorNotifier ErrorNotifier { get; }
 
 	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		base.OnLoad(e);
+		BeginInvoke(_txtName.Focus);
+	}
+
+	/// <inheritdoc/>
 	public Task<bool> ExecuteAsync() => _controller.TryAddRemoteAsync();
 }

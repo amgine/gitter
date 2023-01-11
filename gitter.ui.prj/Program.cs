@@ -45,6 +45,7 @@ internal static class Program
 
 			builder
 				.RegisterGeneric(typeof(AutofacFactory<>))
-				.AsImplementedInterfaces();
+				.As(typeof(IFactory<>))
+				.SingleInstance();
 		});
 }

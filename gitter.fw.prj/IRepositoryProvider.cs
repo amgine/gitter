@@ -28,6 +28,8 @@ using System.Windows.Forms;
 
 using gitter.Framework.Configuration;
 
+#nullable enable
+
 /// <summary>Repository provider.</summary>
 public interface IRepositoryProvider : INamedObject
 {
@@ -73,7 +75,7 @@ public interface IRepositoryProvider : INamedObject
 	/// <returns>Opened repository.</returns>
 	/// <exception cref="ArgumentNullException"><paramref name="workingDirectory"/> == <c>null</c>.</exception>
 	Task<IRepository> OpenRepositoryAsync(string workingDirectory,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default);
 
 	/// <summary>Called after repository is successfully loaded by environment.</summary>
 	/// <param name="repository">Loaded repository.</param>

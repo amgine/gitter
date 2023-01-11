@@ -89,7 +89,7 @@ sealed class MSVS2012LightStyle : MSVS2012Style, IGitterStyle
 		=> ProcessOverlayRenderer.MSVS2012Dark;
 
 	public ToolStripRenderer ToolStripRenderer
-		=> _toolStriprenderer ??= new MSVS2012StyleToolStripRenderer(MSVS2012StyleToolStripRenderer.LightColors);
+		=> _toolStriprenderer ??= new MSVS2012StyleToolStripRenderer(MSVS2012StyleToolStripRenderer.ColorTable.Light);
 
 	public ViewRenderer ViewRenderer => ViewManager.MSVS2012LightStyleRenderer;
 }

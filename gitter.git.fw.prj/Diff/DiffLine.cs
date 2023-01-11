@@ -39,6 +39,7 @@ public sealed class DiffLine : ICloneable
 	/// <param name="states">Line states.</param>
 	/// <param name="nums">Line numbers.</param>
 	/// <param name="text">Line text.</param>
+	/// <param name="ending">Line ending.</param>
 	public DiffLine(DiffLineState state, DiffLineState[] states, int[] nums, string text, string ending = LineEnding.Lf)
 	{
 		Verify.Argument.IsNotNull(states);
@@ -99,33 +100,26 @@ public sealed class DiffLine : ICloneable
 
 	internal void ToString(StringBuilder sb) => sb.Append(ToString());
 
+	/// <inheritdoc/>
 	public override string ToString()
-	{
-		switch(State)
+		=> State switch
 		{
-			case DiffLineState.Added:
-				return "+" + Text;
-			case DiffLineState.Removed:
-				return "-" + Text;
-			case DiffLineState.Context:
-				return " " + Text;
-			default:
-				return Text;
-		}
-	}
+			DiffLineState.Added   => "+" + Text,
+			DiffLineState.Removed => "-" + Text,
+			DiffLineState.Context => " " + Text,
+			_ => Text,
+		};
 
 	#region ICloneable
 
-	public DiffLine Clone()
-	{
-		return new DiffLine(
-			State,
-			(DiffLineState[])States.Clone(),
-			(int[])Nums.Clone(),
-			Text,
-			Ending);
-	}
+	public DiffLine Clone() => new(
+		State,
+		(DiffLineState[])States.Clone(),
+		(int[])Nums.Clone(),
+		Text,
+		Ending);
 
+	/// <inheritdoc/>
 	object ICloneable.Clone() => Clone();
 
 	#endregion

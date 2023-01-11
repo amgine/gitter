@@ -127,19 +127,13 @@ sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 		//using(var brush = new HatchBrush(HatchStyle.Percent20,
 		//    ColorTable.ContentPanelForeground,
 		//    ColorTable.ContentPanelBackground))
-		using(var brush = new SolidBrush(ColorTable.ContentPanelBackground))
-		{
-			e.Graphics.FillRectangle(brush, new Rectangle(Point.Empty, e.ToolStripContentPanel.Size));
-		}
+		e.Graphics.GdiFill(ColorTable.ContentPanelBackground, new Rectangle(Point.Empty, e.ToolStripContentPanel.Size));
 		e.Handled = true;
 	}
 
 	protected override void OnRenderToolStripPanelBackground(ToolStripPanelRenderEventArgs e)
 	{
-		using(var b = new SolidBrush(ColorTable.PanelBackground))
-		{
-			e.Graphics.FillRectangle(b, e.ToolStripPanel.Bounds);
-		}
+		e.Graphics.GdiFill(ColorTable.PanelBackground, e.ToolStripPanel.Bounds);
 		e.Handled = true;
 	}
 
@@ -147,22 +141,22 @@ sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 	{
 		int x = e.ToolStrip.Bounds.Width - 13;
 		int y = e.ToolStrip.Bounds.Height - 13;
-		using(var brush00 = new SolidBrush(ColorTable.SizingGrip00))
-		using(var brush10 = new SolidBrush(ColorTable.SizingGrip10))
-		using(var brush01 = new SolidBrush(ColorTable.SizingGrip01))
-		using(var brush11 = new SolidBrush(ColorTable.SizingGrip11))
+		var brush00 = ColorTable.SizingGrip00;
+		var brush10 = ColorTable.SizingGrip10;
+		var brush01 = ColorTable.SizingGrip01;
+		var brush11 = ColorTable.SizingGrip11;
+
+		using var gdi = e.Graphics.AsGdi();
+		for(int i = 0; i < 4; ++i)
 		{
-			for(int i = 0; i < 4; ++i)
+			for(int j = 0; j < 4; ++j)
 			{
-				for(int j = 0; j < 4; ++j)
+				if(i + j >= 3)
 				{
-					if(i + j >= 3)
-					{
-						e.Graphics.FillRectangle(brush00, new Rectangle(x + i * 3 + 0, y + j * 3 + 0, 1, 1));
-						e.Graphics.FillRectangle(brush10, new Rectangle(x + i * 3 + 1, y + j * 3 + 0, 1, 1));
-						e.Graphics.FillRectangle(brush01, new Rectangle(x + i * 3 + 0, y + j * 3 + 1, 1, 1));
-						e.Graphics.FillRectangle(brush11, new Rectangle(x + i * 3 + 1, y + j * 3 + 1, 1, 1));
-					}
+					gdi.Fill(brush00, new Rectangle(x + i * 3 + 0, y + j * 3 + 0, 1, 1));
+					gdi.Fill(brush10, new Rectangle(x + i * 3 + 1, y + j * 3 + 0, 1, 1));
+					gdi.Fill(brush01, new Rectangle(x + i * 3 + 0, y + j * 3 + 1, 1, 1));
+					gdi.Fill(brush11, new Rectangle(x + i * 3 + 1, y + j * 3 + 1, 1, 1));
 				}
 			}
 		}

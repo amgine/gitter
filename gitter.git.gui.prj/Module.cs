@@ -95,6 +95,8 @@ public sealed class Module : Autofac.Module
 				typeof(ConfigurationPage),
 				typeof(GraphStylePage),
 				typeof(VersionCheckDialog),
+				typeof(InitDialog),
+				typeof(CloneDialog),
 			})
 			.AsSelf()
 			.ExternallyOwned();

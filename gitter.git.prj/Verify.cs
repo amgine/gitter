@@ -30,6 +30,8 @@ using gitter.Git;
 
 using Resources = gitter.Git.Properties.Resources;
 
+#nullable enable
+
 /// <summary>
 /// A static class for retail validated assertions.
 /// Instead of breaking into the debugger an exception is thrown.
@@ -48,7 +50,8 @@ internal static partial class Verify
 		#if !NO_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsValidGitObject(GitNamedObjectWithLifetime gitObject, Repository repository, [CallerArgumentExpression(@"gitObject")] string parameterName = null)
+		public static void IsValidGitObject(GitNamedObjectWithLifetime gitObject, Repository repository,
+			[CallerArgumentExpression(nameof(gitObject))] string? parameterName = null)
 		{
 			Assert.IsNotNull(repository);
 			Assert.IsNeitherNullNorWhitespace(parameterName);
@@ -86,7 +89,8 @@ internal static partial class Verify
 		#if !NO_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsValidRevisionPointer(IRevisionPointer revision, Repository repository, [CallerArgumentExpression(@"revision")] string parameterName = null)
+		public static void IsValidRevisionPointer(IRevisionPointer revision, Repository repository,
+			[CallerArgumentExpression(nameof(revision))] string? parameterName = null)
 		{
 			Assert.IsNotNull(repository);
 			Assert.IsNeitherNullNorWhitespace(parameterName);
@@ -124,7 +128,8 @@ internal static partial class Verify
 		#if !NO_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsValidRevisionPointer(IRevisionPointer revision, string parameterName)
+		public static void IsValidRevisionPointer(IRevisionPointer revision,
+			[CallerArgumentExpression(nameof(revision))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -152,11 +157,12 @@ internal static partial class Verify
 		[DebuggerStepThrough]
 		public static void AreValidRevisionPointers(
 			IRevisionPointer revision1, IRevisionPointer revision2,
-			string argName1 = "revision1", string argName2 = "revision2")
+			[CallerArgumentExpression(nameof(revision1))] string? argName1 = null,
+			[CallerArgumentExpression(nameof(revision2))] string? argName2 = null)
 		{
 			Verify.Argument.IsValidRevisionPointer(revision1, argName1);
 			Verify.Argument.IsValidRevisionPointer(revision2, argName2);
-			Verify.Argument.IsTrue(revision2.Repository == revision1.Repository, argName2,
+			Verify.Argument.IsTrue(revision2.Repository == revision1.Repository, argName2 ?? nameof(argName2),
 				Resources.ExcAllObjectsMustBeHandledByThisRepository.UseAsFormat("revisions"));
 		}
 
@@ -170,7 +176,8 @@ internal static partial class Verify
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
 		public static void IsValidRevisionPointerSequence(
-			IEnumerable<IRevisionPointer> revisions, Repository repository, [CallerArgumentExpression(@"revisions")] string? parameterName = default)
+			IEnumerable<IRevisionPointer> revisions, Repository repository,
+			[CallerArgumentExpression(nameof(revisions))] string? parameterName = default)
 		{
 			Assert.IsNotNull(repository);
 			Assert.IsNeitherNullNorWhitespace(parameterName);
@@ -217,11 +224,12 @@ internal static partial class Verify
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
 		public static void IsValidRevisionPointerSequence(
-			IEnumerable<IRevisionPointer> revisions, string parameterName)
+			IEnumerable<IRevisionPointer> revisions,
+			[CallerArgumentExpression(nameof(revisions))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
-			Repository repository = null;
+			Repository? repository = null;
 			if(revisions == null)
 			{
 				throw new ArgumentNullException(parameterName);
@@ -277,7 +285,8 @@ internal static partial class Verify
 		#if !NO_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsValidReferenceName(string referenceName, ReferenceType referenceType, [CallerArgumentExpression(@"referenceName")] string parameterName = null)
+		public static void IsValidReferenceName(string referenceName, ReferenceType referenceType,
+			[CallerArgumentExpression(nameof(referenceName))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -306,7 +315,8 @@ internal static partial class Verify
 		#if !NO_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsValidSHA1(string value, string parameterName)
+		public static void IsValidSHA1(string value,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 

@@ -44,6 +44,10 @@ partial class HistoryFilterDropDown : UserControl
 	{
 		InitializeComponent();
 
+#if NETCOREAPP
+		_txtSearch.PlaceholderText = "Filter";
+#endif
+
 		if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
 		{
 			Font = GitterApplication.FontManager.UIFont;

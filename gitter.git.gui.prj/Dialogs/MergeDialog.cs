@@ -273,6 +273,13 @@ public partial class MergeDialog : GitDialogBase, IExecutableDialog, IMergeView
 
 	#region Methods
 
+	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		base.OnLoad(e);
+		BeginInvoke(_txtMessage.Focus);
+	}
+
 	private void Localize()
 	{
 		Text = Resources.StrMergeBranches;

@@ -73,10 +73,10 @@ public sealed class StatusCommand : Command
 		};
 
 	public static ICommandArgument NoMoreOptions()
-		=> CommandFlag.NoMoreOptions();
+		=> CommandFlag.NoMoreOptions;
 
 	public static ICommandArgument Verbose()
-		=> CommandFlag.Verbose();
+		=> CommandFlag.Verbose;
 
 	public StatusCommand()
 		: base("status")

@@ -90,10 +90,10 @@ public sealed class PushCommand : Command
 		=> new CommandParameterValue("--receive-pack", receivePack, '=');
 
 	public static ICommandArgument Verbose()
-		=> CommandFlag.Verbose();
+		=> CommandFlag.Verbose;
 
 	public static ICommandArgument Quiet()
-		=> CommandFlag.Quiet();
+		=> CommandFlag.Quiet;
 
 	public PushCommand()
 		: base("push")

@@ -36,7 +36,7 @@ public sealed class ArchiveCommand : Command
 
 	/// <summary>Report progress to stderr.</summary>
 	public static ICommandArgument Verbose()
-		=> CommandFlag.Verbose();
+		=> CommandFlag.Verbose;
 
 	/// <summary>Prepend prefix to each filename in the archive.</summary>
 	public static ICommandArgument Prefix(string prefix)

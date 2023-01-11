@@ -28,7 +28,7 @@ sealed class VerifyTagCommand : Command
 {
 	/// <summary>Print the contents of the tag object before validating it.</summary>
 	public static ICommandArgument Verbose()
-		=> CommandFlag.Verbose();
+		=> CommandFlag.Verbose;
 
 	public VerifyTagCommand()
 		: base("verify-tag")

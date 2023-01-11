@@ -116,6 +116,62 @@ public abstract class HashColumnBase : CustomListBoxColumn
 		}
 	}
 
+	private void PaintNoHash(SubItemPaintEventArgs subItemPaintEventArgs)
+	{
+		Assert.IsNotNull(subItemPaintEventArgs);
+
+		var style = Style;
+		if((subItemPaintEventArgs.State & ItemState.Selected) == ItemState.Selected && style.Type == GitterStyleType.DarkBackground)
+		{
+			if(Abbreviate)
+			{
+#if NET5_0_OR_GREATER
+				subItemPaintEventArgs.PaintText(NoHash.AsSpan(0, DefaultAbbrevLength));
+#else
+				subItemPaintEventArgs.PaintText(NoHash.Substring(0, DefaultAbbrevLength));
+#endif
+			}
+			else
+			{
+				subItemPaintEventArgs.PaintText(NoHash);
+			}
+		}
+		else
+		{
+			using var textBrush = SolidBrushCache.Get(style.Colors.GrayText);
+			if(Abbreviate)
+			{
+#if NET5_0_OR_GREATER
+				subItemPaintEventArgs.PaintText(NoHash.AsSpan(0, DefaultAbbrevLength), textBrush);
+#else
+				subItemPaintEventArgs.PaintText(NoHash.Substring(0, DefaultAbbrevLength), textBrush);
+#endif
+			}
+			else
+			{
+				subItemPaintEventArgs.PaintText(NoHash, textBrush);
+			}
+		}
+	}
+
+	private void PaintHash(SubItemPaintEventArgs subItemPaintEventArgs, string hash)
+	{
+		Assert.IsNotNull(subItemPaintEventArgs);
+
+		if(Abbreviate)
+		{
+#if NET5_0_OR_GREATER
+			subItemPaintEventArgs.PaintText(hash.AsSpan(0, DefaultAbbrevLength));
+#else
+			subItemPaintEventArgs.PaintText(hash.Substring(0, DefaultAbbrevLength));
+#endif
+		}
+		else
+		{
+			subItemPaintEventArgs.PaintText(hash);
+		}
+	}
+
 	/// <inheritdoc/>
 	protected override void OnPaintSubItem(SubItemPaintEventArgs subItemPaintEventArgs)
 	{
@@ -124,53 +180,11 @@ public abstract class HashColumnBase : CustomListBoxColumn
 		var hash = GetHash(subItemPaintEventArgs.Item);
 		if(ReferenceEquals(hash, NoHash))
 		{
-			var style = Style;
-			if((subItemPaintEventArgs.State & ItemState.Selected) == ItemState.Selected && style.Type == GitterStyleType.DarkBackground)
-			{
-				if(Abbreviate)
-				{
-#if NET5_0_OR_GREATER
-					subItemPaintEventArgs.PaintText(NoHash.AsSpan(0, DefaultAbbrevLength));
-#else
-					subItemPaintEventArgs.PaintText(NoHash.Substring(0, DefaultAbbrevLength));
-#endif
-				}
-				else
-				{
-					subItemPaintEventArgs.PaintText(NoHash);
-				}
-			}
-			else
-			{
-				using var textBrush = new SolidBrush(style.Colors.GrayText);
-				if(Abbreviate)
-				{
-#if NET5_0_OR_GREATER
-					subItemPaintEventArgs.PaintText(NoHash.AsSpan(0, DefaultAbbrevLength), textBrush);
-#else
-					subItemPaintEventArgs.PaintText(NoHash.Substring(0, DefaultAbbrevLength), textBrush);
-#endif
-				}
-				else
-				{
-					subItemPaintEventArgs.PaintText(NoHash, textBrush);
-				}
-			}
+			PaintNoHash(subItemPaintEventArgs);
 		}
 		else
 		{
-			if(Abbreviate)
-			{
-#if NET5_0_OR_GREATER
-				subItemPaintEventArgs.PaintText(hash.AsSpan(0, DefaultAbbrevLength));
-#else
-				subItemPaintEventArgs.PaintText(hash.Substring(0, DefaultAbbrevLength));
-#endif
-			}
-			else
-			{
-				subItemPaintEventArgs.PaintText(hash);
-			}
+			PaintHash(subItemPaintEventArgs, hash);
 		}
 	}
 
@@ -194,6 +208,8 @@ public abstract class HashColumnBase : CustomListBoxColumn
 	/// <inheritdoc/>
 	protected override void SaveMoreTo(Section section)
 	{
+		Assert.IsNotNull(section);
+
 		base.SaveMoreTo(section);
 		section.SetValue("Abbreviate", Abbreviate);
 	}
@@ -201,6 +217,8 @@ public abstract class HashColumnBase : CustomListBoxColumn
 	/// <inheritdoc/>
 	protected override void LoadMoreFrom(Section section)
 	{
+		Assert.IsNotNull(section);
+
 		base.LoadMoreFrom(section);
 		Abbreviate = section.GetValue("Abbreviate", Abbreviate);
 	}

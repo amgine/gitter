@@ -39,7 +39,7 @@ internal static class RedmineGuiUtility
 		}
 		else
 		{
-			using(var brush = new SolidBrush(style.Colors.GrayText))
+			using(var brush = SolidBrushCache.Get(style.Colors.GrayText))
 			{
 				paintEventArgs.PaintText(text, brush);
 			}

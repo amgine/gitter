@@ -50,7 +50,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsNeitherNullNorEmpty(string value, [CallerArgumentExpression(@"value")] string? parameterName = null)
+		public static void IsNeitherNullNorEmpty(string value,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -73,7 +74,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsNeitherNullNorWhitespace(string value, [CallerArgumentExpression(@"value")] string? parameterName = null)
+		public static void IsNeitherNullNorWhitespace(string value,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -97,7 +99,9 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsNotDefault<T>(T obj, [CallerArgumentExpression(@"obj")] string? parameterName = null) where T : struct
+		public static void IsNotDefault<T>(T obj,
+			[CallerArgumentExpression(nameof(obj))] string? parameterName = null)
+			where T : struct
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -121,7 +125,9 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsNotNull<T>(T obj, [CallerArgumentExpression(@"obj")] string? parameterName = null) where T : class
+		public static void IsNotNull<T>(T obj,
+			[CallerArgumentExpression(nameof(obj))] string? parameterName = null)
+			where T : class
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -140,7 +146,9 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsNull<T>(T obj, string parameterName) where T : class
+		public static void IsNull<T>(T obj,
+			[CallerArgumentExpression(nameof(obj))] string? parameterName = null)
+			where T : class
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -161,7 +169,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void HasNoNullItems<T>(IEnumerable<T> sequence, [CallerArgumentExpression(@"sequence")] string? parameterName = null)
+		public static void HasNoNullItems<T>(IEnumerable<T> sequence,
+			[CallerArgumentExpression(nameof(sequence))] string? parameterName = null)
 			where T : class
 		{
 			Assert.IsNotNull(sequence);
@@ -186,7 +195,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsNotNegative(int value, [CallerArgumentExpression(@"value")] string? parameterName = null)
+		public static void IsNotNegative(int value,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -206,7 +216,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsNotNegative(float value, [CallerArgumentExpression(@"value")] string? parameterName = null)
+		public static void IsNotNegative(float value,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -226,7 +237,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsNotNegative(double value, [CallerArgumentExpression(@"value")] string? parameterName = null)
+		public static void IsNotNegative(double value,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -246,7 +258,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsPositive(int value, [CallerArgumentExpression(@"value")] string? parameterName = null)
+		public static void IsPositive(int value,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -266,7 +279,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsPositive(float value, [CallerArgumentExpression(@"value")] string? parameterName = null)
+		public static void IsPositive(float value,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -286,7 +300,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsPositive(double value, [CallerArgumentExpression(@"value")] string? parameterName = null)
+		public static void IsPositive(double value,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -308,7 +323,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsGreaterThan(double value, double minValue, [CallerArgumentExpression(@"value")] string? parameterName = null)
+		public static void IsGreaterThan(double value, double minValue,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -334,7 +350,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsLesserThan(double value, double minValue, [CallerArgumentExpression(@"value")] string? parameterName = null)
+		public static void IsLesserThan(double value, double minValue,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -358,7 +375,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsTrue(bool statement, [CallerArgumentExpression(@"statement")] string? parameterName = null)
+		public static void IsTrue(bool statement,
+			[CallerArgumentExpression(nameof(statement))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -435,7 +453,7 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void UriIsAbsolute(Uri uri, [CallerArgumentExpression(@"uri")] string? parameterName = null)
+		public static void UriIsAbsolute(Uri uri, [CallerArgumentExpression(nameof(uri))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
@@ -568,7 +586,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsValidIndex(int value, int upperBoundExclusive, [CallerArgumentExpression(@"value")] string? parameterName = null)
+		public static void IsValidIndex(int value, int upperBoundExclusive,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsTrue(upperBoundExclusive >= 0);
 			Assert.IsNeitherNullNorEmpty(parameterName);
@@ -597,7 +616,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsValidIndex(int lowerBoundInclusive, int value, int upperBoundExclusive, string parameterName)
+		public static void IsValidIndex(int lowerBoundInclusive, int value, int upperBoundExclusive,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = default)
 		{
 			Assert.IsTrue(upperBoundExclusive >= lowerBoundInclusive);
 			Assert.IsNeitherNullNorEmpty(parameterName);
@@ -619,7 +639,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsInRange(int lowerBoundInclusive, int value, int upperBoundInclusive, string message, string parameterName)
+		public static void IsInRange(int lowerBoundInclusive, int value, int upperBoundInclusive, string message,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = default)
 		{
 			Assert.IsTrue(upperBoundInclusive >= lowerBoundInclusive);
 			Assert.IsNeitherNullNorEmpty(parameterName);
@@ -635,7 +656,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsInRange(int lowerBoundInclusive, int value, int upperBoundInclusive, string parameterName)
+		public static void IsInRange(int lowerBoundInclusive, int value, int upperBoundInclusive,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = default)
 		{
 			Assert.IsTrue(upperBoundInclusive >= lowerBoundInclusive);
 			Assert.IsNeitherNullNorEmpty(parameterName);
@@ -673,7 +695,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsInRange(float lowerBoundInclusive, float value, float upperBoundInclusive, string parameterName)
+		public static void IsInRange(float lowerBoundInclusive, float value, float upperBoundInclusive,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsTrue(upperBoundInclusive >= lowerBoundInclusive);
 			Assert.IsNeitherNullNorEmpty(parameterName);
@@ -695,7 +718,8 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsInRange(double lowerBoundInclusive, double value, double upperBoundInclusive, string parameterName)
+		public static void IsInRange(double lowerBoundInclusive, double value, double upperBoundInclusive,
+			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsTrue(upperBoundInclusive >= lowerBoundInclusive);
 			Assert.IsNeitherNullNorEmpty(parameterName);
@@ -817,7 +841,11 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsTrue(bool statement)
+		public static void IsTrue(
+			#if NETCOREAPP
+			[DoesNotReturnIf(false)]
+			#endif
+			bool statement)
 		{
 			if(!statement)
 			{
@@ -835,7 +863,12 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsTrue(bool statement, string message)
+		public static void IsTrue(
+			#if NETCOREAPP
+			[DoesNotReturnIf(false)]
+			#endif
+			bool statement,
+			string message)
 		{
 			if(!statement)
 			{
@@ -852,7 +885,11 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsFalse(bool statement)
+		public static void IsFalse(
+			#if NETCOREAPP
+			[DoesNotReturnIf(true)]
+			#endif
+			bool statement)
 		{
 			if(statement)
 			{
@@ -870,7 +907,12 @@ internal static partial class Verify
 		#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		#endif
-		public static void IsFalse(bool statement, string message)
+		public static void IsFalse(
+			#if NETCOREAPP
+			[DoesNotReturnIf(true)]
+			#endif
+			bool statement,
+			string message)
 		{
 			if(statement)
 			{

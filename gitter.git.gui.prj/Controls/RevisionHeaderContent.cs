@@ -199,11 +199,8 @@ sealed partial class RevisionHeaderContent
 			var font = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi);
 			var r1   = new Rectangle(rect.X, rect.Y, conv.ConvertX(HeaderWidth) - conv.ConvertX(4), conv.ConvertY(DefaultElementHeight));
 			r1.Y += GetYOffset(conv.To, font);
-			using(var brush = new SolidBrush(Owner.Style.Colors.GrayText))
-			{
-				GitterApplication.TextRenderer.DrawText(
-					graphics, header, font, brush, r1, HeaderFormat);
-			}
+			GitterApplication.TextRenderer.DrawText(
+				graphics, header, font, Owner.Style.Colors.GrayText, r1, HeaderFormat);
 		}
 
 		protected void DefaultPaint(Graphics graphics, Dpi dpi, string header, string content, Rectangle rect)

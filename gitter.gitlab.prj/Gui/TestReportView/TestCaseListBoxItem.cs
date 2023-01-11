@@ -68,13 +68,13 @@ sealed class TestCaseListBoxItem : CustomListBoxItem<TestCase>
 		var menu = new ContextMenuStrip();
 		var dpiBindings = new DpiBindings(menu);
 
-		var copyName = new ToolStripMenuItem("Name", null, (_, _) => ClipboardEx.SetTextSafe(DataContext.Name))
+		var copyName = new ToolStripMenuItem("Name", null, (_, _) => ClipboardEx.TrySetTextSafe(DataContext.Name))
 		{
 			ToolTipText = DataContext.Name,
 		};
 		dpiBindings.BindImage(copyName, CommonIcons.ClipboardCopy);
 		menu.Items.Add(copyName);
-		var copyClassName = new ToolStripMenuItem("Class Name", null, (_, _) => ClipboardEx.SetTextSafe(DataContext.ClassName))
+		var copyClassName = new ToolStripMenuItem("Class Name", null, (_, _) => ClipboardEx.TrySetTextSafe(DataContext.ClassName))
 		{
 			ToolTipText = DataContext.ClassName,
 		};
@@ -82,7 +82,7 @@ sealed class TestCaseListBoxItem : CustomListBoxItem<TestCase>
 		menu.Items.Add(copyClassName);
 		if(!string.IsNullOrWhiteSpace(DataContext.SystemOutput))
 		{
-			var copySystemOutput = new ToolStripMenuItem("SystemOutput", null, (_, _) => ClipboardEx.SetTextSafe(DataContext.SystemOutput));
+			var copySystemOutput = new ToolStripMenuItem("SystemOutput", null, (_, _) => ClipboardEx.TrySetTextSafe(DataContext.SystemOutput));
 			dpiBindings.BindImage(copySystemOutput, CommonIcons.ClipboardCopy);
 			menu.Items.Add(copySystemOutput);
 		}

@@ -76,6 +76,13 @@ public partial class InitDialog : GitDialogBase, IExecutableDialog, IAsyncExecut
 
 	public IUserInputErrorNotifier ErrorNotifier { get; }
 
+	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		base.OnLoad(e);
+		BeginInvoke(_txtPath.Focus);
+	}
+
 	private void Localize()
 	{
 		Text = Resources.StrInitRepository;

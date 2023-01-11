@@ -570,7 +570,7 @@ public sealed class Status : GitObject
 		}
 	}
 
-	private string[] GetPatterns(IReadOnlyList<TreeItem> items)
+	private string[]? GetPatterns(IReadOnlyList<TreeItem> items)
 	{
 		Verify.Argument.IsNotNull(items);
 		if(items.Count == 0) return null;
@@ -671,7 +671,7 @@ public sealed class Status : GitObject
 	public async Task<IList<TreeFile>> GetFilesToAddAsync(string? pattern, bool includeUntracked, bool includeIgnored,
 		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
-		progress?.Report(new OperationProgress(Resources.StrLookingForFiles.AddEllipsis()));
+		progress?.Report(new(Resources.StrLookingForFiles.AddEllipsis()));
 		IList<TreeFileData> files;
 		var parameters = GetAddFilesParameters(pattern, includeUntracked, includeIgnored);
 		using(Repository.Monitor.BlockNotifications(RepositoryNotifications.IndexUpdated))
@@ -963,7 +963,7 @@ public sealed class Status : GitObject
 	/// <param name="removeDirectories"><c>true</c> to remove directories.</param>
 	/// <returns>Files that will be removed by a Clean() call.</returns>
 	public async Task<IReadOnlyList<TreeItem>> GetFilesToCleanAsync(string includePattern, string excludePattern, CleanFilesMode mode, bool removeDirectories,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		IList<string> files;
 		progress?.Report(new OperationProgress(Resources.StrsLookingForFiles.AddEllipsis()));

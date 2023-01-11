@@ -23,6 +23,8 @@ namespace gitter.Framework.Controls;
 using System;
 using System.Windows.Forms;
 
+#nullable enable
+
 sealed class DockPanelDockMarkers : DockMarkers<DockPanelDockMarker>
 {
 	public DockPanelDockMarkers(DockPanel dockPanel)

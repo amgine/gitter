@@ -130,7 +130,7 @@ sealed class MSVS2012OverlayRenderer : ProcessOverlayRenderer
 		var dpi  = Dpi.FromControl(processOverlay.HostControl);
 		var conv = DpiConverter.FromDefaultTo(dpi);
 
-		using(var brush = new SolidBrush(Color.FromArgb(BackgroundAlpha, ColorTable.Background)))
+		using(var brush = SolidBrushCache.Get(Color.FromArgb(BackgroundAlpha, ColorTable.Background)))
 		{
 			graphics.FillRectangle(brush, bounds);
 		}
@@ -165,7 +165,7 @@ sealed class MSVS2012OverlayRenderer : ProcessOverlayRenderer
 
 	public override void PaintMessage(ProcessOverlay processOverlay, Graphics graphics, Rectangle bounds, string status)
 	{
-		using(var brush = new SolidBrush(Color.FromArgb(BackgroundAlpha, ColorTable.Background)))
+		using(var brush = SolidBrushCache.Get(Color.FromArgb(BackgroundAlpha, ColorTable.Background)))
 		{
 			graphics.FillRectangle(brush, bounds);
 		}

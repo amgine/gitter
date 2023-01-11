@@ -64,7 +64,7 @@ public class ViewBase : UserControl
 
 		public bool IsVisible
 		{
-			get => _toolbar != null && _toolbar.Visible;
+			get => _toolbar is { Visible: true };
 			set
 			{
 				if(value)

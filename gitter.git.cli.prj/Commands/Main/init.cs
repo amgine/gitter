@@ -35,7 +35,7 @@ public sealed class InitCommand : Command
 		=> new CommandFlag("--bare");
 
 	public static ICommandArgument Quiet()
-		=> CommandFlag.Quiet();
+		=> CommandFlag.Quiet;
 
 	public InitCommand()
 		: base("init")

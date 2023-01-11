@@ -22,13 +22,15 @@ namespace gitter.Framework.Services;
 
 using System;
 
+#nullable enable
+
 public readonly struct LogEvent
 {
 	public readonly string Source;
 	public readonly LogEventType Type;
 	public readonly string Message;
 	public readonly DateTime Timestamp;
-	public readonly Exception Exception;
+	public readonly Exception? Exception;
 
 	public LogEvent(string source, LogEventType type, string message, DateTime timestamp)
 	{
@@ -39,7 +41,7 @@ public readonly struct LogEvent
 		Exception = null;
 	}
 
-	public LogEvent(string source, LogEventType type, string message, DateTime timestamp, Exception exception)
+	public LogEvent(string source, LogEventType type, string message, DateTime timestamp, Exception? exception)
 	{
 		Source = source;
 		Type = type;

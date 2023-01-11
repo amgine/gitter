@@ -254,6 +254,107 @@ sealed class StatusParser : IParser<StatusData>
 
 	#region IParser Members
 
+	private void ProcessParsedLine()
+	{
+		bool staged            = false;
+		bool unstaged          = false;
+		var conflictType       = ConflictType.None;
+		var stagedFileStatus   = FileStatus.Unknown;
+		var unstagedFileStatus = FileStatus.Unknown;
+
+		var x  = _line.X;
+		var y  = _line.Y;
+		var to = _line.To;
+
+		if(x is '?')
+		{
+			staged             = false;
+			unstaged           = true;
+			unstagedFileStatus = FileStatus.Added;
+			++_unstagedUntrackedCount;
+		}
+		else
+		{
+			if(x is 'C' or 'R')
+			{
+				var from = _line.From;
+				if(x is 'C')
+				{
+					x = 'A';
+					stagedFileStatus = FileStatus.Added;
+				}
+				else
+				{
+					if(!_stagedFiles.ContainsKey(from))
+					{
+						var file = new TreeFileData(from, FileStatus.Removed, ConflictType.None, StagedStatus.Staged);
+						_stagedFiles.Add(from, file);
+						++_stagedRemovedCount;
+					}
+					x = 'A';
+					stagedFileStatus = FileStatus.Added;
+				}
+			}
+			conflictType = GetConflictType(x, y);
+			if(conflictType != ConflictType.None)
+			{
+				staged             = false;
+				unstaged           = true;
+				unstagedFileStatus = FileStatus.Unmerged;
+				++_unmergedCount;
+			}
+			else
+			{
+				if(x is not ' ')
+				{
+					staged = true;
+					stagedFileStatus = CharToFileStatus(x);
+					AddStagedStats(stagedFileStatus, 1);
+				}
+				if(y is not ' ')
+				{
+					unstaged = true;
+					unstagedFileStatus = CharToFileStatus(y);
+					AddUnstagedStats(unstagedFileStatus, 1);
+				}
+			}
+		}
+
+		if(staged)   AddStaged  (to, stagedFileStatus);
+		if(unstaged) AddUnstaged(to, unstagedFileStatus, conflictType);
+	}
+
+	private void AddStaged(string name, FileStatus status)
+	{
+		var file = new TreeFileData(name, status, ConflictType.None, StagedStatus.Staged);
+		if(_stagedFiles.TryGetValue(name, out var existing))
+		{
+			AddStagedStats(existing.FileStatus, -1);
+			_stagedFiles[name] = file;
+		}
+		else
+		{
+			_stagedFiles.Add(name, file);
+		}
+	}
+
+	private void AddUnstaged(string name, FileStatus status, ConflictType conflictType)
+	{
+		var file = new TreeFileData(name, status, conflictType, StagedStatus.Unstaged);
+		if(_unstagedFiles.TryGetValue(name, out var existing))
+		{
+			if(existing.FileStatus == FileStatus.Removed)
+			{
+				--_unstagedRemovedCount;
+				_unstagedFiles[name] = file;
+			}
+		}
+		else
+		{
+			_unstagedFiles.Add(name, file);
+		}
+	}
+
 	public void Parse(ITextSegment textSegment)
 	{
 		Verify.Argument.IsNotNull(textSegment);
@@ -262,100 +363,7 @@ sealed class StatusParser : IParser<StatusData>
 		{
 			if(_line.Parse(textSegment))
 			{
-				bool staged            = false;
-				bool unstaged          = false;
-				var conflictType       = ConflictType.None;
-				var stagedFileStatus   = FileStatus.Unknown;
-				var unstagedFileStatus = FileStatus.Unknown;
-
-				var x  = _line.X;
-				var y  = _line.Y;
-				var to = _line.To;
-
-				if(x is '?')
-				{
-					staged             = false;
-					unstaged           = true;
-					unstagedFileStatus = FileStatus.Added;
-					++_unstagedUntrackedCount;
-				}
-				else
-				{
-					if(x is 'C' or 'R')
-					{
-						var from = _line.From;
-						if(x is 'C')
-						{
-							x = 'A';
-							stagedFileStatus = FileStatus.Added;
-						}
-						else
-						{
-							if(!_stagedFiles.ContainsKey(from))
-							{
-								var file = new TreeFileData(from, FileStatus.Removed, ConflictType.None, StagedStatus.Staged);
-								_stagedFiles.Add(from, file);
-								++_stagedRemovedCount;
-							}
-							x = 'A';
-							stagedFileStatus = FileStatus.Added;
-						}
-					}
-					conflictType = GetConflictType(x, y);
-					if(conflictType != ConflictType.None)
-					{
-						staged             = false;
-						unstaged           = true;
-						unstagedFileStatus = FileStatus.Unmerged;
-						++_unmergedCount;
-					}
-					else
-					{
-						if(x is not ' ')
-						{
-							staged = true;
-							stagedFileStatus = CharToFileStatus(x);
-							AddStagedStats(stagedFileStatus, 1);
-						}
-						if(y is not ' ')
-						{
-							unstaged = true;
-							unstagedFileStatus = CharToFileStatus(y);
-							AddUnstagedStats(unstagedFileStatus, 1);
-						}
-					}
-				}
-
-				if(staged)
-				{
-					var file = new TreeFileData(to, stagedFileStatus, ConflictType.None, StagedStatus.Staged);
-					if(_stagedFiles.TryGetValue(to, out var existing))
-					{
-						AddStagedStats(existing.FileStatus, -1);
-						_stagedFiles[to] = file;
-					}
-					else
-					{
-						_stagedFiles.Add(to, file);
-					}
-				}
-				if(unstaged)
-				{
-					var file = new TreeFileData(to, unstagedFileStatus, conflictType, StagedStatus.Unstaged);
-					if(_unstagedFiles.TryGetValue(to, out var existing))
-					{
-						if(existing.FileStatus == FileStatus.Removed)
-						{
-							--_unstagedRemovedCount;
-							_unstagedFiles[to] = file;
-						}
-					}
-					else
-					{
-						_unstagedFiles.Add(to, file);
-					}
-				}
-
+				ProcessParsedLine();
 				_line.Reset();
 			}
 		}

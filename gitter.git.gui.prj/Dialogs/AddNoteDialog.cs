@@ -38,14 +38,8 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public partial class AddNoteDialog : GitDialogBase, IExecutableDialog, IAddNoteView
 {
-	#region Data
-
 	private TextBoxSpellChecker _speller;
 	private readonly IAddNoteController _controller;
-
-	#endregion
-
-	#region .ctor
 
 	/// <summary>Create <see cref="AddNoteDialog"/>.</summary>
 	/// <param name="repository">Repository to create note in.</param>
@@ -86,10 +80,6 @@ public partial class AddNoteDialog : GitDialogBase, IExecutableDialog, IAddNoteV
 		_controller = new AddNoteController(repository) { View = this };
 	}
 
-	#endregion
-
-	#region Properties
-
 	/// <inheritdoc/>
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(400, 241));
 
@@ -104,12 +94,13 @@ public partial class AddNoteDialog : GitDialogBase, IExecutableDialog, IAddNoteV
 
 	public IUserInputErrorNotifier ErrorNotifier { get; }
 
-	#endregion
-
-	#region IExecutableDialog Members
+	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		base.OnLoad(e);
+		BeginInvoke(_txtMessage.Focus);
+	}
 
 	/// <inheritdoc/>
 	public bool Execute() => _controller.TryAddNote();
-
-	#endregion
 }

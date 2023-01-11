@@ -231,7 +231,7 @@ class GitLabRevisionPanel : FlowPanel
 
 	static readonly string HeaderText = Resources.StrGitLab.AddColon();
 
-	private int RenderTests(Graphics graphics, Dpi dpi, Brush normalText, Brush grayText, Rectangle bounds)
+	private int RenderTests(Graphics graphics, Dpi dpi, Color normalText, Color grayText, Rectangle bounds)
 	{
 		if(_testReportSummary is null) return bounds.X;
 
@@ -311,9 +311,9 @@ class GitLabRevisionPanel : FlowPanel
 		var conv = new DpiConverter(FlowControl);
 		var font = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(paintEventArgs.Dpi);
 
-		using var grayText   = new SolidBrush(Style.Colors.GrayText);
-		using var normalText = new SolidBrush(Style.Colors.WindowText);
-		using var linkText   = new SolidBrush(Style.Colors.HyperlinkText);
+		var grayText   = Style.Colors.GrayText;
+		var normalText = Style.Colors.WindowText;
+		var linkText   = Style.Colors.HyperlinkText;
 
 		textBounds = paintEventArgs.Bounds;
 		textBounds.Width = conv.ConvertX(66);

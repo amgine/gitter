@@ -160,7 +160,7 @@ public abstract class DockMarker : Form
 		Assert.IsNotNull(e);
 
 		var graphics = e.Graphics;
-		using(var brush = new SolidBrush(Renderer.DockMarkerBackgroundColor))
+		using(var brush = SolidBrushCache.Get(Renderer.DockMarkerBackgroundColor))
 		{
 			graphics.FillRectangle(brush, e.ClipRectangle);
 		}

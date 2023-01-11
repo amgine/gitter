@@ -336,7 +336,7 @@ public sealed class MSVS2012ScrollBarRenderer : CustomScrollBarRenderer
 	private void RenderArrow(Graphics graphics, Rectangle bounds, Color color, Point p1, Point p2, Point p3)
 	{
 		graphics.GdiFill(ColorTable.Background, bounds);
-		using var brush = new SolidBrush(color);
+		using var brush = SolidBrushCache.Get(color);
 		DrawTriangle(graphics, brush, p1, p2, p3);
 	}
 

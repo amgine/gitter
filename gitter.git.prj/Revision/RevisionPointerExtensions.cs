@@ -32,6 +32,8 @@ using gitter.Git.AccessLayer;
 
 using Resources = gitter.Git.Properties.Resources;
 
+#nullable enable
+
 /// <summary>Extension methods for <see cref="IRevisionPointer"/>.</summary>
 public static class RevisionPointerExtensions
 {
@@ -40,14 +42,12 @@ public static class RevisionPointerExtensions
 	/// <summary>Checks out <paramref name="revision"/>. Checking out a non-branch revision will result in detached HEAD.</summary>
 	/// <param name="revision">Reference to checkout.</param>
 	/// <param name="force">Throw away local changes.</param>
-	/// <exception cref="T:System.ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
-	/// <exception cref="T:System.ArgumentException">
-	/// <paramref name="revision"/> is deleted.
-	/// </exception>
-	/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="revision"/> or failed to checkout.</exception>
+	/// <exception cref="ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
+	/// <exception cref="ArgumentException"><paramref name="revision"/> is deleted.</exception>
+	/// <exception cref="GitException">Failed to dereference <paramref name="revision"/> or failed to checkout.</exception>
 	public static void Checkout(this IRevisionPointer revision, bool force = false)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var repository = revision.Repository;
 		if(repository.Head == revision) return;
@@ -78,14 +78,12 @@ public static class RevisionPointerExtensions
 	/// <summary>Checks out <paramref name="revision"/>. Checking out a non-branch revision will result in detached HEAD.</summary>
 	/// <param name="revision">Reference to checkout.</param>
 	/// <param name="force">Throw away local changes.</param>
-	/// <exception cref="T:System.ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
-	/// <exception cref="T:System.ArgumentException">
-	/// <paramref name="revision"/> is deleted.
-	/// </exception>
-	/// <exception cref="T:gitter.Git.GitException">Failed to dereference <paramref name="revision"/> or failed to checkout.</exception>
+	/// <exception cref="ArgumentNullException"><paramref name="revision"/> == <c>null</c>.</exception>
+	/// <exception cref="ArgumentException"><paramref name="revision"/> is deleted.</exception>
+	/// <exception cref="GitException">Failed to dereference <paramref name="revision"/> or failed to checkout.</exception>
 	public static async Task CheckoutAsync(this IRevisionPointer revision, bool force = false)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var repository = revision.Repository;
 		if(repository.Head == revision) return;
@@ -120,7 +118,7 @@ public static class RevisionPointerExtensions
 
 	public static void CheckoutPath(this IRevisionPointer revision, string path)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var repository = revision.Repository;
 		using(repository.Monitor.BlockNotifications(
@@ -137,7 +135,7 @@ public static class RevisionPointerExtensions
 
 	public static void CheckoutPaths(this IRevisionPointer revision, IList<string> paths)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var repository = revision.Repository;
 		using(repository.Monitor.BlockNotifications(
@@ -160,10 +158,10 @@ public static class RevisionPointerExtensions
 	/// <param name="revisions">Commits to cherry-pick.</param>
 	public static void CherryPick(this IEnumerable<IRevisionPointer> revisions)
 	{
-		Verify.Argument.IsValidRevisionPointerSequence(revisions, nameof(revisions));
+		Verify.Argument.IsValidRevisionPointerSequence(revisions);
 
 		var list = new List<string>();
-		Repository repository = null;
+		Repository? repository = null;
 		foreach(var rev in revisions)
 		{
 			list.Add(rev.Pointer);
@@ -171,6 +169,7 @@ public static class RevisionPointerExtensions
 		}
 		Verify.Argument.IsTrue(list.Count != 0, nameof(revisions),
 			Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("revision"));
+		if(repository is null) throw new ArgumentException("Unspecified repository.", nameof(revisions));
 		try
 		{
 			repository.Accessor.CherryPick.Invoke(new CherryPickParameters(list));
@@ -205,7 +204,7 @@ public static class RevisionPointerExtensions
 	/// <param name="noCommit">Do not commit.</param>
 	public static void CherryPick(this IRevisionPointer revision, int mainline, bool noCommit)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 		Verify.Argument.IsNotNegative(mainline);
 		var repository = revision.Repository;
 		Verify.State.IsFalse(repository.Head.IsEmpty,
@@ -263,21 +262,21 @@ public static class RevisionPointerExtensions
 
 	#region reset
 
-	/// <summary>Reset HEAD to <paramref name="revision"/>.</summary>
+	/// <summary>Reset <c>HEAD</c> to <paramref name="revision"/>.</summary>
 	/// <param name="mode">Reset mode</param>
-	/// <param name="revision">HEAD's new position.</param>
-	/// <exception cref="T:System.ArgumentNullException">
+	/// <param name="revision"><c>HEAD</c>'s new position.</param>
+	/// <exception cref="ArgumentNullException">
 	/// <paramref name="revision"/> == null.
 	/// </exception>
-	/// <exception cref="T:System.ArgumentException">
+	/// <exception cref="ArgumentException">
 	/// <paramref name="revision"/> is not handled by this <see cref="Repository"/> or it is deleted.
 	/// </exception>
-	/// <exception cref="T:gitter.Git.GitException">
+	/// <exception cref="GitException">
 	/// Failed to dereference <paramref name="revision"/> or git reset failed.
 	/// </exception>
 	public static void ResetHeadHere(this IRevisionPointer revision, ResetMode mode = ResetMode.Mixed)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var repository = revision.Repository;
 		repository.Head.Reset(revision, mode);
@@ -299,7 +298,7 @@ public static class RevisionPointerExtensions
 
 	public static void Revert(this IRevisionPointer revision, int mainline, bool noCommit)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 		Verify.Argument.IsNotNegative(mainline);
 
 		var repository = revision.Repository;
@@ -366,10 +365,10 @@ public static class RevisionPointerExtensions
 
 	public static void Revert(this IEnumerable<IRevisionPointer> revisions, bool noCommit)
 	{
-		Verify.Argument.IsValidRevisionPointerSequence(revisions, nameof(revisions));
+		Verify.Argument.IsValidRevisionPointerSequence(revisions);
 
 		var list = new List<string>();
-		Repository repository = null;
+		Repository? repository = null;
 		foreach(var rev in revisions)
 		{
 			list.Add(rev.Pointer);
@@ -418,7 +417,7 @@ public static class RevisionPointerExtensions
 
 	public static void Merge(this IRevisionPointer revision, bool noCommit, bool noFastForward, bool squash, string message)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var repository = revision.Repository;
 		repository.Head.Merge(revision, noCommit, noFastForward, squash, message);
@@ -426,7 +425,7 @@ public static class RevisionPointerExtensions
 
 	public static void Merge(this IRevisionPointer revision, bool noCommit, bool noFastForward, bool squash)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var repository = revision.Repository;
 		repository.Head.Merge(revision, noCommit, noFastForward, squash);
@@ -434,7 +433,7 @@ public static class RevisionPointerExtensions
 
 	public static void Merge(this IRevisionPointer revision)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var repository = revision.Repository;
 		repository.Head.Merge(revision);
@@ -453,7 +452,7 @@ public static class RevisionPointerExtensions
 
 	public static void RebaseHeadHere(this IRevisionPointer revision)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var repository = revision.Repository;
 		var oldHead = repository.Head.CurrentBranch;
@@ -484,9 +483,9 @@ public static class RevisionPointerExtensions
 		}
 	}
 
-	public static async Task RebaseHeadHereAsync(this IRevisionPointer revision, IProgress<OperationProgress> progress)
+	public static async Task RebaseHeadHereAsync(this IRevisionPointer revision, IProgress<OperationProgress>? progress = default)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var repository = revision.Repository;
 		var oldHead = repository.Head.CurrentBranch;
@@ -555,15 +554,15 @@ public static class RevisionPointerExtensions
 
 	#region describe
 
-	public static Tag Describe(this IRevisionPointer revision)
+	public static Tag? Describe(this IRevisionPointer revision)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var repository = revision.Repository;
 
 		var tag = repository.Accessor.Describe.Invoke(
 			new DescribeParameters(revision.Pointer));
-		if(tag != null)
+		if(tag is not null)
 		{
 			return repository.Refs.Tags.TryGetItem(tag);
 		}
@@ -583,7 +582,7 @@ public static class RevisionPointerExtensions
 	public static Branch CreateBranch(this IRevisionPointer revision, string name,
 		BranchTrackingMode tracking = BranchTrackingMode.Default, bool checkout = false)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var repository = revision.Repository;
 		return repository.Refs.Heads.Create(name, revision, tracking, checkout);
@@ -599,7 +598,7 @@ public static class RevisionPointerExtensions
 	/// <returns>Created <see cref="Tag"/>.</returns>
 	public static Tag CreateTag(this IRevisionPointer revision, string name)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var repository = revision.Repository;
 		return repository.Refs.Tags.Create(name, revision);
@@ -613,7 +612,7 @@ public static class RevisionPointerExtensions
 	/// <returns>Created <see cref="Tag"/>.</returns>
 	public static Tag CreateTag(this IRevisionPointer revision, string name, string message, bool sign)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var repository = revision.Repository;
 		return repository.Refs.Tags.Create(name, revision, message, sign);
@@ -627,7 +626,7 @@ public static class RevisionPointerExtensions
 	/// <returns>Created <see cref="Tag"/>.</returns>
 	public static Tag CreateTag(this IRevisionPointer revision, string name, string message, string keyId)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var repository = revision.Repository;
 		return repository.Refs.Tags.Create(name, revision, message, keyId);
@@ -643,7 +642,7 @@ public static class RevisionPointerExtensions
 	/// <returns>Created <see cref="Note"/>.</returns>
 	public static Note AddNote(this IRevisionPointer revision, string message)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 		Verify.Argument.IsNeitherNullNorEmpty(message);
 
 		var repository = revision.Repository;
@@ -659,17 +658,20 @@ public static class RevisionPointerExtensions
 	/// <returns><see cref="Tree"/> pointed by the specified <paramref name="revision"/>.</returns>
 	public static Tree GetTree(this IRevisionPointer revision)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		return new Tree(revision.Repository, revision.FullName);
 	}
 
 	/// <summary>Gets <see cref="Tree"/> pointed by the specified <paramref name="revision"/>.</summary>
 	/// <param name="revision">The revision.</param>
+	/// <param name="progress">Operation progress report receiver.</param>
+	/// <param name="cancellationToken">Operation cancellation token.</param>
 	/// <returns>Function which retrieves <see cref="Tree"/> pointed by the specified <paramref name="revision"/>.</returns>
-	public static Task<Tree> GetTreeAsync(this IRevisionPointer revision, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	public static Task<Tree> GetTreeAsync(this IRevisionPointer revision,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		return Tree.GetAsync(revision.Repository, revision.FullName, progress, cancellationToken);
 	}
@@ -678,47 +680,31 @@ public static class RevisionPointerExtensions
 
 	#region diff
 
-	public static IRevisionDiffSource GetDiffSource(this IRevisionPointer revision, IEnumerable<string> paths = null)
+	public static IRevisionDiffSource GetDiffSource(this IRevisionPointer revision, IEnumerable<string>? paths = null)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
-		var stashedState = revision as StashedState;
-		if(stashedState != null)
+		if(revision is StashedState stashedState)
 		{
-			if(paths == null)
-			{
-				return new StashedChangesDiffSource(stashedState);
-			}
-			else
-			{
-				return new StashedChangesDiffSource(stashedState, paths.ToList());
-			}
+			return paths is null
+				? new StashedChangesDiffSource(stashedState)
+				: new StashedChangesDiffSource(stashedState, paths.ToList());
 		}
 		else
 		{
-			if(paths == null)
-			{
-				return new RevisionChangesDiffSource(revision);
-			}
-			else
-			{
-				return new RevisionChangesDiffSource(revision, paths.ToList());
-			}
+			return paths is null
+				? new RevisionChangesDiffSource(revision)
+				: new RevisionChangesDiffSource(revision, paths.ToList());
 		}
 	}
 
-	public static IDiffSource GetCompareDiffSource(this IRevisionPointer revision1, IRevisionPointer revision2, IEnumerable<string> paths = null)
+	public static IDiffSource GetCompareDiffSource(this IRevisionPointer revision1, IRevisionPointer revision2, IEnumerable<string>? paths = null)
 	{
 		Verify.Argument.AreValidRevisionPointers(revision1, revision2);
 
-		if(paths == null)
-		{
-			return new RevisionCompareDiffSource(revision1, revision2);
-		}
-		else
-		{
-			return new RevisionCompareDiffSource(revision1, revision2, paths.ToList());
-		}
+		return paths is null
+			? new RevisionCompareDiffSource(revision1, revision2)
+			: new RevisionCompareDiffSource(revision1, revision2, paths.ToList());
 	}
 
 	#endregion
@@ -753,10 +739,10 @@ public static class RevisionPointerExtensions
 	/// <summary>Get diff for this revision.</summary>
 	/// <param name="revision">Revision to get diff for.</param>
 	/// <returns><see cref="Diff"/> for this revision.</returns>
-	/// <exception cref="T:gitter.Git.GitException">Failed to get diff.</exception>
+	/// <exception cref="GitException">Failed to get diff.</exception>
 	public static byte[] FormatPatch(this IRevisionPointer revision)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var parameters = GetFormatPatchParameters(revision);
 		var function   = GetFormatPatchFunction(revision);
@@ -766,12 +752,14 @@ public static class RevisionPointerExtensions
 
 	/// <summary>Get diff for this revision.</summary>
 	/// <param name="revision">Revision to get diff for.</param>
+	/// <param name="progress">Operation progress report receiver.</param>
+	/// <param name="cancellationToken">Operation cancellation token.</param>
 	/// <returns><see cref="Diff"/> for this revision.</returns>
-	/// <exception cref="T:gitter.Git.GitException">Failed to get diff.</exception>
+	/// <exception cref="GitException">Failed to get diff.</exception>
 	public static Task<byte[]> FormatPatchAsync(this IRevisionPointer revision,
-		IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		progress?.Report(new OperationProgress(Resources.StrsFetchingPatch.AddEllipsis()));
 		var parameters = GetFormatPatchParameters(revision);
@@ -786,7 +774,7 @@ public static class RevisionPointerExtensions
 
 	public static IBlameSource GetBlameSource(this IRevisionPointer revision, string fileName)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		return new RevisionFileBlameSource(revision, fileName);
 	}
@@ -808,7 +796,7 @@ public static class RevisionPointerExtensions
 
 	public static void Archive(this IRevisionPointer revision, string outputFile, string path, string format)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 		Verify.Argument.IsNeitherNullNorWhitespace(outputFile);
 
 		var parameters = GetArchiveParameters(revision, outputFile, path, format);
@@ -817,7 +805,7 @@ public static class RevisionPointerExtensions
 
 	public static Task ArchiveAsync(this IRevisionPointer revision, string outputFile, string path, string format, IProgress<OperationProgress> progress)
 	{
-		Verify.Argument.IsValidRevisionPointer(revision, nameof(revision));
+		Verify.Argument.IsValidRevisionPointer(revision);
 		Verify.Argument.IsNeitherNullNorWhitespace(outputFile);
 
 		var parameters = GetArchiveParameters(revision, outputFile, path, format);

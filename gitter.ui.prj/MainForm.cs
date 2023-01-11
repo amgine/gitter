@@ -95,12 +95,15 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 
 	/// <summary>Initializes a new instance of the <see cref="MainForm"/> class.</summary>
 	public MainForm(
+		ConfigurationService                    configurationService,
 		IEnumerable<IRepositoryProvider>        repositoryProviders,
 		IEnumerable<IRepositoryServiceProvider> repositoryServiceProviders,
 		IEnumerable<IViewFactory>               viewFactories,
 		IFactory<AboutDialog>                   aboutDialogFactory,
 		IFactory<OptionsDialog>                 optionsDialogFactory)
 	{
+		Verify.Argument.IsNotNull(configurationService);
+
 		SuspendLayout();
 
 		AboutDialogFactory   = aboutDialogFactory;
@@ -112,7 +115,7 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 			Dock = DockStyle.Fill,
 		};
 
-		_configurationService     = GitterApplication.ConfigurationService;
+		_configurationService     = configurationService;
 		_repositoryManagerService = new RepositoryManagerService(SavedRecentRepositories);
 		_viewDockService          = new ViewDockService(this, _dockPanel, _configurationService.ViewsSection);
 		_notificationService      = new BalloonNotificationService();
@@ -236,8 +239,6 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		LoadOptions();
 		LoadRecentRepositories();
 
-		_viewDockService.ShowView(Guids.RepositoryExplorerView);
-
 		foreach(var provider in repositoryProviders)
 		{
 			LoadRepositoryProvider(provider);
@@ -331,9 +332,12 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		dlg.Run(this);
 	}
 
+	/// <inheritdoc/>
 	protected override void OnShown(EventArgs e)
 	{
 		base.OnShown(e);
+
+		_viewDockService.ShowView(Guids.RepositoryExplorerView);
 
 		var cd = Directory.GetCurrentDirectory().ToLower();
 		var appPath = Path.GetDirectoryName(Application.ExecutablePath).ToLower();

@@ -54,7 +54,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 	}
 
 	/// <summary>Fetch completed.</summary>
-	public event EventHandler<FetchCompletedEventArgs> FetchCompleted;
+	public event EventHandler<FetchCompletedEventArgs>? FetchCompleted;
 
 	/// <summary>Invokes <see cref="FetchCompleted"/>.</summary>
 	/// <param name="remote">Remote.</param>
@@ -63,7 +63,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 		=> FetchCompleted?.Invoke(this, new FetchCompletedEventArgs(remote, changes));
 
 	/// <summary>Pull completed.</summary>
-	public event EventHandler<PullCompletedEventArgs> PullCompleted;
+	public event EventHandler<PullCompletedEventArgs>? PullCompleted;
 
 	/// <summary>Invokes <see cref="PullCompleted"/>.</summary>
 	/// <param name="remote">Remote.</param>
@@ -72,7 +72,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 		=> PullCompleted?.Invoke(this, new PullCompletedEventArgs(remote, changes));
 
 	/// <summary>Prune completed.</summary>
-	public event EventHandler<PruneCompletedEventArgs> PruneCompleted;
+	public event EventHandler<PruneCompletedEventArgs>? PruneCompleted;
 
 	/// <summary>Invokes <see cref="PruneCompleted"/>.</summary>
 	/// <param name="remote">Remote.</param>
@@ -95,7 +95,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 
 	private static AddRemoteParameters GetAddRemoteParameters(string name, string url,
 		bool fetch = false, bool mirror = false, TagFetchMode tagFetchMode = TagFetchMode.Default)
-		=> new AddRemoteParameters(name, url)
+		=> new(name, url)
 		{
 			Fetch        = fetch,
 			Mirror       = mirror,

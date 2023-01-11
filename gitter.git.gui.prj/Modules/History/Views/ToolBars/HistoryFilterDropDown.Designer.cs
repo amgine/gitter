@@ -70,7 +70,7 @@
 			this.radioButton3.UseVisualStyleBackColor = true;
 			this.radioButton3.CheckedChanged += new System.EventHandler(this.OnFilterTypeCheckedChanged);
 			//
-			//_searchToolBar
+			// _txtSearch
 			//
 			this._txtSearch.Anchor= ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
 			this._txtSearch.Name = "_txtSearch";

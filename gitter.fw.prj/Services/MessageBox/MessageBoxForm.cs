@@ -292,7 +292,7 @@ public partial class MessageBoxForm : Form
 		}
 		sb.AppendLine();
 		sb.AppendLine(separator);
-		ClipboardEx.SetTextSafe(sb.ToString());
+		ClipboardEx.TrySetTextSafe(sb.ToString());
 	}
 
 	private void MessageBoxForm_KeyDown(object sender, KeyEventArgs e)

@@ -161,12 +161,12 @@ public sealed class GraphColumn : CustomListBoxColumn
 
 		if(!TryGetGraph(paintEventArgs.Item, out var graph, out var itemType)) return;
 
-		var selected       = (paintEventArgs.State & ItemState.Selected) == ItemState.Selected;
+		var selected       = paintEventArgs.HasState(ItemState.Selected);
 		var useColors      = ShowColors && (!selected || !paintEventArgs.IsHostControlFocused);
 		var fillBackground = FillBackground;
 
-		var bounds = paintEventArgs.Bounds;
-		var h      = paintEventArgs.ListBox.CurrentItemHeight;
+		var bounds    = paintEventArgs.Bounds;
+		var cellWidth = paintEventArgs.ListBox.CurrentItemHeight;
 
 		if(fillBackground)
 		{
@@ -174,16 +174,16 @@ public sealed class GraphColumn : CustomListBoxColumn
 			{
 				int i = graph.Length - 1;
 				while(i > 0 && graph[i].Elements == GraphElement.Space) --i;
-				bounds.Width = h * (i + 1);
+				bounds.Width = cellWidth * (i + 1);
 			}
 			GraphStyle.DrawBackground(
 				paintEventArgs.Graphics, paintEventArgs.Dpi,
-				graph, bounds, paintEventArgs.ClipRectangle, h, useColors);
+				graph, bounds, paintEventArgs.ClipRectangle, cellWidth, useColors);
 		}
 
 		GraphStyle.DrawGraph(
 			paintEventArgs.Graphics, paintEventArgs.Dpi,
-			graph, bounds, paintEventArgs.ClipRectangle, h, itemType, useColors);
+			graph, bounds, paintEventArgs.ClipRectangle, cellWidth, itemType, useColors);
 	}
 
 	/// <inheritdoc/>

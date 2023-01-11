@@ -21,6 +21,7 @@
 namespace gitter.Git;
 
 using System;
+
 /// <summary>Reference types.</summary>
 [Flags]
 public enum ReferenceType
@@ -28,19 +29,19 @@ public enum ReferenceType
 	/// <summary>Invalid (none) reference.</summary>
 	None = (0),
 
-	/// <summary><see cref="Revision"/>.</summary>
+	/// <summary>Revision.</summary>
 	Revision = (1 << 0),
-	/// <summary>Local <see cref="Branch"/>.</summary>
+	/// <summary>Local branch.</summary>
 	LocalBranch = (1 << 1),
-	/// <summary>Remote <see cref="Branch"/>.</summary>
+	/// <summary>Remote branch.</summary>
 	RemoteBranch = (1 << 2),
-	/// <summary><see cref="Tag"/>.</summary>
+	/// <summary>Tag.</summary>
 	Tag = (1 << 3),
-	/// <summary><see cref="StashedState"/>.</summary>
+	/// <summary>Stashed state.</summary>
 	Stash = (1 << 4),
-	/// <summary><see cref="Remote"/>.</summary>
+	/// <summary>Remote.</summary>
 	Remote = (1 << 5),
-	/// <summary><see cref="ReflogRecord"/>.</summary>
+	/// <summary>Reflog record.</summary>
 	ReflogRecord = (1 << 6),
 
 	/// <summary>Local or remote <see cref="Branch"/>.</summary>

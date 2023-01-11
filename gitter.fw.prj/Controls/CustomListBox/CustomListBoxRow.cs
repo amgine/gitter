@@ -36,7 +36,7 @@ public class CustomListBoxRow<TData> : CustomListBoxItem<TData>, IEnumerable<Cus
 
 	#region .ctor
 
-	/// <summary>Initializes a new instance of the <see cref="CustomListBoxRow&lt;TData&gt;"/> class.</summary>
+	/// <summary>Initializes a new instance of the <see cref="CustomListBoxRow{TData}"/> class.</summary>
 	/// <param name="data">Data.</param>
 	/// <param name="subItems">Sub items.</param>
 	public CustomListBoxRow(TData data, IEnumerable<CustomListBoxSubItem> subItems)
@@ -53,7 +53,7 @@ public class CustomListBoxRow<TData> : CustomListBoxItem<TData>, IEnumerable<Cus
 		}
 	}
 
-	/// <summary>Initializes a new instance of the <see cref="CustomListBoxRow&lt;TData&gt;"/> class.</summary>
+	/// <summary>Initializes a new instance of the <see cref="CustomListBoxRow{TData}"/> class.</summary>
 	/// <param name="data">Row data.</param>
 	/// <param name="subItems">Sub items.</param>
 	public CustomListBoxRow(TData data, params CustomListBoxSubItem[] subItems)
@@ -71,7 +71,7 @@ public class CustomListBoxRow<TData> : CustomListBoxItem<TData>, IEnumerable<Cus
 		}
 	}
 
-	/// <summary>Initializes a new instance of the <see cref="CustomListBoxRow&lt;TData&gt;"/> class.</summary>
+	/// <summary>Initializes a new instance of the <see cref="CustomListBoxRow{TData}"/> class.</summary>
 	/// <param name="data">Row data.</param>
 	public CustomListBoxRow(TData data)
 		: base(data)

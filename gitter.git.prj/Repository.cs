@@ -32,32 +32,34 @@ using gitter.Framework.Configuration;
 
 using Resources = gitter.Git.Properties.Resources;
 
+#nullable enable
+
 /// <summary>git repository.</summary>
 public sealed class Repository : IGitRepository
 {
 	#region Data
 
 	private RepositoryState _state;
-	private User _userIdentity;
+	private User? _userIdentity;
 
 	#endregion
 
 	#region Events
 
 	/// <summary>Repository was updated.</summary>
-	public event EventHandler Updated;
+	public event EventHandler? Updated;
 
 	/// <summary>State changed.</summary>
-	public event EventHandler StateChanged;
+	public event EventHandler? StateChanged;
 
 	/// <summary>User identity changed.</summary>
-	public event EventHandler UserIdentityChanged;
+	public event EventHandler? UserIdentityChanged;
 
 	/// <summary>Commit created at the top of HEAD.</summary>
-	public event EventHandler<RevisionEventArgs> CommitCreated;
+	public event EventHandler<RevisionEventArgs>? CommitCreated;
 
 	/// <summary>Repository deleted.</summary>
-	public event EventHandler Deleted;
+	public event EventHandler? Deleted;
 
 	internal void OnStateChanged()
 	{
@@ -82,7 +84,7 @@ public sealed class Repository : IGitRepository
 	#region Static
 
 	public static Repository Load(IGitAccessor gitAccessor, string workingDirectory,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(gitAccessor);
 		Verify.Argument.IsNotNull(workingDirectory);
@@ -102,7 +104,7 @@ public sealed class Repository : IGitRepository
 	}
 
 	public static Task<Repository> LoadAsync(IGitAccessor gitAccessor, string workingDirectory,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(gitAccessor);
 		Verify.Argument.IsNotNull(workingDirectory);
@@ -145,7 +147,7 @@ public sealed class Repository : IGitRepository
 		if(!Directory.Exists(gitDirectory))
 		{
 			using var sr = new StreamReader(gitDirectory);
-			string line = sr.ReadLine();
+			var  line = sr.ReadLine();
 			while(line != null)
 			{
 				if(line.StartsWith(GitDirPrefix))
@@ -168,7 +170,7 @@ public sealed class Repository : IGitRepository
 	private static ConfigurationManager GetConfigurationManager(string gitDirectory)
 	{
 		var configurationManager = default(ConfigurationManager);
-		var cfgFileName = Path.Combine(gitDirectory, "gitter-config");
+		var cfgFileName = Path.Combine(gitDirectory, @"gitter-config");
 		try
 		{
 			if(File.Exists(cfgFileName))
@@ -180,7 +182,7 @@ public sealed class Repository : IGitRepository
 		catch(Exception exc) when(!exc.IsCritical())
 		{
 		}
-		return configurationManager ?? new ConfigurationManager("Gitter");
+		return configurationManager ?? new ConfigurationManager(@"Gitter");
 	}
 
 	#endregion
@@ -343,7 +345,7 @@ public sealed class Repository : IGitRepository
 
 	#endregion
 
-	private IRevisionPointer RevisionPointerFromGitFile(string fileName)
+	private IRevisionPointer? RevisionPointerFromGitFile(string fileName)
 	{
 		try
 		{
@@ -351,7 +353,11 @@ public sealed class Repository : IGitRepository
 			if(File.Exists(fileName))
 			{
 				using var sr = new StreamReader(fileName);
-				return GetRevisionPointer(sr.ReadLine());
+				var line = sr.ReadLine();
+				if(line is not null)
+				{
+					return GetRevisionPointer(line);
+				}
 			}
 		}
 		catch(Exception exc) when(!exc.IsCritical())
@@ -360,13 +366,13 @@ public sealed class Repository : IGitRepository
 		return default;
 	}
 
-	public IRevisionPointer MergeHead => RevisionPointerFromGitFile(GitConstants.MERGE_HEAD);
+	public IRevisionPointer? MergeHead => RevisionPointerFromGitFile(GitConstants.MERGE_HEAD);
 
-	public IRevisionPointer CherryPickHead => RevisionPointerFromGitFile(GitConstants.CHERRY_PICK_HEAD);
+	public IRevisionPointer? CherryPickHead => RevisionPointerFromGitFile(GitConstants.CHERRY_PICK_HEAD);
 
-	public IRevisionPointer RevertHead => RevisionPointerFromGitFile(GitConstants.REVERT_HEAD);
+	public IRevisionPointer? RevertHead => RevisionPointerFromGitFile(GitConstants.REVERT_HEAD);
 
-	public IRevisionPointer RebaseHead => RevisionPointerFromGitFile("rebase-merge/head-name");
+	public IRevisionPointer? RebaseHead => RevisionPointerFromGitFile(@"rebase-merge/head-name");
 
 	private RepositoryState GetState()
 	{
@@ -383,7 +389,7 @@ public sealed class Repository : IGitRepository
 		{
 			state = RepositoryState.Reverting;
 		}
-		else if(Directory.Exists(GetGitFileName("rebase-apply")) || Directory.Exists(GetGitFileName("rebase-merge")))
+		else if(Directory.Exists(GetGitFileName(@"rebase-apply")) || Directory.Exists(GetGitFileName(@"rebase-merge")))
 		{
 			state = RepositoryState.Rebasing;
 		}
@@ -402,7 +408,7 @@ public sealed class Repository : IGitRepository
 
 	internal void UpdateUserIdentity(bool raiseEvent)
 	{
-		User userIdentity;
+		User? userIdentity;
 		var name  = Configuration.TryGetParameterValue(GitConstants.UserNameParameter);
 		var email = Configuration.TryGetParameterValue(GitConstants.UserEmailParameter);
 		if(name is null || email is null)
@@ -433,7 +439,7 @@ public sealed class Repository : IGitRepository
 
 	/// <summary>Returns user identity.</summary>
 	/// <value>User identity.</value>
-	public User UserIdentity
+	public User? UserIdentity
 	{
 		get
 		{
@@ -461,14 +467,14 @@ public sealed class Repository : IGitRepository
 
 	#region init
 
-	private static InitRepositoryParameters GetInitRepositoryParameters(string path, string template = default, bool bare = false)
+	private static InitRepositoryParameters GetInitRepositoryParameters(string path, string? template = default, bool bare = false)
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(path);
 
 		return new InitRepositoryParameters(path, template, bare);
 	}
 
-	public static void Init(IGitAccessor gitAccessor, string path, string template = default, bool bare = false)
+	public static void Init(IGitAccessor gitAccessor, string path, string? template = default, bool bare = false)
 	{
 		Verify.Argument.IsNotNull(gitAccessor);
 
@@ -476,7 +482,7 @@ public sealed class Repository : IGitRepository
 		gitAccessor.InitRepository.Invoke(parameters);
 	}
 
-	public static Task InitAsync(IGitAccessor gitAccessor, string path, string template = default, bool bare = false)
+	public static Task InitAsync(IGitAccessor gitAccessor, string path, string? template = default, bool bare = false)
 	{
 		Verify.Argument.IsNotNull(gitAccessor);
 
@@ -489,7 +495,7 @@ public sealed class Repository : IGitRepository
 	#region clone
 
 	private static CloneRepositoryParameters GetCloneRepositoryParameters(
-		string url, string path, string template = null, string remoteName = null,
+		string url, string path, string? template = null, string? remoteName = null,
 		bool shallow = false, int depth = -1, bool bare = false, bool mirror = false, bool recursive = true, bool noCheckout = false)
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(url);
@@ -513,7 +519,7 @@ public sealed class Repository : IGitRepository
 
 	public static void Clone(
 		IGitAccessor gitAccessor,
-		string url, string path, string template = null, string remoteName = null,
+		string url, string path, string? template = null, string? remoteName = null,
 		bool shallow = false, int depth = -1, bool bare = false, bool mirror = false, bool recursive = true, bool noCheckout = false)
 	{
 		Verify.Argument.IsNotNull(gitAccessor);
@@ -524,9 +530,9 @@ public sealed class Repository : IGitRepository
 
 	public static Task CloneAsync(
 		IGitAccessor gitAccessor,
-		string url, string path, string template = null, string remoteName = null,
+		string url, string path, string? template = null, string? remoteName = null,
 		bool shallow = false, int depth = -1, bool bare = false, bool mirror = false, bool recursive = true, bool noCheckout = false,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(gitAccessor);
 
@@ -538,7 +544,7 @@ public sealed class Repository : IGitRepository
 
 	#region cherry-pick
 
-	private static void BeforeCherryPick(CherryPickControl control, IProgress<OperationProgress> progress = default)
+	private static void BeforeCherryPick(CherryPickControl control, IProgress<OperationProgress>? progress = default)
 	{
 		switch(control)
 		{
@@ -558,7 +564,7 @@ public sealed class Repository : IGitRepository
 		}
 	}
 
-	public async Task CherryPickAsync(CherryPickControl control, IProgress<OperationProgress> progress = default)
+	public async Task CherryPickAsync(CherryPickControl control, IProgress<OperationProgress>? progress = default)
 	{
 		Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
 
@@ -577,7 +583,7 @@ public sealed class Repository : IGitRepository
 		}
 		finally
 		{
-			if(Head.Pointer is Branch branch && !branch.IsRemote)
+			if(Head.Pointer is Branch { IsRemote: false } branch)
 			{
 				await branch
 					.RefreshAsync()
@@ -600,7 +606,7 @@ public sealed class Repository : IGitRepository
 
 	#region revert
 
-	private static void BeforeRevert(RevertControl control, IProgress<OperationProgress> progress = default)
+	private static void BeforeRevert(RevertControl control, IProgress<OperationProgress>? progress = default)
 	{
 		switch(control)
 		{
@@ -620,7 +626,7 @@ public sealed class Repository : IGitRepository
 		}
 	}
 
-	public async Task RevertAsync(RevertControl control, IProgress<OperationProgress> progress = default)
+	public async Task RevertAsync(RevertControl control, IProgress<OperationProgress>? progress = default)
 	{
 		Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
 
@@ -696,7 +702,7 @@ public sealed class Repository : IGitRepository
 
 	/// <summary>Control rebase process.</summary>
 	/// <param name="control">Type of operation.</param>
-	public async Task RebaseAsync(RebaseControl control, IProgress<OperationProgress> progress = default)
+	public async Task RebaseAsync(RebaseControl control, IProgress<OperationProgress>? progress = default)
 	{
 		Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
 
@@ -774,7 +780,7 @@ public sealed class Repository : IGitRepository
 	}
 
 	/// <summary>Perform garbage collection.</summary>
-	public async Task GarbageCollectAsync(IProgress<OperationProgress> progress = default)
+	public async Task GarbageCollectAsync(IProgress<OperationProgress>? progress = default)
 	{
 		Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
 
@@ -812,12 +818,11 @@ public sealed class Repository : IGitRepository
 	/// </summary>
 	public void Dispose()
 	{
-		if(!IsDisposed)
-		{
-			GC.SuppressFinalize(this);
-			Dispose(disposing: true);
-			IsDisposed = true;
-		}
+		if(IsDisposed) return;
+
+		GC.SuppressFinalize(this);
+		Dispose(disposing: true);
+		IsDisposed = true;
 	}
 
 	#endregion

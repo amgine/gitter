@@ -47,8 +47,6 @@ public sealed class PropertyPageFactory : PropertyPageFactoryBase
 public sealed class PropertyPageFactory<T> : PropertyPageFactoryBase
 	where T : PropertyPage
 {
-	private readonly Func<IWorkingEnvironment, PropertyPage> _getPropertyPage;
-
 	public PropertyPageFactory(Guid guid, string name, Bitmap icon, Guid groupGuid, IFactory<T> pageFactory)
 		: base(guid, name, icon, groupGuid)
 	{

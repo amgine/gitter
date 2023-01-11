@@ -84,9 +84,9 @@ public static class GitterApplication
 
 			if(_style != value)
 			{
-				ToolStripManager.Renderer		= value.ToolStripRenderer;
-				ViewManager.Renderer			= value.ViewRenderer;
-				CustomListBoxManager.Renderer	= value.ListBoxRenderer;
+				ToolStripManager.Renderer     = value.ToolStripRenderer;
+				ViewManager.Renderer          = value.ViewRenderer;
+				CustomListBoxManager.Renderer = value.ListBoxRenderer;
 				_style = value;
 			}
 		}
@@ -114,8 +114,6 @@ public static class GitterApplication
 	public static FormEx MainForm => _mainForm;
 
 	public static SelectableFontManager FontManager { get; private set; }
-
-	public static ConfigurationService ConfigurationService { get; private set; }
 
 	public static IntegrationFeatures IntegrationFeatures { get; private set; }
 
@@ -162,9 +160,9 @@ public static class GitterApplication
 		}
 	}
 
-	private static void SelectStyle()
+	private static void SelectStyle(ConfigurationService configurationService)
 	{
-		var styleName = ConfigurationService.GuiSection.GetValue<string>("Style", string.Empty);
+		var styleName = configurationService.GuiSection.GetValue<string>("Style", string.Empty);
 		var style = Styles.FirstOrDefault(s => s.Name == styleName);
 		style ??= Styles.First();
 		_styleOnNextStartup = style;
@@ -176,7 +174,20 @@ public static class GitterApplication
 		Assert.IsNotNull(configuration);
 
 		var builder = new ContainerBuilder();
-		configuration(builder);
+
+		builder
+			.RegisterType<ConfigurationService>()
+			.AsSelf()
+			.SingleInstance();
+
+		builder
+			.RegisterInstance(MessageBoxService)
+			.SingleInstance()
+			.AsSelf()
+			.ExternallyOwned();
+
+		configuration?.Invoke(builder);
+
 		return builder.Build();
 	}
 
@@ -202,10 +213,10 @@ public static class GitterApplication
 		log.Info($"Framework: {RuntimeInformation.FrameworkDescription}");
 #endif
 
-		ConfigurationService = new ConfigurationService();
-		FontManager = new SelectableFontManager(ConfigurationService.GlobalSection.GetCreateSection("Fonts"));
+		var configurationService = container.Resolve<ConfigurationService>();
+		FontManager = new SelectableFontManager(configurationService.GlobalSection.GetCreateSection("Fonts"));
 		IntegrationFeatures = new IntegrationFeatures();
-		GlobalOptions.LoadFrom(ConfigurationService.GlobalSection);
+		GlobalOptions.LoadFrom(configurationService.GlobalSection);
 
 #if NETCOREAPP
 		Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
@@ -214,7 +225,7 @@ public static class GitterApplication
 		Application.SetCompatibleTextRenderingDefault(false);
 		Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
 
-		SelectStyle();
+		SelectStyle(configurationService);
 
 		if(Utility.IsOSWindows7OrNewer)
 		{
@@ -243,10 +254,10 @@ public static class GitterApplication
 			_mainForm = null;
 		}
 
-		GlobalOptions.SaveTo(ConfigurationService.GlobalSection);
-		ConfigurationService.GuiSection.SetValue<string>("Style", StyleOnNextStartup.Name);
+		GlobalOptions.SaveTo(configurationService.GlobalSection);
+		configurationService.GuiSection.SetValue<string>("Style", StyleOnNextStartup.Name);
 		FontManager.Save();
-		ConfigurationService.Save();
+		configurationService.Save();
 
 		LoggingService.Global.Info("Application exited");
 	}

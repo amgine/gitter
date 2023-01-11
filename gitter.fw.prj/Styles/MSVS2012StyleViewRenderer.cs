@@ -468,8 +468,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		var color = tab.IsMouseOver ?
 			ColorTable.DockSideTabOutlineHover :
 			ColorTable.DockSideTabOutline;
-		using var brush = new SolidBrush(color);
-		graphics.FillRectangle(brush, rcOutline);
+		graphics.GdiFill(color, rcOutline);
 	}
 
 	public override void RenderViewDockSideTabContent(DockPanelSideTab tab, Graphics graphics, Rectangle bounds)
@@ -510,28 +509,24 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 				var color = host.IsActive
 					? ColorTable.DocTabBackgroundSelectedActive
 					: ColorTable.DocTabBackgroundSelected;
-				using var brush = new SolidBrush(color);
-				graphics.FillRectangle(brush, bounds);
+				graphics.GdiFill(color, bounds);
 			}
 			else if(tab.IsMouseOver)
 			{
-				using var brush = new SolidBrush(ColorTable.DocTabBackgroundHover);
-				graphics.FillRectangle(brush, bounds);
+				graphics.GdiFill(ColorTable.DocTabBackgroundHover, bounds);
 			}
 		}
 		else
 		{
 			if(tab.IsActive)
 			{
-				using var brush = new SolidBrush(ColorTable.ToolTabBackgroundActive);
-				graphics.FillRectangle(brush, bounds);
+				graphics.GdiFill(ColorTable.ToolTabBackgroundActive, bounds);
 			}
 			else
 			{
 				if(tab.IsMouseOver)
 				{
-					using var brush = new SolidBrush(ColorTable.ToolTabBackgroundHover);
-					graphics.FillRectangle(brush, bounds);
+					graphics.GdiFill(ColorTable.ToolTabBackgroundHover, bounds);
 				}
 			}
 			if(tab.Tabs[0] != tab)
@@ -887,7 +882,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 
 	public override void RenderViewDockSide(DockPanelSide side, PaintEventArgs e)
 	{
-		using var brush = new SolidBrush(ColorTable.DockSideBackground);
+		using var brush = SolidBrushCache.Get(ColorTable.DockSideBackground);
 		e.Graphics.FillRectangle(brush, e.ClipRectangle);
 	}
 
@@ -955,11 +950,11 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		var padding = conv.Convert(new Size(4, 4));
 		var rc = new Rectangle(rect.X + padding.Width, rect.Y + padding.Height, rect.Width - padding.Width * 2, (rect.Height - padding.Height * 2) / 2);
 		var arrow = SetupArrow(rect.X, rect.Y, padding, dpi, new Point(7, 21), new Point(11, 17), new Point(12, 17), new Point(15, 21));
-		using(var brush = new SolidBrush(borderColor))
+		using(var brush = SolidBrushCache.Get(borderColor))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
-		using(var brush = new SolidBrush(arrowColor))
+		using(var brush = SolidBrushCache.Get(arrowColor))
 		{
 			graphics.FillPolygon(brush, arrow);
 		}
@@ -969,7 +964,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		rc.Y += h;
 		rc.Width  -= 2 * b;
 		rc.Height -= h + b;
-		using(var brush = new SolidBrush(contentColor))
+		using(var brush = SolidBrushCache.Get(contentColor))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -981,7 +976,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		var conv = DpiConverter.FromDefaultTo(dpi);
 		var padding = conv.Convert(new Size(4, 4));
 		var rc = new Rectangle(rect.X + padding.Width, rect.Y + padding.Height, rect.Width - padding.Width * 2, rect.Height - padding.Height * 2);
-		using(var brush = new SolidBrush(borderColor))
+		using(var brush = SolidBrushCache.Get(borderColor))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -991,7 +986,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		rc.Y += h;
 		rc.Width  -= 2 * b;
 		rc.Height -= h + b;
-		using(var brush = new SolidBrush(contentColor))
+		using(var brush = SolidBrushCache.Get(contentColor))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -1007,11 +1002,11 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		var padding = conv.Convert(new Size(4, 4));
 		var rc = new Rectangle(rect.X + padding.Width, rect.Y + padding.Height, (rect.Width - padding.Width * 2) / 2, rect.Height - padding.Height * 2);
 		var arrow = SetupArrow(rect.X, rect.Y, padding, dpi, new Point(21, 7), new Point(21, 15), new Point(17, 11), new Point(17, 11));
-		using(var brush = new SolidBrush(arrowColor))
+		using(var brush = SolidBrushCache.Get(arrowColor))
 		{
 			graphics.FillPolygon(brush, arrow);
 		}
-		using(var brush = new SolidBrush(borderColor))
+		using(var brush = SolidBrushCache.Get(borderColor))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -1021,7 +1016,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		rc.Y += h;
 		rc.Width  -= 2 * b;
 		rc.Height -= h + b;
-		using(var brush = new SolidBrush(contentColor))
+		using(var brush = SolidBrushCache.Get(contentColor))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -1043,7 +1038,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		rc.Y += h;
 		rc.Width  -= 2 * b;
 		rc.Height -= h + b;
-		using(var brush = new SolidBrush(contentColor))
+		using(var brush = SolidBrushCache.Get(contentColor))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -1063,7 +1058,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		var conv = DpiConverter.FromDefaultTo(dpi);
 		var padding = conv.Convert(new Size(4, 4));
 		var rc = new Rectangle(rect.X + padding.Width, rect.Y + padding.Height, rect.Width - padding.Width * 2, rect.Height - padding.Height * 2);
-		using(var brush = new SolidBrush(borderColor))
+		using(var brush = SolidBrushCache.Get(borderColor))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -1073,7 +1068,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		rc.Y += h;
 		rc.Width  -= 2 * b;
 		rc.Height -= h + b;
-		using(var brush = new SolidBrush(contentColor))
+		using(var brush = SolidBrushCache.Get(contentColor))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -1091,7 +1086,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		{
 			graphics.FillRectangle(brush, rc);
 		}
-		using(var brush = new SolidBrush(arrowColor))
+		using(var brush = SolidBrushCache.Get(arrowColor))
 		{
 			graphics.FillPolygon(brush, arrow);
 		}
@@ -1101,7 +1096,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		rc.Y += h;
 		rc.Width  -= 2 * b;
 		rc.Height -= h + b;
-		using(var brush = new SolidBrush(contentColor))
+		using(var brush = SolidBrushCache.Get(contentColor))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -1123,7 +1118,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		rc.Y += h;
 		rc.Width  -= 2 * b;
 		rc.Height -= h + b;
-		using(var brush = new SolidBrush(contentColor))
+		using(var brush = SolidBrushCache.Get(contentColor))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -1151,7 +1146,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		{
 			graphics.FillRectangle(brush, rc);
 		}
-		using(var brush = new SolidBrush(arrowColor))
+		using(var brush = SolidBrushCache.Get(arrowColor))
 		{
 			graphics.FillPolygon(brush, arrow);
 		}
@@ -1161,7 +1156,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		rc.Y += h;
 		rc.Width  -= 2 * b;
 		rc.Height -= h + b;
-		using(var brush = new SolidBrush(contentColor))
+		using(var brush = SolidBrushCache.Get(contentColor))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -1177,7 +1172,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 			rect.Y + padding.Height,
 			rect.Width  - padding.Width  * 2,
 			rect.Height - padding.Height * 2);
-		using(var brush = new SolidBrush(borderColor))
+		using(var brush = SolidBrushCache.Get(borderColor))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -1187,7 +1182,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		rc.Y += h;
 		rc.Width  -= 2 * b;
 		rc.Height -= h + b;
-		using(var brush = new SolidBrush(contentColor))
+		using(var brush = SolidBrushCache.Get(contentColor))
 		{
 			graphics.FillRectangle(brush, rc);
 		}

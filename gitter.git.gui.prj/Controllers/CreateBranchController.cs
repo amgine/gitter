@@ -35,8 +35,6 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 
 sealed class CreateBranchController : ViewControllerBase<ICreateBranchView>, ICreateBranchController
 {
-	#region .ctor
-
 	public CreateBranchController(Repository repository)
 	{
 		Verify.Argument.IsNotNull(repository);
@@ -44,15 +42,7 @@ sealed class CreateBranchController : ViewControllerBase<ICreateBranchView>, ICr
 		Repository = repository;
 	}
 
-	#endregion
-
-	#region Properties
-
 	private Repository Repository { get; }
-
-	#endregion
-
-	#region Methods
 
 	protected override void OnViewAttached()
 	{
@@ -192,10 +182,6 @@ sealed class CreateBranchController : ViewControllerBase<ICreateBranchView>, ICr
 		return true;
 	}
 
-	#endregion
-
-	#region ICreateBranchController Members
-
 	public Task<bool> TryCreateBranchAsync()
 	{
 		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
@@ -226,6 +212,4 @@ sealed class CreateBranchController : ViewControllerBase<ICreateBranchView>, ICr
 			return TryCreateNewBranchAsync(branchName, refspec, checkout, orphan, reflog);
 		}
 	}
-
-	#endregion
 }

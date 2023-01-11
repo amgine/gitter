@@ -350,7 +350,7 @@ sealed class CommandBuilder
 		#region Formatting
 
 		args.Add(LogCommand.NullTerminate());
-		if(format != null)
+		if(format is not null)
 		{
 			args.Add(format);
 		}
@@ -370,10 +370,10 @@ sealed class CommandBuilder
 			}
 		}
 
-		if(parameters.Paths is { Count: not 0 })
+		if(parameters.Paths is { Count: not 0 } paths)
 		{
-			args.Add(CommandFlag.NoMoreOptions());
-			foreach(var path in parameters.Paths)
+			args.Add(CommandFlag.NoMoreOptions);
+			foreach(var path in paths)
 			{
 				args.Add(new PathCommandArgument(path));
 			}
@@ -476,12 +476,10 @@ sealed class CommandBuilder
 	{
 		Assert.IsNotNull(parameters);
 
-		var args = new List<ICommandArgument>(
-			(parameters.ExcludePatterns is not null ? parameters.ExcludePatterns.Count : 0) +
-			(parameters.Paths is not null ? parameters.Paths.Count + 1 : 0) + 4);
-		args.Add(CleanCommand.DryRun());
-		InsertCleanFilesParameters(parameters, args);
-		return new CleanCommand(args);
+		var builder = new CleanCommand.Builder();
+		builder.DryRun();
+		InsertCleanFilesParameters(parameters, builder);
+		return builder.Build();
 	}
 
 	public Command GetAddFilesCommand(AddFilesParameters parameters)
@@ -520,10 +518,10 @@ sealed class CommandBuilder
 		{
 			args.Add(AddCommand.IgnoreErrors());
 		}
-		if(parameters.Paths is { Count: not 0 })
+		if(parameters.Paths is { Count: not 0 } paths)
 		{
 			args.Add(AddCommand.NoMoreOptions());
-			foreach(var path in parameters.Paths)
+			foreach(var path in paths)
 			{
 				args.Add(new PathCommandArgument(path));
 			}
@@ -571,46 +569,44 @@ sealed class CommandBuilder
 	{
 		Assert.IsNotNull(parameters);
 
-		var args = new List<ICommandArgument>(
-			(parameters.ExcludePatterns is not null ? parameters.ExcludePatterns.Count : 0) +
-			(parameters.Paths is not null ? parameters.Paths.Count + 1 : 0) + 3);
-		InsertCleanFilesParameters(parameters, args);
-		return new CleanCommand(args);
+		var builder = new CleanCommand.Builder();
+		InsertCleanFilesParameters(parameters, builder);
+		return builder.Build();
 	}
 
-	private void InsertCleanFilesParameters(CleanFilesParameters parameters, IList<ICommandArgument> args)
+	private void InsertCleanFilesParameters(CleanFilesParameters parameters, CleanCommand.Builder builder)
 	{
 		if(parameters.Force)
 		{
-			args.Add(CleanCommand.Force());
+			builder.Force();
 		}
 		if(parameters.RemoveDirectories)
 		{
-			args.Add(CleanCommand.Directories());
+			builder.Directories();
 		}
 		switch(parameters.Mode)
 		{
 			case CleanFilesMode.IncludeIgnored:
-				args.Add(CleanCommand.IncludeIgnored());
+				builder.IncludeIgnored();
 				break;
 			case CleanFilesMode.OnlyIgnored:
-				args.Add(CleanCommand.ExcludeUntracked());
+				builder.ExcludeUntracked();
 				break;
 		}
-		if(parameters.ExcludePatterns != null && GitFeatures.CleanExcludeOption.IsAvailableFor(_gitCLI))
+		if(parameters.ExcludePatterns is { Count: > 0 } patterns && GitFeatures.CleanExcludeOption.IsAvailableFor(_gitCLI))
 		{
-			foreach(var pattern in parameters.ExcludePatterns)
+			foreach(var pattern in patterns)
 			{
 				if(!string.IsNullOrEmpty(pattern))
 				{
-					args.Add(CleanCommand.Exclude(pattern));
+					builder.Exclude(pattern);
 				}
 			}
 		}
-		if(parameters.Paths is { Count: not 0 })
+		if(parameters.Paths is { Count: not 0 } paths)
 		{
 			bool addedAnyPath = false;
-			foreach(var path in parameters.Paths)
+			foreach(var path in paths)
 			{
 				if(string.IsNullOrWhiteSpace(path))
 				{
@@ -618,10 +614,10 @@ sealed class CommandBuilder
 				}
 				if(addedAnyPath)
 				{
-					args.Add(CleanCommand.NoMoreOptions());
+					builder.NoMoreOptions();
 					addedAnyPath = true;
 				}
-				args.Add(new PathCommandArgument(path));
+				builder.AddOption(new PathCommandArgument(path));
 			}
 		}
 	}
@@ -714,7 +710,7 @@ sealed class CommandBuilder
 		args.Add(DiffCommand.Patch());
 		args.Add(DiffCommand.FullIndex());
 		args.Add(DiffCommand.NoColor());
-		if(parameters.Context != -1)
+		if(parameters.Context >= 0)
 		{
 			args.Add(DiffCommand.Unified(parameters.Context));
 		}
@@ -801,10 +797,10 @@ sealed class CommandBuilder
 		Assert.IsNotNull(parameters);
 		Assert.IsNotNull(args);
 
-		if(parameters.Paths != null && parameters.Paths.Count != 0)
+		if(parameters.Paths is { Count: > 0 } paths)
 		{
 			args.Add(DiffCommand.NoMoreOptions());
-			foreach(var path in parameters.Paths)
+			foreach(var path in paths)
 			{
 				args.Add(new PathCommandArgument(path));
 			}
@@ -1314,7 +1310,7 @@ sealed class CommandBuilder
 		{
 			args.Add(new CommandParameter(parameters.Revision));
 		}
-		args.Add(CommandFlag.NoMoreOptions());
+		args.Add(CommandFlag.NoMoreOptions);
 		args.Add(new PathCommandArgument(parameters.FileName));
 		return new BlameCommand(args);
 	}
@@ -1922,7 +1918,7 @@ sealed class CommandBuilder
 		{
 			args.Add(SubmoduleCommand.Reference(parameters.ReferenceRepository));
 		}
-		args.Add(CommandFlag.NoMoreOptions());
+		args.Add(CommandFlag.NoMoreOptions);
 		args.Add(new CommandParameter(parameters.Repository));
 		if(parameters.Path is not null)
 		{

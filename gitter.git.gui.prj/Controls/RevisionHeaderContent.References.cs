@@ -121,9 +121,9 @@ partial class RevisionHeaderContent
 			{
 				if(revision.References.Count == 0) return;
 
-				using var tagBrush    = new SolidBrush(ColorScheme.TagBackColor);
-				using var localBrush  = new SolidBrush(ColorScheme.LocalBranchBackColor);
-				using var remoteBrush = new SolidBrush(ColorScheme.RemoteBranchBackColor);
+				using var tagBrush    = SolidBrushCache.Get(ColorScheme.TagBackColor);
+				using var localBrush  = SolidBrushCache.Get(ColorScheme.LocalBranchBackColor);
+				using var remoteBrush = SolidBrushCache.Get(ColorScheme.RemoteBranchBackColor);
 
 				var conv = DpiConverter.FromDefaultTo(dpi);
 				var r2 = new Rectangle(rect.X + conv.ConvertX(HeaderWidth), rect.Y, rect.Width - conv.ConvertX(HeaderWidth), rect.Height);

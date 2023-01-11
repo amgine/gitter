@@ -637,27 +637,25 @@ sealed class BlameFilePanel : FilePanel
 
 		lineX = x + digits * cellSize.Width + _hashColumnWidth + _autorColumnWidth + 1;
 		graphics.DrawLine(Pens.Gray, lineX, y, lineX, y + cellSize.Height);
-		using(var brush = new SolidBrush(Style.Colors.WindowText))
+		var textColor = Style.Colors.WindowText;
+		if(paintHeader)
 		{
-			if(paintHeader)
-			{
-				var rcHash   = new Rectangle(rcLine.X, rcLine.Y, _hashColumnWidth, rcLine.Height);
-				var rcAuthor = new Rectangle(rcLine.X + _hashColumnWidth, rcLine.Y, _autorColumnWidth, rcLine.Height);
-				GitterApplication.TextRenderer.DrawText(
-					graphics, hunk.Commit.Hash.ToString(7), font, brush,
-					rcHash.X + cellSize.Width / 2, rcHash.Y, ContentFormat);
-				GitterApplication.TextRenderer.DrawText(
-					graphics, hunk.Commit.Author, font, brush,
-					rcAuthor.X + cellSize.Width / 2, rcAuthor.Y, ContentFormat);
-			}
-
-			var dx = _hashColumnWidth + _autorColumnWidth;
-			rcLine.X     += dx;
-			rcLine.Width -= dx;
+			var rcHash   = new Rectangle(rcLine.X, rcLine.Y, _hashColumnWidth, rcLine.Height);
+			var rcAuthor = new Rectangle(rcLine.X + _hashColumnWidth, rcLine.Y, _autorColumnWidth, rcLine.Height);
 			GitterApplication.TextRenderer.DrawText(
-				graphics, line.Text, font, brush,
-				rcLine.X, rcLine.Y, ContentFormat);
+				graphics, hunk.Commit.Hash.ToString(7), font, textColor,
+				rcHash.X + cellSize.Width / 2, rcHash.Y, ContentFormat);
+			GitterApplication.TextRenderer.DrawText(
+				graphics, hunk.Commit.Author, font, textColor,
+				rcAuthor.X + cellSize.Width / 2, rcAuthor.Y, ContentFormat);
 		}
+
+		var dx = _hashColumnWidth + _autorColumnWidth;
+		rcLine.X     += dx;
+		rcLine.Width -= dx;
+		GitterApplication.TextRenderer.DrawText(
+			graphics, line.Text, font, textColor,
+			rcLine.X, rcLine.Y, ContentFormat);
 	}
 
 	protected override void OnFlowControlAttached()

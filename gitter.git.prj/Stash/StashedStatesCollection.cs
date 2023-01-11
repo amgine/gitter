@@ -133,7 +133,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 
 	internal void Drop(StashedState stashedState)
 	{
-		Verify.Argument.IsValidGitObject(stashedState, Repository, nameof(stashedState));
+		Verify.Argument.IsValidGitObject(stashedState, Repository);
 
 		var parameters = GetStashDropParameters(stashedState);
 		using(Repository.Monitor.BlockNotifications(
@@ -144,9 +144,9 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		OnStashedStateDropped(stashedState);
 	}
 
-	internal async Task DropAsync(StashedState stashedState, IProgress<OperationProgress> progress = default)
+	internal async Task DropAsync(StashedState stashedState, IProgress<OperationProgress>? progress = default)
 	{
-		Verify.Argument.IsValidGitObject(stashedState, Repository, nameof(stashedState));
+		Verify.Argument.IsValidGitObject(stashedState, Repository);
 
 		progress?.Report(new OperationProgress(Resources.StrPerformingStashDrop.AddEllipsis()));
 		var parameters = GetStashDropParameters(stashedState);
@@ -172,7 +172,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		OnStashedStateDropped();
 	}
 
-	public async Task DropAsync(IProgress<OperationProgress> progress = default)
+	public async Task DropAsync(IProgress<OperationProgress>? progress = default)
 	{
 		Verify.State.IsTrue(_stash.Count != 0);
 
@@ -223,7 +223,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		OnStashCleared();
 	}
 
-	public async Task ClearAsync(IProgress<OperationProgress> progress = default)
+	public async Task ClearAsync(IProgress<OperationProgress>? progress = default)
 	{
 		progress?.Report(new OperationProgress(Resources.StrsCleaningStash.AddEllipsis()));
 		var parameters = GetClearStashParameters();
@@ -502,7 +502,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		Repository.Status.Refresh();
 	}
 
-	public async Task ApplyAsync(bool restoreIndex, IProgress<OperationProgress> progress = default)
+	public async Task ApplyAsync(bool restoreIndex, IProgress<OperationProgress>? progress = default)
 	{
 		Verify.State.IsTrue(_stash.Count != 0);
 
@@ -611,7 +611,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		OnStashPopCompleted(stashedState);
 	}
 
-	public async Task PopAsync(bool restoreIndex, IProgress<OperationProgress> progress = default)
+	public async Task PopAsync(bool restoreIndex, IProgress<OperationProgress>? progress = default)
 	{
 		Verify.State.IsTrue(_stash.Count != 0);
 

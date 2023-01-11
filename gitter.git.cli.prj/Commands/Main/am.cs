@@ -28,7 +28,7 @@ public sealed class AmCommand : Command
 {
 	/// <summary>Add a Signed-off-by: line to the commit message, using the committer identity of yourself.</summary>
 	public static ICommandArgument SignOff()
-		=> CommandFlag.SignOff();
+		=> CommandFlag.SignOff;
 
 	/// <summary>Pass -k flag to git-mailinfo (see git-mailinfo(1)).</summary>
 	public static ICommandArgument Keep()
@@ -36,7 +36,7 @@ public sealed class AmCommand : Command
 
 	/// <summary>Be quiet. Only print error messages.</summary>
 	public static ICommandArgument Quiet()
-		=> CommandFlag.Quiet();
+		=> CommandFlag.Quiet;
 
 	/// <summary>
 	///	Pass -u flag to git-mailinfo (see git-mailinfo(1)). The proposed commit log message taken from the e-mail

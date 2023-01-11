@@ -50,7 +50,7 @@ public sealed class ShowRefCommand : Command
 		=> new CommandFlag("--verify");
 
 	public static ICommandArgument NoMoreOptions()
-		=> CommandFlag.NoMoreOptions();
+		=> CommandFlag.NoMoreOptions;
 
 	public ShowRefCommand()
 		: base("show-ref")

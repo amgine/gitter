@@ -76,6 +76,13 @@ partial class AddServerDialog : DialogBase, IAsyncExecutableDialog, IAddServerVi
 	protected override string ActionVerb => Resources.StrAdd;
 
 	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		base.OnLoad(e);
+		BeginInvoke(_txtName.Focus);
+	}
+
+	/// <inheritdoc/>
 	public async Task<bool> ExecuteAsync()
 	{
 		_txtName.Enabled       = false;

@@ -526,7 +526,7 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		var color = footer.ViewHost.IsActive ?
 			ColorTable.ViewHostForegroundActive :
 			ColorTable.ViewHostForegroundNormal;
-		using(var brush = new SolidBrush(color))
+		using(var brush = SolidBrushCache.Get(color))
 		{
 			var dpi = Dpi.FromControl(footer);
 			var conv = DpiConverter.FromDefaultTo(dpi);
@@ -569,7 +569,7 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		rect.Height += 1;
 
 		graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
-		graphics.TextContrast       = GraphicsUtility.TextContrast;
+		graphics.TextContrast      = GraphicsUtility.TextContrast;
 
 		Color textColor, backgroundStart, backgroundEnd;
 		if(header.ViewHost.IsActive)
@@ -597,7 +597,7 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		}
 		else
 		{
-			using(var brush = new SolidBrush(ColorTable.ViewHostHeaderBackground))
+			using(var brush = SolidBrushCache.Get(ColorTable.ViewHostHeaderBackground))
 			{
 				graphics.FillRectangle(brush, e.ClipRectangle);
 			}
@@ -613,16 +613,13 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		{
 			rect.Width -= header.Buttons.Width + BetweenTextAndButtons;
 		}
-		using(var brush = new SolidBrush(textColor))
-		{
-			GitterApplication.TextRenderer.DrawText(
-				graphics,
-				header.Text,
-				GitterApplication.FontManager.UIFont,
-				brush,
-				Rectangle.Truncate(rect),
-				ViewHostHeaderTextFormat);
-		}
+		GitterApplication.TextRenderer.DrawText(
+			graphics,
+			header.Text,
+			GitterApplication.FontManager.UIFont,
+			textColor,
+			Rectangle.Truncate(rect),
+			ViewHostHeaderTextFormat);
 	}
 
 	#endregion
@@ -1040,7 +1037,7 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		textColor = ColorTable.ViewHostHeaderTextFocused;
 		backgroundStart = ColorTable.ViewHostHeaderBackgroundFocusedStart;
 		backgroundEnd = ColorTable.ViewHostHeaderBackgroundFocusedEnd;
-		using(var brush = new SolidBrush(ColorTable.ViewHostHeaderBackground))
+		using(var brush = SolidBrushCache.Get(ColorTable.ViewHostHeaderBackground))
 		{
 			graphics.FillRectangle(brush, e.ClipRectangle);
 		}
@@ -1055,16 +1052,13 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		{
 			rect.Width -= header.Buttons.Width + BetweenTextAndButtons;
 		}
-		using(var brush = new SolidBrush(textColor))
-		{
-			GitterApplication.TextRenderer.DrawText(
-				graphics,
-				header.Text,
-				GitterApplication.FontManager.UIFont,
-				brush,
-				Rectangle.Truncate(rect),
-				ViewHostHeaderTextFormat);
-		}
+		GitterApplication.TextRenderer.DrawText(
+			graphics,
+			header.Text,
+			GitterApplication.FontManager.UIFont,
+			textColor,
+			Rectangle.Truncate(rect),
+			ViewHostHeaderTextFormat);
 	}
 
 	#endregion

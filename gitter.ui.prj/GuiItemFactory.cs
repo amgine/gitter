@@ -104,7 +104,7 @@ class GuiItemFactory
 
 			if(_vsCodePath is null) yield break;
 
-			yield return new GuiCommand("OpenVSCode", DisplayName, CommonIcons.VSCode, e =>
+			yield return new GuiCommand("OpenVSCode", DisplayName, CommonIcons.VSCode, _ =>
 			{
 				Process.Start(new ProcessStartInfo
 				{
@@ -140,13 +140,13 @@ class GuiItemFactory
 			path = Path.GetFullPath(path);
 			foreach(var sln in Directory.EnumerateFiles(path, "*.sln", SearchOption.TopDirectoryOnly))
 			{
-				yield return new GuiCommand("OpenVSSolution", GetFileName(path, sln), CommonIcons.Solution, e => Utility.OpenUrl(sln));
+				yield return new GuiCommand("OpenVSSolution", GetFileName(path, sln), CommonIcons.Solution, _ => Utility.OpenUrl(sln));
 			}
 			foreach(var dir in Directory.EnumerateDirectories(path))
 			{
 				foreach(var sln in Directory.EnumerateFiles(dir, "*.sln", SearchOption.TopDirectoryOnly))
 				{
-					yield return new GuiCommand("OpenVSSolution", GetFileName(path, sln), CommonIcons.Solution, e => Utility.OpenUrl(sln));
+					yield return new GuiCommand("OpenVSSolution", GetFileName(path, sln), CommonIcons.Solution, _ => Utility.OpenUrl(sln));
 				}
 			}
 		}

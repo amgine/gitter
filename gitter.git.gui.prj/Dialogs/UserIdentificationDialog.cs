@@ -35,15 +35,11 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public partial class UserIdentificationDialog : GitDialogBase, IExecutableDialog
 {
-	#region Data
-
 	private readonly IWorkingEnvironment _environment;
 	private RepositoryProvider _repositoryProvider;
 	private Repository _repository;
 	private string _oldUserName;
 	private string _oldUserEmail;
-
-	#endregion
 
 	public UserIdentificationDialog(IWorkingEnvironment environment, Repository repository)
 	{
@@ -127,13 +123,18 @@ public partial class UserIdentificationDialog : GitDialogBase, IExecutableDialog
 		}
 	}
 
+	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		base.OnLoad(e);
+		BeginInvoke(_txtUsername.Focus);
+	}
+
 	public void SetDefaults()
 	{
 		_txtUsername.Text = Environment.UserName;
 		_txtEmail.Text = string.Format("{0}@{1}", Environment.UserName, Environment.UserDomainName);
 	}
-
-	#region IExecutableDialog Members
 
 	public bool Execute()
 	{
@@ -235,6 +236,4 @@ public partial class UserIdentificationDialog : GitDialogBase, IExecutableDialog
 		}
 		return true;
 	}
-
-	#endregion
 }

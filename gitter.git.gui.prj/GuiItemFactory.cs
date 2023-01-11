@@ -3018,7 +3018,7 @@ public class GuiItemFactory
 			}
 		}
 		var text = sb.ToString();
-		ClipboardEx.SetTextSafe(text);
+		ClipboardEx.TrySetTextSafe(text);
 	}
 
 	#endregion
@@ -3555,7 +3555,7 @@ public class GuiItemFactory
 			Func<string> f => f(),
 			_ => throw new InvalidOperationException(),
 		};
-		ClipboardEx.SetTextSafe(text);
+		ClipboardEx.TrySetTextSafe(text);
 	}
 
 	private static void OnCopyHashToClipboardClick(object sender, EventArgs e)
@@ -3571,7 +3571,7 @@ public class GuiItemFactory
 		{
 			text = text.Substring(0, 7);
 		}
-		ClipboardEx.SetTextSafe(text);
+		ClipboardEx.TrySetTextSafe(text);
 	}
 
 	private static void OnRefreshReferencesClick(object sender, EventArgs e)

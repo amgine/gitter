@@ -409,7 +409,7 @@ public sealed class GraphStyle : IGraphStyle, IDisposable
 						if(useColors && options.ColorNodes)
 						{
 							var color = cell.ColorOf(GraphElementId.Dot);
-							using var brush = new SolidBrush(palette[color]);
+							using var brush = SolidBrushCache.Get(palette[color]);
 							graphics.FillEllipse(brush, cx, cy, cdw, cdh);
 						}
 						else
@@ -472,7 +472,7 @@ public sealed class GraphStyle : IGraphStyle, IDisposable
 		var x0 = bounds.X + cellWidth * dot + (cellWidth >> 1);
 		var x1 = bounds.Right;
 		var bcolor = Color.FromArgb(30, color);
-		using var backgroundBrush = new SolidBrush(bcolor);
+		using var backgroundBrush = SolidBrushCache.Get(bcolor);
 		var back = new Rectangle(x0, bounds.Y + padding, x1 - x0 - accent, bounds.Height - padding * 2);
 		back.Intersect(clip);
 		if(back.Width > 0 && back.Height > 0)
@@ -689,7 +689,7 @@ public sealed class GraphStyle : IGraphStyle, IDisposable
 			var pen = lightBackground ? GraphColors.TagBorderPenForLightBackground : Pens.Black;
 			const int d = 4;
 			var conv = DpiConverter.FromDefaultTo(dpi);
-			graphics.DrawLine(pen, x + bounds.Width - conv.ConvertX(4), bounds.Y, x + bounds.Width, bounds.Y + conv.ConvertY(4));
+			graphics.DrawLine(pen, x + bounds.Width - conv.ConvertX(d), bounds.Y, x + bounds.Width, bounds.Y + conv.ConvertY(d));
 		}
 		return bounds;
 	}

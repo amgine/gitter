@@ -182,7 +182,7 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 		if(column.Extender is not null && bounds.Width > w)
 		{
 			var graphics = paintEventArgs.Graphics;
-			using(var brush = new SolidBrush(ColorTable.Background))
+			using(var brush = SolidBrushCache.Get(ColorTable.Background))
 			{
 				graphics.FillRectangle(brush,
 					bounds.Right - w - 0.5f, bounds.Y,
@@ -200,7 +200,7 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 			_triangle[2] = p3;
 			var foregroundColor = paintEventArgs.HoveredPart == ColumnHitTestResults.Extender ?
 				ColorTable.HoverExtenderForeground : ColorTable.ExtenderForeground;
-			using(var brush = new SolidBrush(foregroundColor))
+			using(var brush = SolidBrushCache.Get(foregroundColor))
 			{
 				graphics.FillPolygon(brush, _triangle);
 			}
@@ -373,12 +373,12 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 					if(isHostControlFocused && isSelected)
 					{
 						CacheMinusTrianglePolygon1(x, y, dpi);
-						using(var brush = new SolidBrush(ColorTable.PlusMinusForeground))
+						using(var brush = SolidBrushCache.Get(ColorTable.PlusMinusForeground))
 						{
 							graphics.FillPolygon(brush, _triangle);
 						}
 						CacheMinusTrianglePolygon2(x, y, dpi);
-						using(var brush = new SolidBrush(ColorTable.SelectionBackground))
+						using(var brush = SolidBrushCache.Get(ColorTable.SelectionBackground))
 						{
 							graphics.FillPolygon(brush, _triangle);
 						}
@@ -386,14 +386,14 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 					else
 					{
 						CacheMinusTrianglePolygon1(x, y, dpi);
-						using var brush = new SolidBrush(ColorTable.AccentPlusMinusForeground);
+						using var brush = SolidBrushCache.Get(ColorTable.AccentPlusMinusForeground);
 						graphics.FillPolygon(brush, _triangle);
 					}
 				}
 				else
 				{
 					CacheMinusTrianglePolygon1(x, y, dpi);
-					using var brush = new SolidBrush(ColorTable.PlusMinusForeground);
+					using var brush = SolidBrushCache.Get(ColorTable.PlusMinusForeground);
 					graphics.FillPolygon(brush, _triangle);
 				}
 			}
@@ -404,13 +404,13 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 					if(isHostControlFocused && isSelected)
 					{
 						CachePlusTrianglePolygon1(x, y, dpi);
-						using var brush = new SolidBrush(ColorTable.PlusMinusForeground);
+						using var brush = SolidBrushCache.Get(ColorTable.PlusMinusForeground);
 						graphics.FillPolygon(brush, _triangle);
 					}
 					else
 					{
 						CachePlusTrianglePolygon1(x, y, dpi);
-						using(var brush = new SolidBrush(ColorTable.AccentPlusMinusForeground))
+						using(var brush = SolidBrushCache.Get(ColorTable.AccentPlusMinusForeground))
 						{
 							graphics.FillPolygon(brush, _triangle);
 						}
@@ -419,18 +419,18 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 						{
 							if(isHostControlFocused)
 							{
-								using var brush = new SolidBrush(ColorTable.SelectionBackground);
+								using var brush = SolidBrushCache.Get(ColorTable.SelectionBackground);
 								graphics.FillPolygon(brush, _triangle);
 							}
 							else
 							{
-								using var brush = new SolidBrush(ColorTable.SelectionBackgroundNoFocus);
+								using var brush = SolidBrushCache.Get(ColorTable.SelectionBackgroundNoFocus);
 								graphics.FillPolygon(brush, _triangle);
 							}
 						}
 						else
 						{
-							using var brush = new SolidBrush(ColorTable.Background);
+							using var brush = SolidBrushCache.Get(ColorTable.Background);
 							graphics.FillPolygon(brush, _triangle);
 						}
 					}
@@ -438,7 +438,7 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 				else
 				{
 					CachePlusTrianglePolygon1(x, y, dpi);
-					using(var brush = new SolidBrush(ColorTable.PlusMinusForeground))
+					using(var brush = SolidBrushCache.Get(ColorTable.PlusMinusForeground))
 					{
 						graphics.FillPolygon(brush, _triangle);
 					}
@@ -447,18 +447,18 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 					{
 						if(isHostControlFocused)
 						{
-							using var brush = new SolidBrush(ColorTable.SelectionBackground);
+							using var brush = SolidBrushCache.Get(ColorTable.SelectionBackground);
 							graphics.FillPolygon(brush, _triangle);
 						}
 						else
 						{
-							using var brush = new SolidBrush(ColorTable.SelectionBackgroundNoFocus);
+							using var brush = SolidBrushCache.Get(ColorTable.SelectionBackgroundNoFocus);
 							graphics.FillPolygon(brush, _triangle);
 						}
 					}
 					else
 					{
-						using var brush = new SolidBrush(ColorTable.Background);
+						using var brush = SolidBrushCache.Get(ColorTable.Background);
 						graphics.FillPolygon(brush, _triangle);
 					}
 				}

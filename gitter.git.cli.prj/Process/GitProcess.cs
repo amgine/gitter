@@ -29,82 +29,10 @@ using System.Threading.Tasks;
 
 using gitter.Framework.CLI;
 
+#nullable enable
+
 internal static class GitProcess
 {
-	private static string GetFullPath(string filename)
-	{
-		string environmentVariable = Environment.GetEnvironmentVariable("PATH");
-		if(!string.IsNullOrWhiteSpace(environmentVariable))
-		{
-			foreach(string str2 in environmentVariable.Split(
-				new char[] { Path.PathSeparator },
-				StringSplitOptions.RemoveEmptyEntries))
-			{
-				try
-				{
-					string path = Path.Combine(str2, filename);
-					if(File.Exists(path))
-					{
-						return path;
-					}
-				}
-				catch(Exception exc) when(!exc.IsCritical())
-				{
-				}
-			}
-		}
-		return null;
-	}
-
-	public static string DetectGitExePath()
-	{
-		const string GitExe = "git.exe";
-		const string GitCmd = "git.cmd";
-
-		string gitExeFullPath = GetFullPath(GitExe);
-		if(!string.IsNullOrWhiteSpace(gitExeFullPath))
-		{
-			string gitWrapperExe = string.Format("{0}cmd{0}{1}", Path.DirectorySeparatorChar, GitExe);
-			if(gitExeFullPath.ToLower().EndsWith(gitWrapperExe))
-			{
-				var realGitExe = Path.Combine(
-					gitExeFullPath.Substring(0, gitExeFullPath.Length - gitWrapperExe.Length),
-					@"bin", GitExe);
-				if(File.Exists(realGitExe))
-				{
-					return realGitExe;
-				}
-			}
-			return gitExeFullPath;
-		}
-		string gitCmdFullPath = GetFullPath(GitCmd);
-		if(!string.IsNullOrWhiteSpace(gitCmdFullPath))
-		{
-			string gitWrapperCmd = string.Format("{0}cmd{0}{1}", Path.DirectorySeparatorChar, GitCmd);
-			if(gitCmdFullPath.ToLower().EndsWith(gitWrapperCmd))
-			{
-				var realGitExe = Path.Combine(
-					gitCmdFullPath.Substring(0, gitCmdFullPath.Length - gitWrapperCmd.Length),
-					@"bin", GitExe);
-				if(File.Exists(realGitExe))
-				{
-					return realGitExe;
-				}
-			}
-			return gitCmdFullPath;
-		}
-		var programFilesPath = Environment.Is64BitOperatingSystem ?
-			Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86) :
-			Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-		var defaultInstallationPath = Path.Combine(
-			programFilesPath, @"Git\bin", GitExe);
-		if(File.Exists(defaultInstallationPath))
-		{
-			return defaultInstallationPath;
-		}
-		return null;
-	}
-
 	public static Version CheckVersion(string gitExe)
 	{
 		var stdErrReceiver = new AsyncTextReader();
@@ -119,20 +47,22 @@ internal static class GitProcess
 
 	public static void SetCriticalEnvironmentVariables(ProcessStartInfo psi)
 	{
-		psi.EnsureEnvironmentVariableExists(GitEnvironment.PlinkProtocol, "ssh");
+		Assert.IsNotNull(psi);
+
+		psi.EnsureEnvironmentVariableExists(GitEnvironment.PlinkProtocol, @"ssh");
 		psi.EnsureEnvironmentVariableExists(GitEnvironment.Home, UserProfile);
 		psi.EnsureEnvironmentVariableExists(GitEnvironment.GitAskPass, _askPassUtilityPath);
 		psi.EnsureEnvironmentVariableExists(GitEnvironment.SshAskPass, _askPassUtilityPath);
-		psi.EnsureEnvironmentVariableExists(GitEnvironment.Display, "localhost:0.0");
+		psi.EnsureEnvironmentVariableExists(GitEnvironment.Display, @"localhost:0.0");
 	}
 
 	private static bool _enableCodepageFallback;
-	private static string _gitInstallationPath;
+	private static string? _gitInstallationPath;
 	private static readonly string _askPassUtilityPath = Path.Combine(
 		AppContext.BaseDirectory, @"gitter.askpass.exe");
-	private static string _gitExePath;
-	private static string _shExePath;
-	private static string _gitkCmdPath;
+	private static string? _gitExePath;
+	private static string? _shExePath;
+	private static string? _gitkCmdPath;
 	private static readonly string UserProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
 	public static Encoding DefaultEncoding { get; private set; } = Encoding.UTF8;
@@ -158,7 +88,7 @@ internal static class GitProcess
 		}
 	}
 
-	public static string GitExePath
+	public static string? GitExePath
 	{
 		get => _gitExePath;
 		set
@@ -186,9 +116,10 @@ internal static class GitProcess
 		}
 	}
 
-	public static Process ExecNormal(GitInput input)
+	public static Process? ExecNormal(GitInput input)
 	{
 		Verify.Argument.IsNotNull(input);
+		Verify.State.IsTrue(_gitExePath is not null, "Git executable path is not set.");
 
 		var psi = new ProcessStartInfo(_gitExePath)
 		{
@@ -233,15 +164,16 @@ internal static class GitProcess
 		}
 	}
 
-	public static Process ExecSh(string repository, string command)
+	public static Process? ExecSh(string repository, string command)
 	{
-		var psi = new ProcessStartInfo()
+		Verify.State.IsTrue(_shExePath is not null, "Git bash executable path is not set.");
+
+		var psi = new ProcessStartInfo(_shExePath)
 		{
 			Arguments        = command,
 			WorkingDirectory = repository,
 			WindowStyle      = ProcessWindowStyle.Normal,
 			LoadUserProfile  = true,
-			FileName         = _shExePath,
 			ErrorDialog      = false,
 		};
 		return Process.Start(psi);
@@ -266,8 +198,10 @@ internal static class GitProcess
 		}
 	}
 
-	public static Process ExecGitk(string repository, string command)
+	public static Process? ExecGitk(string repository, string command)
 	{
+		Verify.State.IsTrue(_gitkCmdPath is not null, "Gitk executable path is not set.");
+
 		var psi = new ProcessStartInfo(_gitkCmdPath)
 		{
 			Arguments        = command,

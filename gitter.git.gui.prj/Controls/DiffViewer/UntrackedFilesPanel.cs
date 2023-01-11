@@ -220,7 +220,7 @@ sealed class UntrackedFilesPanel : FlowPanel
 		var h      = LineHeight.GetValue(paintEventArgs.Dpi);
 		var rc     = new Rectangle(rect.X + conv.ConvertX(5), rect.Y, FlowControl.ContentArea.Width - conv.ConvertX(5) * 2, h);
 		var rcClip = Rectangle.Intersect(rc, clip);
-		using var textBrush = new SolidBrush(FlowControl.Style.Colors.WindowText);
+		using var textBrush = SolidBrushCache.Get(FlowControl.Style.Colors.WindowText);
 		if(rcClip is { Width: > 0, Height: > 0 })
 		{
 			GitterApplication.TextRenderer.DrawText(

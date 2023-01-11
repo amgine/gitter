@@ -45,7 +45,7 @@ public sealed class ConfigurationService : IDisposable
 
 	#region .ctor & finalizer
 
-	internal ConfigurationService()
+	public ConfigurationService()
 	{
 		var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 		_configPath = Path.Combine(appData, AppFolderName);

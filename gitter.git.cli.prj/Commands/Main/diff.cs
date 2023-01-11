@@ -117,7 +117,7 @@ public sealed class DiffCommand : Command
 		=> new CommandParameterValue("--find-copies", similarity.ToString("G", CultureInfo.InvariantCulture).Substring(2), '=');
 
 	public static ICommandArgument NoMoreOptions()
-		=> CommandFlag.NoMoreOptions();
+		=> CommandFlag.NoMoreOptions;
 
 	public static ICommandArgument NullTerminate()
 		=> new CommandFlag("-z");

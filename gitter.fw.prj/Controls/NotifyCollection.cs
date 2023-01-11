@@ -57,7 +57,7 @@ public class NotifyCollection<T> : Collection<T>
 
 	/// <summary>Sort collection using specified <paramref name="comparison"/>.</summary>
 	/// <param name="comparison">Comparison to use for sorting.</param>
-	/// <exception cref="T:System.NullReferenceException"><paramref name="comparison"/> == <c>null</c>.</exception>
+	/// <exception cref="NullReferenceException"><paramref name="comparison"/> == <c>null</c>.</exception>
 	public void Sort(Comparison<T> comparison)
 	{
 		Verify.Argument.IsNotNull(comparison);
@@ -80,7 +80,7 @@ public class NotifyCollection<T> : Collection<T>
 
 	/// <summary>Sort collection using specified <paramref name="comparer"/>.</summary>
 	/// <param name="comparer">Comparer to use for sorting.</param>
-	/// <exception cref="T:System.NullReferenceException"><paramref name="comparer"/> == <c>null</c>.</exception>
+	/// <exception cref="NullReferenceException"><paramref name="comparer"/> == <c>null</c>.</exception>
 	public void Sort(IComparer<T> comparer)
 	{
 		Verify.Argument.IsNotNull(comparer);
@@ -103,8 +103,8 @@ public class NotifyCollection<T> : Collection<T>
 
 	/// <summary>Adds range of items to this collection.</summary>
 	/// <param name="list">Items to add.</param>
-	/// <exception cref="T:System.NullReferenceException"><paramref name="list"/> == <c>null</c>.</exception>
-	/// <exception cref="T:System.ArgumentException">
+	/// <exception cref="NullReferenceException"><paramref name="list"/> == <c>null</c>.</exception>
+	/// <exception cref="ArgumentException">
 	/// Some of the items in <paramref name="list"/> didn't pass <see cref="VerifyItem"/> check.
 	/// </exception>
 	public virtual void AddRange(IEnumerable<T> list)
@@ -282,7 +282,7 @@ public class NotifyCollection<T> : Collection<T>
 
 	#region Overrides
 
-	/// <summary>Called on <see cref="Clear"/> request.</summary>
+	/// <inheritdoc/>
 	protected override void ClearItems()
 	{
 		int n = Count - 1;
@@ -295,10 +295,8 @@ public class NotifyCollection<T> : Collection<T>
 		RaiseChanged(0, n, NotifyEvent.Clear);
 	}
 
-	/// <summary>Called on set item request.</summary>
-	/// <param name="index">Item index.</param>
-	/// <param name="item">Inserted item.</param>
-	/// <exception cref="T:System.ArgumentException"><paramref name="item"/> didn't pass <see cref="VerifyItem"/> check.</exception>
+	/// <inheritdoc/>
+	/// <exception cref="ArgumentException"><paramref name="item"/> didn't pass <see cref="VerifyItem"/> check.</exception>
 	protected override void SetItem(int index, T item)
 	{
 		Verify.Argument.IsTrue(VerifyItem(item), nameof(item));
@@ -310,10 +308,8 @@ public class NotifyCollection<T> : Collection<T>
 		RaiseChanged(index, NotifyEvent.Set);
 	}
 
-	/// <summary>Called on insert item request.</summary>
-	/// <param name="index">Item index.</param>
-	/// <param name="item">Inserted item.</param>
-	/// <exception cref="T:System.ArgumentException"><paramref name="item"/> didn't pass <see cref="VerifyItem"/> check.</exception>
+	/// <inheritdoc/>
+	/// <exception cref="ArgumentException"><paramref name="item"/> didn't pass <see cref="VerifyItem"/> check.</exception>
 	protected override void InsertItem(int index, T item)
 	{
 		Verify.Argument.IsTrue(VerifyItem(item), nameof(item));
@@ -324,8 +320,7 @@ public class NotifyCollection<T> : Collection<T>
 		RaiseChanged(index, NotifyEvent.Insert);
 	}
 
-	/// <summary>Called on remove item request.</summary>
-	/// <param name="index">Item index.</param>
+	/// <inheritdoc/>
 	protected override void RemoveItem(int index)
 	{
 		RaiseChanging(index, NotifyEvent.Remove);

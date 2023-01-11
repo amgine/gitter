@@ -108,6 +108,13 @@ public partial class CreateTagDialog : GitDialogBase, IExecutableDialog, ICreate
 
 	public IUserInputErrorNotifier ErrorNotifier { get; }
 
+	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		BeginInvoke(_txtName.Focus);
+		base.OnLoad(e);
+	}
+
 	private void Localize()
 	{
 		Text				= Resources.StrCreateTag;

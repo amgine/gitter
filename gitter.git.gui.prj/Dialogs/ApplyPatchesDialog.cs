@@ -115,8 +115,8 @@ public partial class ApplyPatchesDialog : GitDialogBase, IExecutableDialog
 
 	public bool Reverse
 	{
-		get { return _chkReverse.Checked; }
-		set { _chkReverse.Checked = value; }
+		get => _chkReverse.Checked;
+		set => _chkReverse.Checked = value;
 	}
 
 	protected override string ActionVerb => Resources.StrApply;

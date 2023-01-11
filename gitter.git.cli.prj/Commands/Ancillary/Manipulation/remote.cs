@@ -61,7 +61,7 @@ public sealed class RemoteCommand : Command
 	}
 
 	public static ICommandArgument Verbose()
-		=> CommandFlag.Verbose();
+		=> CommandFlag.Verbose;
 
 	public static ICommandArgument Fetch()
 		=> new CommandFlag("-f");

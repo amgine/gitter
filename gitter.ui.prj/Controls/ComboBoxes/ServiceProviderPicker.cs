@@ -31,5 +31,6 @@ public sealed class ServiceProviderPicker : CustomObjectPicker<CustomListBox, Se
 	{
 	}
 
+	/// <inheritdoc/>
 	protected override IRepositoryServiceProvider GetValue(ServiceProviderListItem item) => item?.DataContext;
 }

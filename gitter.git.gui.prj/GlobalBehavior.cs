@@ -39,6 +39,46 @@ internal static class GlobalBehavior
 
 	#region AutoComplete
 
+	static void AddStrings<TObject, TEventArgs>(
+		AutoCompleteStringCollection              strings,
+		GitObjectsCollection<TObject, TEventArgs> values)
+		where TObject    : GitNamedObjectWithLifetime
+		where TEventArgs : ObjectEventArgs<TObject>
+	{
+		Assert.IsNotNull(strings);
+		Assert.IsNotNull(values);
+
+		lock(values.SyncRoot)
+		{
+			foreach(var value in values)
+			{
+				strings.Add(value.Name);
+			}
+		}
+	}
+
+	private static void AddStrings(AutoCompleteStringCollection strings, RefsCollection refs, ReferenceType referenceTypes)
+	{
+		Assert.IsNotNull(strings);
+		Assert.IsNotNull(refs);
+
+		static bool HasFlag(ReferenceType flags, ReferenceType flag)
+			=> (flags & flag) == flag;
+
+		if(HasFlag(referenceTypes, ReferenceType.LocalBranch))
+		{
+			AddStrings(strings, refs.Heads);
+		}
+		if(HasFlag(referenceTypes, ReferenceType.RemoteBranch))
+		{
+			AddStrings(strings, refs.Remotes);
+		}
+		if(HasFlag(referenceTypes, ReferenceType.Tag))
+		{
+			AddStrings(strings, refs.Tags);
+		}
+	}
+
 	public static void SetupAutoCompleteSource(TextBox textBox, Repository repository, ReferenceType referenceTypes)
 	{
 		Verify.Argument.IsNotNull(textBox);
@@ -46,31 +86,8 @@ internal static class GlobalBehavior
 
 		if(GlobalBehavior.AutoCompleteMode == AutoCompleteMode.None) return;
 
-		var source = textBox.AutoCompleteCustomSource;
-
-		if((referenceTypes & ReferenceType.LocalBranch) == ReferenceType.LocalBranch)
-		{
-			foreach(var branch in repository.Refs.Heads)
-			{
-				source.Add(branch.Name);
-			}
-		}
-		if((referenceTypes & ReferenceType.RemoteBranch) == ReferenceType.RemoteBranch)
-		{
-			foreach(var branch in repository.Refs.Remotes)
-			{
-				source.Add(branch.Name);
-			}
-		}
-		if((referenceTypes & ReferenceType.Tag) == ReferenceType.Tag)
-		{
-			foreach(var tag in repository.Refs.Tags)
-			{
-				source.Add(tag.Name);
-			}
-		}
-
-		textBox.AutoCompleteMode = GlobalBehavior.AutoCompleteMode;
+		AddStrings(textBox.AutoCompleteCustomSource, repository.Refs, referenceTypes);
+		textBox.AutoCompleteMode   = GlobalBehavior.AutoCompleteMode;
 		textBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
 	}
 
@@ -88,7 +105,7 @@ internal static class GlobalBehavior
 			source.Add(rev.Pointer);
 		}
 
-		textBox.AutoCompleteMode = GlobalBehavior.AutoCompleteMode;
+		textBox.AutoCompleteMode   = GlobalBehavior.AutoCompleteMode;
 		textBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
 	}
 
@@ -99,31 +116,8 @@ internal static class GlobalBehavior
 
 		if(GlobalBehavior.AutoCompleteMode == AutoCompleteMode.None) return;
 
-		var source = comboBox.AutoCompleteCustomSource;
-
-		if((referenceTypes & ReferenceType.LocalBranch) == ReferenceType.LocalBranch)
-		{
-			foreach(var branch in repository.Refs.Heads)
-			{
-				source.Add(branch.Name);
-			}
-		}
-		if((referenceTypes & ReferenceType.RemoteBranch) == ReferenceType.RemoteBranch)
-		{
-			foreach(var branch in repository.Refs.Remotes)
-			{
-				source.Add(branch.Name);
-			}
-		}
-		if((referenceTypes & ReferenceType.Tag) == ReferenceType.Tag)
-		{
-			foreach(var tag in repository.Refs.Tags)
-			{
-				source.Add(tag.Name);
-			}
-		}
-
-		comboBox.AutoCompleteMode = GlobalBehavior.AutoCompleteMode;
+		AddStrings(comboBox.AutoCompleteCustomSource, repository.Refs, referenceTypes);
+		comboBox.AutoCompleteMode   = GlobalBehavior.AutoCompleteMode;
 		comboBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
 	}
 
@@ -140,7 +134,6 @@ internal static class GlobalBehavior
 		{
 			source.Add(rev.Pointer);
 		}
-
 		comboBox.AutoCompleteMode = GlobalBehavior.AutoCompleteMode;
 		comboBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
 	}

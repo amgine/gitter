@@ -24,7 +24,7 @@ using System;
 
 using gitter.Framework;
 
-/// <summary>Information about <see cref="Submodule"/>.</summary>
+/// <summary>Information about submodule.</summary>
 public sealed class SubmoduleData : INamedObject
 {
 	/// <summary>Create <see cref="SubmoduleData"/>.</summary>

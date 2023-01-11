@@ -134,11 +134,8 @@ public sealed class TextWithHyperlinks
 				graphics.ExcludeClip(cr[i]);
 			}
 		}
-		using(var brush = new SolidBrush(style.Colors.WindowText))
-		{
-			GitterApplication.TextRenderer.DrawText(
-				graphics, Text, font, brush, rect, _sf);
-		}
+		GitterApplication.TextRenderer.DrawText(
+			graphics, Text, font, style.Colors.WindowText, rect, _sf);
 		graphics.ResetClip();
 		bool clipIsSet = false;
 		foreach(var glyph in _glyphs)

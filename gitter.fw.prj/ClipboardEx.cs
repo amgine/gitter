@@ -25,23 +25,52 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 
+using gitter.Framework.Services;
+
+#nullable enable
+
 public static class ClipboardEx
 {
-	public static void SetTextSafe(string text, int attemptsCount = 3, int retryInterval = 50)
+	static LoggingService Log { get; } = new(@"Clipboard");
+
+	public static bool TrySetTextSafe(string? text, int attemptsCount = 3, int retryInterval = 50)
 	{
+		Verify.Argument.IsPositive(attemptsCount);
+		Verify.Argument.IsNotNegative(retryInterval);
+
 		const int CLIPBRD_E_CANT_OPEN = unchecked((int)0x800401D0);
+		var lastException = default(Exception);
 		while(attemptsCount > 0)
 		{
 			try
 			{
-				Clipboard.SetText(text);
-				return;
+				if(text is null)
+				{
+					Clipboard.Clear();
+				}
+				else
+				{
+					Clipboard.SetDataObject(text, copy: true);
+				}
+				return true;
+			}
+			catch(ExternalException exc) when(exc.ErrorCode == CLIPBRD_E_CANT_OPEN)
+			{
+				lastException = exc;
 			}
 			catch(COMException exc) when(exc.ErrorCode == CLIPBRD_E_CANT_OPEN)
 			{
+				lastException = exc;
+			}
+			catch(Exception exc)
+			{
+				lastException = exc;
+				break;
 			}
 			--attemptsCount;
 			Thread.Sleep(retryInterval);
 		}
+		Log.Error(lastException, "Failed to set clipboard text");
+		return false;
 	}
 }

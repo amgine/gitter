@@ -20,24 +20,8 @@
 
 namespace gitter.Framework.Layout;
 
-using System;
-
-/// <summary>Контент, размещаемый в <see cref="Grid"/>.</summary>
 public sealed class GridContent
 {
-	/// <summary>Создание <see cref="GridContent"/>.</summary>
-	/// <param name="content">Размещаемый контент.</param>
-	/// <param name="column">Колонка.</param>
-	/// <param name="row">Строка.</param>
-	/// <param name="columnSpan">Количество занимаемых колонок.</param>
-	/// <param name="rowSpan">Количество занимаемых строк.</param>
-	/// <exception cref="ArgumentNullException"><paramref name="column"/> == <c>null</c>.</exception>
-	/// <exception cref="ArgumentOutOfRangeException">
-	/// <paramref name="column"/> должен быть неотрицательным;<br/>
-	/// <paramref name="row"/> должен быть неотрицательным;<br/>
-	/// <paramref name="columnSpan"/> должен быть положительным;<br/>
-	/// <paramref name="rowSpan"/> должен быть положительным.<br/>
-	/// </exception>
 	public GridContent(IContent content, int column = 0, int row = 0, int columnSpan = 1, int rowSpan = 1)
 	{
 		Verify.Argument.IsNotNull(content);
@@ -53,23 +37,13 @@ public sealed class GridContent
 		Content    = content;
 	}
 
-	/// <summary>Возвращает индекс строки, в которой размещается контент.</summary>
-	/// <value>Индекс строки, в которой размещается контент.</value>
 	public int Row { get; }
 
-	/// <summary>Возвращает индекс колонки, в которой размещается контент.</summary>
-	/// <value>Индекс колонки, в которой размещается контент.</value>
 	public int Column { get; }
 
-	/// <summary>Возвращает количество строк занимаемых контентом.</summary>
-	/// <value>Количество строк занимаемых контентом.</value>
 	public int RowSpan { get; }
 
-	/// <summary>Возвращает количество колонок занимаемых контентом.</summary>
-	/// <value>Количество колонок занимаемых контентом.</value>
 	public int ColumnSpan { get; }
 
-	/// <summary>Возвращает контент, размещаемый в ячейках <see cref="Grid"/>.</summary>
-	/// <value>Контент, размещаемый в ячейках <see cref="Grid"/>.</value>
 	public IContent Content { get; }
 }

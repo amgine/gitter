@@ -39,6 +39,8 @@ using gitter.Git.Gui.Dialogs;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
+#nullable enable
+
 /// <summary>git <see cref="Repository"/> provider.</summary>
 sealed class RepositoryProvider : IGitRepositoryProvider
 {
@@ -50,12 +52,12 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 
 	#region Data
 
-	private IWorkingEnvironment _environment;
-	private GuiProvider _guiProvider;
-	private Section _configSection;
+	private IWorkingEnvironment? _environment;
+	private GuiProvider? _guiProvider;
+	private Section? _configSection;
 
-	private IGitAccessorProvider _gitAccessorProvider;
-	private IGitAccessor _gitAccessor;
+	private IGitAccessorProvider? _gitAccessorProvider;
+	private IGitAccessor? _gitAccessor;
 
 	#endregion
 
@@ -65,14 +67,20 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 	public RepositoryProvider(
 		IReadOnlyList<IGitAccessorProvider> accessorProviders,
 		IFactory<VersionCheckDialog>        versionCheckDialogFactory,
+		IFactory<InitDialog>                initDialogFactory,
+		IFactory<CloneDialog>               cloneDialogFactory,
 		ILifetimeScope                      lifetimeScope)
 	{
 		Verify.Argument.IsNotNull(accessorProviders);
 		Verify.Argument.IsNotNull(versionCheckDialogFactory);
+		Verify.Argument.IsNotNull(initDialogFactory);
+		Verify.Argument.IsNotNull(cloneDialogFactory);
 		Verify.Argument.IsNotNull(lifetimeScope);
 
 		GitAccessorProviders      = accessorProviders;
 		VersionCheckDialogFactory = versionCheckDialogFactory;
+		InitDialogFactory         = initDialogFactory;
+		CloneDialogFactory        = cloneDialogFactory;
 		LifetimeScope             = lifetimeScope;
 	}
 
@@ -86,25 +94,30 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 
 	public IImageProvider Icon => Icons.Git;
 
+#if NET5_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.MemberNotNullWhen(returnValue: true, nameof(_environment))]
+#endif
 	public bool IsLoaded => _environment is not null;
 
 	#endregion
 
 	public IReadOnlyList<IGitAccessorProvider> GitAccessorProviders { get; }
 
-	public Section ConfigSection => _configSection;
+	public Section? ConfigSection => _configSection;
 
 	public IFactory<VersionCheckDialog> VersionCheckDialogFactory { get; }
 
+	private IFactory<InitDialog> InitDialogFactory { get; }
+
+	private IFactory<CloneDialog> CloneDialogFactory { get; }
+
 	private ILifetimeScope LifetimeScope { get; }
 
-	public IGitAccessorProvider ActiveGitAccessorProvider
+	public IGitAccessorProvider? ActiveGitAccessorProvider
 	{
 		get => _gitAccessorProvider;
 		set
 		{
-			Verify.Argument.IsNotNull(value);
-
 			if(_gitAccessorProvider != value)
 			{
 				if(_gitAccessorProvider is not null && _gitAccessor is not null && _configSection is not null)
@@ -114,7 +127,7 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 				}
 
 				_gitAccessorProvider = value;
-				_gitAccessor = value.CreateAccessor();
+				_gitAccessor = value?.CreateAccessor();
 
 				if(_gitAccessor is not null && _configSection is not null)
 				{
@@ -125,13 +138,11 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 		}
 	}
 
-	public IGitAccessor GitAccessor
+	public IGitAccessor? GitAccessor
 	{
 		get => _gitAccessor;
 		set
 		{
-			Verify.Argument.IsNotNull(value);
-
 			if(_gitAccessor != value)
 			{
 				if(_gitAccessorProvider is not null && _gitAccessor is not null && _configSection is not null)
@@ -140,7 +151,7 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 					_gitAccessor.SaveTo(gitAccessorSection);
 				}
 
-				_gitAccessorProvider = _gitAccessor.Provider;
+				_gitAccessorProvider = _gitAccessor?.Provider;
 				_gitAccessor = value;
 			}
 		}
@@ -164,17 +175,17 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 			var gitAccessorSection = section.TryGetSection(ActiveGitAccessorProvider.Name);
 			if(gitAccessorSection is not null)
 			{
-				GitAccessor.LoadFrom(gitAccessorSection);
+				GitAccessor?.LoadFrom(gitAccessorSection);
 			}
 		}
 		else
 		{
 			ActiveGitAccessorProvider = GitAccessorProviders.First();
 		}
-		Version gitVersion;
+		Version? gitVersion;
 		try
 		{
-			gitVersion = _gitAccessor.GitVersion;
+			gitVersion = GitAccessor?.GitVersion;
 		}
 		catch(Exception exc) when (!exc.IsCritical())
 		{
@@ -220,21 +231,26 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 
 	public IRepository OpenRepository(string workingDirectory)
 	{
+		if(GitAccessor is null) throw new InvalidOperationException($"Must initialize {nameof(GitAccessor)} first.");
+
 		return Repository.Load(GitAccessor, workingDirectory);
 	}
 
-	public async Task<IRepository> OpenRepositoryAsync(string workingDirectory, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
-		=> await Repository
+	public async Task<IRepository> OpenRepositoryAsync(string workingDirectory,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
+	{
+		if(GitAccessor is null) throw new InvalidOperationException($"Must initialize {nameof(GitAccessor)} first.");
+
+		return await Repository
 			.LoadAsync(GitAccessor, workingDirectory, progress, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
+	}
 
 	public void OnRepositoryLoaded(IRepository repository)
 	{
 		Verify.Argument.IsNotNull(repository);
-		var gitRepository = repository as Repository;
-		Verify.Argument.IsTrue(gitRepository is not null, nameof(repository));
 
-		if(gitRepository.UserIdentity is null)
+		if(_environment is not null && repository is Repository { UserIdentity: null } gitRepository)
 		{
 			using var dlg = new UserIdentificationDialog(_environment, gitRepository);
 			dlg.Run(_environment.MainForm);
@@ -246,7 +262,7 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 		var gitRepository = (Repository)repository;
 		try
 		{
-			var cfgFileName = Path.Combine(gitRepository.GitDirectory, "gitter-config");
+			var cfgFileName = Path.Combine(gitRepository.GitDirectory, @"gitter-config");
 			using var fs = new FileStream(cfgFileName, FileMode.Create, FileAccess.Write, FileShare.None);
 			gitRepository.ConfigurationManager.Save(new XmlAdapter(fs));
 		}
@@ -262,9 +278,9 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 	public IRepositoryGuiProvider GuiProvider
 		=> _guiProvider ??= new GuiProvider(this, LifetimeScope);
 
-	public Control CreateInitDialog() => new InitDialog(this);
+	public Control CreateInitDialog() => InitDialogFactory.Create();
 
-	public Control CreateCloneDialog() => new CloneDialog(this);
+	public Control CreateCloneDialog() => CloneDialogFactory.Create();
 
 	public DialogResult RunInitDialog()
 	{
@@ -272,7 +288,7 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 
 		DialogResult res;
 		string path = "";
-		using(var dlg = new InitDialog(this))
+		using(var dlg = InitDialogFactory.Create())
 		{
 			dlg.RepositoryPath.Value = _environment.RecentRepositoryPath;
 			res = dlg.Run(_environment.MainForm);
@@ -297,7 +313,7 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 
 		DialogResult res;
 		var path = default(string);
-		using(var dlg = new CloneDialog(this))
+		using(var dlg = CloneDialogFactory.Create())
 		{
 			dlg.RepositoryPath.Value = _environment.RecentRepositoryPath;
 			res = dlg.Run(_environment.MainForm);

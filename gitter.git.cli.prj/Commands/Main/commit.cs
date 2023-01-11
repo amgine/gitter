@@ -82,7 +82,7 @@ public sealed class CommitCommand : Command
 		=> new CommandFlag("--include");
 
 	public static ICommandArgument SignOff()
-		=> CommandFlag.SignOff();
+		=> CommandFlag.SignOff;
 
 	public static ICommandArgument NoVerify()
 		=> new CommandFlag("--no-verify");
@@ -97,13 +97,13 @@ public sealed class CommitCommand : Command
 		=> new CommandFlag("--edit");
 
 	public static ICommandArgument Verbose()
-		=> CommandFlag.Verbose();
+		=> CommandFlag.Verbose;
 
 	public static ICommandArgument Quiet()
-		=> CommandFlag.Quiet();
+		=> CommandFlag.Quiet;
 
 	public static ICommandArgument NoMoreOptions()
-		=> CommandFlag.NoMoreOptions();
+		=> CommandFlag.NoMoreOptions;
 
 	public CommitCommand()
 		: base("commit")

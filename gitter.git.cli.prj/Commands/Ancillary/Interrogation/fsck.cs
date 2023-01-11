@@ -65,7 +65,7 @@ sealed class FsckCommand : Command
 		=> new CommandFlag("--no-progress");
 
 	public static ICommandArgument Verbose()
-		=> CommandFlag.Verbose();
+		=> CommandFlag.Verbose;
 
 	public FsckCommand()
 		: base("fsck")

@@ -103,7 +103,7 @@ public sealed class LsFilesCommand : Command
 
 	/// <summary>Do not interpret any more arguments as options.</summary>
 	public static ICommandArgument NoMoreOptions()
-		=> CommandFlag.NoMoreOptions();
+		=> CommandFlag.NoMoreOptions;
 
 	public LsFilesCommand()
 		: base("ls-files")

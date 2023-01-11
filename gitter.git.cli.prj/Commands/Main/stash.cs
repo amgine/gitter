@@ -65,7 +65,7 @@ public sealed class StashCommand : Command
 		=> new CommandFlag("--include-untracked");
 
 	public static ICommandArgument Quiet()
-		=> CommandFlag.Quiet();
+		=> CommandFlag.Quiet;
 
 	public StashCommand()
 		: base("stash")

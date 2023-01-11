@@ -36,13 +36,7 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public partial class StashToBranchDialog : GitDialogBase, IExecutableDialog, IStashToBranchView
 {
-	#region Data
-
 	private readonly IStashToBranchController _controller;
-
-	#endregion
-
-	#region .ctor
 
 	public StashToBranchDialog(StashedState stashedState)
 	{
@@ -70,10 +64,6 @@ public partial class StashToBranchDialog : GitDialogBase, IExecutableDialog, ISt
 		_controller = new StashToBranchController(stashedState) { View = this };
 	}
 
-	#endregion
-
-	#region Properties
-
 	/// <inheritdoc/>
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 53));
 
@@ -86,9 +76,12 @@ public partial class StashToBranchDialog : GitDialogBase, IExecutableDialog, ISt
 
 	public IUserInputErrorNotifier ErrorNotifier { get; }
 
-	#endregion
-
-	#region Methods
+	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		base.OnLoad(e);
+		BeginInvoke(_txtBranchName.Focus);
+	}
 
 	private void Localize()
 	{
@@ -98,11 +91,5 @@ public partial class StashToBranchDialog : GitDialogBase, IExecutableDialog, ISt
 		_lblStash.Text = Resources.StrStash.AddColon();
 	}
 
-	#endregion
-
-	#region IExecutableDialog Members
-
 	public bool Execute() => _controller.TryCreateBranch();
-
-	#endregion
 }

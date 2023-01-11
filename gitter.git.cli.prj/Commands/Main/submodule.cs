@@ -74,7 +74,7 @@ public sealed class SubmoduleCommand : Command
 		=> new CommandParameterValue("-b" , name, ' ');
 
 	public static ICommandArgument NoMoreOptions()
-		=> CommandFlag.NoMoreOptions();
+		=> CommandFlag.NoMoreOptions;
 
 	public SubmoduleCommand()
 		: base("submodule")

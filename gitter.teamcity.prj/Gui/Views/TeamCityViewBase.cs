@@ -31,12 +31,12 @@ public class TeamCityViewBase : ViewBase
 {
 	private TeamCityServiceContext _serviceContext;
 
-	/// <summary>Create <see cref="RedmineViewBase"/>.</summary>
+	/// <summary>Create <see cref="TeamCityViewBase"/>.</summary>
 	public TeamCityViewBase()
 	{
 	}
 
-	/// <summary>Create <see cref="RedmineViewBase"/>.</summary>
+	/// <summary>Create <see cref="TeamCityViewBase"/>.</summary>
 	public TeamCityViewBase(Guid guid, IWorkingEnvironment environment)
 		: base(guid, environment)
 	{
@@ -44,7 +44,7 @@ public class TeamCityViewBase : ViewBase
 
 	public TeamCityServiceContext ServiceContext
 	{
-		get { return _serviceContext; }
+		get => _serviceContext;
 		set
 		{
 			if(value != _serviceContext)

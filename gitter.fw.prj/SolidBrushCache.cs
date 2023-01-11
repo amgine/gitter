@@ -18,43 +18,56 @@
  */
 #endregion
 
-namespace gitter.Framework.Layout;
+namespace gitter.Framework;
 
 using System;
+using System.Collections.Generic;
+using System.Drawing;
 
 #nullable enable
 
-public abstract class GridDefinition
+public static class SolidBrushCache
 {
-	private ISizeSpec _sizeSpec;
+	[ThreadStatic]
+	private static Stack<SolidBrush>? _brushes;
 
-	public event EventHandler? SizeSpecChanged;
-
-	protected virtual void OnSizeSpecChanged(EventArgs e)
-		=> SizeSpecChanged?.Invoke(this, e);
-
-	private protected GridDefinition(Grid grid, ISizeSpec sizeSpec)
+	public ref struct CachedSolidBrush
 	{
-		Verify.Argument.IsNotNull(sizeSpec);
+		private SolidBrush _brush;
 
-		Grid      = grid;
-		_sizeSpec = sizeSpec;
-	}
-
-	public Grid Grid { get; }
-
-	public ISizeSpec SizeSpec
-	{
-		get => _sizeSpec;
-		set
+		internal CachedSolidBrush(Color color)
 		{
-			Verify.Argument.IsNotNull(value);
-
-			if(_sizeSpec != value)
+			if(_brushes is { Count: > 0 })
 			{
-				_sizeSpec = value;
-				OnSizeSpecChanged(EventArgs.Empty);
+				_brush = _brushes.Pop();
+				_brush.Color = color;
+			}
+			else
+			{
+				_brush = new(color);
+			}
+		}
+
+		public Color Color
+		{
+			get => _brush.Color;
+			set => _brush.Color = value;
+		}
+
+		public static implicit operator Brush(CachedSolidBrush cached) => cached._brush;
+
+		public static implicit operator SolidBrush(CachedSolidBrush cached) => cached._brush;
+
+		public void Dispose()
+		{
+			if(_brush is not null)
+			{
+				(_brushes ??= new()).Push(_brush);
+				_brush = null!;
 			}
 		}
 	}
+
+	public static CachedSolidBrush Get(Color color)
+		=> new(color);
 }

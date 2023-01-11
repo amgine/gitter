@@ -117,5 +117,11 @@ public class ItemPaintEventArgs : EventArgs
 		}
 	}
 
+	/// <summary>Checks if painted item has the specified state bit set.</summary>
+	/// <param name="state">State bit to check for.</param>
+	/// <returns><c>true</c> is the specified bit is set, <c>false</c> otherwise.</returns>
+	public bool HasState(ItemState state)
+		=> (State & state) == state;
+
 	#endregion
 }

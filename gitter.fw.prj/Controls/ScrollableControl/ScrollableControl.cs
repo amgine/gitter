@@ -237,7 +237,7 @@ public class ScrollableControl : Control
 	[Browsable(false)]
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 	public Rectangle ContentWindow
-		=> new Rectangle(_hScrollPos, _vScrollPos, _contentArea.Width, _contentArea.Height);
+		=> new(_hScrollPos, _vScrollPos, _contentArea.Width, _contentArea.Height);
 
 	/// <summary>Content size.</summary>
 	[Browsable(false)]
@@ -253,6 +253,7 @@ public class ScrollableControl : Control
 			? Style.CreateScrollBar(orientation)
 			: new SystemScrollBarAdapter(orientation);
 
+	/// <inheritdoc/>
 	protected override bool ScaleChildren => false;
 
 	private int _vscrollWidth;
@@ -774,7 +775,7 @@ public class ScrollableControl : Control
 		var scroll = VScrollAffectsClientArea ?
 			new RECT(_clientArea) :
 			new RECT(_contentArea);
-		User32.ScrollWindowEx(
+		_ = User32.ScrollWindowEx(
 			hwnd,
 			0, dy,
 			ref scroll, ref scroll,
@@ -788,7 +789,7 @@ public class ScrollableControl : Control
 		var scroll = HScrollAffectsClientArea ?
 			new RECT(_clientArea) :
 			new RECT(_contentArea);
-		User32.ScrollWindowEx(
+		_ = User32.ScrollWindowEx(
 			hwnd,
 			dx, 0,
 			ref scroll, ref scroll,

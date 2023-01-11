@@ -108,7 +108,7 @@ internal sealed partial class GitCLI : IGitAccessor, ICliOptionsProvider
 			if(_gitExePath is null)
 			{
 				_gitExePath = AutodetectGitExePath
-					? GitProcess.DetectGitExePath()
+					? GitFinder.DetectGitExePath()
 					: ManualGitExePath;
 				GitProcess.GitExePath = _gitExePath;
 			}

@@ -24,6 +24,8 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
+#nullable enable
+
 sealed class ViewHostDockMarker : DockMarker
 {
 	private static readonly IDpiBoundValue<Point[]> SmallCrossPolygon = new ScalablePoints(new[]

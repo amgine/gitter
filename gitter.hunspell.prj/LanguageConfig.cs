@@ -30,7 +30,6 @@ public class LanguageConfig
 	private string hyphenDictFile;
 	private string languageCode;
 	private string myThesDatFile;
-	private string myThesIdxFile;
 	private int processors;
 
 	public string HunspellAffFile

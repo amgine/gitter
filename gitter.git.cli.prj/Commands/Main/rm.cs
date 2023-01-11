@@ -35,16 +35,16 @@ public sealed class RmCommand : Command
 		=> new CommandFlag("--cached");
 
 	public static ICommandArgument NoMoreOptions()
-		=> CommandFlag.NoMoreOptions();
+		=> CommandFlag.NoMoreOptions;
 
 	public static ICommandArgument Force()
 		=> new CommandFlag("--force");
 
 	public static ICommandArgument Quiet()
-		=> CommandFlag.Quiet();
+		=> CommandFlag.Quiet;
 
 	public static ICommandArgument DryRun()
-		=> CommandFlag.DryRun();
+		=> CommandFlag.DryRun;
 
 	public RmCommand()
 		: base("rm")

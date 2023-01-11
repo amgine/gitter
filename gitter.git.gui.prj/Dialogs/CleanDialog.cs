@@ -118,6 +118,13 @@ public partial class CleanDialog : DialogBase, IAsyncExecutableDialog
 	public Repository Repository { get; }
 
 	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		base.OnLoad(e);
+		BeginInvoke(_txtPattern.Focus);
+	}
+
+	/// <inheritdoc/>
 	protected override void OnClosed(DialogResult result)
 	{
 		SaveConfig();

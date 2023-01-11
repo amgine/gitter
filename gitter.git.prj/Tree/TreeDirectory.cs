@@ -58,12 +58,12 @@ public sealed class TreeDirectory : TreeItem
 	private void OnCommitDeleted(TreeCommit commit)
 		=> CommitDeleted?.Invoke(this, new TreeCommitEventArgs(commit));
 
-	public TreeDirectory(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name)
+	public TreeDirectory(Repository repository, string relativePath, TreeDirectory? parent, FileStatus status, string name)
 		: base(repository, relativePath, parent, status, name)
 	{
 	}
 
-	public TreeDirectory(Repository repository, string relativePath, TreeDirectory parent, string name)
+	public TreeDirectory(Repository repository, string relativePath, TreeDirectory? parent, string name)
 		: this(repository, relativePath, parent, FileStatus.Unknown, name)
 	{
 	}

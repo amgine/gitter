@@ -39,7 +39,7 @@ public sealed class MvCommand : Command
 
 	/// <summary>Do nothing; only show what would happen.</summary>
 	public static ICommandArgument DryRun()
-		=> CommandFlag.DryRun();
+		=> CommandFlag.DryRun;
 
 	public MvCommand()
 		: base("mv")

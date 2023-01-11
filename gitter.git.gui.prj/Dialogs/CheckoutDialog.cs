@@ -35,17 +35,13 @@ using gitter.Git.Gui.Interfaces;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
+#nullable enable
+
 [ToolboxItem(false)]
 public partial class CheckoutDialog : GitDialogBase, IExecutableDialog, ICheckoutView
 {
-	#region Data
-
 	private readonly Repository _repository;
 	private readonly ICheckoutController _controller;
-
-	#endregion
-
-	#region .ctor
 
 	public CheckoutDialog(Repository repository)
 	{
@@ -76,10 +72,6 @@ public partial class CheckoutDialog : GitDialogBase, IExecutableDialog, ICheckou
 		_controller = new CheckoutController(repository) { View = this };
 	}
 
-	#endregion
-
-	#region Properties
-
 	/// <inheritdoc/>
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 325));
 
@@ -90,67 +82,41 @@ public partial class CheckoutDialog : GitDialogBase, IExecutableDialog, ICheckou
 
 	public IUserInputErrorNotifier ErrorNotifier { get; }
 
-	#endregion
-
-	#region Methods
-
-	private void OnReferencesItemActivated(object sender, ItemEventArgs e)
+	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
 	{
-		if((e.Item is BranchListItem) || (e.Item is TagListItem))
+		base.OnLoad(e);
+		_txtRevision.SelectAll();
+		BeginInvoke(_txtRevision.Focus);
+	}
+
+	private void OnReferencesItemActivated(object? sender, ItemEventArgs e)
+	{
+		if(e.Item is BranchListItem or TagListItem)
 		{
 			ClickOk();
 		}
 	}
 
-	private bool TrySetRevisionText(BranchListItem listItem)
+	private bool TrySetRevisionText(IDataContextProvider<IRevisionPointer>? listItem)
 	{
-		if(listItem != null)
+		if(listItem is not null)
 		{
-			var branch = listItem.DataContext;
-			_txtRevision.Text = branch.Name;
+			var @object = listItem.DataContext;
+			_txtRevision.Text = @object.Pointer;
 			return true;
 		}
 		return false;
 	}
 
-	private bool TrySetRevisionText(RemoteBranchListItem listItem)
-	{
-		if(listItem != null)
-		{
-			var branch = listItem.DataContext;
-			_txtRevision.Text = branch.Name;
-			return true;
-		}
-		return false;
-	}
-
-	private bool TrySetRevisionText(TagListItem listItem)
-	{
-		if(listItem != null)
-		{
-			var tag = listItem.DataContext;
-			_txtRevision.Text = tag.Name;
-			return true;
-		}
-		return false;
-	}
-
-	private void OnSelectionChanged(object sender, EventArgs e)
+	private void OnSelectionChanged(object? sender, EventArgs e)
 	{
 		if(_lstReferences.SelectedItems.Count != 1) return;
 		var item = _lstReferences.SelectedItems[0];
 
-		if(TrySetRevisionText(item as BranchListItem)) return;
-		if(TrySetRevisionText(item as RemoteBranchListItem)) return;
-		if(TrySetRevisionText(item as TagListItem)) return;
+		TrySetRevisionText(item as IDataContextProvider<IRevisionPointer>);
 	}
-
-	#endregion
-
-	#region IExecutableDialog
 
 	/// <inheritdoc/>
 	public bool Execute() => _controller.TryCheckout();
-
-	#endregion
 }

@@ -85,7 +85,7 @@ public class HyperlinkContextMenu : ContextMenuStrip
 	private static void OnCopyToClipboardClick(object sender, EventArgs e)
 	{
 		var text = (string)((ToolStripItem)sender).Tag;
-		ClipboardEx.SetTextSafe(text);
+		ClipboardEx.TrySetTextSafe(text);
 	}
 
 	private static void OnOpenInBrowserClick(object sender, EventArgs e)

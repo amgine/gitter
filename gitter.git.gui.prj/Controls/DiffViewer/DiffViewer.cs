@@ -131,7 +131,7 @@ public class DiffViewer : FlowLayoutControl
 									sb.Remove(sb.Length - 1, 1);
 								}
 							}
-							ClipboardEx.SetTextSafe(sb.ToString());
+							ClipboardEx.TrySetTextSafe(sb.ToString());
 							break;
 						}
 					}

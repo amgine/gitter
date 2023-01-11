@@ -100,7 +100,7 @@ sealed class Win7CustomListBoxRenderer : CustomListBoxRenderer
 			rc.Width -= conv.ConvertX(2);
 			graphics.DrawRectangle(p, rc);
 		}
-		using(var b = new SolidBrush(c2))
+		using(var b = SolidBrushCache.Get(c2))
 		{
 			var rc = rect;
 			rc.Y += conv.ConvertY(3);
@@ -136,7 +136,7 @@ sealed class Win7CustomListBoxRenderer : CustomListBoxRenderer
 				var p2 = new PointF(p1.X + arrowSize, p1.Y - arrowSize);
 				var p3 = new PointF(p1.X - arrowSize + 1, p1.Y - arrowSize);
 				var triangle = new PointF[3] { p1, p2, p3, };
-				using(var brush = new SolidBrush(Color.FromArgb(76, 96, 122)))
+				using(var brush = SolidBrushCache.Get(Color.FromArgb(76, 96, 122)))
 				{
 					graphics.FillPolygon(brush, triangle);
 				}
@@ -159,7 +159,7 @@ sealed class Win7CustomListBoxRenderer : CustomListBoxRenderer
 			rc.Width -= conv.ConvertX(1);
 			graphics.DrawRectangle(p, rc);
 		}
-		using(var b = new SolidBrush(c2))
+		using(var b = SolidBrushCache.Get(c2))
 		{
 			var rc = rect;
 			rc.X += conv.ConvertX(2);
@@ -190,7 +190,7 @@ sealed class Win7CustomListBoxRenderer : CustomListBoxRenderer
 				var p2 = new PointF(p1.X + arrowSize, p1.Y - arrowSize);
 				var p3 = new PointF(p1.X - arrowSize + 1, p1.Y - arrowSize);
 				var triangle = new PointF[3] { p1, p2, p3, };
-				using(var brush = new SolidBrush(Color.FromArgb(76, 96, 122)))
+				using(var brush = SolidBrushCache.Get(Color.FromArgb(76, 96, 122)))
 				{
 					graphics.FillPolygon(brush, triangle);
 				}

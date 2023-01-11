@@ -77,10 +77,10 @@ public sealed class UpdateIndexCommand : Command
 		=> new CommandFlag("-z");
 
 	public static ICommandArgument Verbose()
-		=> CommandFlag.Verbose();
+		=> CommandFlag.Verbose;
 
 	public static ICommandArgument NoMoreOptions()
-		=> CommandFlag.NoMoreOptions();
+		=> CommandFlag.NoMoreOptions;
 
 	public UpdateIndexCommand()
 		: base("update-index")

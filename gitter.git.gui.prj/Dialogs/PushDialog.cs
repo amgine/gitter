@@ -193,6 +193,13 @@ public partial class PushDialog : GitDialogBase, IPushView, IExecutableDialog
 
 	public IUserInputErrorNotifier ErrorNotifier { get; }
 
+	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		base.OnLoad(e);
+		BeginInvoke(_lstReferences.Focus);
+	}
+
 	private static Remote PickDefaultRemote(Repository repository)
 	{
 		Assert.IsNotNull(repository);

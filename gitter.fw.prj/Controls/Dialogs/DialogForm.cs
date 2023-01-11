@@ -136,7 +136,7 @@ public partial class DialogForm : Form
 			};
 			_btnOK.Control.Parent = pnlButtons;
 			_btnOK.Click += _btnOK_Click;
-			AcceptButton = _btnOK;
+			AcceptButton = _btnOK.Control as Button;
 		}
 		if(btnCancel)
 		{
@@ -146,7 +146,7 @@ public partial class DialogForm : Form
 			};
 			_btnCancel.Control.Parent = pnlButtons;
 			_btnCancel.Click += _btnCancel_Click;
-			CancelButton = _btnCancel;
+			CancelButton = _btnCancel.Control as Button;
 		}
 		if(btnApply)
 		{
@@ -159,10 +159,10 @@ public partial class DialogForm : Form
 		}
 
 		GridContent WrapButton(IButtonWidget button, int index)
-			=> new GridContent(new ControlContent(button.Control,
+			=> new(new ControlContent(button.Control,
 				marginOverride: noMargin,
 				horizontalContentAlignment: HorizontalContentAlignment.Stretch,
-				verticalContentAlignment: VerticalContentAlignment.Stretch),
+				verticalContentAlignment:   VerticalContentAlignment.Stretch),
 				row: 1, column: index * 2 + firstOffset);
 
 		var buttonsContent = new GridContent[btnCount];

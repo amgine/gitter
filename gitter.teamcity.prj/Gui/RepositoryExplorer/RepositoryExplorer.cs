@@ -29,7 +29,6 @@ using gitter.TeamCity.Gui;
 
 sealed class RepositoryExplorer
 {
-	private readonly RepositoryExplorerRootListItem _rootItem;
 	private readonly TeamCityServiceContext _service;
 
 	public RepositoryExplorer(IWorkingEnvironment environment, TeamCityGuiProvider guiProvider)

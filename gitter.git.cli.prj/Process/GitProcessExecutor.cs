@@ -25,6 +25,8 @@ using System.Diagnostics;
 
 using gitter.Framework.CLI;
 
+#nullable enable
+
 /// <summary>Executes git.exe.</summary>
 internal sealed class GitProcessExecutor : ProcessExecutor<GitInput>
 {

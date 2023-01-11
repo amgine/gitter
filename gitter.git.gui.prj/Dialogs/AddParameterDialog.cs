@@ -101,6 +101,13 @@ public partial class AddParameterDialog : GitDialogBase, IExecutableDialog
 	}
 
 	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		base.OnLoad(e);
+		BeginInvoke(_txtName.Focus);
+	}
+
+	/// <inheritdoc/>
 	public bool Execute()
 	{
 		string name = _txtName.Text.Trim();

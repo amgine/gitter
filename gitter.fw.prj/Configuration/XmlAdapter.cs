@@ -182,7 +182,9 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 		else
 		{
 			var assembly = type.Assembly;
+#if !NETCOREAPP
 			if(!assembly.GlobalAssemblyCache)
+#endif
 			{
 				aqn = type.FullName + ", " + assembly.GetName().Name;
 			}

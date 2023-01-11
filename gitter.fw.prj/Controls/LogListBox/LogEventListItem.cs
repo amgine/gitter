@@ -79,7 +79,7 @@ sealed class LogEventListItem : CustomListBoxItem<LogEvent>
 		var menu = new ContextMenuStrip();
 		var dpiBindings = new DpiBindings(menu);
 		var copy = new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
-			(_, _) => ClipboardEx.SetTextSafe(DataContext.Message));
+			(_, _) => ClipboardEx.TrySetTextSafe(DataContext.Message));
 		dpiBindings.BindImage(copy, CommonIcons.ClipboardCopy);
 		menu.Items.Add(copy);
 		Utility.MarkDropDownForAutoDispose(menu);

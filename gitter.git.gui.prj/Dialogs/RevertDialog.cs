@@ -40,7 +40,7 @@ public partial class RevertDialog : GitDialogBase, IExecutableDialog
 
 	public RevertDialog(IRevisionPointer revisionPointer)
 	{
-		Verify.Argument.IsValidRevisionPointer(revisionPointer, nameof(revisionPointer));
+		Verify.Argument.IsValidRevisionPointer(revisionPointer);
 
 		RevisionPointer = revisionPointer;
 

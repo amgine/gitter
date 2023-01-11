@@ -28,11 +28,11 @@ public sealed class AddCommand : Command
 {
 	/// <summary>Don't actually add the file(s), just show if they exist.</summary>
 	public static ICommandArgument DryRun()
-		=> CommandFlag.DryRun();
+		=> CommandFlag.DryRun;
 
 	/// <summary>Be verbose.</summary>
 	public static ICommandArgument Verbose()
-		=> CommandFlag.Verbose();
+		=> CommandFlag.Verbose;
 
 	/// <summary>Allow adding otherwise ignored files.</summary>
 	public static ICommandArgument Force()
@@ -43,7 +43,7 @@ public sealed class AddCommand : Command
 	///	may be supplied to limit operation to a subset of the working tree. See “Interactive mode” for details.
 	/// </summary>
 	public static ICommandArgument Interactive()
-		=> CommandFlag.Interactive();
+		=> CommandFlag.Interactive;
 
 	/// <summary>
 	/// Similar to Interactive mode but the initial command loop is bypassed and the patch subcommand
@@ -99,7 +99,7 @@ public sealed class AddCommand : Command
 	///	(useful when filenames might be mistaken for command-line options).
 	/// </summary>
 	public static ICommandArgument NoMoreOptions()
-		=> CommandFlag.NoMoreOptions();
+		=> CommandFlag.NoMoreOptions;
 
 	public AddCommand()
 		: base("add")

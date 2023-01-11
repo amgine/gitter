@@ -667,5 +667,5 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 			: ToString(length);
 	}
 
-#endregion
+	#endregion
 }

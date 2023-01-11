@@ -26,18 +26,18 @@ using System.Text;
 /// <summary>Command flag.</summary>
 public record class CommandFlag(string Name, string LongName) : ICommandArgument
 {
-	public static ICommandArgument DryRun() => new CommandFlag("--dry-run");
+	public static ICommandArgument DryRun { get; } = new CommandFlag("--dry-run");
 
-	public static ICommandArgument Verbose() => CommonArguments.Verbose;
+	public static ICommandArgument Verbose => CommonArguments.Verbose;
 
-	public static ICommandArgument Quiet() => CommonArguments.Quiet;
+	public static ICommandArgument Quiet => CommonArguments.Quiet;
 
-	public static ICommandArgument SignOff() => new CommandFlag("--signoff");
+	public static ICommandArgument SignOff { get; } = new CommandFlag("--signoff");
 
-	public static ICommandArgument Interactive() => new CommandFlag("--interactive");
+	public static ICommandArgument Interactive { get; } = new CommandFlag("--interactive");
 
 	/// <summary>Do not interpret any more arguments as options.</summary>
-	public static ICommandArgument NoMoreOptions() => CommonArguments.NoMoreOptions;
+	public static ICommandArgument NoMoreOptions => CommonArguments.NoMoreOptions;
 
 	public CommandFlag(string Name) : this(Name, Name)
 	{

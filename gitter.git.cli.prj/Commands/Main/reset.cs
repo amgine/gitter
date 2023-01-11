@@ -74,7 +74,7 @@ public sealed class ResetCommand : Command
 
 	/// <summary>Do not interpret any more arguments as options.</summary>
 	public static ICommandArgument NoMoreOptions()
-		=> CommandFlag.NoMoreOptions();
+		=> CommandFlag.NoMoreOptions;
 
 	public ResetCommand()
 		: base("reset")

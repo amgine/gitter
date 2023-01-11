@@ -84,6 +84,13 @@ public partial class RenameBranchDialog : GitDialogBase, IExecutableDialog, IRen
 
 	public IUserInputErrorNotifier ErrorNotifier { get; }
 
+	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		base.OnLoad(e);
+		BeginInvoke(_txtNewName.Focus);
+	}
+
 	private void Localize()
 	{
 		Text = Resources.StrRenameBranch;

@@ -65,7 +65,7 @@ sealed class MSVS2012DarkStyle : MSVS2012Style, IGitterStyle
 		=> ProcessOverlayRenderer.MSVS2012Dark;
 
 	public ToolStripRenderer ToolStripRenderer
-		=> _toolStriprenderer ??= new MSVS2012StyleToolStripRenderer(MSVS2012StyleToolStripRenderer.DarkColors);
+		=> _toolStriprenderer ??= new MSVS2012StyleToolStripRenderer(MSVS2012StyleToolStripRenderer.ColorTable.Dark);
 
 	public ViewRenderer ViewRenderer
 		=> ViewManager.MSVS2012DarkStyleRenderer;

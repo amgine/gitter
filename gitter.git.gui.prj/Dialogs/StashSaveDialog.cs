@@ -33,13 +33,7 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public partial class StashSaveDialog : GitDialogBase, IExecutableDialog
 {
-	#region Data
-
 	private TextBoxSpellChecker _speller;
-
-	#endregion
-
-	#region .ctor
 
 	/// <summary>Create <see cref="StashSaveDialog"/>.</summary>
 	/// <param name="repository">Repository for performing stash save.</param>
@@ -76,10 +70,6 @@ public partial class StashSaveDialog : GitDialogBase, IExecutableDialog
 		}
 	}
 
-	#endregion
-
-	#region Properties
-
 	public Repository Repository { get; private set; }
 
 	/// <summary>Do not stash staged changes.</summary>
@@ -109,9 +99,12 @@ public partial class StashSaveDialog : GitDialogBase, IExecutableDialog
 	/// <inheritdoc/>
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(400, 156));
 
-	#endregion
-
-	#region IExecutableDialog Members
+	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		base.OnLoad(e);
+		BeginInvoke(_txtMessage.Focus);
+	}
 
 	/// <summary>Perform stash save.</summary>
 	/// <returns>true if stash save succeeded.</returns>
@@ -130,6 +123,4 @@ public partial class StashSaveDialog : GitDialogBase, IExecutableDialog
 		}
 		return true;
 	}
-
-	#endregion
 }

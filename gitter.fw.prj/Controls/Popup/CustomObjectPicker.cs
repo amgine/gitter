@@ -209,7 +209,7 @@ public abstract class CustomObjectPicker<TListBox, TItem, TValue> : CustomPopupC
 			var oldBrush = column.ContentBrush;
 			try
 			{
-				using var brush = new SolidBrush(e.ForeColor);
+				using var brush = SolidBrushCache.Get(e.ForeColor);
 				column.ContentBrush = brush;
 				var args = new SubItemPaintEventArgs(e.Graphics, Dpi.FromControl(this),
 					e.Bounds,

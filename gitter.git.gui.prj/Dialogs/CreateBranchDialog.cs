@@ -114,6 +114,13 @@ public partial class CreateBranchDialog : GitDialogBase, IAsyncExecutableDialog,
 
 	public IUserInputErrorNotifier ErrorNotifier { get; }
 
+	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e)
+	{
+		base.OnLoad(e);
+		BeginInvoke(_txtName.Focus);
+	}
+
 	private void Localize()
 	{
 		Text = Resources.StrCreateBranch;

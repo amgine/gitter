@@ -97,7 +97,7 @@ class GuiItemFactory
 			Func<string> func => func(),
 			_ => default,
 		};
-		ClipboardEx.SetTextSafe(text);
+		ClipboardEx.TrySetTextSafe(text);
 	}
 
 	private static void OnUpdateRedmineObjectClick(object sender, EventArgs e)

@@ -25,62 +25,80 @@ using System.Collections.Generic;
 /// <summary>Remove untracked files from the working tree.</summary>
 public sealed class CleanCommand : Command
 {
-	/// <summary>
-	/// If the git configuration variable clean.requireForce is not set to false, git clean will refuse to run unless given -f or -n.
-	/// </summary>
-	public static ICommandArgument Force()
-		=> new CommandFlag("--force");
+	const string CleanCommandName = @"clean";
 
-	/// <summary>
-	/// Remove untracked directories in addition to untracked files. If an untracked directory is managed by a different git
-	/// repository, it is not removed by default. Use -f option twice if you really want to remove such a directory.
-	/// </summary>
-	public static ICommandArgument Directories()
-		=> new CommandFlag("-d");
+	public static class KnownArguments
+	{
+		/// <summary>
+		/// If the git configuration variable <c>clean.requireForce</c> is not set to false, git clean will refuse to run unless given -f or -n.
+		/// </summary>
+		public static ICommandArgument Force { get; } = new CommandFlag("--force");
 
-	/// <summary>Be quiet, only report errors, but not the files that are successfully removed.</summary>
-	public static ICommandArgument Quiet()
-		=> new CommandFlag("--quiet");
+		/// <summary>
+		/// Remove untracked directories in addition to untracked files. If an untracked directory is managed by a different git
+		/// repository, it is not removed by default. Use -f option twice if you really want to remove such a directory.
+		/// </summary>
+		public static ICommandArgument Directories { get; } = new CommandFlag("-d");
 
-	/// <summary>Don't actually remove anything, just show what would be done.</summary>
-	public static ICommandArgument DryRun()
-		=> new CommandFlag("--dry-run");
+		/// <summary>Be quiet, only report errors, but not the files that are successfully removed.</summary>
+		public static ICommandArgument Quiet => CommandFlag.Quiet;
 
-	/// <summary>
-	/// Specify special exceptions to not be cleaned. Each &lt;pattern&gt; is the same form as in $GIT_DIR/info/excludes
-	/// and this option can be given multiple times.
-	/// </summary>
-	public static ICommandArgument Exclude(string pattern)
-		=> new CommandParameterValue("--exclude", pattern, '=');
+		/// <summary>Don't actually remove anything, just show what would be done.</summary>
+		public static ICommandArgument DryRun => CommandFlag.DryRun;
 
-	/// <summary>
-	/// Don't use the ignore rules. This allows removing all untracked files, including build products.
-	/// This can be used (possibly in conjunction with git reset) to create a pristine working directory to test a clean build.
-	/// </summary>
-	public static ICommandArgument IncludeIgnored()
-		=> new CommandFlag("-x");
+		/// <summary>
+		/// Specify special exceptions to not be cleaned. Each &lt;pattern&gt; is the same form as in $GIT_DIR/info/excludes
+		/// and this option can be given multiple times.
+		/// </summary>
+		public static ICommandArgument Exclude(string pattern) => new CommandParameterValue("--exclude", pattern, '=');
 
-	/// <summary>
-	/// Remove only files ignored by git. This may be useful to rebuild everything from scratch, but keep manually created files.
-	/// </summary>
-	public static ICommandArgument ExcludeUntracked()
-		=> new CommandFlag("-X");
+		/// <summary>
+		/// Don't use the ignore rules. This allows removing all untracked files, including build products.
+		/// This can be used (possibly in conjunction with git reset) to create a pristine working directory to test a clean build.
+		/// </summary>
+		public static ICommandArgument IncludeIgnored { get;} = new CommandFlag("-x");
 
-	public static ICommandArgument NoMoreOptions()
-		=> CommandFlag.NoMoreOptions();
+		/// <summary>
+		/// Remove only files ignored by git. This may be useful to rebuild everything from scratch, but keep manually created files.
+		/// </summary>
+		public static ICommandArgument ExcludeUntracked { get; } = new CommandFlag("-X");
+
+		public static ICommandArgument NoMoreOptions => CommandFlag.NoMoreOptions;
+	}
+
+	public class Builder : CommandBuilderBase
+	{
+		public Builder() : base(CleanCommandName) { }
+
+		public void Force() => AddArgument(KnownArguments.Force);
+
+		public void Directories() => AddArgument(KnownArguments.Directories);
+
+		public void Quiet() => AddArgument(KnownArguments.Quiet);
+
+		public void DryRun() => AddArgument(KnownArguments.DryRun);
+
+		public void Exclude(string pattern) => AddArgument(KnownArguments.Exclude(pattern));
+
+		public void IncludeIgnored() => AddArgument(KnownArguments.IncludeIgnored);
+
+		public void ExcludeUntracked() => AddArgument(KnownArguments.ExcludeUntracked);
+
+		public void NoMoreOptions() => AddArgument(KnownArguments.NoMoreOptions);
+	}
 
 	public CleanCommand()
-		: base("clean")
+		: base(CleanCommandName)
 	{
 	}
 
 	public CleanCommand(params ICommandArgument[] args)
-		: base("clean", args)
+		: base(CleanCommandName, args)
 	{
 	}
 
 	public CleanCommand(IList<ICommandArgument> args)
-		: base("clean", args)
+		: base(CleanCommandName, args)
 	{
 	}
 }

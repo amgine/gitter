@@ -175,6 +175,6 @@ public partial class ExceptionDialog : DialogBase
 	private void CopyToClipboard()
 	{
 		var message = GetMessage();
-		ClipboardEx.SetTextSafe(message);
+		ClipboardEx.TrySetTextSafe(message);
 	}
 }

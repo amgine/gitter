@@ -239,20 +239,23 @@ sealed class LogParser : IParser<IList<RevisionData>>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private int GetSeconds() => Get2Digits(17);
 
-		private TimeSpan GetOffset()
-		{
-			var sign = _buffer[20] switch
+		const int OffsetSignIndex    = 20;
+		const int OffsetHoursIndex   = 21;
+		const int OffsetMinutesIndex = 23;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private int GetOffsetSign()
+			=> _buffer[OffsetSignIndex] switch
 			{
 				'+' =>  1,
 				'-' => -1,
-				_ => throw new FormatException(),
+				_ => throw new FormatException($"Unexpected character at TZ offset sign: {_buffer[OffsetSignIndex]}"),
 			};
 
-			var h = Get2Digits(21);
-			var m = Get2Digits(23);
-
-			return new TimeSpan(sign * (h * 60 + m) * 60 * 10000000L);
-		}
+		private TimeSpan GetOffset() => new(
+			GetOffsetSign() *
+			(Get2Digits(OffsetHoursIndex) * 60 + Get2Digits(OffsetMinutesIndex)) *
+			TimeSpan.TicksPerMinute);
 
 		public DateTimeOffset GetValue() => new(
 			GetYear(), GetMonth(), GetDay(),
@@ -325,20 +328,23 @@ sealed class LogParser : IParser<IList<RevisionData>>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private int GetSeconds() => Get2Digits(17);
 
-		private TimeSpan GetOffset()
-		{
-			var sign = _buffer[19] switch
+		const int OffsetSignIndex    = 19;
+		const int OffsetHoursIndex   = 20;
+		const int OffsetMinutesIndex = 23;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private int GetOffsetSign()
+			=> _buffer[OffsetSignIndex] switch
 			{
 				'+' =>  1,
 				'-' => -1,
-				_ => throw new FormatException(),
+				_ => throw new FormatException($"Unexpected character at TZ offset sign: {_buffer[OffsetSignIndex]}"),
 			};
 
-			var h = Get2Digits(20);
-			var m = Get2Digits(23);
-
-			return new TimeSpan(sign * (h * 60 + m) * 60 * TimeSpan.TicksPerSecond);
-		}
+		private TimeSpan GetOffset() => new(
+			GetOffsetSign() *
+			(Get2Digits(OffsetHoursIndex) * 60 + Get2Digits(OffsetMinutesIndex)) *
+			TimeSpan.TicksPerMinute);
 
 		public DateTimeOffset GetValue() => new(
 			GetYear(), GetMonth(), GetDay(),
@@ -595,7 +601,7 @@ sealed class LogParser : IParser<IList<RevisionData>>
 			TimestampFormat.Unix          => new UnixTimestampField(),
 			TimestampFormat.ISO8601       => new ISO8601TimestampField(),
 			TimestampFormat.StrictISO8601 => new StrictISO8601TimestampField(),
-			_ => throw new ArgumentException("Unsupported timestamp format.", nameof(timestampFormat)),
+			_ => throw new ArgumentException($"Unsupported timestamp format: {timestampFormat}.", nameof(timestampFormat)),
 		};
 
 	public LogParser(Dictionary<Hash, RevisionData> cache = null, TimestampFormat timestampFormat = TimestampFormat.StrictISO8601)
@@ -663,6 +669,25 @@ sealed class LogParser : IParser<IList<RevisionData>>
 		return revisionData;
 	}
 
+	private void CompleteRevision()
+	{
+		_log.Add(BuildRevision());
+		for(int i = 0; i < _fields.Length; ++i)
+		{
+			_fields[i].Reset();
+		}
+		_currentFieldIndex = 0;
+	}
+
+	private void NextField()
+	{
+		++_currentFieldIndex;
+		if(_currentFieldIndex == _fields.Length)
+		{
+			CompleteRevision();
+		}
+	}
+
 	#endregion
 
 	#region IParser<IList<RevisionData>> Members
@@ -681,16 +706,7 @@ sealed class LogParser : IParser<IList<RevisionData>>
 		{
 			if(_fields[_currentFieldIndex].Parse(textSegment))
 			{
-				++_currentFieldIndex;
-				if(_currentFieldIndex == _fields.Length)
-				{
-					_log.Add(BuildRevision());
-					for(int i = 0; i < _fields.Length; ++i)
-					{
-						_fields[i].Reset();
-					}
-					_currentFieldIndex = 0;
-				}
+				NextField();
 			}
 		}
 	}

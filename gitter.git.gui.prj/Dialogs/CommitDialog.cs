@@ -116,6 +116,7 @@ public partial class CommitDialog : GitDialogBase, IExecutableDialog, IAsyncExec
 		_chkAmend.Text       = Resources.StrAmend;
 	}
 
+	/// <inheritdoc/>
 	protected override void OnClosed(DialogResult result)
 	{
 		Repository.Status.SaveCommitMessage(result != DialogResult.OK
