@@ -37,7 +37,6 @@ partial class HistoryFilterDropDown : UserControl
 {
 	private Repository _repository;
 	private LogOptions _logOptions;
-	private string _searchBuffer;
 
 	public IUserInputSource<string> Search { get; }
 
@@ -59,7 +58,6 @@ partial class HistoryFilterDropDown : UserControl
 		_txtSearch.ForeColor = ForeColor;
 		_txtSearch.TextChanged += _txtSearch_TextChanged;
 		Search = new TextBoxInputSource(_txtSearch);
-
 	}
 
 	public LogOptions LogOptions
@@ -135,7 +133,7 @@ partial class HistoryFilterDropDown : UserControl
 			if(_repository != value)
 			{
 				_repository = value;
-				LoadReferences(value);
+				LoadReferences(value, null);
 			}
 		}
 	}
@@ -150,10 +148,21 @@ partial class HistoryFilterDropDown : UserControl
 		}
 	}
 
-	private void LoadReferences(Repository repository)
+	private void LoadReferences(Repository repository, string filter)
 	{
 		_lstReferences.ItemCheckedChanged -= OnItemCheckedChanged;
-		_lstReferences.LoadData(repository);
+		if(string.IsNullOrEmpty(filter))
+		{
+			_lstReferences.LoadData(repository);
+		}
+		else
+		{
+			_lstReferences.LoadData(repository, ReferenceType.Reference, true, true, x =>
+			{
+				if(x is Reference reference) return reference.Name.Contains(filter);
+				return x.FullName.Contains(filter);
+			});
+		}
 		_lstReferences.EnableCheckboxes();
 		_lstReferences.ExpandAll();
 		UpdateCheckStatuses();
@@ -163,28 +172,11 @@ partial class HistoryFilterDropDown : UserControl
 	private void _txtSearch_TextChanged(object sender, EventArgs e)
 	{
 		if(_lstReferences.Items.Count == 0) return;
-		if(string.IsNullOrEmpty(Search.Value))
-		{
-			_searchBuffer = null;
-			_lstReferences.Items.Clear();
-			LoadReferences(Repository);
-		}
-		else
-		{
-			if(_searchBuffer != null)
-			{
-				_lstReferences.Items.Clear();
-				LoadReferences(Repository);
-			}
+		LoadReferences(Repository, Search.Value);
+	}
 
-			_lstReferences.ItemCheckedChanged -= OnItemCheckedChanged;
-			_lstReferences.FilterItems(Search.Value);
-			_lstReferences.ItemCheckedChanged += OnItemCheckedChanged;
-		}
-
-		if(_searchBuffer != Search.Value)
-		{
-			_searchBuffer = Search.Value;
-		}
+	private void HistoryFilterDropDown_VisibleChanged(object sender, EventArgs e)
+	{
+		Search.Value = string.Empty;
 	}
 }

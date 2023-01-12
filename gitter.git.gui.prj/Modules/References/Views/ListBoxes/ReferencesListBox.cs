@@ -21,7 +21,6 @@
 namespace gitter.Git.Gui.Controls;
 
 using System;
-using System.Collections.Generic;
 
 using gitter.Framework.Controls;
 
@@ -115,19 +114,6 @@ public sealed class ReferencesListBox : CustomListBox
 		EndUpdate();
 	}
 
-	public void FilterItems(string value)
-	{
-		BeginUpdate();
-
-		var branches = new Dictionary<CustomListBoxItem, List<CustomListBoxItem>>();
-		GetFilteredGroupBranches(_refBinding.Heads.Items, value, branches);
-		GetFilteredGroupBranches(_refBinding.Remotes.Items, value, branches);
-		GetFilteredGroupBranches(_refBinding.Tags.Items, value, branches);
-		RemoveFilteredBranches(branches);
-
-		EndUpdate();
-	}
-
 	protected override void Dispose(bool disposing)
 	{
 		if(disposing)
@@ -139,60 +125,5 @@ public sealed class ReferencesListBox : CustomListBox
 			}
 		}
 		base.Dispose(disposing);
-	}
-
-	private void GetFilteredGroupBranches(CustomListBoxItemsCollection items, string filter, Dictionary<CustomListBoxItem, List<CustomListBoxItem>> filteredItems)
-	{
-		if(items.Count == 0) return;
-		if(items[0] is IDataContextProvider<Reference>)
-		{
-			var filteredBrachItems = new List<CustomListBoxItem>();
-			filteredItems.Add(items[0].Parent, filteredBrachItems);
-			GroupFilter(items, filteredBrachItems, filter);
-			return;
-		}
-
-		foreach(var item in items)
-		{
-			if(item is not IDataContextProvider<Reference>)
-			{
-				if(item.Items.Count == 0) continue;
-				if(item.Items[0] is not IDataContextProvider<Reference>)
-				{
-					GetFilteredGroupBranches(item.Items, filter, filteredItems);
-				}
-				else
-				{
-					var filteredBrachItems = new List<CustomListBoxItem>();
-					filteredItems.Add(item, filteredBrachItems);
-					GroupFilter(item.Items, filteredBrachItems, filter);
-				}
-			}
-		}
-	}
-
-	private void GroupFilter(CustomListBoxItemsCollection items, List<CustomListBoxItem> toRemove, string filter)
-	{
-		foreach(var item in items)
-		{
-			if(item is IDataContextProvider<Reference> branch)
-			{
-				if(!branch.DataContext.Name.Contains(filter))
-				{
-					toRemove.Add(item);
-				}
-			}
-		}
-	}
-
-	private void RemoveFilteredBranches(Dictionary<CustomListBoxItem, List<CustomListBoxItem>> filteredItemsByGroup)
-	{
-		foreach(var group in filteredItemsByGroup)
-		{
-			foreach(var item in group.Value)
-			{
-				group.Key.Items.Remove(item);
-			}
-		}
 	}
 }

@@ -109,6 +109,7 @@
 			this.MinimumSize = new System.Drawing.Size(241, 279);
 			this.Name = "HistoryFilterDropDown";
 			this.Size = new System.Drawing.Size(239, 279);
+			this.VisibleChanged += HistoryFilterDropDown_VisibleChanged;
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
