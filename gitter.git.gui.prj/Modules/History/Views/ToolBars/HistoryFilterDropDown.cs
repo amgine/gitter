@@ -28,7 +28,8 @@ using System.Windows.Forms;
 
 using gitter.Framework;
 using gitter.Framework.Controls;
-
+using gitter.Framework.Mvc;
+using gitter.Framework.Mvc.WinForms;
 using gitter.Git.Gui.Controls;
 
 [DesignerCategory("")]
@@ -36,6 +37,8 @@ partial class HistoryFilterDropDown : UserControl
 {
 	private Repository _repository;
 	private LogOptions _logOptions;
+
+	public IUserInputSource<string> Search { get; }
 
 	public HistoryFilterDropDown()
 	{
@@ -51,6 +54,10 @@ partial class HistoryFilterDropDown : UserControl
 		{
 			Font = SystemFonts.MessageBoxFont;
 		}
+		_txtSearch.BackColor = BackColor;
+		_txtSearch.ForeColor = ForeColor;
+		_txtSearch.TextChanged += _txtSearch_TextChanged;
+		Search = new TextBoxInputSource(_txtSearch);
 	}
 
 	public LogOptions LogOptions
@@ -126,12 +133,7 @@ partial class HistoryFilterDropDown : UserControl
 			if(_repository != value)
 			{
 				_repository = value;
-				_lstReferences.ItemCheckedChanged -= OnItemCheckedChanged;
-				_lstReferences.LoadData(value);
-				_lstReferences.EnableCheckboxes();
-				_lstReferences.ExpandAll();
-				UpdateCheckStatuses();
-				_lstReferences.ItemCheckedChanged += OnItemCheckedChanged;
+				LoadReferences(value, null);
 			}
 		}
 	}
@@ -144,5 +146,37 @@ partial class HistoryFilterDropDown : UserControl
 			if(radioButton2.Checked) _logOptions.Filter = LogReferenceFilter.HEAD;
 			if(radioButton3.Checked) _logOptions.Filter = LogReferenceFilter.Allowed;
 		}
+	}
+
+	private void LoadReferences(Repository repository, string filter)
+	{
+		_lstReferences.ItemCheckedChanged -= OnItemCheckedChanged;
+		if(string.IsNullOrEmpty(filter))
+		{
+			_lstReferences.LoadData(repository);
+		}
+		else
+		{
+			_lstReferences.LoadData(repository, ReferenceType.Reference, true, true, x =>
+			{
+				if(x is Reference reference) return reference.Name.Contains(filter);
+				return x.FullName.Contains(filter);
+			});
+		}
+		_lstReferences.EnableCheckboxes();
+		_lstReferences.ExpandAll();
+		UpdateCheckStatuses();
+		_lstReferences.ItemCheckedChanged += OnItemCheckedChanged;
+	}
+
+	private void _txtSearch_TextChanged(object sender, EventArgs e)
+	{
+		if(_lstReferences.Items.Count == 0) return;
+		LoadReferences(Repository, Search.Value);
+	}
+
+	private void HistoryFilterDropDown_VisibleChanged(object sender, EventArgs e)
+	{
+		Search.Value = string.Empty;
 	}
 }

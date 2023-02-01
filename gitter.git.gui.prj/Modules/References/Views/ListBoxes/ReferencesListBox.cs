@@ -24,8 +24,6 @@ using System;
 
 using gitter.Framework.Controls;
 
-using Resources = gitter.Git.Gui.Properties.Resources;
-
 /// <summary><see cref="CustomListBox"/> for displaying <see cref="M:Repository.Branches"/> &amp; <see cref="M:Repository.Tags"/>.</summary>
 public sealed class ReferencesListBox : CustomListBox
 {
