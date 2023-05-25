@@ -58,35 +58,24 @@ public static class GravatarService
 		return ToHexString(hash);
 	}
 
+	private static unsafe string ToHexString(
 #if NET5_0_OR_GREATER
-
-	private static unsafe string ToHexString(ReadOnlySpan<byte> bytes)
-	{
-		var chars = stackalloc char[bytes.Length * 2];
-		for(int i = 0; i < bytes.Length; ++i)
-		{
-			int h = bytes[i];
-			chars[(i << 1)    ] = Alphabet[h >> 4];
-			chars[(i << 1) | 1] = Alphabet[h & 0x0f];
-		}
-		return new string(chars);
-	}
-
+		ReadOnlySpan<byte> bytes
 #else
-
-	private static unsafe string ToHexString(byte[] bytes)
+		byte[] bytes
+#endif
+		)
 	{
-		var chars = stackalloc char[bytes.Length * 2];
+		var len   = bytes.Length * 2;
+		var chars = stackalloc char[len];
 		for(int i = 0; i < bytes.Length; ++i)
 		{
 			int h = bytes[i];
 			chars[(i << 1)    ] = Alphabet[h >> 4];
 			chars[(i << 1) | 1] = Alphabet[h & 0x0f];
 		}
-		return new string(chars);
+		return new string(chars, 0, len);
 	}
-
-#endif
 
 	public static async Task<Bitmap> GetGravatarAsync(string email,
 		DefaultGravatarType defaultType = DefaultGravatarType.wavatar,
