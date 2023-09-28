@@ -26,13 +26,14 @@ using System.Drawing;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.IO;
+using System.Threading;
 
 /// <summary>Service for requesting global avatars.</summary>
 public static class GravatarService
 {
 	private static readonly char[] Alphabet = { '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f' };
 
-	private const string URL = "http://www.gravatar.com/avatar/{0}?d={1}&s={2}&r={3}";
+	private const string URL = "https://www.gravatar.com/avatar/{0}?d={1}&s={2}&r={3}";
 
 	public const int DefaultSize = 80;
 
@@ -77,22 +78,48 @@ public static class GravatarService
 		return new string(chars, 0, len);
 	}
 
-	public static async Task<Bitmap> GetGravatarAsync(string email,
+	private static string FormatUrl(string email,
 		DefaultGravatarType defaultType = DefaultGravatarType.wavatar,
 		GravatarRating      rating      = GravatarRating.g,
 		int                 size        = DefaultSize)
 	{
-		Verify.Argument.IsInRange(1, size, 2048, nameof(size));
+		Verify.Argument.IsInRange(1, size, 2048);
 
-		var url = string.Format(URL, MD5(email), defaultType, size, rating);
-		using var response = await _client
-			.GetAsync(url)
-			.ConfigureAwait(continueOnCapturedContext: false);
-		response.EnsureSuccessStatusCode();
-		var data = await response.Content
-			.ReadAsByteArrayAsync()
-			.ConfigureAwait(continueOnCapturedContext: false);
+		return string.Format(URL, MD5(email), defaultType, size, rating);
+	}
+
+	private static Bitmap AsBitmap(byte[] data)
+	{
 		var ms = new MemoryStream(data, writable: false);
 		return new Bitmap(ms);
+	}
+
+	public static async Task<Bitmap> GetGravatarAsync(string email,
+		DefaultGravatarType defaultType       = DefaultGravatarType.wavatar,
+		GravatarRating      rating            = GravatarRating.g,
+		int                 size              = DefaultSize,
+		CancellationToken   cancellationToken = default)
+	{
+		var url = FormatUrl(email, defaultType, rating, size);
+#if NET6_0_OR_GREATER
+		var data = await _client
+			.GetByteArrayAsync(url, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+#else
+		using var response = await _client
+			.GetAsync(url, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		response.EnsureSuccessStatusCode();
+		cancellationToken.ThrowIfCancellationRequested();
+		var data = await response.Content
+#if NETCOREAPP
+			.ReadAsByteArrayAsync(cancellationToken)
+#else
+			.ReadAsByteArrayAsync()
+#endif
+			.ConfigureAwait(continueOnCapturedContext: false);
+		cancellationToken.ThrowIfCancellationRequested();
+#endif
+		return AsBitmap(data);
 	}
 }
