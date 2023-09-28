@@ -43,7 +43,7 @@ public interface IRevisionPointer
 
 	/// <summary>Evaluate commit which is targeted by this <see cref="IRevisionPointer"/>.</summary>
 	/// <returns>Commit which is pointed by this <see cref="IRevisionPointer"/>.</returns>
-	Task<Revision> DereferenceAsync();
+	ValueTask<Revision> DereferenceAsync();
 
 	/// <summary>Object is deleted and not valid anymore.</summary>
 	bool IsDeleted { get; }

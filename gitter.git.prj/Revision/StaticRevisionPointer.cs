@@ -67,33 +67,35 @@ internal class StaticRevisionPointer : IRevisionPointer
 	/// <inheritdoc/>
 	public virtual Revision Dereference()
 	{
-		if(_revision == null)
+		if(_revision is null)
 		{
 			var rev = Repository.Accessor.Dereference
 				.Invoke(new DereferenceParameters(Pointer));
 			lock(Repository.Revisions.SyncRoot)
 			{
-				_revision = Repository.Revisions.GetOrCreateRevision(rev.SHA1);
+				_revision = Repository.Revisions.GetOrCreateRevision(rev.CommitHash);
 			}
 		}
 		return _revision;
 	}
 
-	/// <inheritdoc/>
-	public virtual async Task<Revision> DereferenceAsync()
+	protected virtual async ValueTask<Revision> DereferenceCoreAsync()
 	{
-		if(_revision == null)
+		var rev = await Repository.Accessor.Dereference
+			.InvokeAsync(new DereferenceParameters(Pointer))
+			.ConfigureAwait(continueOnCapturedContext: false);
+		lock(Repository.Revisions.SyncRoot)
 		{
-			var rev = await Repository.Accessor.Dereference
-				.InvokeAsync(new DereferenceParameters(Pointer))
-				.ConfigureAwait(continueOnCapturedContext: false);
-			lock(Repository.Revisions.SyncRoot)
-			{
-				_revision = Repository.Revisions.GetOrCreateRevision(rev.SHA1);
-			}
+			_revision = Repository.Revisions.GetOrCreateRevision(rev.CommitHash);
 		}
 		return _revision;
 	}
+
+	/// <inheritdoc/>
+	public ValueTask<Revision> DereferenceAsync()
+		=> _revision is not null
+			? new(_revision)
+			: DereferenceCoreAsync();
 
 	#endregion
 }

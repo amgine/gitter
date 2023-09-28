@@ -145,7 +145,7 @@ public sealed class LogCommand : Command
 	{
 	}
 
-	public LogCommand(IList<ICommandArgument> args)
+	public LogCommand(IEnumerable<ICommandArgument> args)
 		: base("log", args)
 	{
 	}

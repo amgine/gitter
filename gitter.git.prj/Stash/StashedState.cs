@@ -178,7 +178,7 @@ public sealed class StashedState : GitNamedObjectWithLifetime, IRevisionPointer
 	Revision IRevisionPointer.Dereference() => Revision;
 
 	/// <inheritdoc/>
-	Task<Revision> IRevisionPointer.DereferenceAsync() => Task.FromResult(Revision);
+	ValueTask<Revision> IRevisionPointer.DereferenceAsync() => new(Revision);
 
 	#endregion
 }

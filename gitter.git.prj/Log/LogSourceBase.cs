@@ -28,10 +28,6 @@ using System.Threading.Tasks;
 
 using gitter.Framework;
 	
-using gitter.Git.AccessLayer;
-	
-using Resources = gitter.Git.Properties.Resources;
-	
 public abstract class LogSourceBase : ILogSource
 {
 	protected LogSourceBase()

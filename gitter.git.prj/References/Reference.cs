@@ -107,7 +107,7 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 		}
 
 		/// <inheritdoc/>
-		public async Task<Revision> DereferenceAsync()
+		public async ValueTask<Revision> DereferenceAsync()
 		{
 			var revisionData = await _reference.Repository.Accessor.Dereference.InvokeAsync(
 				new DereferenceParameters(FullName)
@@ -422,8 +422,10 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 	string IRevisionPointer.Pointer => Name;
 
 	/// <inheritdoc/>
-	Revision IRevisionPointer.Dereference() => _pointer.Dereference();
+	Revision IRevisionPointer.Dereference()
+		=> _pointer.Dereference();
 
 	/// <inheritdoc/>
-	Task<Revision> IRevisionPointer.DereferenceAsync() => _pointer.DereferenceAsync();
+	ValueTask<Revision> IRevisionPointer.DereferenceAsync()
+		=> _pointer.DereferenceAsync();
 }

@@ -69,19 +69,19 @@ internal sealed class DynamicRevisionPointer : IRevisionPointer
 			new DereferenceParameters(Pointer));
 		lock(Repository.Revisions.SyncRoot)
 		{
-			return Repository.Revisions.GetOrCreateRevision(rev.SHA1);
+			return Repository.Revisions.GetOrCreateRevision(rev.CommitHash);
 		}
 	}
 
 	/// <inheritdoc/>
-	public async Task<Revision> DereferenceAsync()
+	public async ValueTask<Revision> DereferenceAsync()
 	{
 		var rev = await Repository.Accessor.Dereference
 			.InvokeAsync(new DereferenceParameters(Pointer))
 			.ConfigureAwait(continueOnCapturedContext: false);
 		lock(Repository.Revisions.SyncRoot)
 		{
-			return Repository.Revisions.GetOrCreateRevision(rev.SHA1);
+			return Repository.Revisions.GetOrCreateRevision(rev.CommitHash);
 		}
 	}
 

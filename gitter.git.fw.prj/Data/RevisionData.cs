@@ -44,17 +44,17 @@ public sealed class RevisionData : INamedObject
 
 	#region .ctor
 
-	public RevisionData(Hash sha1)
+	public RevisionData(Hash commitHash)
 	{
-		SHA1   = sha1;
-		Fields = RevisionField.SHA1;
+		CommitHash = commitHash;
+		Fields     = RevisionField.CommitHash;
 	}
 
 	#endregion
 
 	#region Properties
 
-	public Hash SHA1 { get; }
+	public Hash CommitHash { get; }
 
 	public Hash TreeHash
 	{
@@ -176,9 +176,9 @@ public sealed class RevisionData : INamedObject
 	public bool DataValid(RevisionField data)
 		=> (Fields & data) == data;
 
-	string INamedObject.Name => SHA1.ToString();
+	string INamedObject.Name => CommitHash.ToString();
 
-	public override string ToString() => SHA1.ToString();
+	public override string ToString() => CommitHash.ToString();
 
 	#endregion
 }

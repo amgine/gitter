@@ -349,7 +349,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 					_stash.Clear();
 					foreach(var ssinfo in stash)
 					{
-						if(!d.TryGetValue(ssinfo.Revision.SHA1, out var stashedState))
+						if(!d.TryGetValue(ssinfo.Revision.CommitHash, out var stashedState))
 						{
 							stashedState = ObjectFactories.CreateStashedState(Repository, ssinfo);
 							_stash.Add(stashedState);
@@ -358,7 +358,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 						else
 						{
 							ObjectFactories.UpdateStashedState(stashedState, ssinfo);
-							d.Remove(ssinfo.Revision.SHA1);
+							d.Remove(ssinfo.Revision.CommitHash);
 							_stash.Add(stashedState);
 						}
 					}

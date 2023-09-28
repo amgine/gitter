@@ -71,28 +71,23 @@ public sealed class PathLogSource : LogSourceBase
 	{
 		if(Repository.IsEmpty)
 		{
-			var task = cancellationToken.IsCancellationRequested
-				? Task.FromCanceled<RevisionLog>(cancellationToken)
-				: Task.FromResult(new RevisionLog(Repository, Preallocated<Revision>.EmptyArray));
-			return await task.ConfigureAwait(continueOnCapturedContext: false);
+			return new RevisionLog(Repository, Array.Empty<Revision>());
 		}
-		else
-		{
-			var parameters = options.GetLogParameters();
-			parameters.References = new[] { Revision.Pointer };
-			parameters.Paths = new[] { Path };
-			parameters.Follow = FollowRenames;
 
-			progress?.Report(new(Resources.StrsFetchingLog.AddEllipsis()));
-			var revisionData = await Repository
-				.Accessor
-				.QueryRevisions
-				.InvokeAsync(parameters, progress, cancellationToken)
-				.ConfigureAwait(continueOnCapturedContext: false);
-			progress?.Report(OperationProgress.Completed);
-			var revisions = Repository.Revisions.Resolve(revisionData);
-			return new RevisionLog(Repository, revisions);
-		}
+		var parameters = options.GetLogParameters();
+		parameters.References = new[] { Revision.Pointer };
+		parameters.Paths = new[] { Path };
+		parameters.Follow = FollowRenames;
+
+		progress?.Report(new(Resources.StrsFetchingLog.AddEllipsis()));
+		var revisionData = await Repository
+			.Accessor
+			.QueryRevisions
+			.InvokeAsync(parameters, progress, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		progress?.Report(OperationProgress.Completed);
+		var revisions = Repository.Revisions.Resolve(revisionData);
+		return new RevisionLog(Repository, revisions);
 	}
 
 	/// <inheritdoc/>

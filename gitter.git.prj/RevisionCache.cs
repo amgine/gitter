@@ -148,6 +148,24 @@ public sealed class RevisionCache : GitObject, IEnumerable<Revision>
 		return revision;
 	}
 
+	private Revision ResolveCore(RevisionData revisionData)
+	{
+		Assert.IsNotNull(revisionData);
+
+		if(_revisions.TryGetValue(revisionData.CommitHash, out var revision))
+		{
+			if(!revision.IsLoaded)
+			{
+				ObjectFactories.UpdateRevision(revision, revisionData);
+			}
+		}
+		else
+		{
+			revision = ObjectFactories.CreateRevision(Repository, revisionData);
+		}
+		return revision;
+	}
+
 	/// <summary>
 	/// Transforms list of <see cref="RevisionData"/> into array of <see cref="Revision"/> objects
 	/// creating, caching and updating revisions if necessary.
@@ -158,24 +176,37 @@ public sealed class RevisionCache : GitObject, IEnumerable<Revision>
 	{
 		Verify.Argument.IsNotNull(data);
 
-		var res = new Revision[data.Count];
+		var count = data.Count;
+		if(count == 0) return Array.Empty<Revision>();
+		var res = new Revision[count];
 		lock(SyncRoot)
 		{
-			for(int i = 0; i < data.Count; ++i)
+			for(int i = 0; i < count; ++i)
 			{
-				var revisionData = data[i];
-				if(_revisions.TryGetValue(revisionData.SHA1, out var revision))
-				{
-					if(!revision.IsLoaded)
-					{
-						ObjectFactories.UpdateRevision(revision, revisionData);
-					}
-				}
-				else
-				{
-					revision = ObjectFactories.CreateRevision(Repository, revisionData);
-				}
-				res[i] = revision;
+				res[i] = ResolveCore(data[i]);
+			}
+		}
+		return res;
+	}
+
+	/// <summary>
+	/// Transforms list of <see cref="RevisionData"/> into array of <see cref="Revision"/> objects
+	/// creating, caching and updating revisions if necessary.
+	/// </summary>
+	/// <param name="data">List of <see cref="RevisionData"/> objects.</param>
+	/// <returns>Array of corresponding <see cref="Revision"/> objects.</returns>
+	internal Revision[] Resolve(IReadOnlyList<RevisionData> data)
+	{
+		Verify.Argument.IsNotNull(data);
+
+		var count = data.Count;
+		if(count == 0) return Array.Empty<Revision>();
+		var res = new Revision[count];
+		lock(SyncRoot)
+		{
+			for(int i = 0; i < count; ++i)
+			{
+				res[i] = ResolveCore(data[i]);
 			}
 		}
 		return res;

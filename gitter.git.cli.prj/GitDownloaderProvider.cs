@@ -61,9 +61,6 @@ sealed class GitDownloaderProvider : IGitDownloaderProvider
 
 	public async Task<IGitDownloader> CreateAsync(CancellationToken cancellationToken = default)
 	{
-		var version     = default(Version);
-		var downloadUrl = default(string);
-
 		try
 		{
 			var downloadPage = await DownloadPageSourceAsync(DownloadPageUrl, cancellationToken)
@@ -71,7 +68,7 @@ sealed class GitDownloaderProvider : IGitDownloaderProvider
 			var arch = Environment.Is64BitOperatingSystem ? @"64" : @"32";
 			foreach(Match match in _regexUrl.Matches(downloadPage))
 			{
-				if(match.Groups[@"arch"]?.Value == arch && Version.TryParse(match.Groups[@"version"]?.Value, out version))
+				if(match.Groups[@"arch"]?.Value == arch && Version.TryParse(match.Groups[@"version"]?.Value, out var version))
 				{
 					return new GitDownloader(version, match.Groups[@"url"].Value);
 				}
@@ -80,6 +77,6 @@ sealed class GitDownloaderProvider : IGitDownloaderProvider
 		catch
 		{
 		}
-		return new GitDownloader(version, downloadUrl);
+		return GitDownloader.Unavailable;
 	}
 }

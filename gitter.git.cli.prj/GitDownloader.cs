@@ -31,6 +31,22 @@ using gitter.Framework;
 
 sealed class GitDownloader : IGitDownloader
 {
+	sealed class UnavailableImpl : IGitDownloader
+	{
+		public Version LatestVersion => default;
+
+		public bool IsAvailable => false;
+
+		public string DownloadUrl => default;
+
+		public void Download() => throw new InvalidOperationException();
+
+		public Task DownloadAndInstallAsync(IProgress<OperationProgress> progress = null)
+			=> throw new InvalidOperationException();
+	}
+
+	public static IGitDownloader Unavailable { get; } = new UnavailableImpl();
+
 	public GitDownloader(Version version, string downloadUrl)
 	{
 		LatestVersion = version;

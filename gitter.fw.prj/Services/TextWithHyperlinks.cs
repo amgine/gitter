@@ -79,6 +79,7 @@ public sealed class TextWithHyperlinks
 	}
 
 	private readonly TrackingService<HyperlinkGlyph> _hoveredLink;
+	private bool _failedToSegment;
 
 	public TextWithHyperlinks(string text, IHyperlinkExtractor extractor = null)
 	{
@@ -89,8 +90,15 @@ public sealed class TextWithHyperlinks
 		_glyphs = extractor.ExtractHyperlinks(text)
 							.Select(static h => new HyperlinkGlyph(h))
 							.ToArray();
-		_sf.SetMeasurableCharacterRanges(
-			Array.ConvertAll(_glyphs, static l => new CharacterRange(l.Start, l.Length)));
+		try
+		{
+			_sf.SetMeasurableCharacterRanges(
+				Array.ConvertAll(_glyphs, static l => new CharacterRange(l.Start, l.Length)));
+		}
+		catch
+		{
+			_failedToSegment = true;
+		}
 
 		_hoveredLink = new TrackingService<HyperlinkGlyph>();
 		_hoveredLink.Changed += OnHoveredLinkChanged;
@@ -116,6 +124,13 @@ public sealed class TextWithHyperlinks
 		Assert.IsNotNull(style);
 		Assert.IsNotNull(graphics);
 		Assert.IsNotNull(font);
+
+		if(_failedToSegment)
+		{
+			GitterApplication.TextRenderer.DrawText(
+				graphics, Text, font, style.Colors.WindowText, rect, _sf);
+			return;
+		}
 
 		bool useCache = _cachedRect == rect;
 		if(useCache)

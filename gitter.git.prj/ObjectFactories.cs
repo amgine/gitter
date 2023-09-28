@@ -250,7 +250,7 @@ static class ObjectFactories
 		Revision revision;
 		lock(reflogRecord.Repository.Revisions.SyncRoot)
 		{
-			revision = reflogRecord.Repository.Revisions.GetOrCreateRevision(reflogRecordData.Revision.SHA1);
+			revision = reflogRecord.Repository.Revisions.GetOrCreateRevision(reflogRecordData.Revision.CommitHash);
 		}
 		if(!revision.IsLoaded)
 		{
@@ -268,7 +268,7 @@ static class ObjectFactories
 		Revision revision;
 		lock(repository.Revisions.SyncRoot)
 		{
-			revision = repository.Revisions.GetOrCreateRevision(reflogRecordData.Revision.SHA1);
+			revision = repository.Revisions.GetOrCreateRevision(reflogRecordData.Revision.CommitHash);
 		}
 		if(!revision.IsLoaded)
 		{
@@ -293,7 +293,7 @@ static class ObjectFactories
 		Revision revision;
 		lock(repository.Revisions.SyncRoot)
 		{
-			revision = repository.Revisions.GetOrCreateRevision(stashedStateData.Revision.SHA1);
+			revision = repository.Revisions.GetOrCreateRevision(stashedStateData.Revision.CommitHash);
 		}
 		if(!revision.IsLoaded)
 		{
@@ -310,7 +310,7 @@ static class ObjectFactories
 		submodule.UpdateInfo(submoduleData.Path, submoduleData.Url);
 	}
 
-	public static Submodule CreateSubmodue(Repository repository, SubmoduleData submoduleData)
+	public static Submodule CreateSubmodule(Repository repository, SubmoduleData submoduleData)
 	{
 		Verify.Argument.IsNotNull(repository);
 		Verify.Argument.IsNotNull(submoduleData);
@@ -334,7 +334,7 @@ static class ObjectFactories
 			bool found = false;
 			for(int i = id; i < revision.Parents.Count; ++i)
 			{
-				if(revision.Parents[i].Hash == info.SHA1)
+				if(revision.Parents[i].Hash == info.CommitHash)
 				{
 					if(i != id)
 					{
@@ -373,7 +373,7 @@ static class ObjectFactories
 		Verify.Argument.IsNotNull(revisionData);
 
 		var fields = revisionData.Fields;
-		if(fields != RevisionField.SHA1)
+		if(fields != RevisionField.CommitHash)
 		{
 			var repository = revision.Repository;
 			if(HasFlag(fields, RevisionField.Subject))
@@ -423,9 +423,9 @@ static class ObjectFactories
 		var revisions = repository.Revisions;
 		lock(revisions.SyncRoot)
 		{
-			var revision = revisions.GetOrCreateRevision(revisionData.SHA1);
+			var revision = revisions.GetOrCreateRevision(revisionData.CommitHash);
 			var fields = revisionData.Fields;
-			if(!revision.IsLoaded && (fields != RevisionField.SHA1))
+			if(!revision.IsLoaded && (fields != RevisionField.CommitHash))
 			{
 				if(HasFlag(fields, RevisionField.Subject))
 				{
@@ -443,7 +443,7 @@ static class ObjectFactories
 				{
 					foreach(var parentData in revisionData.Parents)
 					{
-						var parent = revisions.GetOrCreateRevision(parentData.SHA1);
+						var parent = revisions.GetOrCreateRevision(parentData.CommitHash);
 						revision.Parents.AddInternal(parent);
 					}
 				}

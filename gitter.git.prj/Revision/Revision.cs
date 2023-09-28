@@ -31,7 +31,6 @@ public sealed partial class Revision : GitObject, IRevisionPointer
 	#region Data
 
 	private Hash _treeHash;
-	private User _author;
 
 	#endregion
 
@@ -104,24 +103,7 @@ public sealed partial class Revision : GitObject, IRevisionPointer
 
 	public string TreeHashString { get; private set; }
 
-	public User Author
-	{
-		get => _author;
-		internal set
-		{
-			if(!IsLoaded)
-			{
-				_author = value;
-			}
-			else
-			{
-				if(_author != value)
-				{
-					_author = value;
-				}
-			}
-		}
-	}
+	public User Author { get; internal set; }
 
 	public DateTimeOffset AuthorDate { get; internal set; }
 
@@ -147,7 +129,7 @@ public sealed partial class Revision : GitObject, IRevisionPointer
 
 	Revision IRevisionPointer.Dereference() => this;
 
-	Task<Revision> IRevisionPointer.DereferenceAsync() => Task.FromResult(this);
+	ValueTask<Revision> IRevisionPointer.DereferenceAsync() => new(this);
 
 	#endregion
 

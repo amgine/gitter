@@ -233,7 +233,7 @@ public sealed class Reflog : GitObject, IEnumerable<ReflogRecord>
 		{
 			if(_reflog.Count != 0)
 			{
-				if(record.Revision.SHA1 == _reflog[0].Revision.Hash)
+				if(record.Revision.CommitHash == _reflog[0].Revision.Hash)
 				{
 					return;
 				}

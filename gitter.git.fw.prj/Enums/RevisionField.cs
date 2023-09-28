@@ -27,7 +27,7 @@ public enum RevisionField
 {
 	None = 0,
 
-	SHA1           = (1 <<  0),
+	CommitHash           = (1 <<  0),
 	TreeHash       = (1 <<  1),
 	Parents        = (1 <<  2),
 	Children       = (1 <<  3),

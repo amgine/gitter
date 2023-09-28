@@ -96,14 +96,14 @@ public sealed class Project : NamedRedmineObject
 
 	public string Description
 	{
-		get { return _description; }
-		private set { UpdatePropertyValue(ref _description, value, DescriptionProperty); }
+		get => _description;
+		private set => UpdatePropertyValue(ref _description, value, DescriptionProperty);
 	}
 
 	public string Identifier
 	{
-		get { return _identifier; }
-		private set { UpdatePropertyValue(ref _identifier, value, IdentifierProperty); }
+		get => _identifier;
+		private set => UpdatePropertyValue(ref _identifier, value, IdentifierProperty);
 	}
 
 	public DateTime CreatedOn

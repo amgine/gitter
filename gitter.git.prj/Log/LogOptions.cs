@@ -154,7 +154,7 @@ public sealed class LogOptions
 				p.All = true;
 				break;
 			case LogReferenceFilter.Allowed:
-				var l = new List<string>();
+				var l = new List<string>(capacity: _allowedReferences.Count);
 				foreach(var reference in _allowedReferences)
 				{
 					l.Add(reference.FullName);

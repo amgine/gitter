@@ -157,11 +157,13 @@ public sealed class ReflogRecord : GitLifeTimeDynamicNamedObject, IRevisionPoint
 		=> Reflog.Reference.Name + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}";
 
 	string IRevisionPointer.Pointer
-		=> Reflog.Reference.Name + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}"; 
+		=> Reflog.Reference.Name + "@{" + _index.ToString(CultureInfo.InvariantCulture) + "}";
 
+	/// <inheritdoc/>
 	Revision IRevisionPointer.Dereference() => _revision;
 
-	Task<Revision> IRevisionPointer.DereferenceAsync() => Task.FromResult(_revision);
+	/// <inheritdoc/>
+	ValueTask<Revision> IRevisionPointer.DereferenceAsync() => new(_revision);
 
 	/// <summary>Returns a <see cref="System.String"/> that represents this <see cref="ReflogRecord"/>.</summary>
 	/// <returns>A <see cref="System.String"/> that represents this <see cref="ReflogRecord"/>.</returns>

@@ -50,10 +50,9 @@ public sealed class RepositoryLogSource : LogSourceBase
 
 		if(Repository.IsEmpty)
 		{
-			return await Task
-				.FromResult(new RevisionLog(Repository, Preallocated<Revision>.EmptyArray))
-				.ConfigureAwait(continueOnCapturedContext: false);
+			return new RevisionLog(Repository, Array.Empty<Revision>());
 		}
+
 		progress?.Report(new(Resources.StrsFetchingLog.AddEllipsis()));
 		var parameters = options.GetLogParameters();
 		var revisionData = await Repository.Accessor.QueryRevisions

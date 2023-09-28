@@ -38,7 +38,7 @@ internal sealed class NowherePointer : GitObject, IRevisionPointer
 
 	Revision IRevisionPointer.Dereference() => null;
 
-	Task<Revision> IRevisionPointer.DereferenceAsync() => Task.FromResult(default(Revision));
+	ValueTask<Revision> IRevisionPointer.DereferenceAsync() => new(default(Revision));
 
 	bool IRevisionPointer.IsDeleted => false;
 

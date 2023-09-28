@@ -1660,7 +1660,7 @@ public class CustomListBox : ScrollableControl
 							}
 							break;
 					}
-					if(menu != null)
+					if(menu is not null)
 					{
 						menu.Renderer = Style.ToolStripRenderer;
 						menu.Show(this, p, ToolStripDropDownDirection.Default);

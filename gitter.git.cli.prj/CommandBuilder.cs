@@ -202,18 +202,18 @@ sealed class CommandBuilder
 
 	private ICommandArgument GetReflogFormatArgument()
 		=> GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI)
-			? LogCommand.Format("%gd%n%gs%n%H%n%T%n%P%n%cI%n%cN%n%cE%n%aI%n%aN%n%aE%n%B")
-			: LogCommand.Format("%gd%n%gs%n%H%n%T%n%P%n%cI%n%cN%n%cE%n%aI%n%aN%n%aE%n%s%n%n%b");
+			? LogCommand.Format(LogFormatPlaceholders.ReflogFormat)
+			: LogCommand.Format(LogFormatPlaceholders.ReflogFormatOld);
 
 	private ICommandArgument GetRevisionFormatArgument()
 		=> GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI)
-			? LogCommand.Format("%H%n%T%n%P%n%cI%n%cN%n%cE%n%aI%n%aN%n%aE%n%B")
-			: LogCommand.Format("%H%n%T%n%P%n%cI%n%cN%n%cE%n%aI%n%aN%n%aE%n%s%n%n%b");
+			? LogCommand.Format(LogFormatPlaceholders.RevisionFormat)
+			: LogCommand.Format(LogFormatPlaceholders.RevisionFormatOld);
 
 	private ICommandArgument GetRevisionDataFormatArgument()
 		=> GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI)
-			? LogCommand.Format("%T%n%P%n%cI%n%cN%n%cE%n%aI%n%aN%n%aE%n%B")
-			: LogCommand.Format("%T%n%P%n%cI%n%cN%n%cE%n%aI%n%aN%n%aE%n%s%n%n%b");
+			? LogCommand.Format(LogFormatPlaceholders.RevisionDataFormat)
+			: LogCommand.Format(LogFormatPlaceholders.RevisionDataFormatOld);
 
 	private static void InsertQueryRevisionsParameters(QueryRevisionsParameters parameters, IList<ICommandArgument> args, ICommandArgument format)
 	{

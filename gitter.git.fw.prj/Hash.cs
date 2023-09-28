@@ -27,6 +27,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
+#nullable enable
+
 [StructLayout(LayoutKind.Sequential)]
 public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, IFormattable
 {
@@ -69,6 +71,7 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 
 	#region Static
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static int TryParseCharToHexDigit(char ch)
 		=> ch switch
 		{
@@ -78,6 +81,17 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 			_ => -1,
 		};
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static int ParseCharToHexDigit(char ch)
+		=> ch switch
+		{
+			>= '0' and <= '9' => ch - '0',
+			>= 'a' and <= 'f' => 10 + (ch - 'a'),
+			>= 'A' and <= 'F' => 10 + (ch - 'A'),
+			_ => throw new ArgumentException("Hexadecimal digit expected.", nameof(ch)),
+		};
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static int TryParseByteToHexDigit(byte ch)
 		=> ch switch
 		{
@@ -88,8 +102,18 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 		};
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static int ParseByteToHexDigit(byte ch)
+		=> ch switch
+		{
+			>= (byte)'0' and <= (byte)'9' => ch - '0',
+			>= (byte)'a' and <= (byte)'f' => 10 + (ch - 'a'),
+			>= (byte)'A' and <= (byte)'F' => 10 + (ch - 'A'),
+			_ => throw new ArgumentException("Hexadecimal digit expected.", nameof(ch)),
+		};
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static char ToHexDigit(uint digit)
-		=> digit > 9 ? (char)('a' + (digit - 10)) : (char)('0' + digit);
+		=> digit >= 10 ? (char)('a' + (digit - 10)) : (char)('0' + digit);
 
 	private static bool TryParsePart(string hash, int offset, out uint part)
 	{
@@ -130,50 +154,69 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 		return true;
 	}
 
+#if NETCOREAPP
+
+	private static bool TryParsePart(ReadOnlySpan<byte> hash, out uint part)
+	{
+		part = 0;
+		for(int i = 0; i < 8; ++i)
+		{
+			int digit = TryParseByteToHexDigit(hash[i]);
+			if(digit < 0) return false;
+			part = (part << 4) + (uint)digit;
+		}
+		return true;
+	}
+
+#endif
+
 	private static uint ParsePart(string hash, int offset)
 	{
 		uint result = 0;
 		for(int i = 0; i < 8; ++i)
 		{
-			int digit = TryParseCharToHexDigit(hash[offset + i]);
-			if(digit < 0)
-			{
-				throw new ArgumentException("Argument must contain hexadecimal string representation of the hash.", nameof(hash));
-			}
+			int digit = ParseCharToHexDigit(hash[offset + i]);
 			result = (result << 4) + (uint)digit;
 		}
 		return result;
 	}
 
-	private static uint ParsePart(char[] hash, int offset)
-	{
-		uint result = 0;
-		for(int i = 0; i < 8; ++i)
-		{
-			int digit = TryParseCharToHexDigit(hash[offset + i]);
-			if(digit < 0)
-			{
-				throw new ArgumentException("Argument must contain hexadecimal string representation of the hash.", nameof(hash));
-			}
-			result = (result << 4) + (uint)digit;
-		}
-		return result;
-	}
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static uint ParsePart(char[] hash, int offset) =>
+		(uint)ParseCharToHexDigit(hash[offset + 0]) << 28 |
+		(uint)ParseCharToHexDigit(hash[offset + 1]) << 24 |
+		(uint)ParseCharToHexDigit(hash[offset + 2]) << 20 |
+		(uint)ParseCharToHexDigit(hash[offset + 3]) << 16 |
+		(uint)ParseCharToHexDigit(hash[offset + 4]) << 12 |
+		(uint)ParseCharToHexDigit(hash[offset + 5]) <<  8 |
+		(uint)ParseCharToHexDigit(hash[offset + 6]) <<  4 |
+		(uint)ParseCharToHexDigit(hash[offset + 7]) <<  0;
 
-	private static uint ParsePart(byte[] hash, int offset)
-	{
-		uint result = 0;
-		for(int i = 0; i < 8; ++i)
-		{
-			int digit = TryParseByteToHexDigit(hash[offset + i]);
-			if(digit < 0)
-			{
-				throw new ArgumentException("Argument must contain hexadecimal string representation of the hash.", nameof(hash));
-			}
-			result = (result << 4) + (uint)digit;
-		}
-		return result;
-	}
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static uint ParsePart(byte[] hash, int offset) =>
+		(uint)ParseByteToHexDigit(hash[offset + 0]) << 28 |
+		(uint)ParseByteToHexDigit(hash[offset + 1]) << 24 |
+		(uint)ParseByteToHexDigit(hash[offset + 2]) << 20 |
+		(uint)ParseByteToHexDigit(hash[offset + 3]) << 16 |
+		(uint)ParseByteToHexDigit(hash[offset + 4]) << 12 |
+		(uint)ParseByteToHexDigit(hash[offset + 5]) <<  8 |
+		(uint)ParseByteToHexDigit(hash[offset + 6]) <<  4 |
+		(uint)ParseByteToHexDigit(hash[offset + 7]) <<  0;
+
+#if NETCOREAPP
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	private static uint ParsePart(ReadOnlySpan<char> hash) =>
+		(uint)ParseCharToHexDigit(hash[0]) << 28 |
+		(uint)ParseCharToHexDigit(hash[1]) << 24 |
+		(uint)ParseCharToHexDigit(hash[2]) << 20 |
+		(uint)ParseCharToHexDigit(hash[3]) << 16 |
+		(uint)ParseCharToHexDigit(hash[4]) << 12 |
+		(uint)ParseCharToHexDigit(hash[5]) <<  8 |
+		(uint)ParseCharToHexDigit(hash[6]) <<  4 |
+		(uint)ParseCharToHexDigit(hash[7]) <<  0;
+
+#endif
 
 	private static uint EvalPart(byte[] hash, int offset)
 	{
@@ -185,6 +228,7 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 		return result;
 	}
 
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static unsafe void DumpPart(uint part, char* buffer)
 	{
 		buffer[0] = ToHexDigit((part >> 28) & 0x0f);
@@ -199,22 +243,19 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 
 	private static unsafe void DumpPart(uint part, char* buffer, int length)
 	{
-		if(length-- < 0) return;
-		buffer[0] = ToHexDigit((part >> 28) & 0x0f);
-		if(length-- < 0) return;
-		buffer[1] = ToHexDigit((part >> 24) & 0x0f);
-		if(length-- < 0) return;
-		buffer[2] = ToHexDigit((part >> 20) & 0x0f);
-		if(length-- < 0) return;
-		buffer[3] = ToHexDigit((part >> 16) & 0x0f);
-		if(length-- < 0) return;
-		buffer[4] = ToHexDigit((part >> 12) & 0x0f);
-		if(length-- < 0) return;
-		buffer[5] = ToHexDigit((part >>  8) & 0x0f);
-		if(length-- < 0) return;
-		buffer[6] = ToHexDigit((part >>  4) & 0x0f);
-		if(length-- < 0) return;
-		buffer[7] = ToHexDigit((part >>  0) & 0x0f);
+		if(length >= 8)
+		{
+			DumpPart(part, buffer);
+			return;
+		}
+		if(length < 1) return; buffer[0] = ToHexDigit((part >> 28) & 0x0f);
+		if(length < 2) return; buffer[1] = ToHexDigit((part >> 24) & 0x0f);
+		if(length < 3) return; buffer[2] = ToHexDigit((part >> 20) & 0x0f);
+		if(length < 4) return; buffer[3] = ToHexDigit((part >> 16) & 0x0f);
+		if(length < 5) return; buffer[4] = ToHexDigit((part >> 12) & 0x0f);
+		if(length < 6) return; buffer[5] = ToHexDigit((part >>  8) & 0x0f);
+		if(length < 7) return; buffer[6] = ToHexDigit((part >>  4) & 0x0f);
+		if(length < 8) return; buffer[7] = ToHexDigit((part >>  0) & 0x0f);
 	}
 
 	private static void DumpPart(uint part, StringBuilder stringBuilder)
@@ -337,6 +378,30 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 		return false;
 	}
 
+#if NETCOREAPP
+
+	public static bool TryParse(ReadOnlySpan<byte> utf8str, out Hash hash)
+	{
+		if(utf8str.Length < HexStringLength)
+		{
+			hash = default;
+			return false;
+		}
+		if (TryParsePart(utf8str.Slice( 0, 8), out var part0) &&
+			TryParsePart(utf8str.Slice( 8, 8), out var part1) &&
+			TryParsePart(utf8str.Slice(16, 8), out var part2) &&
+			TryParsePart(utf8str.Slice(24, 8), out var part3) &&
+			TryParsePart(utf8str.Slice(32, 8), out var part4))
+		{
+			hash = new Hash(part0, part1, part2, part3, part4);
+			return true;
+		}
+		hash = default;
+		return false;
+	}
+
+#endif
+
 	#endregion
 
 	#region .ctor
@@ -422,6 +487,21 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 		_part4 = ParsePart(hash, 32 + offset);
 	}
 
+#if NETCOREAPP
+
+	public Hash(ReadOnlySpan<char> hash)
+	{
+		Verify.Argument.IsTrue(hash.Length >= HexStringLength, nameof(hash), "Hash must be at least 40 characters long.");
+
+		_part0 = ParsePart(hash.Slice( 0, 8));
+		_part1 = ParsePart(hash.Slice( 8, 8));
+		_part2 = ParsePart(hash.Slice(16, 8));
+		_part3 = ParsePart(hash.Slice(24, 8));
+		_part4 = ParsePart(hash.Slice(32, 8));
+	}
+
+#endif
+
 	#endregion
 
 	#region Operators
@@ -495,6 +575,7 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 		if(a._part4 < b._part4) return true;
 		return true;
 	}
+
 	#endregion
 
 	#region Methods
@@ -504,14 +585,14 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 		=> (int)(_part0 ^ _part1 ^ _part2 ^ _part3 ^ _part4);
 
 	/// <inheritdoc/>
-	public override bool Equals(object obj)
+	public override bool Equals(object? obj)
 		=> obj is Hash other && this == other;
 
 	/// <inheritdoc/>
 	public bool Equals(Hash other) => this == other;
 
 	/// <inheritdoc/>
-	public int CompareTo(object other)
+	public int CompareTo(object? other)
 	{
 		if(other is null) return 1;
 		if(other is not Hash hash) throw new ArgumentException("Argument must be a Hash value.", nameof(other));
@@ -580,7 +661,7 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 	public void ToByteArray(byte[] buffer, int offset)
 	{
 		Verify.Argument.IsNotNull(buffer);
-		Verify.Argument.IsInRange(0, offset, buffer.Length - Size, nameof(offset));
+		Verify.Argument.IsInRange(0, offset, buffer.Length - Size);
 
 		unsafe
 		{
@@ -594,6 +675,38 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 			}
 		}
 	}
+
+#if NETCOREAPP
+
+	public bool TryFormat(Span<char> buffer)
+	{
+		var length = buffer.Length;
+		unsafe
+		{
+			fixed(char* ptr = buffer)
+			{
+				if(length >= HexStringLength)
+				{
+					DumpPart(_part0, ptr +  0);
+					DumpPart(_part1, ptr +  8);
+					DumpPart(_part2, ptr + 16);
+					DumpPart(_part3, ptr + 24);
+					DumpPart(_part4, ptr + 32);
+				}
+				else
+				{
+					DumpPart(_part0, ptr +  0, length -  0);
+					DumpPart(_part1, ptr +  8, length -  8);
+					DumpPart(_part2, ptr + 16, length - 16);
+					DumpPart(_part3, ptr + 24, length - 24);
+					DumpPart(_part4, ptr + 32, length - 32);
+				}
+			}
+		}
+		return true;
+	}
+
+#endif
 
 	/// <inheritdoc/>
 	public override string ToString()
@@ -612,7 +725,7 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 
 	public string ToString(int length)
 	{
-		Verify.Argument.IsInRange(0, length, HexStringLength, nameof(length));
+		Verify.Argument.IsInRange(0, length, HexStringLength);
 
 		if(length == 0) return string.Empty;
 		if(length == HexStringLength) return ToString();
@@ -642,7 +755,7 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 	public void ToString(StringBuilder stringBuilder, int length)
 	{
 		Verify.Argument.IsNotNull(stringBuilder);
-		Verify.Argument.IsInRange(0, length, HexStringLength, nameof(length));
+		Verify.Argument.IsInRange(0, length, HexStringLength);
 
 		DumpPart(_part0, stringBuilder, length);
 		DumpPart(_part1, stringBuilder, length -= 8);
@@ -651,7 +764,7 @@ public readonly struct Hash : IEquatable<Hash>, IComparable<Hash>, IComparable, 
 		DumpPart(_part4, stringBuilder, length -= 8);
 	}
 
-	public string ToString(string format, IFormatProvider formatProvider)
+	public string ToString(string? format, IFormatProvider? formatProvider)
 	{
 		if(string.IsNullOrWhiteSpace(format)) return ToString();
 		if(!int.TryParse(format, NumberStyles.Integer, CultureInfo.InvariantCulture, out int length))
