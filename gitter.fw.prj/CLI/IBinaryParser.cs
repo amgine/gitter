@@ -20,16 +20,22 @@
 
 namespace gitter.Framework.CLI;
 
-public interface IParser
+using System;
+
+public interface IBinaryParser
 {
-	void Parse(ITextSegment textSegment);
+#if NETCOREAPP
+	void Parse(ReadOnlySpan<byte> data);
+#else
+	void Parse(ArraySegment<byte> data);
+#endif
 
 	void Complete();
 
 	void Reset();
 }
 
-public interface IParser<out T> : IParser
+public interface IBinaryParser<out T> : IBinaryParser
 {
 	T GetResult();
 }

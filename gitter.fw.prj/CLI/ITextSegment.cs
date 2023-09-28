@@ -20,6 +20,7 @@
 
 namespace gitter.Framework.CLI;
 
+using System;
 using System.Text;
 
 public interface ITextSegment
@@ -32,6 +33,8 @@ public interface ITextSegment
 
 	char ReadChar();
 
+	string ReadString(int length);
+
 	void Skip(int count = 1);
 
 	int IndexOf(char c);
@@ -41,4 +44,14 @@ public interface ITextSegment
 	void MoveTo(char[] buffer, int bufferOffset, int count);
 
 	void MoveTo(StringBuilder stringBuilder, int count);
+
+#if NETCOREAPP
+
+	ReadOnlySpan<char> AsSpan(int offset, int count);
+
+	ReadOnlySpan<char> AsSpan(int count);
+
+	ReadOnlySpan<char> AsSpan();
+
+#endif
 }

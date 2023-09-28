@@ -53,9 +53,13 @@ public abstract class AsyncOutputReceiverBase : OutputReceiverBase, IOutputRecei
 	protected virtual void FreeBuffer(ArraySegment<byte> buffer)
 		=> ArrayPool<byte>.Shared.Return(buffer.Array);
 
-	protected abstract void InitializeCore(Process process, StreamReader reader, ArraySegment<byte> buffer);
+	protected virtual void InitializeCore(Process process, StreamReader reader, ArraySegment<byte> buffer)
+	{
+	}
 
-	protected abstract void DeinitializeCore();
+	protected virtual void DeinitializeCore()
+	{
+	}
 
 	/// <inheritdoc/>
 	public void Initialize(Process process, StreamReader reader)
@@ -101,13 +105,14 @@ public abstract class AsyncOutputReceiverBase : OutputReceiverBase, IOutputRecei
 
 	private async void ReadLoop()
 	{
+		var memory = new Memory<byte>(_buffer.Array, _buffer.Offset, _buffer.Count);
 		while(true)
 		{
 			int bytesCount;
 			try
 			{
 				bytesCount = await _stream
-					.ReadAsync(new Memory<byte>(_buffer.Array, _buffer.Offset, _buffer.Count))
+					.ReadAsync(memory)
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 			catch(IOException)

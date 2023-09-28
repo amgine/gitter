@@ -26,7 +26,7 @@ using System.Text;
 
 using gitter.Framework.CLI;
 
-sealed class StatusParser : IParser<StatusData>
+sealed class StatusParser : ITextParser<StatusData>
 {
 	#region Helpers
 
@@ -52,6 +52,80 @@ sealed class StatusParser : IParser<StatusData>
 				stringBuilder.Remove(stringBuilder.Length - 1, 1);
 			}
 		}
+
+#if NETCOREAPP
+
+		private static bool ParseFileName(ref ReadOnlySpan<char> text, StringBuilder stringBuilder)
+		{
+			Assert.IsNotNull(stringBuilder);
+
+			int terminator = text.IndexOf('\0');
+			if(terminator == -1)
+			{
+				stringBuilder.Append(text);
+				text = ReadOnlySpan<char>.Empty;
+			}
+			else
+			{
+				if(terminator != 0)
+				{
+					stringBuilder.Append(text[..terminator]);
+					text = text[(terminator + 1)..];
+				}
+				else
+				{
+					text = text[1..];
+				}
+				RemoveTrailingSlash(stringBuilder);
+				return true;
+			}
+			return false;
+		}
+
+		public bool Parse(ref ReadOnlySpan<char> text)
+		{
+			while(text.Length > 0)
+			{
+				switch(_offset)
+				{
+					case -3:
+						X = text[0];
+						text = text[1..];
+						++_offset;
+						break;
+					case -2:
+						Y = text[0];
+						text = text[1..];
+						++_offset;
+						break;
+					case -1:
+						text = text[1..];
+						++_offset;
+						break;
+					case 0:
+						if(ParseFileName(ref text, _to))
+						{
+							++_offset;
+							if(X != 'C' && X != 'R')
+							{
+								++_offset;
+								return true;
+							}
+						}
+						break;
+					case 1:
+						if(ParseFileName(ref text, _from))
+						{
+							++_offset;
+							return true;
+						}
+						break;
+				}
+			}
+			return false;
+		}
+
+#else
 
 		private static bool ParseFileName(ITextSegment textSegment, StringBuilder stringBuilder)
 		{
@@ -118,6 +192,8 @@ sealed class StatusParser : IParser<StatusData>
 			}
 			return false;
 		}
+
+#endif
 
 		public char X { get; private set; }
 
@@ -355,6 +431,22 @@ sealed class StatusParser : IParser<StatusData>
 		}
 	}
 
+#if NETCOREAPP
+
+	public void Parse(ReadOnlySpan<char> text)
+	{
+		while(text.Length > 0)
+		{
+			if(_line.Parse(ref text))
+			{
+				ProcessParsedLine();
+				_line.Reset();
+			}
+		}
+	}
+
+#else
+
 	public void Parse(ITextSegment textSegment)
 	{
 		Verify.Argument.IsNotNull(textSegment);
@@ -368,6 +460,8 @@ sealed class StatusParser : IParser<StatusData>
 			}
 		}
 	}
+
+#endif
 
 	public void Complete()
 	{

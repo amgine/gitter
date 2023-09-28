@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 using gitter.Framework.CLI;
 
-sealed class QueryStatusFunction : ParserBasedFunctionImpl<QueryStatusParameters, StatusData>
+sealed class QueryStatusFunction : TextParserBasedFunctionImpl<QueryStatusParameters, StatusData>
 {
 	private readonly CommandBuilder _commandBuilder;
 
@@ -44,7 +44,7 @@ sealed class QueryStatusFunction : ParserBasedFunctionImpl<QueryStatusParameters
 		return _commandBuilder.GetQueryStatusCommand(parameters);
 	}
 
-	protected override IParser<StatusData> CreateParser()
+	protected override ITextParser<StatusData> CreateParser()
 		=> new StatusParser();
 
 	protected override CommandExecutionFlags GetExecutionFlags()

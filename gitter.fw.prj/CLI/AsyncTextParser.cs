@@ -26,17 +26,19 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 
-/// <summary>Reads text from stdio/stderr and parses it through <see cref="IParser"/>.</summary>
+/// <summary>Reads text from <c>stdio</c>/<c>stderr</c> and parses it with a <see cref="ITextParser"/>.</summary>
 public sealed class AsyncTextParser : AsyncOutputReceiverBase
 {
+#if !NETCOREAPP
 	private readonly CharArrayTextSegment _textSegment = new();
+#endif
 	private char[] _charBuffer;
 	private Decoder _decoder;
 
 	/// <summary>Initializes a new instance of the <see cref="AsyncTextParser"/> class.</summary>
 	/// <param name="parser">Output parser.</param>
 	/// <param name="bufferSize">Size of the internal buffer.</param>
-	public AsyncTextParser(IParser parser, int bufferSize = 0x400)
+	public AsyncTextParser(ITextParser parser, int bufferSize = 0x400)
 		: base(bufferSize)
 	{
 		Verify.Argument.IsNotNull(parser);
@@ -44,7 +46,7 @@ public sealed class AsyncTextParser : AsyncOutputReceiverBase
 		Parser = parser;
 	}
 
-	private IParser Parser { get; }
+	private ITextParser Parser { get; }
 
 	/// <inheritdoc/>
 	protected override void InitializeCore(Process process, StreamReader reader, ArraySegment<byte> buffer)
@@ -72,8 +74,12 @@ public sealed class AsyncTextParser : AsyncOutputReceiverBase
 		int charsCount = _decoder.GetChars(buffer.Array, buffer.Offset, buffer.Count, _charBuffer, 0);
 		if(charsCount != 0)
 		{
+#if NETCOREAPP
+			Parser.Parse(new ReadOnlySpan<char>(_charBuffer, 0, charsCount));
+#else
 			_textSegment.SetBuffer(_charBuffer, 0, charsCount);
 			Parser.Parse(_textSegment);
+#endif
 		}
 	}
 

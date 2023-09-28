@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 using gitter.Framework.CLI;
 
-sealed class QueryRevisionsFunction : ParserBasedFunctionImpl<QueryRevisionsParameters, IList<RevisionData>>
+sealed class QueryRevisionsFunction : TextParserBasedFunctionImpl<QueryRevisionsParameters, IList<RevisionData>>
 {
 	private readonly CommandBuilder _commandBuilder;
 
@@ -38,12 +38,8 @@ sealed class QueryRevisionsFunction : ParserBasedFunctionImpl<QueryRevisionsPara
 	}
 
 	protected override Command CreateCommand(QueryRevisionsParameters parameters)
-	{
-		Assert.IsNotNull(parameters);
+		=> _commandBuilder.GetQueryRevisionsCommand(parameters);
 
-		return _commandBuilder.GetQueryRevisionsCommand(parameters);
-	}
-
-	protected override IParser<IList<RevisionData>> CreateParser()
+	protected override ITextParser<IList<RevisionData>> CreateParser()
 		=> new LogParser();
 }

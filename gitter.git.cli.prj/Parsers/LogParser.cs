@@ -23,125 +23,133 @@ namespace gitter.Git.AccessLayer.CLI;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text;
 
+using gitter.Framework;
 using gitter.Framework.CLI;
 
-sealed class LogParser : IParser<IList<RevisionData>>
+sealed partial class LogParser : ITextParser<IList<RevisionData>>
 {
 	#region Helpers
 
-	interface IField
+	interface ITextFieldParser
 	{
+#if NETCOREAPP
+		bool Parse(ref ReadOnlySpan<char> text);
+#else
 		bool Parse(ITextSegment textSegment);
+#endif
 
 		void Reset();
 	}
 
-	interface IField<out T> : IField
+	interface ITextFieldParser<out T> : ITextFieldParser
 	{
 		T GetValue();
 	}
 
-	record struct CommitMessage(string Subject, string Body);
-
-	sealed class HashField : IField<Hash>
+	enum FieldParserState
 	{
-		private readonly char[] _buffer;
-		private int _offset;
+		Initial,
+		Buffering,
+		WaitingTerminator,
+		Completed,
+	}
 
-		public HashField()
+	readonly record struct CommitMessage(string Subject, string Body);
+
+#if NETCOREAPP
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	static bool FillBufferExcludeLastChar(char[] buffer, int total, ref int offset, ref ReadOnlySpan<char> text)
+	{
+		if(offset < total)
 		{
-			_buffer = new char[Hash.HexStringLength];
-		}
-
-		public bool Parse(ITextSegment textSegment)
-		{
-			Verify.Argument.IsNotNull(textSegment);
-			Verify.State.IsFalse(_offset > Hash.HexStringLength, "Field is already completed.");
-
-			if(_offset < Hash.HexStringLength)
+			int need = total - offset;
+			if(text.Length > need)
 			{
-				int c = Math.Min(textSegment.Length, Hash.HexStringLength - _offset);
-				textSegment.MoveTo(_buffer, _offset, c);
-				_offset += c;
-			}
-			if(_offset == Hash.HexStringLength && textSegment.Length > 0)
-			{
-				_offset = Hash.HexStringLength + 1;
-				textSegment.Skip();
+				text[..need].CopyTo(new(buffer, offset, need));
+				text = text[(need + 1)..];
+				offset = total + 1;
 				return true;
 			}
-			return false;
+			else
+			{
+				text.CopyTo(new(buffer, offset, text.Length));
+				offset += text.Length;
+				text = default;
+				return false;
+			}
 		}
-
-		public void Reset() => _offset = 0;
-
-		public Hash GetValue() => new(_buffer);
+		if(offset == total && text.Length > 0)
+		{
+			offset = total + 1;
+			text = text[1..];
+			return true;
+		}
+		return false;
 	}
 
-	sealed class MultiHashField : IField<List<Hash>>
+#else
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	static bool FillBufferExcludeLastChar(char[] buffer, int total, ref int offset, ITextSegment textSegment)
 	{
-		private readonly char[] _buffer;
-		private readonly List<Hash> _hashes;
-		private int _offset;
-		private bool _isCompleted;
-
-		public MultiHashField()
+		if(offset < total)
 		{
-			_buffer = new char[Hash.HexStringLength];
-			_hashes = new List<Hash>();
+			int c = Math.Min(textSegment.Length, total - offset);
+			textSegment.MoveTo(buffer, offset, c);
+			offset += c;
 		}
-
-		public void Reset()
+		if(offset == total && textSegment.Length > 0)
 		{
-			_isCompleted = false;
-			_offset = 0;
-			_hashes.Clear();
+			offset = total + 1;
+			textSegment.Skip();
+			return true;
 		}
-
-		public bool Parse(ITextSegment textSegment)
-		{
-			Verify.Argument.IsNotNull(textSegment);
-			Verify.State.IsFalse(_isCompleted, "Field is already completed.");
-
-			if(_offset == 0 && textSegment.Length > 0)
-			{
-				var term = textSegment.PeekChar();
-				if(term == '\n')
-				{
-					textSegment.Skip(1);
-					_isCompleted = true;
-					return true;
-				}
-			}
-			if(_offset < Hash.HexStringLength && textSegment.Length > 0)
-			{
-				int c = Math.Min(textSegment.Length, Hash.HexStringLength - _offset);
-				textSegment.MoveTo(_buffer, _offset, c);
-				_offset += c;
-			}
-			if(_offset == Hash.HexStringLength && textSegment.Length > 0)
-			{
-				_offset = 0;
-				_hashes.Add(new Hash(_buffer));
-				var separator = textSegment.ReadChar();
-				if(separator == '\n')
-				{
-					_isCompleted = true;
-					return true;
-				}
-			}
-			return false;
-		}
-
-		public List<Hash> GetValue() => _hashes;
+		return false;
 	}
 
-	sealed class UnixTimestampField : IField<DateTimeOffset>
+#endif
+
+	sealed class UnixTimestampField : ITextFieldParser<DateTimeOffset>
 	{
+		const char Terminator = '\n';
+
 		private long _timestamp;
 		private bool _isCompleted;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private void AppendDigit(char digit)
+		{
+			int value = digit - '0';
+			if(value is >= 0 and <= 9)
+			{
+				_timestamp = _timestamp * 10 + value;
+			}
+		}
+
+#if NETCOREAPP
+
+		public bool Parse(ref ReadOnlySpan<char> text)
+		{
+			Verify.State.IsFalse(_isCompleted, "Field is already completed.");
+
+			for(int i = 0; i < text.Length; ++i)
+			{
+				var c = text[i];
+				if(c == Terminator)
+				{
+					text = text[(i + 1)..];
+					_isCompleted = true;
+					return true;
+				}
+				AppendDigit(c);
+			}
+			text = ReadOnlySpan<char>.Empty;
+			return false;
+		}
+
+#else
 
 		public bool Parse(ITextSegment textSegment)
 		{
@@ -151,19 +159,17 @@ sealed class LogParser : IParser<IList<RevisionData>>
 			while(textSegment.Length > 0)
 			{
 				var c = textSegment.ReadChar();
-				if(c == '\n')
+				if(c == Terminator)
 				{
 					_isCompleted = true;
 					return true;
 				}
-				int value = c - '0';
-				if(value >= 0 && value <= 9)
-				{
-					_timestamp = _timestamp * 10 + value;
-				}
+				AppendDigit(c);
 			}
 			return false;
 		}
+
+#endif
 
 		public DateTimeOffset GetValue() => DateTimeOffset.FromUnixTimeSeconds(_timestamp).ToLocalTime();
 
@@ -174,7 +180,7 @@ sealed class LogParser : IParser<IList<RevisionData>>
 		}
 	}
 
-	sealed class ISO8601TimestampField : IField<DateTimeOffset>
+	sealed class ISO8601TimestampField : ITextFieldParser<DateTimeOffset>
 	{
 		// 0123456789012345678901234
 		// 2020-11-17 00:13:52 +0300
@@ -187,25 +193,26 @@ sealed class LogParser : IParser<IList<RevisionData>>
 			_buffer = new char[25];
 		}
 
+#if NETCOREAPP
+
+		public bool Parse(ref ReadOnlySpan<char> text)
+		{
+			Verify.State.IsFalse(_offset > _buffer.Length, "Field is already completed.");
+
+			return FillBufferExcludeLastChar(_buffer, _buffer.Length, ref _offset, ref text);
+		}
+
+#else
+
 		public bool Parse(ITextSegment textSegment)
 		{
 			Verify.Argument.IsNotNull(textSegment);
 			Verify.State.IsFalse(_offset > _buffer.Length, "Field is already completed.");
 
-			if(_offset < _buffer.Length)
-			{
-				int c = Math.Min(textSegment.Length, _buffer.Length - _offset);
-				textSegment.MoveTo(_buffer, _offset, c);
-				_offset += c;
-			}
-			if(_offset == _buffer.Length && textSegment.Length > 0)
-			{
-				_offset = _buffer.Length + 1;
-				textSegment.Skip();
-				return true;
-			}
-			return false;
+			return FillBufferExcludeLastChar(_buffer, _buffer.Length, ref _offset, textSegment);
 		}
+
+#endif
 
 		public void Reset() => _offset = 0;
 
@@ -215,9 +222,9 @@ sealed class LogParser : IParser<IList<RevisionData>>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private int GetYear() =>
 			Digit(_buffer[0]) * 1000 +
-			Digit(_buffer[1]) * 100 +
-			Digit(_buffer[2]) * 10 +
-			Digit(_buffer[3]);
+			Digit(_buffer[1]) *  100 +
+			Digit(_buffer[2]) *   10 +
+			Digit(_buffer[3]) *    1;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private int Get2Digits(int offset) =>
@@ -263,339 +270,30 @@ sealed class LogParser : IParser<IList<RevisionData>>
 			GetOffset());
 	}
 
-	sealed class StrictISO8601TimestampField : IField<DateTimeOffset>
-	{
-		// 0123456789012345678901234
-		// 2020-06-02T16:21:00+03:00
-
-		private readonly char[] _buffer;
-		private int _offset;
-
-		public StrictISO8601TimestampField()
-		{
-			_buffer = new char[25];
-		}
-
-		public bool Parse(ITextSegment textSegment)
-		{
-			Verify.Argument.IsNotNull(textSegment);
-			Verify.State.IsFalse(_offset > _buffer.Length, "Field is already completed.");
-
-			if(_offset < _buffer.Length)
-			{
-				int c = Math.Min(textSegment.Length, _buffer.Length - _offset);
-				textSegment.MoveTo(_buffer, _offset, c);
-				_offset += c;
-			}
-			if(_offset == _buffer.Length && textSegment.Length > 0)
-			{
-				_offset = _buffer.Length + 1;
-				textSegment.Skip();
-				return true;
-			}
-			return false;
-		}
-
-		public void Reset() => _offset = 0;
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static int Digit(char c) => c - '0';
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int GetYear() =>
-			Digit(_buffer[0]) * 1000 +
-			Digit(_buffer[1]) * 100 +
-			Digit(_buffer[2]) * 10 +
-			Digit(_buffer[3]);
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int Get2Digits(int offset) =>
-			Digit(_buffer[offset + 0]) * 10 +
-			Digit(_buffer[offset + 1]);
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int GetMonth() => Get2Digits(5);
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int GetDay() => Get2Digits(8);
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int GetHours() => Get2Digits(11);
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int GetMinutes() => Get2Digits(14);
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int GetSeconds() => Get2Digits(17);
-
-		const int OffsetSignIndex    = 19;
-		const int OffsetHoursIndex   = 20;
-		const int OffsetMinutesIndex = 23;
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private int GetOffsetSign()
-			=> _buffer[OffsetSignIndex] switch
-			{
-				'+' =>  1,
-				'-' => -1,
-				_ => throw new FormatException($"Unexpected character at TZ offset sign: {_buffer[OffsetSignIndex]}"),
-			};
-
-		private TimeSpan GetOffset() => new(
-			GetOffsetSign() *
-			(Get2Digits(OffsetHoursIndex) * 60 + Get2Digits(OffsetMinutesIndex)) *
-			TimeSpan.TicksPerMinute);
-
-		public DateTimeOffset GetValue() => new(
-			GetYear(), GetMonth(), GetDay(),
-			GetHours(), GetMinutes(), GetSeconds(),
-			GetOffset());
-	}
-
-	sealed class StringLineField : IField<string>
-	{
-		private readonly StringBuilder _line;
-		private bool _isCompleted;
-
-		public StringLineField()
-		{
-			_line = new StringBuilder();
-		}
-
-		public string GetValue() => _line.ToString();
-
-		#region IField Members
-
-		public bool Parse(ITextSegment textSegment)
-		{
-			Verify.Argument.IsNotNull(textSegment);
-			Verify.State.IsFalse(_isCompleted, "Field is already completed.");
-
-			if(textSegment.Length > 0)
-			{
-				int eol = textSegment.IndexOf('\n');
-				if(eol == -1)
-				{
-					textSegment.MoveTo(_line, textSegment.Length);
-				}
-				else
-				{
-					if(eol != 0)
-					{
-						textSegment.MoveTo(_line, eol);
-					}
-					textSegment.Skip(1);
-					return true;
-				}
-			}
-			return false;
-		}
-
-		public void Reset()
-		{
-			_line.Clear();
-			_isCompleted = false;
-		}
-
-		#endregion
-	}
-
-	sealed class CommitMessageField : IField<CommitMessage>
-	{
-		sealed class EmptyLineSeparator
-		{
-			private readonly char[] _buffer;
-			private int _length;
-			private int _lineEndings;
-
-			public EmptyLineSeparator()
-			{
-				_buffer = new char[4];
-			}
-
-			public int Length => _length;
-
-			public bool Append(char c)
-			{
-				if(c == '\n')
-				{
-					if(_length == 0)
-					{
-						++_lineEndings;
-					}
-					else
-					{
-						if(_buffer[_length - 1] != '\r')
-						{
-							++_lineEndings;
-						}
-					}
-				}
-				_buffer[_length++] = c;
-				return _lineEndings == 2;
-			}
-
-			public void Dump(StringBuilder stringBuilder)
-			{
-				Assert.IsNotNull(stringBuilder);
-
-				stringBuilder.Append(_buffer, 0, _length);
-				Reset();
-			}
-
-			public void Reset()
-			{
-				_length = 0;
-				_lineEndings = 0;
-			}
-		}
-
-		static readonly char[] Separators = new[] { '\0', '\r', '\n' };
-
-		private readonly StringBuilder _subject;
-		private readonly StringBuilder _body;
-		private readonly EmptyLineSeparator _separator;
-		private bool _isSubjectCompleted;
-		private bool _isCompleted;
-
-		public CommitMessageField()
-		{
-			_subject   = new StringBuilder();
-			_body      = new StringBuilder();
-			_separator = new EmptyLineSeparator();
-		}
-
-		public CommitMessage GetValue() => new(_subject.ToString(), _body.ToString());
-
-		private static void RemoveTrailingWhitespace(StringBuilder stringBuilder)
-		{
-			Assert.IsNotNull(stringBuilder);
-
-			int offset = stringBuilder.Length - 1;
-			while(offset >= 0 && char.IsWhiteSpace(stringBuilder[offset]))
-			{
-				--offset;
-			}
-			++offset;
-			if(offset < stringBuilder.Length)
-			{
-				stringBuilder.Remove(offset, stringBuilder.Length - offset);
-			}
-		}
-
-		#region IField Members
-
-		public bool Parse(ITextSegment textSegment)
-		{
-			Verify.Argument.IsNotNull(textSegment);
-			Verify.State.IsFalse(_isCompleted, "Field is already completed.");
-
-			while(textSegment.Length > 0)
-			{
-				int separatorIndex = _isSubjectCompleted ?
-					textSegment.IndexOf('\0') :
-					textSegment.IndexOfAny(Separators);
-				if(separatorIndex == -1)
-				{
-					if(_isSubjectCompleted)
-					{
-						textSegment.MoveTo(_body, textSegment.Length);
-					}
-					else
-					{
-						if(_separator.Length != 0)
-						{
-							_separator.Dump(_subject);
-						}
-						textSegment.MoveTo(_subject, textSegment.Length);
-					}
-					return false;
-				}
-				else
-				{
-					if(_isSubjectCompleted)
-					{
-						textSegment.MoveTo(_body, separatorIndex);
-					}
-					else
-					{
-						if(separatorIndex != 0)
-						{
-							if(_separator.Length != 0)
-							{
-								_separator.Dump(_subject);
-							}
-							textSegment.MoveTo(_subject, separatorIndex);
-						}
-					}
-					var separatorChar = textSegment.ReadChar();
-					switch(separatorChar)
-					{
-						case '\0':
-							RemoveTrailingWhitespace(_subject);
-							if(_isSubjectCompleted)
-							{
-								RemoveTrailingWhitespace(_body);
-							}
-							_isCompleted = true;
-							return true;
-						case '\r':
-						case '\n':
-							if(_isSubjectCompleted)
-							{
-								_body.Append(separatorChar);
-							}
-							else
-							{
-								if(_separator.Append(separatorChar))
-								{
-									_isSubjectCompleted = true;
-									_separator.Reset();
-								}
-							}
-							break;
-					}
-				}
-			}
-			return false;
-		}
-
-		public void Reset()
-		{
-			_subject.Clear();
-			_body.Clear();
-			_separator.Reset();
-			_isSubjectCompleted = false;
-			_isCompleted = false;
-		}
-
-		#endregion
-	}
-
 	#endregion
 
 	#region Data
 
 	private readonly Dictionary<Hash, RevisionData> _cache;
 	private readonly List<RevisionData> _log;
-	private readonly IField<Hash> _commitHash;
-	private readonly IField<Hash> _treeHash;
-	private readonly IField<List<Hash>> _parents;
-	private readonly IField<DateTimeOffset> _commitDate;
-	private readonly IField<string> _committerName;
-	private readonly IField<string> _committerEmail;
-	private readonly IField<DateTimeOffset> _authorDate;
-	private readonly IField<string> _authorName;
-	private readonly IField<string> _authorEmail;
-	private readonly IField<CommitMessage> _commitMessage;
-	private readonly IField[] _fields;
+	private readonly ITextFieldParser<Hash> _commitHash;
+	private readonly ITextFieldParser<Hash> _treeHash;
+	private readonly ITextFieldParser<List<Hash>> _parents;
+	private readonly ITextFieldParser<DateTimeOffset> _commitDate;
+	private readonly ITextFieldParser<string> _committerName;
+	private readonly ITextFieldParser<string> _committerEmail;
+	private readonly ITextFieldParser<DateTimeOffset> _authorDate;
+	private readonly ITextFieldParser<string> _authorName;
+	private readonly ITextFieldParser<string> _authorEmail;
+	private readonly ITextFieldParser<CommitMessage> _commitMessage;
+	private readonly ITextFieldParser[] _fields;
 	private int _currentFieldIndex;
 
 	#endregion
 
 	#region .ctor
 
-	private static IField<DateTimeOffset> CreateTimestampParser(TimestampFormat timestampFormat)
+	private static ITextFieldParser<DateTimeOffset> CreateTimestampParser(TimestampFormat timestampFormat)
 		=> timestampFormat switch
 		{
 			TimestampFormat.Unix          => new UnixTimestampField(),
@@ -609,18 +307,18 @@ sealed class LogParser : IParser<IList<RevisionData>>
 		_cache = cache ?? new Dictionary<Hash, RevisionData>(Hash.EqualityComparer);
 		_log   = new List<RevisionData>();
 
-		_fields = new IField[]
+		_fields = new ITextFieldParser[]
 		{
 			_commitHash     = new HashField(),
 			_treeHash       = new HashField(),
-			_parents        = new MultiHashField(),
+			_parents        = new MultiHashFieldParser(),
 			_commitDate     = CreateTimestampParser(timestampFormat),
-			_committerName  = new StringLineField(),
-			_committerEmail = new StringLineField(),
+			_committerName  = new StringLineFieldParser(),
+			_committerEmail = new StringLineFieldParser(),
 			_authorDate     = CreateTimestampParser(timestampFormat),
-			_authorName     = new StringLineField(),
-			_authorEmail    = new StringLineField(),
-			_commitMessage  = new CommitMessageField(),
+			_authorName     = new StringLineFieldParser(),
+			_authorEmail    = new StringLineFieldParser(),
+			_commitMessage  = new CommitMessageFieldParser(),
 		};
 	}
 
@@ -640,6 +338,10 @@ sealed class LogParser : IParser<IList<RevisionData>>
 	private RevisionData[] GetParents()
 	{
 		var parentHashes = _parents.GetValue();
+		if(parentHashes.Count == 0)
+		{
+			return Preallocated<RevisionData>.EmptyArray;
+		}
 		var parents = new RevisionData[parentHashes.Count];
 		for(int i = 0; i < parents.Length; ++i)
 		{
@@ -698,6 +400,21 @@ sealed class LogParser : IParser<IList<RevisionData>>
 
 	#region IParser Members
 
+#if NETCOREAPP
+
+	public void Parse(ReadOnlySpan<char> text)
+	{
+		while(text.Length > 0)
+		{
+			if(_fields[_currentFieldIndex].Parse(ref text))
+			{
+				NextField();
+			}
+		}
+	}
+
+#else
+
 	public void Parse(ITextSegment textSegment)
 	{
 		Verify.Argument.IsNotNull(textSegment);
@@ -710,6 +427,8 @@ sealed class LogParser : IParser<IList<RevisionData>>
 			}
 		}
 	}
+
+#endif
 
 	public void Complete()
 	{

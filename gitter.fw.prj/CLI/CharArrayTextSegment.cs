@@ -160,5 +160,18 @@ public sealed class CharArrayTextSegment : ITextSegment
 		return value;
 	}
 
+#if NETCOREAPP
+
+	public ReadOnlySpan<char> AsSpan(int offset, int count)
+		=> new(_buffer, _offset + offset, count);
+
+	public ReadOnlySpan<char> AsSpan(int count)
+		=> new(_buffer, _offset, count);
+
+	public ReadOnlySpan<char> AsSpan()
+		=> new(_buffer, _offset, _length);
+
+#endif
+
 	#endregion
 }

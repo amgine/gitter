@@ -139,5 +139,18 @@ public sealed class StringTextSegment : ITextSegment
 		return value;
 	}
 
+#if NETCOREAPP
+
+	public ReadOnlySpan<char> AsSpan(int offset, int count)
+		=> _buffer.AsSpan(_offset + offset, count);
+
+	public ReadOnlySpan<char> AsSpan(int count)
+		=> _buffer.AsSpan(_offset, count);
+
+	public ReadOnlySpan<char> AsSpan()
+		=> _buffer.AsSpan(_offset, _length);
+
+#endif
+
 	#endregion
 }

@@ -29,7 +29,7 @@ using System.Threading.Tasks;
 using gitter.Framework;
 using gitter.Framework.CLI;
 
-abstract class ParserBasedFunctionImpl<TParameters, TOutput> : IGitFunction<TParameters, TOutput>
+abstract class TextParserBasedFunctionImpl<TParameters, TOutput> : IGitFunction<TParameters, TOutput>
 	where TParameters : class
 {
 	#region Data
@@ -40,7 +40,7 @@ abstract class ParserBasedFunctionImpl<TParameters, TOutput> : IGitFunction<TPar
 
 	#region .ctor
 
-	protected ParserBasedFunctionImpl(ICommandExecutor commandExecutor)
+	protected TextParserBasedFunctionImpl(ICommandExecutor commandExecutor)
 	{
 		Verify.Argument.IsNotNull(commandExecutor);
 
@@ -53,7 +53,7 @@ abstract class ParserBasedFunctionImpl<TParameters, TOutput> : IGitFunction<TPar
 
 	protected abstract Command CreateCommand(TParameters parameters);
 
-	protected abstract IParser<TOutput> CreateParser();
+	protected abstract ITextParser<TOutput> CreateParser();
 
 	protected virtual void HandleNonZeroExitCode(AsyncTextReader stdErrReceiver, int exitCode)
 	{
@@ -73,17 +73,24 @@ abstract class ParserBasedFunctionImpl<TParameters, TOutput> : IGitFunction<TPar
 	{
 		Verify.Argument.IsNotNull(parameters);
 
-		var command        = CreateCommand(parameters);
-		var parser         = CreateParser();
-		var stdOutReceiver = new AsyncTextParser(parser);
-		var stdErrReceiver = new AsyncTextReader();
-		var exitCode       = _commandExecutor.ExecuteCommand(
-			command, stdOutReceiver, stdErrReceiver, GetExecutionFlags());
-		if(exitCode != 0)
+		var command = CreateCommand(parameters);
+		var parser  = CreateParser();
+		try
 		{
-			HandleNonZeroExitCode(stdErrReceiver, exitCode);
+			var stdOutReceiver = new AsyncTextParser(parser);
+			var stdErrReceiver = new AsyncTextReader();
+			var exitCode       = _commandExecutor.ExecuteCommand(
+				command, stdOutReceiver, stdErrReceiver, GetExecutionFlags());
+			if(exitCode != 0)
+			{
+				HandleNonZeroExitCode(stdErrReceiver, exitCode);
+			}
+			return parser.GetResult();
 		}
-		return parser.GetResult();
+		finally
+		{
+			(parser as IDisposable)?.Dispose();
+		}
 	}
 
 	public async Task<TOutput> InvokeAsync(TParameters parameters,
@@ -91,20 +98,25 @@ abstract class ParserBasedFunctionImpl<TParameters, TOutput> : IGitFunction<TPar
 	{
 		Verify.Argument.IsNotNull(parameters);
 
-		var command        = CreateCommand(parameters);
-		var parser         = CreateParser();
-		var stdOutReceiver = new AsyncTextParser(parser);
-		var stdErrReceiver = new AsyncTextReader();
-
-		var processExitCode = await _commandExecutor
-			.ExecuteCommandAsync(command, stdOutReceiver, stdErrReceiver, GetExecutionFlags(), cancellationToken)
-			.ConfigureAwait(continueOnCapturedContext: false);
-
-		if(processExitCode != 0)
+		var command = CreateCommand(parameters);
+		var parser  = CreateParser();
+		try
 		{
-			HandleNonZeroExitCode(stdErrReceiver, processExitCode);
+			var stdOutReceiver = new AsyncTextParser(parser);
+			var stdErrReceiver = new AsyncTextReader();
+			var exitCode       = await _commandExecutor
+				.ExecuteCommandAsync(command, stdOutReceiver, stdErrReceiver, GetExecutionFlags(), cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
+			if(exitCode != 0)
+			{
+				HandleNonZeroExitCode(stdErrReceiver, exitCode);
+			}
+			return parser.GetResult();
 		}
-		return parser.GetResult();
+		finally
+		{
+			(parser as IDisposable)?.Dispose();
+		}
 	}
 
 	#endregion
