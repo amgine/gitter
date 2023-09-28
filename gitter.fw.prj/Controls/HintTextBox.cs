@@ -29,6 +29,30 @@ namespace gitter.Framework.Controls;
 [DesignerCategory("")]
 public class HintTextBox : TextBox
 {
+	[DefaultValue("GrayText")]
+	[Browsable(true)]
+	[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+	public Color HintForeColor { get; set; } = SystemColors.GrayText;
+
+	[DefaultValue("WindowText")]
+	[Browsable(true)]
+	[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+	public Color TextForeColor { get; set; } = SystemColors.WindowText;
+
+#if NET6_0_OR_GREATER
+
+	[DefaultValue("")]
+	[Browsable(true)]
+	[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+	[Description("Text to display on unfocused control when no text is entered.")]
+	public string Hint
+	{
+		get => base.PlaceholderText;
+		set => base.PlaceholderText = value;
+	}
+
+#else
+
 	private bool _userTextEntered;
 	private string _hint;
 
@@ -79,16 +103,6 @@ public class HintTextBox : TextBox
 		}
 	}
 
-	[DefaultValue("GrayText")]
-	[Browsable(true)]
-	[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
-	public Color HintForeColor { get; set; } = SystemColors.GrayText;
-
-	[DefaultValue("WindowText")]
-	[Browsable(true)]
-	[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
-	public Color TextForeColor { get; set; } = SystemColors.WindowText;
-
 	[DefaultValue("")]
 	[Browsable(true)]
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
@@ -126,4 +140,6 @@ public class HintTextBox : TextBox
 			}
 		}
 	}
+
+#endif
 }
