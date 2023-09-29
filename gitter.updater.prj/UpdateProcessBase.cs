@@ -22,14 +22,13 @@ namespace gitter.Updater;
 
 using System;
 using System.IO;
+using System.Threading;
 
 using Resources = gitter.Updater.Properties.Resources;
 
 abstract class UpdateProcessBase : IUpdateProcess
 {
 	protected const string MainBinaryName = "gitter.exe";
-
-	private IAsyncResult _currentProcess;
 
 	protected UpdateProcessBase(string targetDirectory)
 	{
@@ -40,7 +39,7 @@ abstract class UpdateProcessBase : IUpdateProcess
 
 	protected UpdateProcessMonitor Monitor { get; private set; }
 
-	public bool IsUpdating => _currentProcess != null;
+	public bool IsUpdating { get; set; }
 
 	protected virtual void NotifyInitializing(UpdateProcessMonitor monitor)
 	{
@@ -49,19 +48,19 @@ abstract class UpdateProcessBase : IUpdateProcess
 
 	public void BeginUpdate(UpdateProcessMonitor monitor)
 	{
-		if(_currentProcess != null) throw new InvalidOperationException();
+		if(IsUpdating) throw new InvalidOperationException();
 
 		NotifyInitializing(monitor);
 
-		Action proc = UpdateProc;
 		Monitor = monitor;
-		_currentProcess = proc.BeginInvoke(UpdateProcCallback, proc);
+		ThreadPool.QueueUserWorkItem(_ => Update(monitor), null);
 	}
 
 	public void Update(UpdateProcessMonitor monitor)
 	{
 		NotifyInitializing(monitor);
 
+		IsUpdating = true;
 		Monitor = monitor;
 		try
 		{
@@ -82,33 +81,8 @@ abstract class UpdateProcessBase : IUpdateProcess
 		{
 			Cleanup();
 			Monitor = null;
+			IsUpdating = false;
 		}
-	}
-
-	private void UpdateProcCallback(IAsyncResult ar)
-	{
-		var proc = (Action)ar.AsyncState;
-		try
-		{
-			proc.EndInvoke(ar);
-		}
-		catch(Exception exc)
-		{
-			if(Monitor.CancelRequested)
-			{
-				Monitor.ReportCancelled();
-			}
-			else
-			{
-				Monitor.ReportFailure("Unexpected error:\n" + exc.Message);
-			}
-		}
-		finally
-		{
-			Cleanup();
-		}
-		Monitor = null;
-		_currentProcess = null;
 	}
 
 	protected abstract void UpdateProc();

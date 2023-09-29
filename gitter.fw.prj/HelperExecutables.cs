@@ -63,7 +63,11 @@ public static class HelperExecutables
 	{
 		const string tempPathName      = @"gitter-updater";
 		const string updaterExeName    = @"gitter.updater.exe";
+#if NETCOREAPP
+		const string updaterConfigName = @"gitter.updater.runtimeconfig.json";
+#else
 		const string updaterConfigName = @"gitter.updater.exe.config";
+#endif
 
 		var sourcePath = Path.GetDirectoryName(typeof(HelperExecutables).Assembly.Location);
 		var targetPath = Path.Combine(Path.GetTempPath(), tempPathName);
