@@ -52,6 +52,10 @@ public partial class RepositoryExplorerView : ViewBase
 		}
 	}
 
+	private static readonly IDpiBoundValue<Size> _defaultScalableSize = DpiBoundValue.Size(new(160, 449));
+
+	public override IDpiBoundValue<Size> DefaultScalableSize => _defaultScalableSize;
+
 	public void AddItem(CustomListBoxItem item)
 		=> _lstRepositoryExplorer.Items.Add(item);
 

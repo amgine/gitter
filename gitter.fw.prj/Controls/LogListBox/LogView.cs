@@ -22,6 +22,7 @@ namespace gitter.Framework.Controls;
 
 using System;
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 
 using Resources = gitter.Framework.Properties.Resources;
@@ -45,6 +46,10 @@ internal sealed class LogView : ViewBase
 
 		Text = Resources.StrLog;
 	}
+
+	private static readonly IDpiBoundValue<Size> _defaultScalableSize = DpiBoundValue.Size(new(555, 200));
+
+	public override IDpiBoundValue<Size> DefaultScalableSize => _defaultScalableSize;
 
 	public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"log.view");
 }

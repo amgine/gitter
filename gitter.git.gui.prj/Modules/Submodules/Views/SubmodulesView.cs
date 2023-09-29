@@ -22,6 +22,7 @@ namespace gitter.Git.Gui.Views;
 
 using System;
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 
 using gitter.Framework;
@@ -65,6 +66,10 @@ sealed class SubmodulesView : GitViewBase, ISearchableView<SubmodulesSearchOptio
 
 		AddTopToolStrip(_toolBar = new SubmodulesToolbar(this));
 	}
+
+	private static readonly IDpiBoundValue<Size> _defaultScalableSize = DpiBoundValue.Size(new(555, 160));
+
+	public override IDpiBoundValue<Size> DefaultScalableSize => _defaultScalableSize;
 
 	protected override void AttachToRepository(Repository repository)
 	{

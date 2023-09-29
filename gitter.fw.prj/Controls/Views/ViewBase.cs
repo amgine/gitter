@@ -138,6 +138,7 @@ public class ViewBase : UserControl
 	/// <summary>To keep designer happy.</summary>
 	public ViewBase()
 	{
+		SuspendLayout();
 		Size = new Size(555, 362);
 		if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
 		{
@@ -149,6 +150,7 @@ public class ViewBase : UserControl
 		{
 			Font = SystemFonts.MessageBoxFont ?? SystemFonts.DefaultFont;
 		}
+		ResumeLayout(performLayout: false);
 	}
 
 	/// <summary>Create <see cref="ViewBase"/>.</summary>
@@ -164,6 +166,10 @@ public class ViewBase : UserControl
 	#endregion
 
 	public IWorkingEnvironment WorkingEnvironment { get; }
+
+	private static readonly IDpiBoundValue<Size> _defaultScalableSize = DpiBoundValue.Size(new(555, 362));
+
+	public virtual IDpiBoundValue<Size> DefaultScalableSize => _defaultScalableSize;
 
 	protected INotificationService NotificationService
 		=> _notificationService ??= new BalloonNotificationService();

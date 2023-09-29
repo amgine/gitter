@@ -49,7 +49,6 @@
 			this.Name = "ToolboxTool";
 			this.Size = new System.Drawing.Size(153, 449);
 			this.ResumeLayout(false);
-
 		}
 
 		#endregion

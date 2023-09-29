@@ -131,6 +131,11 @@ public sealed class ViewDockService
 		if(_activeView == view) _activeView = null;
 	}
 
+	private void Rescale(ViewBase view)
+	{
+		view.Size = view.DefaultScalableSize.GetValue(new Dpi(DockPanel.DeviceDpi));
+	}
+
 	private void FindAppropriateViewHost(IViewFactory factory, ViewBase view)
 	{
 		var host = DockPanel.RootHost;
@@ -159,7 +164,7 @@ public sealed class ViewDockService
 							return;
 						}
 					}
-					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					Rescale(view);
 					host = new ViewHost(DockPanel, false, true, new[] { view })
 					{
 						Size = DockPanel.RootHost.Size
@@ -168,49 +173,49 @@ public sealed class ViewDockService
 					break;
 
 				case ViewPosition.Left:
-					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					Rescale(view);
 					host = new ViewHost(DockPanel, false, false, new[] { view });
 					DockPanel.PerformDock(host, DockResult.Left);
 					break;
 				case ViewPosition.Top:
-					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					Rescale(view);
 					host = new ViewHost(DockPanel, false, false, new[] { view });
 					DockPanel.PerformDock(host, DockResult.Top);
 					break;
 				case ViewPosition.Right:
-					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					Rescale(view);
 					host = new ViewHost(DockPanel, false, false, new[] { view });
 					DockPanel.PerformDock(host, DockResult.Right);
 					break;
 				case ViewPosition.Bottom:
-					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					Rescale(view);
 					host = new ViewHost(DockPanel, false, false, new[] { view });
 					DockPanel.PerformDock(host, DockResult.Bottom);
 					break;
 
 				case ViewPosition.LeftAutoHide:
-					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					Rescale(view);
 					host = new ViewHost(DockPanel, false, false, new[] { view });
 					host.UnpinFromLeft();
 					break;
 				case ViewPosition.TopAutoHide:
-					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					Rescale(view);
 					host = new ViewHost(DockPanel, false, false, new[] { view });
 					host.UnpinFromTop();
 					break;
 				case ViewPosition.RightAutoHide:
-					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					Rescale(view);
 					host = new ViewHost(DockPanel, false, false, new[] { view });
 					host.UnpinFromRight();
 					break;
 				case ViewPosition.BottomAutoHide:
-					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					Rescale(view);
 					host = new ViewHost(DockPanel, false, false, new[] { view });
 					host.UnpinFromBottom();
 					break;
 
 				case ViewPosition.Float:
-					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					Rescale(view);
 					host = new ViewHost(DockPanel, false, false, new[] { view });
 					var form = host.PrepareFloatingMode();
 					form.Location = DockPanel.PointToScreen(new Point(20, 20));
@@ -218,7 +223,7 @@ public sealed class ViewDockService
 					break;
 
 				default:
-					view.Size = DpiConverter.FromDefaultTo(new Dpi(DockPanel.DeviceDpi)).Convert(view.Size);
+					Rescale(view);
 					DockPanel.RootHost.AddView(view);
 					break;
 			}
