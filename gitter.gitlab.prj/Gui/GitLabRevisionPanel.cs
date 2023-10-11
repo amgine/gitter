@@ -27,6 +27,7 @@ using System.Windows.Forms;
 
 using gitter.Framework;
 using gitter.Framework.Controls;
+using gitter.Framework.Services;
 using gitter.Git;
 using gitter.GitLab.Api;
 
@@ -34,6 +35,8 @@ using Resources = gitter.GitLab.Properties.Resources;
 
 class GitLabRevisionPanel : FlowPanel
 {
+	static readonly LoggingService Log = new(@"GitLab");
+
 	const int PipelineId   = 1;
 	const int TestCases    = 2;
 	const int ViewOnGitLab = 3;
@@ -103,8 +106,9 @@ class GitLabRevisionPanel : FlowPanel
 				Invalidate();
 			}
 		}
-		catch
+		catch(Exception exc)
 		{
+			Log.Error(exc, exc.Message);
 			_failed = true;
 		}
 		finally
