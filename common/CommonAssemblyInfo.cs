@@ -30,8 +30,8 @@ using System.Resources;
 
 [assembly: NeutralResourcesLanguage("en-us")]
 
-[assembly: AssemblyFileVersion("1.1.2.0")]
-[assembly: AssemblyVersion("1.1.2.0")]
+[assembly: AssemblyFileVersion("1.1.3.0")]
+[assembly: AssemblyVersion("1.1.3.0")]
 
 #if NET6_0_OR_GREATER
 [module: System.Runtime.Versioning.SupportedOSPlatform("windows")]
