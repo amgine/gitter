@@ -64,6 +64,7 @@ public static class HelperExecutables
 		const string tempPathName      = @"gitter-updater";
 		const string updaterExeName    = @"gitter.updater.exe";
 #if NETCOREAPP
+		const string updaterDllName    = @"gitter.updater.dll";
 		const string updaterConfigName = @"gitter.updater.runtimeconfig.json";
 #else
 		const string updaterConfigName = @"gitter.updater.exe.config";
@@ -75,6 +76,9 @@ public static class HelperExecutables
 		{
 			Directory.CreateDirectory(targetPath);
 		}
+#if NETCOREAPP
+		File.Copy(Path.Combine(sourcePath, updaterDllName),    Path.Combine(targetPath, updaterDllName),    overwrite: true);
+#endif
 		File.Copy(Path.Combine(sourcePath, updaterExeName),    Path.Combine(targetPath, updaterExeName),    overwrite: true);
 		File.Copy(Path.Combine(sourcePath, updaterConfigName), Path.Combine(targetPath, updaterConfigName), overwrite: true);
 		using var process = new Process
