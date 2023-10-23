@@ -59,6 +59,17 @@ partial class DiffView : GitViewBase
 	protected virtual void OnViewModeChanged(EventArgs e)
 		=> ((EventHandler)Events[ViewModeChangedEvent])?.Invoke(this, e);
 
+	private static readonly object DiffOptionsUpdatedEvent = new();
+
+	public event EventHandler DiffOptionsUpdated
+	{
+		add    => Events.AddHandler    (DiffOptionsUpdatedEvent, value);
+		remove => Events.RemoveHandler (DiffOptionsUpdatedEvent, value);
+	}
+
+	protected virtual void OnDiffOptionsUpdated(EventArgs e)
+		=> ((EventHandler)Events[DiffOptionsUpdatedEvent])?.Invoke(this, e);
+
 	#endregion
 
 	#region .ctor
@@ -266,21 +277,17 @@ partial class DiffView : GitViewBase
 		if(Guid == Guids.ContextualDiffViewGuid)
 		{
 			var node = section.TryGetSection("ContextualDiffOptions");
-			if(node != null)
+			if(node is not null)
 			{
 				_options.Context = node.GetValue<int>("Context", _options.Context);
 				_options.IgnoreWhitespace = node.GetValue<bool>("IgnoreWhitespace", _options.IgnoreWhitespace);
 				_options.UsePatienceAlgorithm = node.GetValue<bool>("UsePatienceAlgorithm", _options.UsePatienceAlgorithm);
-				switch(node.GetValue<string>("ViewMode", string.Empty))
+				OnDiffOptionsUpdated(EventArgs.Empty);
+				ViewMode = node.GetValue<string>("ViewMode", string.Empty) switch
 				{
-					case "Split":
-						ViewMode = DiffViewMode.Split;
-						break;
-					case "Single":
-					default:
-						ViewMode = DiffViewMode.Single;
-						break;
-				}
+					"Split" => DiffViewMode.Split,
+					_       => DiffViewMode.Single,
+				};
 			}
 		}
 		base.LoadRepositoryConfig(section);
@@ -292,14 +299,15 @@ partial class DiffView : GitViewBase
 
 		if(viewModel is DiffViewModel vm)
 		{
-			if(vm.DiffOptions != null)
+			if(vm.DiffOptions is not null)
 			{
 				_options = vm.DiffOptions;
 			}
-			else if(_options == null)
+			else if(_options is null)
 			{
 				_options = new DiffOptions();
 			}
+			OnDiffOptionsUpdated(EventArgs.Empty);
 			DiffSource = vm.DiffSource;
 			UpdateText();
 		}
@@ -366,7 +374,7 @@ partial class DiffView : GitViewBase
 		}
 	}
 
-	public DiffOptions DiffOptions => _options ??= new DiffOptions();
+	public DiffOptions DiffOptions => _options ??= new();
 
 	private void UpdateText()
 	{

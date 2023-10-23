@@ -67,6 +67,7 @@ internal sealed class DiffToolbar : ToolStrip
 	private readonly ToolStripButton _btnSingleMode;
 	private readonly ToolStripButton _btnSplitMode;
 	private readonly DpiBindings _bindings;
+	private bool _updatingDiffOptions;
 
 	#endregion
 
@@ -89,7 +90,6 @@ internal sealed class DiffToolbar : ToolStrip
 			});
 		Items.Add(_contextTextBox = new ToolStripTextBox()
 			{
-				Text = _diffView.DiffOptions.Context.ToString(CultureInfo.InvariantCulture),
 				TextBoxTextAlign = HorizontalAlignment.Right,
 				ControlAlign = ContentAlignment.MiddleCenter,
 				AutoSize = false,
@@ -105,18 +105,9 @@ internal sealed class DiffToolbar : ToolStrip
 		Items.Add(_ddbOptions = new ToolStripDropDownButton(Resources.StrOptions)
 			{
 			});
-		_ddbOptions.DropDownItems.Add(_mnuIgnoreWhitespace = new ToolStripMenuItem(Resources.StrsIgnoreWhitespace, null, OnIgnoreWhitespaceClick)
-			{
-				Checked = _diffView.DiffOptions.IgnoreWhitespace,
-			});
-		_ddbOptions.DropDownItems.Add(_mnuUsePatienceAlgorithm = new ToolStripMenuItem(Resources.StrsUsePatienceDiffAlgorithm, null, OnUsePatienceAlgorithmClick)
-			{
-				Checked = _diffView.DiffOptions.UsePatienceAlgorithm,
-			});
-		_ddbOptions.DropDownItems.Add(_mnuBinaryDiff = new ToolStripMenuItem(Resources.StrBinary, null, OnBinaryClick)
-			{
-				Checked = _diffView.DiffOptions.Binary,
-			});
+		_ddbOptions.DropDownItems.Add(_mnuIgnoreWhitespace = new ToolStripMenuItem(Resources.StrsIgnoreWhitespace, null, OnIgnoreWhitespaceClick));
+		_ddbOptions.DropDownItems.Add(_mnuUsePatienceAlgorithm = new ToolStripMenuItem(Resources.StrsUsePatienceDiffAlgorithm, null, OnUsePatienceAlgorithmClick));
+		_ddbOptions.DropDownItems.Add(_mnuBinaryDiff = new ToolStripMenuItem(Resources.StrBinary, null, OnBinaryClick));
 
 		Items.Add(_btnSplitMode = new ToolStripButton(Resources.StrDiffSplitView, default, (_, _) => _diffView.ViewMode = DiffViewMode.Split)
 			{
@@ -131,9 +122,10 @@ internal sealed class DiffToolbar : ToolStrip
 				Checked = _diffView.ViewMode == DiffViewMode.Single,
 			});
 
-		_contextTextBox.TextChanged += OnContextTextChanged;
-		_contextTextBox.KeyPress += static (_, e) => e.Handled = !char.IsNumber(e.KeyChar);
-		_diffView.ViewModeChanged += OnDiffViewViewModeChanged;
+		_contextTextBox.TextChanged  += OnContextTextChanged;
+		_contextTextBox.KeyPress     += static (_, e) => e.Handled = !char.IsNumber(e.KeyChar);
+		_diffView.ViewModeChanged    += OnDiffViewViewModeChanged;
+		_diffView.DiffOptionsUpdated += OnDiffViewDiffOptionsUpdated;
 
 		_bindings = new DpiBindings(this);
 		_bindings.BindImage(_btnRefresh,     Icons.Refresh);
@@ -142,6 +134,31 @@ internal sealed class DiffToolbar : ToolStrip
 		_bindings.BindImage(_ddbOptions,     Icons.Options);
 		_bindings.BindImage(_btnSingleMode,  Icons.DiffSingle);
 		_bindings.BindImage(_btnSplitMode,   Icons.DiffSplit);
+
+		DisplayDiffOptions(diffView.DiffOptions);
+	}
+
+	private void OnDiffViewDiffOptionsUpdated(object sender, EventArgs e)
+	{
+		DisplayDiffOptions(_diffView.DiffOptions);
+	}
+
+	private void DisplayDiffOptions(DiffOptions diffOptions)
+	{
+		Assert.IsNotNull(diffOptions);
+
+		_updatingDiffOptions = true;
+		try
+		{
+			_contextTextBox.Text             = diffOptions.Context.ToString(CultureInfo.InvariantCulture);
+			_mnuIgnoreWhitespace.Checked     = diffOptions.IgnoreWhitespace;
+			_mnuUsePatienceAlgorithm.Checked = diffOptions.UsePatienceAlgorithm;
+			_mnuBinaryDiff.Checked           = diffOptions.Binary;
+		}
+		finally
+		{
+			_updatingDiffOptions = false;
+		}
 	}
 
 	private void OnDiffViewViewModeChanged(object sender, EventArgs e)
@@ -152,6 +169,7 @@ internal sealed class DiffToolbar : ToolStrip
 
 	private void OnContextTextChanged(object sender, EventArgs e)
 	{
+		if(_updatingDiffOptions) return;
 		if(int.TryParse(_contextTextBox.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int context))
 		{
 			SetContext(context);
@@ -160,6 +178,7 @@ internal sealed class DiffToolbar : ToolStrip
 
 	private void OnIgnoreWhitespaceClick(object sender, EventArgs e)
 	{
+		if(_updatingDiffOptions) return;
 		_diffView.DiffOptions.IgnoreWhitespace = !_diffView.DiffOptions.IgnoreWhitespace;
 		_mnuIgnoreWhitespace.Checked = _diffView.DiffOptions.IgnoreWhitespace;
 		_diffView.RefreshContent();
@@ -167,6 +186,7 @@ internal sealed class DiffToolbar : ToolStrip
 
 	private void OnUsePatienceAlgorithmClick(object sender, EventArgs e)
 	{
+		if(_updatingDiffOptions) return;
 		_diffView.DiffOptions.UsePatienceAlgorithm = !_diffView.DiffOptions.UsePatienceAlgorithm;
 		_mnuUsePatienceAlgorithm.Checked = _diffView.DiffOptions.UsePatienceAlgorithm;
 		_diffView.RefreshContent();
@@ -174,6 +194,7 @@ internal sealed class DiffToolbar : ToolStrip
 
 	private void OnBinaryClick(object sender, EventArgs e)
 	{
+		if(_updatingDiffOptions) return;
 		_diffView.DiffOptions.Binary = !_diffView.DiffOptions.Binary;
 		_mnuBinaryDiff.Checked = _diffView.DiffOptions.Binary;
 		_diffView.RefreshContent();
@@ -193,7 +214,6 @@ internal sealed class DiffToolbar : ToolStrip
 		{
 			_diffView.DiffOptions.Context = context;
 			_diffView.RefreshContent();
-			_contextTextBox.Text = context.ToString(CultureInfo.InvariantCulture);
 		}
 	}
 
