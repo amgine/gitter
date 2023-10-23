@@ -11,9 +11,20 @@ partial class LogParser
 {
 	sealed class MultiHashFieldParser : ITextFieldParser<List<Hash>>
 	{
+		enum ParserState
+		{
+			ExpectNewLineOrHash,
+			ExpectNewLineOrSpace,
+			ExpectHash,
+		}
+
+		const char Separator = ' ';
+		const char Terminator = '\n';
+
 		private readonly char[] _buffer;
 		private readonly List<Hash> _hashes;
 		private int _offset;
+		private ParserState _state;
 		private bool _isCompleted;
 
 		public MultiHashFieldParser()
@@ -24,6 +35,7 @@ partial class LogParser
 
 		public void Reset()
 		{
+			_state = ParserState.ExpectNewLineOrHash;
 			_isCompleted = false;
 			_offset = 0;
 			_hashes.Clear();
@@ -35,56 +47,65 @@ partial class LogParser
 		{
 			Verify.State.IsFalse(_isCompleted, "Field is already completed.");
 
-			if(_offset == 0)
+			while(text.Length > 0)
 			{
-				if(text.Length > 0 && text[0] == '\n')
+				if(_offset == 0)
 				{
-					text = text[1..];
-					_isCompleted = true;
-					return true;
-				}
-				if(text.Length == Hash.HexStringLength)
-				{
-					_hashes.Add(new Hash(text));
-					text = default;
-					return false;
+					switch(_state)
+					{
+						case ParserState.ExpectNewLineOrHash:
+							if(text[0] == Terminator)
+							{
+								text = text[1..];
+								_isCompleted = true;
+								return true;
+							}
+							goto case ParserState.ExpectHash;
+						case ParserState.ExpectNewLineOrSpace:
+							switch(text[0])
+							{
+								case Terminator: // no more hashes available
+									text = text[1..];
+									_isCompleted = true;
+									return true;
+								case Separator: // more hashes available
+									text = text[1..];
+									_state = ParserState.ExpectHash;
+									continue;
+								default:
+									throw new ApplicationException(
+										$"Unexpected character: '{text[0]}'. Expected '\\n' or ' '.");
+							}
+						case ParserState.ExpectHash:
+							if(text.Length >= Hash.HexStringLength)
+							{
+								_hashes.Add(new Hash(text));
+								text = text[Hash.HexStringLength..];
+								_state = ParserState.ExpectNewLineOrSpace;
+								continue;
+							}
+							else
+							{
+								text.CopyTo(_buffer);
+								_offset = text.Length;
+								text = default;
+								return false;
+							}
+					}
 				}
 				else
 				{
-					while(text.Length > Hash.HexStringLength)
+					int c = Math.Min(text.Length, Hash.HexStringLength - _offset);
+					text[..c].CopyTo(new(_buffer, _offset, c));
+					text = text[c..];
+					_offset += c;
+					if(_offset == Hash.HexStringLength)
 					{
-						_hashes.Add(new Hash(text));
-						var terminator = text[Hash.HexStringLength];
-						text = text[(Hash.HexStringLength + 1)..];
-						if(terminator == '\n')
-						{
-							_isCompleted = true;
-							return true;
-						}
-						else
-						{
-							return false;
-						}
+						_hashes.Add(new Hash(_buffer));
+						_offset = 0;
+						_state = ParserState.ExpectNewLineOrSpace;
+						continue;
 					}
-				}
-			}
-			if(_offset < Hash.HexStringLength && text.Length > 0)
-			{
-				int c = Math.Min(text.Length, Hash.HexStringLength - _offset);
-				text[..c].CopyTo(new(_buffer, _offset, c));
-				text = text[c..];
-				_offset += c;
-			}
-			if(_offset == Hash.HexStringLength && text.Length > 0)
-			{
-				_offset = 0;
-				_hashes.Add(new Hash(_buffer));
-				var separator = text[0];
-				text = text[1..];
-				if(separator == '\n')
-				{
-					_isCompleted = true;
-					return true;
 				}
 			}
 			return false;
@@ -97,27 +118,62 @@ partial class LogParser
 			Verify.Argument.IsNotNull(textSegment);
 			Verify.State.IsFalse(_isCompleted, "Field is already completed.");
 
-			if(_offset == 0 && textSegment.Length > 0 && textSegment.PeekChar() == '\n')
+			while(textSegment.Length > 0)
 			{
-				textSegment.Skip(1);
-				_isCompleted = true;
-				return true;
-			}
-			if(_offset < Hash.HexStringLength && textSegment.Length > 0)
-			{
-				int c = Math.Min(textSegment.Length, Hash.HexStringLength - _offset);
-				textSegment.MoveTo(_buffer, _offset, c);
-				_offset += c;
-			}
-			if(_offset == Hash.HexStringLength && textSegment.Length > 0)
-			{
-				_offset = 0;
-				_hashes.Add(new Hash(_buffer));
-				var separator = textSegment.ReadChar();
-				if(separator == '\n')
+				if(_offset == 0)
 				{
-					_isCompleted = true;
-					return true;
+					switch(_state)
+					{
+						case ParserState.ExpectNewLineOrHash:
+							if(textSegment.PeekChar() == Terminator)
+							{
+								textSegment.Skip(1);
+								_isCompleted = true;
+								return true;
+							}
+							goto case ParserState.ExpectHash;
+						case ParserState.ExpectNewLineOrSpace:
+							switch(textSegment.PeekChar())
+							{
+								case Terminator: // no more hashes available
+									textSegment.Skip(1);
+									_isCompleted = true;
+									return true;
+								case Separator: // more hashes available
+									textSegment.Skip(1);
+									_state = ParserState.ExpectHash;
+									continue;
+								default:
+									throw new ApplicationException(
+										$"Unexpected character: '{textSegment.PeekChar()}'. Expected '\\n' or ' '.");
+							}
+						case ParserState.ExpectHash:
+							if(textSegment.Length >= Hash.HexStringLength)
+							{
+								_hashes.Add(new Hash(textSegment.ReadString(Hash.HexStringLength)));
+								_state = ParserState.ExpectNewLineOrSpace;
+								continue;
+							}
+							else
+							{
+								_offset = textSegment.Length;
+								textSegment.MoveTo(_buffer, 0, textSegment.Length);
+								return false;
+							}
+					}
+				}
+				else
+				{
+					int c = Math.Min(textSegment.Length, Hash.HexStringLength - _offset);
+					textSegment.MoveTo(_buffer, _offset, c);
+					_offset += c;
+					if(_offset == Hash.HexStringLength)
+					{
+						_hashes.Add(new Hash(_buffer));
+						_offset = 0;
+						_state = ParserState.ExpectNewLineOrSpace;
+						continue;
+					}
 				}
 			}
 			return false;
