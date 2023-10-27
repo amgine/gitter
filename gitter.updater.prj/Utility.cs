@@ -150,8 +150,18 @@ public static class Utility
 			var processes = Process.GetProcesses();
 			foreach(var p in processes)
 			{
-				bool kill = p.ProcessName == "gitter";
-				if(!kill)
+				ProcessModule module;
+				try
+				{
+					module = p.MainModule;
+				}
+				catch
+				{
+					continue;
+				}
+
+				bool kill = false;
+				if(module?.ModuleName == @"gitter.exe")
 				{
 					try
 					{
@@ -183,7 +193,7 @@ public static class Utility
 					}
 					try
 					{
-						if(!closed || !p.WaitForExit(2000))
+						if(!p.WaitForExit(2000))
 						{
 							p.Kill();
 						}
