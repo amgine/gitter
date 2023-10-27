@@ -13,9 +13,9 @@ partial class LogParser
 	{
 		enum ParserState
 		{
-			ExpectNewLineOrHash,
-			ExpectNewLineOrSpace,
-			ExpectHash,
+			ExpectTerminatorOrValue,
+			ExpectTerminatorOrSeparator,
+			ExpectValue,
 		}
 
 		const char Separator = ' ';
@@ -35,7 +35,7 @@ partial class LogParser
 
 		public void Reset()
 		{
-			_state = ParserState.ExpectNewLineOrHash;
+			_state = ParserState.ExpectTerminatorOrValue;
 			_isCompleted = false;
 			_offset = 0;
 			_hashes.Clear();
@@ -53,15 +53,15 @@ partial class LogParser
 				{
 					switch(_state)
 					{
-						case ParserState.ExpectNewLineOrHash:
+						case ParserState.ExpectTerminatorOrValue:
 							if(text[0] == Terminator)
 							{
 								text = text[1..];
 								_isCompleted = true;
 								return true;
 							}
-							goto case ParserState.ExpectHash;
-						case ParserState.ExpectNewLineOrSpace:
+							goto case ParserState.ExpectValue;
+						case ParserState.ExpectTerminatorOrSeparator:
 							switch(text[0])
 							{
 								case Terminator: // no more hashes available
@@ -70,18 +70,18 @@ partial class LogParser
 									return true;
 								case Separator: // more hashes available
 									text = text[1..];
-									_state = ParserState.ExpectHash;
+									_state = ParserState.ExpectValue;
 									continue;
 								default:
 									throw new ApplicationException(
 										$"Unexpected character: '{text[0]}'. Expected '\\n' or ' '.");
 							}
-						case ParserState.ExpectHash:
+						case ParserState.ExpectValue:
 							if(text.Length >= Hash.HexStringLength)
 							{
 								_hashes.Add(new Hash(text));
 								text = text[Hash.HexStringLength..];
-								_state = ParserState.ExpectNewLineOrSpace;
+								_state = ParserState.ExpectTerminatorOrSeparator;
 								continue;
 							}
 							else
@@ -103,7 +103,7 @@ partial class LogParser
 					{
 						_hashes.Add(new Hash(_buffer));
 						_offset = 0;
-						_state = ParserState.ExpectNewLineOrSpace;
+						_state = ParserState.ExpectTerminatorOrSeparator;
 						continue;
 					}
 				}
@@ -124,15 +124,15 @@ partial class LogParser
 				{
 					switch(_state)
 					{
-						case ParserState.ExpectNewLineOrHash:
+						case ParserState.ExpectTerminatorOrValue:
 							if(textSegment.PeekChar() == Terminator)
 							{
 								textSegment.Skip(1);
 								_isCompleted = true;
 								return true;
 							}
-							goto case ParserState.ExpectHash;
-						case ParserState.ExpectNewLineOrSpace:
+							goto case ParserState.ExpectValue;
+						case ParserState.ExpectTerminatorOrSeparator:
 							switch(textSegment.PeekChar())
 							{
 								case Terminator: // no more hashes available
@@ -141,23 +141,24 @@ partial class LogParser
 									return true;
 								case Separator: // more hashes available
 									textSegment.Skip(1);
-									_state = ParserState.ExpectHash;
+									_state = ParserState.ExpectValue;
 									continue;
 								default:
 									throw new ApplicationException(
 										$"Unexpected character: '{textSegment.PeekChar()}'. Expected '\\n' or ' '.");
 							}
-						case ParserState.ExpectHash:
+						case ParserState.ExpectValue:
 							if(textSegment.Length >= Hash.HexStringLength)
 							{
-								_hashes.Add(new Hash(textSegment.ReadString(Hash.HexStringLength)));
-								_state = ParserState.ExpectNewLineOrSpace;
+								textSegment.MoveTo(_buffer, 0, Hash.HexStringLength);
+								_hashes.Add(new Hash(_buffer));
+								_state = ParserState.ExpectTerminatorOrSeparator;
 								continue;
 							}
 							else
 							{
 								_offset = textSegment.Length;
-								textSegment.MoveTo(_buffer, 0, textSegment.Length);
+								textSegment.MoveTo(_buffer, 0, _offset);
 								return false;
 							}
 					}
@@ -171,7 +172,7 @@ partial class LogParser
 					{
 						_hashes.Add(new Hash(_buffer));
 						_offset = 0;
-						_state = ParserState.ExpectNewLineOrSpace;
+						_state = ParserState.ExpectTerminatorOrSeparator;
 						continue;
 					}
 				}
