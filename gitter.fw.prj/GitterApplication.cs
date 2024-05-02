@@ -139,6 +139,7 @@ public static class GitterApplication
 			catch
 			{
 			}
+			if(e.IsTerminating) Environment.Exit(0);
 		}
 		else
 		{

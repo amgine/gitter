@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net6.0-windows;net48</TargetFrameworks>
-    <LangVersion>11</LangVersion>
+    <LangVersion>12</LangVersion>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
@@ -14,12 +14,20 @@
     <DefineConstants>$(DefineConstants);CS_11</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$([MSBuild]::VersionEquals('$(LangVersion)', '12'))">
+    <DefineConstants>$(DefineConstants);CS_12</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(LangVersion)', '10'))">
     <DefineConstants>$(DefineConstants);CS_10_OR_GREATER</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(LangVersion)', '11'))">
     <DefineConstants>$(DefineConstants);CS_11_OR_GREATER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(LangVersion)', '12'))">
+    <DefineConstants>$(DefineConstants);CS_12_OR_GREATER</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>

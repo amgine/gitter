@@ -26,19 +26,14 @@ using gitter.Framework.Controls;
 
 using gitter.Git.Gui.Controls;
 
-class ConfigSearch : ListBoxSearch<ConfigSearchOptions>
+class ConfigSearch(CustomListBox listBox) : ListBoxSearch<ConfigSearchOptions>(listBox)
 {
-	public ConfigSearch(CustomListBox listBox)
-		: base(listBox)
-	{
-	}
-
 	protected static bool TestConfigParameter(ConfigParameter parameter, ConfigSearchOptions search)
 	{
 		Assert.IsNotNull(parameter);
 		Assert.IsNotNull(search);
 
-		if(TestString(parameter.Name, search)) return true;
+		if(TestString(parameter.Name,  search)) return true;
 		if(TestString(parameter.Value, search)) return true;
 
 		return false;

@@ -218,21 +218,20 @@ partial class DiffView : GitViewBase
 		get => _diffViewerFiles;
 		set
 		{
-			if(_diffViewerFiles != value)
+			if(_diffViewerFiles == value) return;
+
+			if(_diffViewerFiles is not null)
 			{
-				if(_diffViewerFiles != null)
-				{
-					_diffViewerFiles.Parent = null;
-					_diffViewerFiles.DiffFileContextMenuRequested -= OnDiffFileContextMenuRequested;
-					_diffViewerFiles.UntrackedFileContextMenuRequested -= OnUntrackedFileContextMenuRequested;
-					_diffViewerFiles.Dispose();
-				}
-				_diffViewerFiles = value;
-				if(_diffViewerFiles != null)
-				{
-					_diffViewerFiles.DiffFileContextMenuRequested += OnDiffFileContextMenuRequested;
-					_diffViewerFiles.UntrackedFileContextMenuRequested += OnUntrackedFileContextMenuRequested;
-				}
+				_diffViewerFiles.Parent = null;
+				_diffViewerFiles.DiffFileContextMenuRequested -= OnDiffFileContextMenuRequested;
+				_diffViewerFiles.UntrackedFileContextMenuRequested -= OnUntrackedFileContextMenuRequested;
+				_diffViewerFiles.Dispose();
+			}
+			_diffViewerFiles = value;
+			if(_diffViewerFiles is not null)
+			{
+				_diffViewerFiles.DiffFileContextMenuRequested += OnDiffFileContextMenuRequested;
+				_diffViewerFiles.UntrackedFileContextMenuRequested += OnUntrackedFileContextMenuRequested;
 			}
 		}
 	}
@@ -299,14 +298,7 @@ partial class DiffView : GitViewBase
 
 		if(viewModel is DiffViewModel vm)
 		{
-			if(vm.DiffOptions is not null)
-			{
-				_options = vm.DiffOptions;
-			}
-			else if(_options is null)
-			{
-				_options = new DiffOptions();
-			}
+			_options = vm.DiffOptions ?? new();
 			OnDiffOptionsUpdated(EventArgs.Empty);
 			DiffSource = vm.DiffSource;
 			UpdateText();
@@ -318,7 +310,7 @@ partial class DiffView : GitViewBase
 		if(viewModel is DiffViewModel vm)
 		{
 			DiffBinding = null;
-			if(_diffSource != null)
+			if(_diffSource is not null)
 			{
 				_diffSource.Updated -= OnDiffSourceUpdated;
 				_diffSource.Dispose();
@@ -364,7 +356,7 @@ partial class DiffView : GitViewBase
 
 	public override void RefreshContent()
 	{
-		if(DiffBinding != null)
+		if(DiffBinding is not null)
 		{
 			DiffBinding.ReloadData();
 		}

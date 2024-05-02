@@ -56,10 +56,10 @@ public sealed class Module : Autofac.Module
 			.ExternallyOwned();
 
 		builder
-			.RegisterTypes(new[]
-			{
+			.RegisterTypes(
+			[
 				typeof(ConfigurationPage),
-			})
+			])
 			.AsSelf()
 			.ExternallyOwned();
 

@@ -32,13 +32,30 @@ using Resources = gitter.Framework.Properties.Resources;
 public partial class ExceptionDialog : DialogBase
 {
 	private const string ReportUrl = @"https://github.com/amgine/gitter/issues/new";
-	private DateTime _date;
+	private readonly DateTime _date;
+
+	private static bool ShouldUnwrap(Exception exception)
+		=> exception
+		is TargetInvocationException
+		or TypeInitializationException
+		or AggregateException;
+
+	private static Exception Unwrap(Exception e)
+	{
+		while(ShouldUnwrap(e) && e.InnerException is not null)
+		{
+			e = e.InnerException;
+		}
+		return e;
+	}
 
 	/// <summary>Create <see cref="ExceptionDialog"/>.</summary>
 	/// <param name="exception">Related exception.</param>
 	public ExceptionDialog(Exception exception)
 	{
 		Verify.Argument.IsNotNull(exception);
+
+		exception = Unwrap(exception);
 
 		Exception = exception;
 		_date = DateTime.Now;

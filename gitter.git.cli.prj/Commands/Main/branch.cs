@@ -153,17 +153,11 @@ public sealed class BranchCommand : Command
 		public static ICommandArgument NoMerged(string? commit) => commit is null ? NoMergedHEAD : new CommandParameterValue("--no-merged", commit, ' ');
 	}
 
-	public sealed class Builder : CommandBuilderBase
+	public sealed class Builder(Version gitVersion) : CommandBuilderBase(BranchCommandName)
 	{
 		static readonly Version NewReflogArgVersion = new(2, 20, 0);
 
-		public Builder(Version gitVersion)
-			: base(BranchCommandName)
-		{
-			GitVersion = gitVersion;
-		}
-
-		private Version GitVersion { get; }
+		private Version GitVersion { get; } = gitVersion;
 
 		public void Delete(bool force = false)
 			=> AddArgument(force

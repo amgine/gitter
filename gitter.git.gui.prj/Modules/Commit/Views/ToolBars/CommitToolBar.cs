@@ -22,7 +22,6 @@ namespace gitter.Git.Gui.Views;
 
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.Windows.Forms;
 
 using gitter.Framework;

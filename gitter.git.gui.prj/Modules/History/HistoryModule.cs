@@ -34,34 +34,12 @@ using gitter.Git.Gui.Views;
 
 sealed class HistoryModule : Autofac.Module
 {
-	sealed class NamedFactoryParameter<T> : Parameter
+	sealed class NamedFactoryParameter<T>(string name) : Parameter
 	{
-		sealed class Factory : IFactory<T>
+		sealed class Factory(IComponentContext componentContext, string name) : IFactory<T>
 		{
-			public Factory(IComponentContext componentContext, string name)
-			{
-				Assert.IsNotNull(componentContext);
-				Assert.IsNotNull(name);
-
-				ComponentContext = componentContext;
-				Name             = name;
-			}
-
-			private IComponentContext ComponentContext { get; }
-
-			private string Name { get; }
-
-			public T Create() => ComponentContext.ResolveNamed<T>(Name);
+			public T Create() => componentContext.ResolveNamed<T>(name);
 		}
-
-		public NamedFactoryParameter(string name)
-		{
-			Verify.Argument.IsNotNull(name);
-
-			Name = name;
-		}
-
-		private string Name { get; }
 
 		public override bool CanSupplyValue(ParameterInfo pi, IComponentContext context, out Func<object> valueProvider)
 		{
@@ -70,7 +48,7 @@ sealed class HistoryModule : Autofac.Module
 
 			if(typeof(IFactory<T>).IsAssignableFrom(pi.ParameterType))
 			{
-				valueProvider = () => new Factory(context, Name);
+				valueProvider = () => new Factory(context, name);
 				return true;
 			}
 			valueProvider = default;
@@ -94,11 +72,11 @@ sealed class HistoryModule : Autofac.Module
 		RegisterView<PathHistoryView>(builder, ForPathRevisionHistory);
 
 		builder
-			.RegisterTypes(new[]
-			{
+			.RegisterTypes(
+			[
 				typeof(HistoryViewFactory),
 				typeof(PathHistoryViewFactory),
-			})
+			])
 			.Named<IViewFactory>(@"git")
 			.As<GitViewFactoryBase>()
 			.SingleInstance();

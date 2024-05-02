@@ -44,11 +44,10 @@ class GuiItemFactory
 	}
 
 	private static readonly IPathCommandsProvider[] _pathCommandsProviders =
-		new IPathCommandsProvider[]
-		{
+		[
 			new OpenWithVisualStudioCodeProvider(),
 			new OpenVisualStudioSolutionsProvider(),
-		};
+		];
 
 	interface IPathCommandsProvider
 	{

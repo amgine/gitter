@@ -153,8 +153,8 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		_menuStrip.Dock = DockStyle.None;
 		_menuStrip.Items.AddRange(new ToolStripItem[]
 		{
-			new ToolStripMenuItem(Resources.StrRepository, null, new ToolStripItem[]
-			{
+			new ToolStripMenuItem(Resources.StrRepository, null,
+			[
 				init  = new ToolStripMenuItem(Resources.StrInit.AddEllipsis(),  default, OnInitRepositoryClick),
 				clone = new ToolStripMenuItem(Resources.StrClone.AddEllipsis(), default, OnCloneRepositoryClick),
 				new ToolStripSeparator(),
@@ -162,21 +162,21 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 				{
 					ShortcutKeys = Keys.Control | Keys.O,
 				},
-				_mnuRecentRepositories = new ToolStripMenuItem(Resources.StrRecent, null, new ToolStripItem[]
-				{
+				_mnuRecentRepositories = new ToolStripMenuItem(Resources.StrRecent, null,
+				[
 					_mnuDummy = new ToolStripMenuItem("<no available>")
 					{
 						Enabled = false,
 					},
-				}),
+				]),
 				new ToolStripSeparator(),
 				new ToolStripMenuItem(Resources.StrExit, null, _mnuExit_Click)
 				{
 					ShortcutKeys = Keys.Alt | Keys.F4,
 				},
-			}),
-			_mnuView = new ToolStripMenuItem(Resources.StrView, null, new ToolStripItem[]
-			{
+			]),
+			_mnuView = new ToolStripMenuItem(Resources.StrView, null,
+			[
 				new ViewMenuItem(_repositoryExplorerFactory) { Environment = this },
 				new ViewMenuItem(_startPageFactory) { Environment = this },
 				new ToolStripSeparator(),
@@ -186,15 +186,15 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 				},
 				new ToolStripSeparator(),
 				new ViewMenuItem(_logFactory) { Environment = this },
-			}),
-			_mnuTools = new ToolStripMenuItem(Resources.StrTools, null, new ToolStripItem[]
-			{
+			]),
+			_mnuTools = new ToolStripMenuItem(Resources.StrTools, null,
+			[
 				new ToolStripMenuItem(Resources.StrOptions.AddEllipsis(), null, _mnuOptions_Click),
-			}),
-			new ToolStripMenuItem(Resources.StrHelp, null, new ToolStripItem[]
-			{
+			]),
+			new ToolStripMenuItem(Resources.StrHelp, null,
+			[
 				new ToolStripMenuItem(Resources.StrAbout.AddEllipsis(), null, _mnuAbout_Click),
-			}),
+			]),
 		});
 
 		_bindings.BindImage(init,  CommonIcons.Init);
@@ -791,15 +791,18 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		}
 		else
 		{
-			var wasOpened = OpenRepository(path, prov);
-			if(wasOpened)
-			{
-				RepositoryManagerService.RegisterRecentRepository(path);
-				_repositoryExplorerFactory.RootItem.RepositoryDisplayName =
-					Path.GetFileName(path.EndsWithOneOf(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) ?
-										path.Substring(0, path.Length - 1) : path);
-			}
-			return wasOpened;
+			if(!OpenRepository(path, prov)) return false;
+			RepositoryManagerService.RegisterRecentRepository(path);
+			_repositoryExplorerFactory.RootItem.RepositoryDisplayName =
+				Path.GetFileName(
+#if NET5_0_OR_GREATER
+					Path.EndsInDirectorySeparator(path)
+#else
+					path.EndsWithOneOf(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+#endif
+						? path.Substring(0, path.Length - 1)
+						: path);
+			return true;
 		}
 	}
 
@@ -989,5 +992,5 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 
 	DpiBindings IWorkingEnvironment.MainFormDpiBindings => _bindings;
 
-	#endregion
+#endregion
 }

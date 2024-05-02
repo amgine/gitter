@@ -4,16 +4,7 @@ using Autofac;
 
 using gitter.Framework;
 
-sealed class AutofacFactory<T> : IFactory<T>
+sealed class AutofacFactory<T>(IComponentContext componentContext) : IFactory<T>
 {
-	public AutofacFactory(IComponentContext componentContext)
-	{
-		Verify.Argument.IsNotNull(componentContext);
-
-		ComponentContext = componentContext;
-	}
-
-	private IComponentContext ComponentContext { get; }
-
-	public T Create() => ComponentContext.Resolve<T>();
+	public T Create() => componentContext.Resolve<T>();
 }

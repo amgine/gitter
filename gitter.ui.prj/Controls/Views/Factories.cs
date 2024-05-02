@@ -72,9 +72,7 @@ sealed class StartPageViewFactory : ViewFactoryBase
 
 	/// <inheritdoc/>
 	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-	{
-		return new StartPageView(environment, this);
-	}
+		=> new StartPageView(environment, this);
 
 	public bool CloseAfterRepositoryLoad { get; set; }
 
