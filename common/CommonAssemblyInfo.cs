@@ -24,14 +24,14 @@ using System.Resources;
 
 [assembly: AssemblyCompany("amgine")]
 [assembly: AssemblyProduct("gitter")]
-[assembly: AssemblyCopyright("Copyright © amgine 2023")]
+[assembly: AssemblyCopyright("Copyright © amgine 2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
 [assembly: NeutralResourcesLanguage("en-us")]
 
-[assembly: AssemblyFileVersion("1.1.4.0")]
-[assembly: AssemblyVersion("1.1.4.0")]
+[assembly: AssemblyFileVersion("1.1.5.0")]
+[assembly: AssemblyVersion("1.1.5.0")]
 
 #if NET6_0_OR_GREATER
 [module: System.Runtime.Versioning.SupportedOSPlatform("windows")]
