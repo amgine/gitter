@@ -60,30 +60,34 @@ sealed partial class LogParser : ITextParser<IList<RevisionData>>
 #if NETCOREAPP
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	static bool FillBuffer(char[] buffer, int total, ref int offset, ref ReadOnlySpan<char> text)
+	{
+		if(offset >= total) return offset == total;
+
+		int need = total - offset;
+		if(text.Length >= need)
+		{
+			text[..need].CopyTo(new(buffer, offset, need));
+			text = text[need..];
+			offset = total;
+			return true;
+		}
+		else
+		{
+			text.CopyTo(new(buffer, offset, text.Length));
+			offset += text.Length;
+			text = default;
+			return false;
+		}
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	static bool FillBufferExcludeLastChar(char[] buffer, int total, ref int offset, ref ReadOnlySpan<char> text)
 	{
-		if(offset < total)
-		{
-			int need = total - offset;
-			if(text.Length > need)
-			{
-				text[..need].CopyTo(new(buffer, offset, need));
-				text = text[(need + 1)..];
-				offset = total + 1;
-				return true;
-			}
-			else
-			{
-				text.CopyTo(new(buffer, offset, text.Length));
-				offset += text.Length;
-				text = default;
-				return false;
-			}
-		}
-		if(offset == total && text.Length > 0)
+		if(FillBuffer(buffer, total, ref offset, ref text) && text.Length > 0)
 		{
 			offset = total + 1;
-			text = text[1..];
+			text   = text[1..];
 			return true;
 		}
 		return false;
@@ -92,7 +96,7 @@ sealed partial class LogParser : ITextParser<IList<RevisionData>>
 #else
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	static bool FillBufferExcludeLastChar(char[] buffer, int total, ref int offset, ITextSegment textSegment)
+	static bool FillBuffer(char[] buffer, int total, ref int offset, ITextSegment textSegment)
 	{
 		if(offset < total)
 		{
@@ -100,7 +104,13 @@ sealed partial class LogParser : ITextParser<IList<RevisionData>>
 			textSegment.MoveTo(buffer, offset, c);
 			offset += c;
 		}
-		if(offset == total && textSegment.Length > 0)
+		return offset == total;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	static bool FillBufferExcludeLastChar(char[] buffer, int total, ref int offset, ITextSegment textSegment)
+	{
+		if(FillBuffer(buffer, total, ref offset, textSegment) && textSegment.Length > 0)
 		{
 			offset = total + 1;
 			textSegment.Skip();

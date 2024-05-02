@@ -11,10 +11,12 @@ partial class LogParser
 {
 	sealed class StrictISO8601TimestampField : ITextFieldParser<DateTimeOffset>
 	{
-		const int FieldSize = 25;
+		const int FieldSizeZ = 20;
+		const int FieldSize  = 25;
 
 		// 0123456789012345678901234
 		// 2020-06-02T16:21:00+03:00
+		// 2020-06-02T16:21:00Z
 
 		private readonly char[] _buffer;
 		private int _offset;
@@ -27,6 +29,79 @@ partial class LogParser
 			_state = FieldParserState.Initial;
 		}
 
+#if NETCOREAPP
+
+		private bool InitialParseFull(ref ReadOnlySpan<char> text, int fieldSize)
+		{
+			_value = ParseCore(text);
+			if(text.Length > fieldSize)
+			{
+				text = text[(fieldSize + 1)..];
+				_state = FieldParserState.Completed;
+				return true;
+			}
+			else
+			{
+				text = default;
+				_state = FieldParserState.WaitingTerminator;
+				return false;
+			}
+		}
+
+		private void InitialBuffer(ref ReadOnlySpan<char> text)
+		{
+			_offset = text.Length;
+			text.CopyTo(_buffer);
+			text = default;
+			_state = FieldParserState.Buffering;
+		}
+
+		private bool ParseTerminator(ref ReadOnlySpan<char> text)
+		{
+			if(text.Length == 0) return false;
+
+			text = text[1..];
+			_state = FieldParserState.Completed;
+			return true;
+		}
+
+#else
+
+		private bool InitialParseFull(ITextSegment text, int fieldSize)
+		{
+			text.MoveTo(_buffer, 0, fieldSize);
+			_value = ParseCore(_buffer);
+			if(text.Length > 0)
+			{
+				text.Skip();
+				_state = FieldParserState.Completed;
+				return true;
+			}
+			else
+			{
+				_state = FieldParserState.WaitingTerminator;
+				return false;
+			}
+		}
+
+		private void InitialBuffer(ITextSegment text)
+		{
+			_offset = text.Length;
+			text.MoveTo(_buffer, 0, _offset);
+			_state = FieldParserState.Buffering;
+		}
+
+		private bool ParseTerminator(ITextSegment text)
+		{
+			if(text.Length == 0) return false;
+
+			text.Skip();
+			_state = FieldParserState.Completed;
+			return true;
+		}
+
+#endif
+
 		public bool Parse(
 #if NETCOREAPP
 			ref ReadOnlySpan<char> text
@@ -38,67 +113,93 @@ partial class LogParser
 			switch(_state)
 			{
 				case FieldParserState.Initial:
-					if(text.Length >= FieldSize)
+					if(text.Length >= FieldSizeZ && text[OffsetSignIndex] == 'Z')
 					{
 #if NETCOREAPP
-						_value = ParseCore(text);
+						return InitialParseFull(ref text, FieldSizeZ);
 #else
-						text.MoveTo(_buffer, 0, FieldSize);
-						_value = ParseCore(_buffer);
+						return InitialParseFull(text, FieldSizeZ);
 #endif
-						if(text.Length > FieldSize)
-						{
+					}
+					else if(text.Length >= FieldSize)
+					{
 #if NETCOREAPP
-							text = text[(FieldSize + 1)..];
+						return InitialParseFull(ref text, FieldSize);
 #else
-							text.Skip();
+						return InitialParseFull(text, FieldSize);
 #endif
+					}
+					else
+					{
+#if NETCOREAPP
+						InitialBuffer(ref text);
+#else
+						InitialBuffer(text);
+#endif
+						return false;
+					}
+				case FieldParserState.Buffering:
+					if(_offset >= FieldSizeZ)
+					{
+#if NETCOREAPP
+						if(FillBufferExcludeLastChar(_buffer, FieldSize, ref _offset, ref text))
+#else
+						if(FillBufferExcludeLastChar(_buffer, FieldSize, ref _offset, text))
+#endif
+						{
+							_value = ParseCore(_buffer);
 							_state = FieldParserState.Completed;
 							return true;
 						}
 						else
 						{
-#if NETCOREAPP
-							text = default;
-#endif
-							_state  = FieldParserState.WaitingTerminator;
 							return false;
 						}
 					}
 					else
 					{
-						_state = FieldParserState.Buffering;
-						goto case FieldParserState.Buffering;
-					}
-				case FieldParserState.Buffering:
 #if NETCOREAPP
-					if(FillBufferExcludeLastChar(_buffer, FieldSize, ref _offset, ref text))
+						if(FillBuffer(_buffer, FieldSizeZ, ref _offset, ref text))
 #else
-					if(FillBufferExcludeLastChar(_buffer, FieldSize, ref _offset, text))
+						if(FillBuffer(_buffer, FieldSizeZ, ref _offset, text))
 #endif
-					{
-						_value = ParseCore(_buffer);
-						_state = FieldParserState.Completed;
-						return true;
-					}
-					else
-					{
-						return false;
+						{
+							if(_buffer[OffsetSignIndex] == 'Z')
+							{
+								_value = ParseCore(_buffer);
+								if(text.Length > 0)
+								{
+#if NETCOREAPP
+									text = text[1..];
+#else
+									text.Skip();
+#endif
+									_state = FieldParserState.Completed;
+									return true;
+								}
+								else
+								{
+									_state = FieldParserState.WaitingTerminator;
+									return false;
+								}
+							}
+							else
+							{
+								if(text.Length <= 0) return false;
+								goto case FieldParserState.Buffering;
+							}
+						}
+						else
+						{
+							return false;
+						}
 					}
 				case FieldParserState.WaitingTerminator:
-					if(text.Length > 0)
-					{
 #if NETCOREAPP
-						text = text[1..];
+					return ParseTerminator(ref text);
 #else
-						text.Skip();
+					return ParseTerminator(text);
 #endif
-						return true;
-					}
-					else
-					{
-						return false;
-					}
 				case FieldParserState.Completed:
 					throw new InvalidOperationException("Field is already completed.");
 				default:
@@ -113,7 +214,16 @@ partial class LogParser
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private static int Digit(char c) => c - '0';
+		private static int Digit(char c)
+		{
+#if DEBUG
+			var d = c - '0';
+			if(d is < 0 or > 9) throw new FormatException();
+			return d;
+#else
+			return c - '0';
+#endif
+		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static int GetYear(
@@ -200,7 +310,8 @@ partial class LogParser
 			{
 				'+' =>  1,
 				'-' => -1,
-				_ => throw new FormatException($"Unexpected character at TZ offset sign: {buffer[OffsetSignIndex]}"),
+				'Z' =>  0,
+				 _  => throw new FormatException($"Unexpected character at TZ offset sign: {buffer[OffsetSignIndex]}"),
 			};
 
 		private static TimeSpan GetOffset(
@@ -209,10 +320,14 @@ partial class LogParser
 #else
 			char[] buffer
 #endif
-			) => new(
-			GetOffsetSign(buffer) *
-			(Get2Digits(buffer, OffsetHoursIndex) * 60 + Get2Digits(buffer, OffsetMinutesIndex)) *
-			TimeSpan.TicksPerMinute);
+			)
+		{
+			var sign = GetOffsetSign(buffer);
+			if(sign == 0) return TimeSpan.Zero;
+			var hours   = Get2Digits(buffer, OffsetHoursIndex);
+			var minutes = Get2Digits(buffer, OffsetMinutesIndex);
+			return new(sign * (hours * 60 + minutes) * TimeSpan.TicksPerMinute);
+		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static DateTimeOffset ParseCore(
@@ -222,9 +337,13 @@ partial class LogParser
 			char[] buffer
 #endif
 			) => new(
-			GetYear(buffer), GetMonth(buffer), GetDay(buffer),
-			GetHours(buffer), GetMinutes(buffer), GetSeconds(buffer),
-			GetOffset(buffer));
+			year:   GetYear   (buffer),
+			month:  GetMonth  (buffer),
+			day:    GetDay    (buffer),
+			hour:   GetHours  (buffer),
+			minute: GetMinutes(buffer),
+			second: GetSeconds(buffer),
+			offset: GetOffset (buffer));
 
 		public DateTimeOffset GetValue() => _value;
 	}
