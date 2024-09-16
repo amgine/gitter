@@ -242,235 +242,163 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 	private sealed class BooleanPersister : XmlPersister<bool>
 	{
 		protected override void StoreCore(XmlWriterContext context, bool value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override bool LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToBoolean(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToBoolean(context.LoadFromAttribute());
 	}
 
 	private sealed class CharPersister : XmlPersister<char>
 	{
 		protected override void StoreCore(XmlWriterContext context, char value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override char LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToChar(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToChar(context.LoadFromAttribute());
 	}
 
 	private sealed class BytePersister : XmlPersister<byte>
 	{
 		protected override void StoreCore(XmlWriterContext context, byte value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override byte LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToByte(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToByte(context.LoadFromAttribute());
 	}
 
 	private sealed class SBytePersister : XmlPersister<sbyte>
 	{
 		protected override void StoreCore(XmlWriterContext context, sbyte value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override sbyte LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToSByte(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToSByte(context.LoadFromAttribute());
 	}
 
 	private sealed class Int16Persister : XmlPersister<short>
 	{
 		protected override void StoreCore(XmlWriterContext context, short value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override short LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToInt16(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToInt16(context.LoadFromAttribute());
 	}
 
 	private sealed class UInt16Persister : XmlPersister<ushort>
 	{
 		protected override void StoreCore(XmlWriterContext context, ushort value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override ushort LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToUInt16(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToUInt16(context.LoadFromAttribute());
 	}
 
 	private sealed class Int32Persister : XmlPersister<int>
 	{
 		protected override void StoreCore(XmlWriterContext context, int value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override int LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToInt32(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToInt32(context.LoadFromAttribute());
 	}
 
 	private sealed class UInt32Persister : XmlPersister<uint>
 	{
 		protected override void StoreCore(XmlWriterContext context, uint value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override uint LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToUInt32(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToUInt32(context.LoadFromAttribute());
 	}
 
 	private sealed class Int64Persister : XmlPersister<long>
 	{
 		protected override void StoreCore(XmlWriterContext context, long value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override long LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToInt64(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToInt64(context.LoadFromAttribute());
 	}
 
 	private sealed class UInt64Persister : XmlPersister<ulong>
 	{
 		protected override void StoreCore(XmlWriterContext context, ulong value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override ulong LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToUInt64(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToUInt64(context.LoadFromAttribute());
 	}
 
 	private sealed class SinglePersister : XmlPersister<float>
 	{
 		protected override void StoreCore(XmlWriterContext context, float value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override float LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToSingle(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToSingle(context.LoadFromAttribute());
 	}
 
 	private sealed class DoublePersister : XmlPersister<double>
 	{
 		protected override void StoreCore(XmlWriterContext context, double value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override double LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToDouble(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToDouble(context.LoadFromAttribute());
 	}
 
 	private sealed class DecimalPersister : XmlPersister<decimal>
 	{
 		protected override void StoreCore(XmlWriterContext context, decimal value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override decimal LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToDecimal(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToDecimal(context.LoadFromAttribute());
 	}
 
 	private sealed class DateTimePersister : XmlPersister<DateTime>
 	{
 		protected override void StoreCore(XmlWriterContext context, DateTime value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value, XmlDateTimeSerializationMode.Utc));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value, XmlDateTimeSerializationMode.Utc));
 
 		protected override DateTime LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToDateTime(context.LoadFromAttribute(), XmlDateTimeSerializationMode.Utc);
-		}
+			=> XmlConvert.ToDateTime(context.LoadFromAttribute(), XmlDateTimeSerializationMode.Utc);
 	}
 
 	private sealed class DateTimeOffsetPersister : XmlPersister<DateTimeOffset>
 	{
 		protected override void StoreCore(XmlWriterContext context, DateTimeOffset value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override DateTimeOffset LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToDateTimeOffset(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToDateTimeOffset(context.LoadFromAttribute());
 	}
 
 	private sealed class TimeSpanPersister : XmlPersister<TimeSpan>
 	{
 		protected override void StoreCore(XmlWriterContext context, TimeSpan value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override TimeSpan LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToTimeSpan(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToTimeSpan(context.LoadFromAttribute());
 	}
 
 	private sealed class GuidPersister : XmlPersister<Guid>
 	{
 		protected override void StoreCore(XmlWriterContext context, Guid value)
-		{
-			context.StoreInAttribute(XmlConvert.ToString(value));
-		}
+			=> context.StoreInAttribute(XmlConvert.ToString(value));
 
 		protected override Guid LoadCore(XmlReaderContext context)
-		{
-			return XmlConvert.ToGuid(context.LoadFromAttribute());
-		}
+			=> XmlConvert.ToGuid(context.LoadFromAttribute());
 	}
 
 	private sealed class StringPersister : XmlPersister<string>
 	{
 		protected override void StoreCore(XmlWriterContext context, string value)
-		{
-			context.StoreInAttribute(value);
-		}
+			=> context.StoreInAttribute(value);
 
 		protected override string LoadCore(XmlReaderContext context)
-		{
-			return context.LoadFromAttribute();
-		}
+			=> context.LoadFromAttribute();
 	}
 
 	private sealed class PointPersister : XmlPersister<Point>
@@ -579,10 +507,7 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 
 	private sealed class EnumPersister : IXmlPersister
 	{
-		public Type Type
-		{
-			get { return typeof(Enum); }
-		}
+		public Type Type => typeof(Enum);
 
 		public void Store(XmlWriterContext context, Parameter parameter)
 		{
@@ -608,10 +533,7 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 
 	private sealed class ArrayPersister : IXmlPersister
 	{
-		public Type Type
-		{
-			get { return typeof(Array); }
-		}
+		public Type Type => typeof(Array);
 
 		public void Store(XmlWriterContext context, Parameter parameter)
 		{
@@ -841,10 +763,10 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 
 		public static Parameter Load(XmlReaderContext context)
 		{
-			var type = DecodeTypeName(context.LoadFromAttribute("Type"));
-			if(type == null) throw new NotSupportedException();
+			var type = DecodeTypeName(context.LoadFromAttribute("Type"))
+				?? throw new NotSupportedException();
 			var name = context.CurrentName;
-			IXmlPersister persister = null;
+			IXmlPersister persister;
 			if(type.IsEnum)
 			{
 				Persisters.TryGetValue(typeof(Enum), out persister);
@@ -857,14 +779,9 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 			{
 				Persisters.TryGetValue(type, out persister);
 			}
-			if(persister != null)
-			{
-				return new Parameter(name, type, persister.LoadValue(context));
-			}
-			else
-			{
-				return new Parameter(name, type, null);
-			}
+			return persister is not null
+				? new Parameter(name, type, persister.LoadValue(context))
+				: new Parameter(name, type, null);
 		}
 	}
 
