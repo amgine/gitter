@@ -21,6 +21,7 @@
 namespace gitter.Framework.Configuration;
 
 using System;
+using System.IO;
 
 public sealed class ConfigurationManager : INamedObject
 {

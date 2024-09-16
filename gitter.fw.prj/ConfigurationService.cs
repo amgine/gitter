@@ -78,14 +78,17 @@ public sealed class ConfigurationService : IDisposable
 
 	public ConfigurationManager Configuration { get; }
 
+	private string GetFullPath(string fileName)
+		=> Path.Combine(_configPath, fileName);
+
 	public Stream CreateFile(string fileName)
-		=> new FileStream(Path.Combine(_configPath, fileName), FileMode.Create, FileAccess.Write, FileShare.None);
+		=> new FileStream(GetFullPath(fileName), FileMode.Create, FileAccess.Write, FileShare.None);
 
 	public Stream OpenFile(string fileName)
-		=> new FileStream(Path.Combine(_configPath, fileName), FileMode.Open, FileAccess.Read, FileShare.Read);
+		=> new FileStream(GetFullPath(fileName), FileMode.Open, FileAccess.Read, FileShare.Read);
 
 	public bool FileExists(string fileName)
-		=> File.Exists(Path.Combine(_configPath, fileName));
+		=> File.Exists(GetFullPath(fileName));
 
 	public Section RootSection { get; }
 
@@ -165,9 +168,16 @@ public sealed class ConfigurationService : IDisposable
 	{
 		try
 		{
-			using var stream  = CreateFile(configFile);
-			using var adapter = new XmlAdapter(stream);
-			config.Save(adapter);
+			var temp = Path.ChangeExtension(configFile, "tmp");
+			using(var stream = CreateFile(temp))
+			using(var adapter = new XmlAdapter(stream))
+			{
+				config.Save(adapter);
+			}
+			File.Replace(
+				GetFullPath(temp),
+				GetFullPath(configFile),
+				GetFullPath(Path.ChangeExtension(configFile, "bak")));
 		}
 		catch(Exception exc) when(!exc.IsCritical())
 		{
