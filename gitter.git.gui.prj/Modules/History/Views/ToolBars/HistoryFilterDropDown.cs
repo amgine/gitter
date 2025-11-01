@@ -24,6 +24,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 using gitter.Framework;
@@ -161,10 +162,19 @@ partial class HistoryFilterDropDown : UserControl
 		}
 		else
 		{
+
+			// Determine if filter looks like a regex pattern
+			var isRegexLike = IsLikelyRegexPattern(filter);
+			var regex = isRegexLike ? TryCreateRegex(filter) : null;
+			_txtSearch.BackColor = GetFilterColorForRegex(isRegexLike, regex);
+
 			_lstReferences.LoadData(repository, ReferenceType.Reference, true, true, x =>
 			{
-				if(x is Reference reference) return reference.Name.Contains(filter);
-				return x.FullName.Contains(filter);
+				if(x is Reference reference)
+				{
+					return MatchesFilter(reference.Name, filter, regex);
+				}
+				return MatchesFilter(x.FullName, filter, regex);
 			});
 		}
 		_lstReferences.EnableCheckboxes();
@@ -182,5 +192,91 @@ partial class HistoryFilterDropDown : UserControl
 	private void HistoryFilterDropDown_VisibleChanged(object sender, EventArgs e)
 	{
 		Search.Value = string.Empty;
+	}
+
+	private Color GetFilterColorForRegex(bool isRegexLike, Regex regex)
+	{
+		// Visual feedback: change text box color based on search mode
+		if(isRegexLike)
+		{
+			if(regex is not null)
+			{
+				// Valid regex - subtle green
+				return GitterApplication.Style.Type == GitterStyleType.DarkBackground
+					? Color.FromArgb(30, 60, 30)   // Dark theme: dark green
+					: Color.FromArgb(230, 255, 230); // Light theme: light green
+			}
+			else
+			{
+				// Invalid regex - subtle red
+				return GitterApplication.Style.Type == GitterStyleType.DarkBackground
+					? Color.FromArgb(60, 30, 30)   // Dark theme: dark red
+					: Color.FromArgb(255, 230, 230); // Light theme: light red
+			}
+		}
+
+		// Plain text search - use default color
+		return BackColor;
+	}
+
+	private static bool MatchesFilter(string name, string filter, Regex regex)
+	{
+		if(regex is not null)
+		{
+			// Use regex matching
+			return regex.IsMatch(name);
+		}
+		else
+		{
+#if NET6_0_OR_GREATER
+			// Use plain text search (case-insensitive)
+			return name.Contains(filter, StringComparison.OrdinalIgnoreCase);
+#else
+			return name.Contains(filter);
+#endif
+		}
+	}
+
+	private static Regex TryCreateRegex(string filter)
+	{
+		try
+		{
+			return new Regex(filter, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+		}
+		catch(ArgumentException)
+		{
+			// Invalid regex pattern
+			return null;
+		}
+	}
+
+	private static bool IsLikelyRegexPattern(string filter)
+	{
+		if(string.IsNullOrEmpty(filter)) return false;
+
+		// Check for common regex metacharacters
+		// These suggest the user intends to use regex
+		var regexIndicators = new[]
+		{
+			".*",   // Any characters (zero or more)
+			".+",   // Any characters (one or more)
+			"^",    // Start of line
+			"$",    // End of line
+			"[",    // Character class
+			"]",    // Character class end
+			"(",    // Group start
+			")",    // Group end
+			"|",    // Alternation
+			"\\d",  // Digit
+			"\\w",  // Word character
+			"\\s",  // Whitespace
+			"{",    // Quantifier
+			"}",    // Quantifier end
+			"?",    // Optional (zero or one)
+			"+",    // One or more
+			"*",    // Zero or more
+		};
+
+		return regexIndicators.Any(filter.Contains);
 	}
 }
