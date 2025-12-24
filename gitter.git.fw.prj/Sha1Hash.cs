@@ -816,7 +816,7 @@ public readonly struct Sha1Hash : IHashValue<Sha1Hash>
 		else
 #endif
 		{
-			for(int i = 0; i < HexStringLength; ++i)
+			for(int i = 0; i < Size; ++i)
 			{
 				var value = _data.Data[i];
 				hashStringUtf16[i * 2 + 0] = HashUtils.ToHexDigit(value >> 4);

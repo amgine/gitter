@@ -600,7 +600,7 @@ public readonly struct Sha256Hash : IHashValue<Sha256Hash>
 		else
 #endif
 		{
-			for(int i = 0; i < HexStringLength; ++i)
+			for(int i = 0; i < Size; ++i)
 			{
 				var value = _data.Data[i];
 				hashStringUtf16[i * 2 + 0] = HashUtils.ToHexDigit(value >> 4);
