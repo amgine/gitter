@@ -21,9 +21,9 @@
 namespace gitter.Framework;
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Collections.Generic;
 
 internal static class IconCache
 {
@@ -35,25 +35,29 @@ internal static class IconCache
 		[@".cmd"] = @"file.terminal",
 		[@".bat"] = @"file.terminal",
 		[@".ps1"] = @"file.terminal",
+		[@".sh"] = @"file.terminal",
 
 		[@".dll"] = @"file.binary",
 
-		[@".xml"]  = @"file.code",
-		[@".cs"]   = @"file.code",
-		[@".py"]   = @"file.code",
-		[@".vb"]   = @"file.code",
-		[@".c"]    = @"file.code",
-		[@".cpp"]  = @"file.code",
-		[@".h"]    = @"file.code",
-		[@".hpp"]  = @"file.code",
-		[@".js"]   = @"file.code",
+		[@".json"] = @"file.json",
+		[@".xml"] = @"file.code",
+		[@".cs"] = @"file.code",
+		[@".py"] = @"file.code",
+		[@".vb"] = @"file.code",
+		[@".c"] = @"file.code",
+		[@".cpp"] = @"file.code",
+		[@".h"] = @"file.code",
+		[@".hpp"] = @"file.code",
+		[@".js"] = @"file.code",
+		[@".ts"] = @"file.code",
 		[@".aspx"] = @"file.code",
-		[@".php"]  = @"file.php",
+		[@".php"] = @"file.php",
 		[@".xaml"] = @"file.xaml",
+		[@".sql"] = @"file.sql",
 
 		[@".xlsx"] = @"file.excel",
-		[@".xsl"]  = @"file.excel",
-		[@".csv"]  = @"file.excel.csv",
+		[@".xsl"] = @"file.excel",
+		[@".csv"] = @"file.excel.csv",
 
 		[@".avi"] = @"file.film",
 		[@".mp4"] = @"file.film",
@@ -62,14 +66,14 @@ internal static class IconCache
 
 		[@".flv"] = @"file.flash",
 
-		[@".htm"]  = @"file.globe",
+		[@".htm"] = @"file.globe",
 		[@".html"] = @"file.globe",
 
-		[@".bmp"]  = @"file.image",
-		[@".png"]  = @"file.image",
-		[@".gif"]  = @"file.image",
-		[@".tga"]  = @"file.image",
-		[@".jpg"]  = @"file.image",
+		[@".bmp"] = @"file.image",
+		[@".png"] = @"file.image",
+		[@".gif"] = @"file.image",
+		[@".tga"] = @"file.image",
+		[@".jpg"] = @"file.image",
 		[@".jpeg"] = @"file.image",
 
 		[@".wav"] = @"file.music",
@@ -82,7 +86,7 @@ internal static class IconCache
 
 		[@".psd"] = @"file.photoshop",
 
-		[@".ppt"]  = @"file.powerpoint",
+		[@".ppt"] = @"file.powerpoint",
 		[@".pptx"] = @"file.powerpoint",
 
 		[@".txt"] = @"file.text",
@@ -90,15 +94,38 @@ internal static class IconCache
 		[@".sln"]    = @"file.vs",
 		[@".slnx"]   = @"file.vs",
 		[@".csproj"] = @"file.vs",
+		[@".code-workspace"] = @"file.vs",
 
-		[@".rtf"]  = @"file.word",
-		[@".doc"]  = @"file.word",
+		[@".rtf"] = @"file.word",
+		[@".doc"] = @"file.word",
 		[@".docx"] = @"file.word",
+
+		[@".conf"] = @"file.conf",
+		[@".config"] = @"file.conf",
+		[@".ini"] = @"file.conf",
+		[@".env"] = @"file.conf",
+		[@".props"] = @"file.conf",
+		[@".properties"] = @"file.conf",
+
+		[@".yml"] = @"file.yml",
+		[@".yaml"] = @"file.yml",
+
+		[@".md"] = @"file.md",
+		[@".mdc"] = @"file.md",
+	};
+
+	private static readonly Dictionary<string, string> _fileNameAssociations = new(comparer: StringComparer.OrdinalIgnoreCase)
+	{
+		[@"dockerfile"] = @"file.docker",
+		[@".dockerignore"] = @"file.docker",
+		[@".gitignore"] = @"file.git",
+		[@".gitattributes"] = @"file.git",
+		[@".editorconfig"] = @"file.conf",
 	};
 
 	private const string _defaultIconName = @"file.default";
 
-	private static string GetCacheKey(string fileName)
+	private static string GetExtCacheKey(string fileName)
 	{
 		try
 		{
@@ -110,12 +137,40 @@ internal static class IconCache
 		}
 	}
 
+	private static string GetNameCacheKey(string fileName)
+	{
+		try
+		{
+			return Path.GetFileName(fileName);
+		}
+		catch
+		{
+			return string.Empty;
+		}
+	}
+
 	public static Bitmap? GetIcon(string fileName, int size)
 	{
-		if(!_associations.TryGetValue(GetCacheKey(fileName), out var name))
+		var fileNameOnly = GetNameCacheKey(fileName);
+
+		var icon = _defaultIconName;
+		if(_associations.TryGetValue(GetExtCacheKey(fileName), out var image))
 		{
-			name = _defaultIconName;
+			icon = image;
 		}
-		return CachedResources.ScaledBitmaps[name, size];
+		else if(_fileNameAssociations.TryGetValue(fileNameOnly, out var iconName))
+		{
+			icon = iconName;
+		}
+		else if(fileNameOnly.StartsWith(@"dockerfile", StringComparison.OrdinalIgnoreCase))
+		{
+			icon = _fileNameAssociations[@"dockerfile"];
+		}
+		else if(fileNameOnly.StartsWith(@".env", StringComparison.OrdinalIgnoreCase))
+		{
+			icon = _associations[@".env"];
+		}
+
+		return CachedResources.ScaledBitmaps[icon, size];
 	}
 }
