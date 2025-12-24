@@ -51,7 +51,8 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 
 	#region Constants
 
-	private const int SavedRecentRepositories = 25;
+	private const int SavedRecentRepositories = 100;
+	private const int MainMenuMaxRecentRepositories = 25;
 
 	#endregion
 
@@ -95,18 +96,18 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 
 	/// <summary>Initializes a new instance of the <see cref="MainForm"/> class.</summary>
 	public MainForm(
-		ConfigurationService                    configurationService,
-		IEnumerable<IRepositoryProvider>        repositoryProviders,
+		ConfigurationService configurationService,
+		IEnumerable<IRepositoryProvider> repositoryProviders,
 		IEnumerable<IRepositoryServiceProvider> repositoryServiceProviders,
-		IEnumerable<IViewFactory>               viewFactories,
-		IFactory<AboutDialog>                   aboutDialogFactory,
-		IFactory<OptionsDialog>                 optionsDialogFactory)
+		IEnumerable<IViewFactory> viewFactories,
+		IFactory<AboutDialog> aboutDialogFactory,
+		IFactory<OptionsDialog> optionsDialogFactory)
 	{
 		Verify.Argument.IsNotNull(configurationService);
 
 		SuspendLayout();
 
-		AboutDialogFactory   = aboutDialogFactory;
+		AboutDialogFactory = aboutDialogFactory;
 		OptionsDialogFactory = optionsDialogFactory;
 
 		_dockPanel = new DockPanel
@@ -115,11 +116,11 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 			Dock = DockStyle.Fill,
 		};
 
-		_configurationService     = configurationService;
+		_configurationService = configurationService;
 		_repositoryManagerService = new RepositoryManagerService(SavedRecentRepositories);
-		_viewDockService          = new ViewDockService(this, _dockPanel, _configurationService.ViewsSection);
-		_notificationService      = new BalloonNotificationService();
-		_bindings                 = new DpiBindings(this);
+		_viewDockService = new ViewDockService(this, _dockPanel, _configurationService.ViewsSection);
+		_notificationService = new BalloonNotificationService();
+		_bindings = new DpiBindings(this);
 
 		foreach(var viewFactory in viewFactories)
 		{
@@ -132,7 +133,7 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 
 		_statusStrip = new StatusStrip();
 		_statusStrip.SuspendLayout();
-		_statusStrip.Dock        = DockStyle.None;
+		_statusStrip.Dock = DockStyle.None;
 		_statusStrip.LayoutStyle = ToolStripLayoutStyle.HorizontalStackWithOverflow;
 		_statusStrip.Name        = nameof(_statusStrip);
 		_statusStrip.Renderer    = GitterApplication.Style.ToolStripRenderer;
@@ -198,9 +199,9 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 			]),
 		]);
 
-		_bindings.BindImage(init,  CommonIcons.Init);
+		_bindings.BindImage(init, CommonIcons.Init);
 		_bindings.BindImage(clone, CommonIcons.Clone);
-		_bindings.BindImage(open,  Icons.RepositoryOpen);
+		_bindings.BindImage(open, Icons.RepositoryOpen);
 
 		_toolStripContainer = new() { Dock = DockStyle.Fill };
 		_toolStripContainer.BottomToolStripPanel.SuspendLayout();
@@ -471,7 +472,7 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 	private void SaveOptions()
 	{
 		var state = WindowState;
-		var bounds = state!=FormWindowState.Normal?RestoreBounds:Bounds;
+		var bounds = state != FormWindowState.Normal ? RestoreBounds : Bounds;
 		if(state == FormWindowState.Minimized) state = FormWindowState.Normal;
 
 		var mainWindowNode = _configurationService.GuiSection.GetCreateSection("MainWindow");
@@ -546,7 +547,7 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		while(_mnuRecentRepositories.DropDownItems.Count > 0)
 		{
 			var index = _mnuRecentRepositories.DropDownItems.Count - 1;
-			var item  = _mnuRecentRepositories.DropDownItems[index];
+			var item = _mnuRecentRepositories.DropDownItems[index];
 			_mnuRecentRepositories.DropDownItems.RemoveAt(index);
 			_bindings.UnbindImage(item);
 			item.Dispose();
@@ -562,6 +563,12 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		{
 			foreach(var repo in _repositoryManagerService.RecentRepositories)
 			{
+				//the most up-to-date repositories
+				if(_mnuRecentRepositories.DropDownItems.Count >= MainMenuMaxRecentRepositories)
+				{
+					break;
+				}
+
 				var item = new ToolStripMenuItem(
 					repo.Path, default, OnRecentRepositoryClick)
 				{
@@ -909,12 +916,12 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 					var item  = (ToolStripMenuItem)sender!;
 					var strip = (ToolStrip)item.Tag!;
 					strip.Visible = !strip.Visible;
-					item.Checked  = strip.Visible;
+					item.Checked = strip.Visible;
 				})
-		{
-			Checked = true,
-			Tag = toolStrip,
-		});
+			{
+				Checked = true,
+				Tag = toolStrip,
+			});
 		if(_mnuToolbars.DropDownItems.Count == 1)
 		{
 			_mnuToolbars.Enabled = true;
@@ -993,5 +1000,5 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 
 	DpiBindings IWorkingEnvironment.MainFormDpiBindings => _bindings;
 
-#endregion
+	#endregion
 }
