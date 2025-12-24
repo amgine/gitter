@@ -38,7 +38,9 @@ public sealed class GithubReleasesUpdateChannel(HttpMessageInvoker httpMessageIn
 
 	static readonly Regex _assetsLinkRegex = new("src\\=\\\"(?<url>https\\:\\/\\/github\\.com\\/amgine\\/gitter\\/releases\\/expanded_assets\\/v(?<version>\\d+(\\.\\d+){0,3}))\\\"");
 
-#if NET6_0_OR_GREATER
+#if NET10_0_OR_GREATER
+	static readonly Regex _downloadLinkRegex = new("\\<a\\s+href\\=\\\"(?<url>\\/amgine\\/gitter\\/releases\\/download\\/v(?<version>\\d+(\\.\\d+){0,3})\\/gitter\\-net10\\.0\\-binaries\\.zip)\\\"");
+#elif NET6_0_OR_GREATER
 	static readonly Regex _downloadLinkRegex = new("\\<a\\s+href\\=\\\"(?<url>\\/amgine\\/gitter\\/releases\\/download\\/v(?<version>\\d+(\\.\\d+){0,3})\\/gitter\\-net6\\.0\\-binaries\\.zip)\\\"");
 #else
 	static readonly Regex _downloadLinkRegex = new("\\<a\\s+href\\=\\\"(?<url>\\/amgine\\/gitter\\/releases\\/download\\/v(?<version>\\d+(\\.\\d+){0,3})\\/gitter\\-binaries\\.zip)\\\"");
