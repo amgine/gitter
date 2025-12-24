@@ -27,45 +27,48 @@ using Autofac;
 using gitter.Framework;
 using gitter.Framework.Controls;
 
-#nullable enable
-
-abstract class GitViewFactoryBase : ViewFactoryBase
+abstract class GitViewFactoryBase(Guid guid, string name, IImageProvider imageProvider, bool singleton = false)
+	: ViewFactoryBase(guid, name, imageProvider, singleton)
 {
-	protected GitViewFactoryBase(Guid guid, string name, IImageProvider imageProvider, bool singleton = false)
-		: base(guid, name, imageProvider, singleton)
-	{
-	}
-
 	public ILifetimeScope? Scope { get; set; }
+
+	protected ILifetimeScope RequireScope()
+		=> Scope
+		?? throw new InvalidOperationException("Component scope is not available.");
 }
 
-class GitViewFactoryBase<T> : GitViewFactoryBase where T : ViewBase
+class GitViewFactoryBase<T>(Guid guid, string name, IImageProvider imageProvider, bool singleton = false)
+	: GitViewFactoryBase(guid, name, imageProvider, singleton) where T : ViewBase
 {
-	public GitViewFactoryBase(Guid guid, string name, IImageProvider imageProvider, bool singleton = false)
-		: base(guid, name, imageProvider, singleton)
-	{
-	}
+	/// <summary>Attaches lifetime to a view so they will be disposed together.</summary>
+	/// <param name="view">View.</param>
+	/// <param name="scope">Lifetime scope.</param>
+	private static void AttachScope(T view, ILifetimeScope scope)
+		=> view.Disposed += (_, _) => scope.Dispose();
+
+	/// <summary>Resolves view instance using the specified lifetime scope.</summary>
+	/// <param name="scope">View lifetime scope.</param>
+	/// <returns>Resolved view.</returns>
+	protected virtual T ResolveView(ILifetimeScope scope)
+		=> scope.Resolve<T>();
 
 	/// <inheritdoc/>
 	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 	{
-		if(Scope is null)
-		{
-			throw new InvalidOperationException();
-		}
-
-		ViewBase view;
-		var scope = Scope.BeginLifetimeScope();
+		var scope = RequireScope().BeginLifetimeScope();
 		try
 		{
-			view = scope.Resolve<T>();
-			view.Disposed += (_, _) => scope.Dispose();
+			if(ResolveView(scope) is not { IsDisposed: false } view)
+			{
+				throw new InvalidOperationException("Resolved view is null or disposed.");
+			}
+			AttachScope(view, scope);
+			return view;
 		}
 		catch
 		{
 			scope.Dispose();
 			throw;
 		}
-		return view;
 	}
 }

@@ -32,7 +32,7 @@ public abstract class AsyncOutputReceiverBase : OutputReceiverBase, IOutputRecei
 #endif
 
 	private readonly int _bufferSize;
-	private Stream _stream;
+	private Stream? _stream;
 	private ArraySegment<byte> _buffer;
 
 	protected AsyncOutputReceiverBase(int bufferSize = 0x400)
@@ -51,7 +51,7 @@ public abstract class AsyncOutputReceiverBase : OutputReceiverBase, IOutputRecei
 		=> new(ArrayPool<byte>.Shared.Rent(_bufferSize));
 
 	protected virtual void FreeBuffer(ArraySegment<byte> buffer)
-		=> ArrayPool<byte>.Shared.Return(buffer.Array);
+		=> ArrayPool<byte>.Shared.Return(buffer.Array!);
 
 	protected virtual void InitializeCore(Process process, StreamReader reader, ArraySegment<byte> buffer)
 	{
@@ -111,7 +111,7 @@ public abstract class AsyncOutputReceiverBase : OutputReceiverBase, IOutputRecei
 			int bytesCount;
 			try
 			{
-				bytesCount = await _stream
+				bytesCount = await _stream!
 					.ReadAsync(memory)
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
@@ -129,7 +129,7 @@ public abstract class AsyncOutputReceiverBase : OutputReceiverBase, IOutputRecei
 			{
 				if(!IsCanceled)
 				{
-					Process(new(_buffer.Array, _buffer.Offset, bytesCount));
+					Process(new(_buffer.Array!, _buffer.Offset, bytesCount));
 				}
 			}
 			else
@@ -156,7 +156,7 @@ public abstract class AsyncOutputReceiverBase : OutputReceiverBase, IOutputRecei
 	{
 		try
 		{
-			return _stream.EndRead(ar);
+			return _stream!.EndRead(ar);
 		}
 		catch(IOException)
 		{
@@ -203,7 +203,7 @@ public abstract class AsyncOutputReceiverBase : OutputReceiverBase, IOutputRecei
 		bool isReading;
 		try
 		{
-			_stream.BeginRead(_buffer.Array, 0, _buffer.Count, _onStreamRead, this);
+			_stream!.BeginRead(_buffer.Array, 0, _buffer.Count, _onStreamRead, this);
 			isReading = true;
 		}
 		catch(IOException)

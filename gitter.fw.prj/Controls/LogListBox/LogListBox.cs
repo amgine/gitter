@@ -30,20 +30,19 @@ public class LogListBox : CustomListBox, IObserver<LogEvent>
 	private const int DefaultMessageLimit = 500;
 
 	private int _messageLimit;
-	private IDisposable _observerToken;
+	private IDisposable? _observerToken;
 
 	/// <summary>Initializes a new instance of the <see cref="LogListBox"/> class.</summary>
 	public LogListBox()
 	{
 		Columns.AddRange(
-			new CustomListBoxColumn[]
-			{
+			[
 				new LogListBoxTypeColumn(),
 				new LogListBoxTimestampColumn(),
 				new LogListBoxSourceColumn(),
 				new LogListBoxMessageColumn(),
 				new LogListBoxExceptionColumn(),
-			});
+			]);
 
 		_messageLimit = DefaultMessageLimit;
 		_observerToken = LogListBoxAppender.Instance.Subscribe(this);
@@ -103,7 +102,7 @@ public class LogListBox : CustomListBox, IObserver<LogEvent>
 		{
 			try
 			{
-				BeginInvoke(new Action<LogEvent>(AppendEvent), new object[] { value });
+				BeginInvoke(new Action<LogEvent>(AppendEvent), [value]);
 			}
 			catch
 			{

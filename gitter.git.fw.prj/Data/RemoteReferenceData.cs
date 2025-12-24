@@ -20,11 +20,9 @@
 
 namespace gitter.Git.AccessLayer;
 
-using System;
-
 public sealed class RemoteReferenceData
 {
-	public RemoteReferenceData(string name, Hash hash)
+	public RemoteReferenceData(string name, Sha1Hash hash)
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(name);
 
@@ -48,7 +46,7 @@ public sealed class RemoteReferenceData
 
 	public string Name { get; }
 
-	public Hash Hash { get; }
+	public Sha1Hash Hash { get; }
 
 	public override string ToString() => Name;
 }

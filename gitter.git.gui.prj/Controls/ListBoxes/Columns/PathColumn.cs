@@ -44,7 +44,7 @@ public class PathColumn : CustomListBoxColumn
 	/// <inheritdoc/>
 	public override string IdentificationString => "Path";
 
-	protected virtual string GetPath(CustomListBoxItem item) => default;
+	protected virtual string? GetPath(CustomListBoxItem item) => default;
 
 	/// <inheritdoc/>
 	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)

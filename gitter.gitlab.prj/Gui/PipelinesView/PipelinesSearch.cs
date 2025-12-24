@@ -25,13 +25,8 @@ using System.Globalization;
 
 using gitter.Framework.Controls;
 
-class PipelinesSearch : ListBoxSearch<PipelinesSearchOptions>
+class PipelinesSearch(CustomListBox listBox) : ListBoxSearch<PipelinesSearchOptions>(listBox)
 {
-	public PipelinesSearch(CustomListBox listBox)
-		: base(listBox)
-	{
-	}
-
 	private static bool TestPipeline(Api.Pipeline pipeline, PipelinesSearchOptions search)
 	{
 		Assert.IsNotNull(pipeline);
@@ -48,6 +43,6 @@ class PipelinesSearch : ListBoxSearch<PipelinesSearchOptions>
 		Assert.IsNotNull(item);
 		Assert.IsNotNull(search);
 
-		return item is PipelineListItem ili && TestPipeline(ili.DataContext, search);
+		return item is PipelineListItem pli && TestPipeline(pli.DataContext, search);
 	}
 }

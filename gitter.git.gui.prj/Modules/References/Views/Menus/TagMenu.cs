@@ -37,7 +37,9 @@ public sealed class TagMenu : ContextMenuStrip
 	{
 		Verify.Argument.IsValidGitObject(tag, nameof(tag));
 
-		Tag = tag;
+        Renderer = GitterApplication.Style.ToolStripRenderer;
+
+        Tag = tag;
 
 		var dpiBindings = new DpiBindings(this);
 		var factory     = new GuiItemFactory(dpiBindings);
@@ -77,7 +79,10 @@ public sealed class TagMenu : ContextMenuStrip
 		var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
 		item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, Tag.Name));
 		item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullName, Tag.FullName));
-		item.DropDownItems.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, Tag.Revision.Hash.ToString()));
+		if(Tag.Revision is not null)
+		{
+			item.DropDownItems.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, Tag.Revision.Hash.ToString()));
+		}
 		Items.Add(item);
 	}
 

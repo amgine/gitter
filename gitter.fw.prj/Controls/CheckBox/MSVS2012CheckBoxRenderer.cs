@@ -25,84 +25,70 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-sealed class MSVS2012CheckBoxRenderer : CustomCheckBoxRenderer
+sealed class MSVS2012CheckBoxRenderer(MSVS2012CheckBoxRenderer.ColorTable colorTable) : CustomCheckBoxRenderer
 {
-	#region Color Tables
+	public static ColorTable DarkColors => ColorTable.Dark;
 
-	private static IColorTable _darkColors;
+	public readonly record struct Colors(
+		Color Foreground,
+		Color CheckBackground,
+		Color CheckBorder = default);
 
-	public static IColorTable DarkColors => _darkColors ??= new DarkColorTable();
-
-	public interface IColorTable
+	public sealed record class ColorTable(
+		Colors Normal,
+		Colors Highlight,
+		Colors Disabled)
 	{
-		Color Foreground { get; }
-
-		Color ForegroundHighlight { get; }
-
-		Color ForegroundDisabled { get; }
-
-		Color CheckBackground { get; }
-
-		Color CheckBackgroundHighlight { get; }
-
-		Color CheckHighlight { get; }
+		public static ColorTable Dark { get; } = new(
+			Normal: new(
+				Foreground:      Color.FromArgb(190, 190, 190),
+				CheckBackground: Color.FromArgb( 63,  63,  63)),
+			Highlight: new(
+				Foreground:      Color.FromArgb(241, 241, 241),
+				CheckBackground: Color.FromArgb( 70,  70,  70),
+				CheckBorder:     Color.FromArgb( 85, 170, 255)),
+			Disabled: new(
+				Foreground:      Color.FromArgb(101, 101, 101),
+				CheckBackground: Color.FromArgb( 63,  63,  63)));
 	}
 
-	private sealed class DarkColorTable : IColorTable
+	private Colors GetColors(CustomCheckBox checkBox)
 	{
-		private static readonly Color FOREGROUND = Color.FromArgb(153, 153, 153);
-		private static readonly Color FOREGROUND_HIGHLIGHT = Color.FromArgb(241, 241, 241);
-		private static readonly Color FOREGROUND_DISABLED = Color.FromArgb(101, 101, 101);
-		private static readonly Color CHECK_BACKGROUND = Color.FromArgb(63, 63, 63);
-		private static readonly Color CHECK_BACKGROUND_HIGHLIGHT = Color.FromArgb(70, 70, 70);
-		private static readonly Color CHECK_HIGHLIGHT = Color.FromArgb(85, 170, 255);
-
-		public Color Foreground => FOREGROUND;
-
-		public Color ForegroundHighlight => FOREGROUND_HIGHLIGHT;
-
-		public Color ForegroundDisabled => FOREGROUND_DISABLED;
-
-		public Color CheckBackground => CHECK_BACKGROUND;
-
-		public Color CheckBackgroundHighlight => CHECK_BACKGROUND_HIGHLIGHT;
-
-		public Color CheckHighlight => CHECK_HIGHLIGHT;
+		if(!checkBox.Enabled) return colorTable.Disabled;
+		var highlight = checkBox.IsMouseOver || checkBox.Focused;
+		return highlight ? colorTable.Highlight : colorTable.Normal;
 	}
 
-	#endregion
-
-	public MSVS2012CheckBoxRenderer(IColorTable colorTable)
+	public override Rectangle Measure(CustomCheckBox checkBox)
 	{
-		Verify.Argument.IsNotNull(colorTable);
-
-		ColorTable = colorTable;
+		var conv         = DpiConverter.FromDefaultTo(checkBox);
+		var checkBoxSize = conv.Convert(new Size(16, 16));
+		var bounds       = checkBox.ClientRectangle;
+		var textOffset   = checkBoxSize.Width;
+		if(checkBox.Image is not null)
+		{
+			var imageSize = conv.Convert(new Size(16, 16));
+			textOffset += imageSize.Width + conv.ConvertX(4);
+		}
+		var textSize     = TextRenderer.MeasureText(checkBox.Text, checkBox.Font, bounds.Size);
+		if(textSize.Width < bounds.Width - textOffset)
+		{
+			bounds.Width = textSize.Width + textOffset;
+		}
+		return bounds;
 	}
 
-	private IColorTable ColorTable { get; }
-
-	public override void Render(Graphics graphics, Dpi dpi, Rectangle clipRectangle, CustomCheckBox checkBox)
+	public override void Render(Graphics graphics, Rectangle clipRectangle, CustomCheckBox checkBox)
 	{
-		var conv         = DpiConverter.FromDefaultTo(dpi);
+		var conv         = DpiConverter.FromDefaultTo(checkBox);
 		var checkBoxSize = conv.Convert(new Size(16, 16));
 		if(checkBox.BackColor != Color.Transparent)
 		{
 			graphics.GdiFill(checkBox.BackColor, clipRectangle);
 		}
-		bool highlight;
-		Color foregroundColor;
-		if(checkBox.Enabled)
-		{
-			highlight = checkBox.IsMouseOver || checkBox.Focused;
-			foregroundColor = highlight ? ColorTable.ForegroundHighlight : ColorTable.Foreground;
-		}
-		else
-		{
-			highlight = false;
-			foregroundColor = ColorTable.ForegroundDisabled;
-		}
+		var colors = GetColors(checkBox);
 		var rcCheckBox = new Rectangle(1, 1 + (checkBox.Height - checkBoxSize.Height) / 2, checkBoxSize.Height - 2, checkBoxSize.Height - 2);
-		using(var brush = SolidBrushCache.Get(highlight ? ColorTable.CheckBackgroundHighlight : ColorTable.CheckBackground))
+		using(var brush = SolidBrushCache.Get(colors.CheckBackground))
 		{
 			graphics.FillRectangle(brush, rcCheckBox);
 		}
@@ -110,25 +96,24 @@ sealed class MSVS2012CheckBoxRenderer : CustomCheckBoxRenderer
 		rcCheckBox.Y -= 1;
 		rcCheckBox.Width += 1;
 		rcCheckBox.Height += 1;
-		if(highlight)
+		if(colors.CheckBorder.A != 0)
 		{
-			using var pen = new Pen(ColorTable.CheckHighlight);
+			using var pen = new Pen(colors.CheckBorder);
 			graphics.DrawRectangle(pen, rcCheckBox);
 		}
 		switch(checkBox.CheckState)
 		{
 			case CheckState.Checked:
 				{
-					var path = new Point[]
-					{
-						new Point(conv.ConvertX( 4), conv.ConvertY( 7) + rcCheckBox.Y),
-						new Point(conv.ConvertX( 6), conv.ConvertY(10) + rcCheckBox.Y),
-						new Point(conv.ConvertX(11), conv.ConvertY( 3) + rcCheckBox.Y),
-					};
-					using(var pen = new Pen(foregroundColor, conv.ConvertX(1.7f)))
+					using(var pen = new Pen(colors.Foreground, conv.ConvertX(1.7f)))
 					using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
 					{
-						graphics.DrawLines(pen, path);
+						graphics.DrawLines(pen,
+							[
+								new(conv.ConvertX( 4), conv.ConvertY( 7) + rcCheckBox.Y),
+								new(conv.ConvertX( 6), conv.ConvertY(10) + rcCheckBox.Y),
+								new(conv.ConvertX(11), conv.ConvertY( 3) + rcCheckBox.Y),
+							]);
 					}
 				}
 				break;
@@ -139,7 +124,7 @@ sealed class MSVS2012CheckBoxRenderer : CustomCheckBoxRenderer
 						rcCheckBox.Y + conv.ConvertY(5),
 						rcCheckBox.Width  - conv.ConvertX(9),
 						rcCheckBox.Height - conv.ConvertY(9));
-					using(var brush = new SolidBrush(foregroundColor))
+					using(var brush = SolidBrushCache.Get(colors.Foreground))
 					{
 						graphics.FillRectangle(brush, rect);
 					}
@@ -162,7 +147,7 @@ sealed class MSVS2012CheckBoxRenderer : CustomCheckBoxRenderer
 				text,
 				checkBox.Font,
 				new Rectangle(textOffset, 0, checkBox.Width - textOffset, checkBox.Height),
-				foregroundColor,
+				colors.Foreground,
 				TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
 		}
 	}

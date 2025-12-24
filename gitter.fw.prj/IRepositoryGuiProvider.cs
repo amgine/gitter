@@ -32,5 +32,5 @@ public interface IRepositoryGuiProvider : IGuiProvider
 	void ActivateDefaultView();
 
 	/// <summary>Repository which is currently active.</summary>
-	IRepository Repository { get; set; }
+	IRepository? Repository { get; set; }
 }

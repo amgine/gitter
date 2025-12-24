@@ -23,13 +23,17 @@ namespace gitter.Git.Gui.Dialogs;
 using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Windows.Forms;
 
 using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Mvc;
 using gitter.Framework.Mvc.WinForms;
 using gitter.Framework.Services;
 
 using gitter.Git.Gui.Controllers;
+using gitter.Git.Gui.Controls;
 using gitter.Git.Gui.Interfaces;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
@@ -38,8 +42,81 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public partial class AddNoteDialog : GitDialogBase, IExecutableDialog, IAddNoteView
 {
-	private TextBoxSpellChecker _speller;
+	readonly struct DialogControls
+	{
+		public readonly TextBox _txtMessage;
+		public readonly LabelControl _lblMessage;
+		public readonly RevisionPicker _txtRevision;
+		public readonly LabelControl _lblRevision;
+
+		public DialogControls(IGitterStyle? style)
+		{
+			style ??= GitterApplication.Style;
+
+			_txtMessage = new()
+			{
+				AcceptsReturn = true,
+				AcceptsTab = true,
+				Multiline = true,
+				ScrollBars = ScrollBars.None,
+			};
+			_lblMessage  = new();
+			_txtRevision = new();
+			_lblRevision = new();
+
+			GitterApplication.FontManager.InputFont.Apply(_txtRevision, _txtMessage);
+		}
+
+		public void Localize()
+		{
+			_lblRevision.Text = Resources.StrRevision.AddColon();
+			_lblMessage.Text  = Resources.StrMessage.AddColon();
+		}
+
+		public void Layout(Control parent)
+		{
+			TextBoxDecorator messageDec;
+
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					rows:
+					[
+						LayoutConstants.TextInputRowHeight,
+						LayoutConstants.LabelRowHeight,
+						LayoutConstants.LabelRowSpacing,
+						SizeSpec.Everything(),
+					],
+					columns:
+					[
+						SizeSpec.Absolute(100),
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblRevision, marginOverride: LayoutConstants.TextBoxLabelMargin), row: 0, column: 0),
+						new GridContent(new ControlContent(_txtRevision, marginOverride: LayoutConstants.TextBoxMargin), row: 0, column: 1),
+						new GridContent(new ControlContent(_lblMessage, marginOverride: LayoutConstants.NoMargin), row: 1, columnSpan: 2),
+						new GridContent(new ControlContent(messageDec = new(_txtMessage), marginOverride: LayoutConstants.NoMargin), row: 3, columnSpan: 2),
+					]),
+			};
+
+			_lblRevision.Parent = parent;
+			_txtRevision.Parent = parent;
+			_lblMessage.Parent  = parent;
+			messageDec.Parent  = parent;
+
+			var tabIndex = 0;
+			_lblRevision.TabIndex = tabIndex++;
+			_txtRevision.TabIndex = tabIndex++;
+			_lblMessage.TabIndex  = tabIndex++;
+			messageDec.TabIndex  = tabIndex++;
+		}
+	}
+
+	private readonly DialogControls _controls;
 	private readonly IAddNoteController _controller;
+	private TextBoxSpellChecker? _speller;
 
 	/// <summary>Create <see cref="AddNoteDialog"/>.</summary>
 	/// <param name="repository">Repository to create note in.</param>
@@ -49,35 +126,57 @@ public partial class AddNoteDialog : GitDialogBase, IExecutableDialog, IAddNoteV
 
 		Repository = repository;
 
-		InitializeComponent();
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		Size = ScalableSize.GetValue(Dpi.Default);
+		Name = nameof(AddNoteDialog);
+		Text = Resources.StrAddNote;
+		_controls = new(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
 
 		var inputs = new IUserInputSource[]
 		{
-			Revision = new ControlInputSource(_txtRevision),
-			Message  = new TextBoxInputSource(_txtMessage),
+			Revision = new ControlInputSource(_controls._txtRevision),
+			Message  = new TextBoxInputSource(_controls._txtMessage),
 		};
 		ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 		Text = Resources.StrAddNote;
 
-		_txtRevision.References.LoadData(
+		_controls._txtRevision.References.LoadData(
 			Repository,
 			ReferenceType.Reference,
 			GlobalBehavior.GroupReferences,
 			GlobalBehavior.GroupRemoteBranches);
-		_txtRevision.References.Items[0].IsExpanded = true;
+		_controls._txtRevision.References.Items[0].IsExpanded = true;
 
-		_txtRevision.Text = GitConstants.HEAD;
+		_controls._txtRevision.Text = GitConstants.HEAD;
 
-		_lblRevision.Text = Resources.StrRevision.AddColon();
-		_lblMessage.Text = Resources.StrMessage.AddColon();
+		_controls._lblRevision.Text = Resources.StrRevision.AddColon();
+		_controls._lblMessage.Text = Resources.StrMessage.AddColon();
 
-		GitterApplication.FontManager.InputFont.Apply(_txtRevision, _txtMessage);
 		if(SpellingService.Enabled)
 		{
-			_speller = new TextBoxSpellChecker(_txtMessage, true);
+			_speller = new TextBoxSpellChecker(_controls._txtMessage, true);
 		}
 		_controller = new AddNoteController(repository) { View = this };
+	}
+
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
+
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			_speller?.Dispose();
+		}
+		base.Dispose(disposing);
 	}
 
 	/// <inheritdoc/>
@@ -90,7 +189,7 @@ public partial class AddNoteDialog : GitDialogBase, IExecutableDialog, IAddNoteV
 
 	public IUserInputSource<string> Revision { get; }
 
-	public IUserInputSource<string> Message { get; }
+	public IUserInputSource<string?> Message { get; }
 
 	public IUserInputErrorNotifier ErrorNotifier { get; }
 
@@ -98,7 +197,7 @@ public partial class AddNoteDialog : GitDialogBase, IExecutableDialog, IAddNoteV
 	protected override void OnLoad(EventArgs e)
 	{
 		base.OnLoad(e);
-		BeginInvoke(_txtMessage.Focus);
+		BeginInvoke(_controls._txtMessage.Focus);
 	}
 
 	/// <inheritdoc/>

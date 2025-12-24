@@ -25,6 +25,7 @@ using System.ComponentModel;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>Control for hosting <see cref="T:ViewBase"/> controls.</summary>
 [ToolboxItem(false)]
@@ -42,13 +43,13 @@ public sealed class ViewHost : ContainerControl, IDockHost
 	private readonly ViewHostResizingProcess _resizingProcess;
 	private bool _isDocumentWell;
 	private bool _isActive;
-	private ViewHostHeader _header;
-	private ViewHostTabs _tabs;
-	private ViewHostFooter _footer;
-	private ViewBase _activeView;
+	private ViewHostHeader? _header;
+	private ViewHostTabs? _tabs;
+	private ViewHostFooter? _footer;
+	private ViewBase? _activeView;
 	private ViewHostStatus _status;
-	private Form _ownerForm;
-	private DockPanelSide _dockSide;
+	private Form? _ownerForm;
+	private DockPanelSide? _dockSide;
 
 	private bool _readyToMove;
 	private int _mdX;
@@ -99,7 +100,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 	/// <param name="isRoot">if set to <c>true</c> disables host auto-destruction on losing all hosted views.</param>
 	/// <param name="isDocumentWell">if set to <c>true</c> uses advanced layout features for hosting variable size documents.</param>
 	/// <param name="views">Hosted views.</param>
-	internal ViewHost(DockPanel grid, bool isRoot, bool isDocumentWell, IEnumerable<ViewBase> views)
+	internal ViewHost(DockPanel grid, bool isRoot, bool isDocumentWell, IEnumerable<ViewBase>? views)
 	{
 		Verify.Argument.IsNotNull(grid);
 
@@ -112,7 +113,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 		_grid = grid;
 		_isRoot = isRoot;
 		_isDocumentWell = isDocumentWell;
-		_views = new List<ViewBase>();
+		_views = [];
 		var dpi  = Dpi.FromControl(this);
 		var size = new Size(
 			ViewConstants.MinimumHostWidth.GetValue(dpi),
@@ -121,7 +122,10 @@ public sealed class ViewHost : ContainerControl, IDockHost
 		{
 			foreach(var view in views)
 			{
-				Verify.Argument.IsTrue(view is not null, nameof(views), "List of views contains invalid arguments.");
+				if(view is null)
+				{
+					throw new ArgumentException("List of views contains invalid arguments.", nameof(views));
+				}
 
 				_views.Add(view);
 				view.TextChanged += OnViewTextChanged;
@@ -205,7 +209,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 
 	private ViewRenderer Renderer => ViewManager.Renderer;
 
-	private static T GetValue<T>(IDpiBoundValue<T> value, Dpi dpi, T defaultValue = default)
+	private static T? GetValue<T>(IDpiBoundValue<T> value, Dpi dpi, T? defaultValue = default)
 		=> value is not null ? value.GetValue(dpi) : defaultValue;
 
 	/// <inheritdoc/>
@@ -244,7 +248,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 		}
 	}
 
-	private void OnOwnerFormActivated(object sender, EventArgs e)
+	private void OnOwnerFormActivated(object? sender, EventArgs e)
 	{
 		if(ContainsFocus)
 		{
@@ -253,7 +257,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 		}
 	}
 
-	private void OnOwnerFormDeactivated(object sender, EventArgs e)
+	private void OnOwnerFormDeactivated(object? sender, EventArgs e)
 	{
 		if(_isActive)
 		{
@@ -284,7 +288,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 	protected override void OnMouseEnter(EventArgs e)
 	{
 		base.OnMouseEnter(e);
-		if(Status == ViewHostStatus.AutoHide)
+		if(Status == ViewHostStatus.AutoHide && DockSide is not null)
 		{
 			Cursor = DockSide.Orientation switch
 			{
@@ -536,8 +540,8 @@ public sealed class ViewHost : ContainerControl, IDockHost
 	{
 		Verify.State.IsTrue(_status == ViewHostStatus.AutoHide);
 
-		var side = _dockSide.Side;
-		var grid = _dockSide.DockPanel;
+		var side = _dockSide!.Side;
+		var grid = _dockSide!.DockPanel;
 		Undock();
 		var dockResult = side switch
 		{
@@ -562,7 +566,10 @@ public sealed class ViewHost : ContainerControl, IDockHost
 			var dpi = Dpi.FromControl(this);
 			_viewContainer.Height += Renderer.TabHeight.GetValue(dpi);
 		}
-		_header.Width = w;
+		if(_header is not null)
+		{
+			_header.Width = w;
+		}
 		_viewContainer.Width = w;
 	}
 
@@ -599,7 +606,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 			RemoveTabs();
 		}
 		Width += ViewConstants.SideDockPanelBorderSize;
-		_header.SetBounds(
+		_header?.SetBounds(
 			ViewConstants.SideDockPanelBorderSize, 0, w, 0,
 			BoundsSpecified.X | BoundsSpecified.Width);
 		_viewContainer.ResumeLayout(true);
@@ -626,7 +633,10 @@ public sealed class ViewHost : ContainerControl, IDockHost
 				BoundsSpecified.Y | BoundsSpecified.Height);
 			RemoveTabs();
 		}
-		_header.Top = ViewConstants.SideDockPanelBorderSize;
+		if(_header is not null)
+		{
+			_header.Top = ViewConstants.SideDockPanelBorderSize;
+		}
 		Height += ViewConstants.SideDockPanelBorderSize;
 		_viewContainer.ResumeLayout(true);
 	}
@@ -663,44 +673,46 @@ public sealed class ViewHost : ContainerControl, IDockHost
 
 	private void MaximizeFloatingForm()
 	{
-		if(_status == ViewHostStatus.Floating)
+		if(_status == ViewHostStatus.Floating && TopLevelControl is Form form)
 		{
-			_header.SetAvailableButtons(new[]
-			{
+			form.WindowState = FormWindowState.Maximized;
+			_header?.SetAvailableButtons(
+			[
 				ViewButtonType.Normalize,
 				ViewButtonType.Close,
-			});
-			((Form)TopLevelControl).WindowState = FormWindowState.Maximized;
+			]);
 		}
 	}
 
 	private void NormalizeFloatingForm()
 	{
-		if(_status == ViewHostStatus.Floating)
+		if(_status == ViewHostStatus.Floating && TopLevelControl is Form form)
 		{
-			_header.SetAvailableButtons(new[]
-				{
-					ViewButtonType.Maximize,
-					ViewButtonType.Close,
-				});
-			((Form)TopLevelControl).WindowState = FormWindowState.Normal;
+			form.WindowState = FormWindowState.Normal;
+			_header?.SetAvailableButtons(
+			[
+				ViewButtonType.Maximize,
+				ViewButtonType.Close,
+			]);
 		}
 	}
 
-	private void OnHeaderMouseDoubleClick(object sender, MouseEventArgs e)
+	private void OnHeaderMouseDoubleClick(object? sender, MouseEventArgs e)
 	{
 		if(e.Button == MouseButtons.Left)
 		{
 			if(_status == ViewHostStatus.Floating)
 			{
-				var f = (Form)TopLevelControl;
-				if(f.WindowState == FormWindowState.Maximized)
+				if(TopLevelControl is Form form)
 				{
-					NormalizeFloatingForm();
-				}
-				else
-				{
-					MaximizeFloatingForm();
+					if(form.WindowState == FormWindowState.Maximized)
+					{
+						NormalizeFloatingForm();
+					}
+					else
+					{
+						MaximizeFloatingForm();
+					}
 				}
 			}
 			else
@@ -711,25 +723,24 @@ public sealed class ViewHost : ContainerControl, IDockHost
 				var borderSize = Renderer.FloatBorderSize.GetValue(dpi);
 				loc.X -= borderSize.Width;
 				loc.Y -= borderSize.Height;
-				var form = PrepareFloatingMode();
-				form.Location = loc;
+				var form = PrepareFloatingMode(loc);
 				form.Show(owner);
 			}
 		}
 	}
 
-	private void OnHeaderButtonClick(object sender, ViewButtonClickEventArgs e)
+	private void OnHeaderButtonClick(object? sender, ViewButtonClickEventArgs e)
 	{
 		switch(e.Button)
 		{
 			case ViewButtonType.Close:
 				if(_status == ViewHostStatus.Floating)
 				{
-					((Form)TopLevelControl).Close();
+					(TopLevelControl as Form)?.Close();
 				}
 				else
 				{
-					if(_activeView != null)
+					if(_activeView is not null)
 					{
 						var view = _activeView;
 						var index = _views.IndexOf(view);
@@ -794,7 +805,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 			}
 			else
 			{
-				_tabs.AddView(view);
+				_tabs!.AddView(view);
 			}
 		}
 		else
@@ -814,7 +825,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 			}
 			else
 			{
-				_tabs.AddView(view);
+				_tabs!.AddView(view);
 			}
 		}
 		UpdateChildrenBounds(Dpi.FromControl(this));
@@ -911,7 +922,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 			}
 			else
 			{
-				_tabs.RemoveView(view);
+				_tabs?.RemoveView(view);
 				if(_activeView == view)
 				{
 					bool focused = view.ContainsFocus;
@@ -962,7 +973,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 					}
 					else
 					{
-						_tabs.RemoveView(view);
+						_tabs?.RemoveView(view);
 					}
 				}
 				if(_activeView == view)
@@ -1009,15 +1020,14 @@ public sealed class ViewHost : ContainerControl, IDockHost
 		}
 	}
 
-	private void OnHeaderMouseDown(object sender, MouseEventArgs e)
+	private void OnHeaderMouseDown(object? sender, MouseEventArgs e)
 	{
 		switch(e.Button)
 		{
 			case MouseButtons.Left:
 				if(_status == ViewHostStatus.Floating)
 				{
-					var form = (Form)TopLevelControl;
-					if(form.WindowState != FormWindowState.Normal) return;
+					if(TopLevelControl is Form { WindowState: not FormWindowState.Normal }) return;
 				}
 				_mdX = e.X;
 				_mdY = e.Y;
@@ -1026,7 +1036,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 		}
 	}
 
-	private void OnHeaderMouseMove(object sender, MouseEventArgs e)
+	private void OnHeaderMouseMove(object? sender, MouseEventArgs e)
 	{
 		bool moving = false;
 		if(_readyToMove)
@@ -1061,8 +1071,11 @@ public sealed class ViewHost : ContainerControl, IDockHost
 				}
 			}
 			var location = e.Location;
-			location.X += _header.Left;
-			location.Y += _header.Top;
+			if(_header is not null)
+			{
+				location.X += _header.Left;
+				location.Y += _header.Top;
+			}
 			if(_dockingProcess.IsActive)
 			{
 				_dockingProcess.Update(location);
@@ -1074,21 +1087,25 @@ public sealed class ViewHost : ContainerControl, IDockHost
 		}
 	}
 
-	private void OnHeaderMouseUp(object sender, MouseEventArgs e)
+	private void OnHeaderMouseUp(object? sender, MouseEventArgs e)
 	{
 		if(_dockingProcess.IsActive)
 		{
 			var location = e.Location;
-			location.X += _header.Left;
-			location.Y += _header.Top;
+			if(_header is not null)
+			{
+				location.X += _header.Left;
+				location.Y += _header.Top;
+			}
 			_dockingProcess.Commit(location);
 		}
 		_readyToMove = false;
 	}
 
-	private void OnViewTextChanged(object sender, EventArgs e)
+	private void OnViewTextChanged(object? sender, EventArgs e)
 	{
-		var view = (ViewBase)sender;
+		if(sender is not ViewBase view) return;
+
 		_header?.Invalidate();
 		_tabs?.InvalidateTab(view);
 	}
@@ -1117,10 +1134,10 @@ public sealed class ViewHost : ContainerControl, IDockHost
 	}
 
 	/// <inheritdoc/>
-	protected override void OnSizeChanged(EventArgs e)
+	protected override void OnLayout(LayoutEventArgs e)
 	{
 		UpdateChildrenBounds(Dpi.FromControl(this));
-		base.OnSizeChanged(e);
+		base.OnLayout(e);
 		if(_tabs is not null && _activeView is not null)
 		{
 			_tabs.EnsureVisible(_activeView);
@@ -1130,13 +1147,6 @@ public sealed class ViewHost : ContainerControl, IDockHost
 #if NETCOREAPP || NET47_OR_GREATER || NET5_0_OR_GREATER
 	/// <inheritdoc/>
 	protected override bool ScaleChildren => false;
-
-	/// <inheritdoc/>
-	protected override void OnDpiChangedAfterParent(EventArgs e)
-	{
-		UpdateChildrenBounds(Dpi.FromControl(this));
-		base.OnDpiChangedAfterParent(e);
-	}
 #endif
 
 	public void Activate()
@@ -1156,7 +1166,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 		Verify.Argument.IsTrue(view.Host == this, nameof(view), "View is not hosted in this ViewHost.");
 
 		SetActiveView(view);
-		_activeView.Focus();
+		_activeView?.Focus();
 	}
 
 	/// <summary>This view host is active.</summary>
@@ -1169,7 +1179,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 		{
 			case ViewHostStatus.AutoHide:
 				{
-					_dockSide.RemoveHost(this);
+					_dockSide!.RemoveHost(this);
 					switch(_dockSide.Side)
 					{
 						case AnchorStyles.Left or AnchorStyles.Right:
@@ -1218,10 +1228,13 @@ public sealed class ViewHost : ContainerControl, IDockHost
 				break;
 			case ViewHostStatus.Floating:
 				{
-					var parent = (Form)TopLevelControl;
+					var parent = TopLevelControl as Form;
 					Parent = null;
-					parent.Close();
-					parent.Dispose();
+					if(parent is not null)
+					{
+						parent.Close();
+						parent.Dispose();
+					}
 					Anchor = ViewConstants.AnchorDefault;
 				}
 				break;
@@ -1243,7 +1256,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 
 	public void StartMoving(int dx, int dy)
 	{
-		if(_header is null) return;
+		if(_header is null || Parent is null) return;
 
 		var pos = Control.MousePosition;
 		pos.Offset(-dx, -dy);
@@ -1257,9 +1270,9 @@ public sealed class ViewHost : ContainerControl, IDockHost
 
 	/// <summary>Undock and embed into floating form.</summary>
 	/// <returns>Floating form.</returns>
-	internal FloatingViewForm PrepareFloatingMode()
+	internal FloatingViewForm PrepareFloatingMode(Point? loc = default)
 	{
-		var location = FloatingViewForm.GetLocationFor(this);
+		var location = loc ?? FloatingViewForm.GetLocationFor(this);
 		if(_status != ViewHostStatus.Offscreen) Undock();
 
 		var floatingForm = new FloatingViewForm(this);
@@ -1277,7 +1290,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 
 	/// <summary>Gets the root owner form.</summary>
 	/// <returns>Root owner form.</returns>
-	public Form GetRootOwnerForm()
+	public Form? GetRootOwnerForm()
 	{
 		if(TopLevelControl is Form form)
 		{
@@ -1293,10 +1306,17 @@ public sealed class ViewHost : ContainerControl, IDockHost
 	/// <summary>Undock and go floating.</summary>
 	/// <param name="parent">Parent form.</param>
 	/// <returns>Floating form.</returns>
-	public Form GoFloatingMode(IWin32Window parent)
+	public Form GoFloatingMode(IWin32Window? parent)
 	{
 		var floatingForm = PrepareFloatingMode();
-		floatingForm.Show(parent);
+		if(parent is not null)
+		{
+			floatingForm.Show(parent);
+		}
+		else
+		{
+			floatingForm.Show();
+		}
 		return floatingForm;
 	}
 
@@ -1307,9 +1327,8 @@ public sealed class ViewHost : ContainerControl, IDockHost
 	/// <summary>Destroy floating host form and get ready to dock.</summary>
 	private void ReturnFromFloatingMode()
 	{
-		if(Status == ViewHostStatus.Floating)
+		if(Status == ViewHostStatus.Floating && TopLevelControl is Form p)
 		{
-			var p = (Form)TopLevelControl;
 			Parent = null;
 			p.Close();
 			p.Dispose();
@@ -1345,8 +1364,8 @@ public sealed class ViewHost : ContainerControl, IDockHost
 			case ViewHostStatus.AutoHide:
 				_header.SetAvailableButtons(ViewButtonType.Pin, ViewButtonType.Close);
 				break;
-			case ViewHostStatus.Floating:
-				switch(((Form)TopLevelControl).WindowState)
+			case ViewHostStatus.Floating when TopLevelControl is Form form:
+				switch(form.WindowState)
 				{
 					case FormWindowState.Maximized:
 						_header.SetAvailableButtons(ViewButtonType.Normalize, ViewButtonType.Close);
@@ -1373,10 +1392,13 @@ public sealed class ViewHost : ContainerControl, IDockHost
 	/// Host can have only one active view.
 	/// Root host has no active view if it hosts no views.
 	/// </remarks>
-	public ViewBase ActiveView => _activeView;
+	public ViewBase? ActiveView => _activeView;
 
 	/// <summary>Active view's caption.</summary>
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+	#if NET5_0_OR_GREATER
+	[AllowNull]
+	#endif
 	public override string Text
 	{
 		get => _activeView is not null ? _activeView.Text : string.Empty;
@@ -1400,9 +1422,9 @@ public sealed class ViewHost : ContainerControl, IDockHost
 			view.Host = null;
 			viewHost.AddView(view);
 		}
-		if(ActiveView != null)
+		if(ActiveView is not null)
 		{
-			viewHost.SetActiveView(_activeView);
+			viewHost.SetActiveView(ActiveView);
 			_activeView = null;
 		}
 		Dispose();
@@ -1411,7 +1433,7 @@ public sealed class ViewHost : ContainerControl, IDockHost
 
 	/// <summary>Gets the <see cref="DockPanelSide"/> which hosts this <see cref="ViewHost"/> in auto-hide state.</summary>
 	/// <value><see cref="DockPanelSide"/> which hosts this <see cref="ViewHost"/> in auto-hide state.</value>
-	internal DockPanelSide DockSide
+	internal DockPanelSide? DockSide
 	{
 		get => _dockSide;
 		set => _dockSide = value;

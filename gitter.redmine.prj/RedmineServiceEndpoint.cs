@@ -21,25 +21,23 @@
 namespace gitter.Redmine;
 
 using System;
-
-using gitter.Framework;
+using System.Net.Http;
 
 public sealed class RedmineServiceEndpoint
 {
-	private readonly GCCache<RedmineServiceContext> _context;
+	private readonly RedmineServiceContext _context;
 	private string _url;
 	private string _apiKey;
 
-	public RedmineServiceEndpoint(string name, string url, string apiKey)
+	public RedmineServiceEndpoint(HttpMessageInvoker httpMessageInvoker, string name, string url, string apiKey)
 	{
 		Name = name;
 		_url = url;
 		_apiKey = apiKey;
-		_context = new GCCache<RedmineServiceContext>(
-			() => new RedmineServiceContext(new Uri(_url), _apiKey));
+		_context = new RedmineServiceContext(httpMessageInvoker, new Uri(_url), _apiKey);
 	}
 
 	public string Name { get; }
 
-	public RedmineServiceContext Context => _context.Value;
+	public RedmineServiceContext Context => _context;
 }

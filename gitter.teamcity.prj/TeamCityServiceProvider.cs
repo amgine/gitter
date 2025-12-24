@@ -21,21 +21,24 @@
 namespace gitter.TeamCity;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using System.Net.Http;
 using System.Text;
-using System.Drawing;
 using System.Windows.Forms;
 
 using gitter.Framework;
 using gitter.Framework.Configuration;
+using gitter.Framework.Controls;
 
 using gitter.TeamCity.Gui;
 using gitter.TeamCity.Gui.Views;
 
 using Resources = gitter.TeamCity.Properties.Resources;
 
-public sealed class TeamCityServiceProvider : IRepositoryServiceProvider
+public sealed class TeamCityServiceProvider(HttpMessageInvoker httpMessageInvoker) : IRepositoryServiceProvider
 {
-	public static IWorkingEnvironment Environment { get; private set; }
+	public static IWorkingEnvironment? Environment { get; private set; }
 
 	public string Name => "teamcity";
 
@@ -44,6 +47,10 @@ public sealed class TeamCityServiceProvider : IRepositoryServiceProvider
 	public bool CanBeAddedManually => true;
 
 	public IImageProvider Icon => Icons.TeamCity;
+
+	public NotifyCollection<ServerInfo> Servers { get; } = [];
+
+	public HttpMessageInvoker HttpMessageInvoker { get; } = httpMessageInvoker;
 
 	/// <summary>Prepare for working inside specified <paramref name="environment"/>.</summary>
 	/// <param name="environment"><see cref="IWorkingEnvironment"/> to work in.</param>
@@ -54,6 +61,14 @@ public sealed class TeamCityServiceProvider : IRepositoryServiceProvider
 
 		environment.ViewDockService.RegisterFactory(new BuildTypeBuildsViewFactory());
 
+		if(section.TryGetSection("Servers", out var servers))
+		{
+			foreach(var server in servers.Sections)
+			{
+				Servers.Add(ServerInfo.LoadFrom(server));
+			}
+		}
+
 		Environment = environment;
 		return true;
 	}
@@ -62,9 +77,15 @@ public sealed class TeamCityServiceProvider : IRepositoryServiceProvider
 	/// <param name="section"><see cref="Section"/> for storing configuration.</param>
 	public void SaveTo(Section section)
 	{
+		var servers = section.GetCreateEmptySection("Servers");
+		int index = 0;
+		foreach(var server in Servers)
+		{
+			server.SaveTo(servers.GetCreateEmptySection($"Server{index++}"));
+		}
 	}
 
-	public bool IsValidFor(IRepository repository)
+	public static bool IsValidFor(IRepository repository)
 	{
 		if(repository is null) return false;
 		var issueTrackers = repository.ConfigSection.TryGetSection("IssueTrackers");
@@ -73,9 +94,7 @@ public sealed class TeamCityServiceProvider : IRepositoryServiceProvider
 			var section = issueTrackers.TryGetSection("TeamCity");
 			if(section is not null)
 			{
-				if(!section.ContainsParameter("ServiceUri")) return false;
-				if(!section.ContainsParameter("Username")) return false;
-				if(!section.ContainsParameter("Password")) return false;
+				if(!section.ContainsParameter("ServerName")) return false;
 				if(!section.ContainsParameter("ProjectId")) return false;
 				return true;
 			}
@@ -87,17 +106,11 @@ public sealed class TeamCityServiceProvider : IRepositoryServiceProvider
 	{
 		Verify.Argument.IsNotNull(repository);
 
-		return new ProviderSetupControl(repository);
+		return new ProviderSetupDialog(repository, Servers);
 	}
 
-	private static string Unmask(string str)
-	{
-		if(str == string.Empty) return string.Empty;
-
-		return Encoding.UTF8.GetString(Convert.FromBase64String(str));
-	}
-
-	public bool TryCreateGuiProvider(IRepository repository, out IGuiProvider guiProvider)
+	public bool TryCreateGuiProvider(IRepository repository,
+		[MaybeNullWhen(returnValue: false)] out IGuiProvider guiProvider)
 	{
 		if(!IsValidFor(repository))
 		{
@@ -107,16 +120,21 @@ public sealed class TeamCityServiceProvider : IRepositoryServiceProvider
 
 		var section = repository.ConfigSection.GetSection("IssueTrackers").GetSection("TeamCity");
 
-		var uri = section.GetValue<string>("ServiceUri");
-		var username = Unmask(section.GetValue<string>("Username"));
-		var password = Unmask(section.GetValue<string>("Password"));
-		var pid = section.GetValue<string>("ProjectId");
-		var svc = new TeamCityServiceContext(new Uri(uri), username, password)
+		var name   = section.GetValue<string>("ServerName") ?? "";
+		var pid    = section.GetValue<string>("ProjectId");
+		var server = Servers.FirstOrDefault(s => s.Name == name);
+		if(server is null)
+		{
+			guiProvider = default;
+			return false;
+		}
+
+		var svc = new TeamCityServiceContext(HttpMessageInvoker, server)
 		{
 			DefaultProjectId = pid,
 		};
 
-		guiProvider = new TeamCityGuiProvider(repository, svc);
+		guiProvider = new TeamCityGuiProvider(repository, Servers, svc);
 		return true;
 	}
 }

@@ -30,7 +30,7 @@ using gitter.Framework;
 /// <summary>Represents a tag on remote repository.</summary>
 public sealed class RemoteRepositoryTag : BaseRemoteReference
 {
-	internal RemoteRepositoryTag(RemoteReferencesCollection refs, string name, TagType type, Hash hash)
+	internal RemoteRepositoryTag(RemoteReferencesCollection refs, string name, TagType type, Sha1Hash hash)
 		: base(refs, name, hash)
 	{
 		TagType = type;
@@ -42,6 +42,6 @@ public sealed class RemoteRepositoryTag : BaseRemoteReference
 
 	protected override void DeleteCore() => References.RemoveTag(this);
 
-	protected override Task DeleteCoreAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	protected override Task DeleteCoreAsync(IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 		=> References.RemoveTagAsync(this, progress, cancellationToken);
 }

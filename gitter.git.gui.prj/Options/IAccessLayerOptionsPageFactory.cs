@@ -27,5 +27,5 @@ using gitter.Git.AccessLayer;
 
 interface IAccessLayerOptionsPageFactory
 {
-	DialogBase Create(Type accessLayerType, IGitAccessor accessor);
+	DialogBase? Create(Type accessLayerType, IGitAccessor accessor);
 }

@@ -30,8 +30,8 @@ public sealed class MSVS2012ScrollBarRenderer : CustomScrollBarRenderer
 {
 	#region Color Tables
 
-	private static IColorTable _darkColor;
-	private static IColorTable _lightColor;
+	private static IColorTable? _darkColor;
+	private static IColorTable? _lightColor;
 
 	/// <summary>Returns dark color table.</summary>
 	public static IColorTable DarkColor => _darkColor ??= new DarkColorTable();
@@ -60,36 +60,28 @@ public sealed class MSVS2012ScrollBarRenderer : CustomScrollBarRenderer
 	{
 		#region Static
 
-		private static readonly Color BACKGROUND		= MSVS2012DarkColors.SCROLLBAR_SPACING;
-		private static readonly Color ARROW_NORMAL		= Color.FromArgb(153, 153, 153);
-		private static readonly Color ARROW_HOVER		= Color.FromArgb( 28, 151, 234);
-		private static readonly Color ARROW_PRESSED		= Color.FromArgb(  0, 122, 204);
-		private static readonly Color ARROW_DISABLED	= Color.FromArgb( 85,  85,  88);
-		private static readonly Color THUMB_NORMAL		= Color.FromArgb(104, 104, 104);
-		private static readonly Color THUMB_HOVER		= Color.FromArgb(158, 158, 158);
-		private static readonly Color THUMB_PRESSED		= Color.FromArgb(239, 235, 239);
-		private static readonly Color THUMB_DISABLED	= Color.FromArgb( 85,  85,  88);
+		private static readonly Color BACKGROUND     = MSVS2012DarkColors.SCROLLBAR_SPACING;
+		private static readonly Color ARROW_NORMAL   = Color.FromArgb(153, 153, 153);
+		private static readonly Color ARROW_HOVER    = Color.FromArgb( 28, 151, 234);
+		private static readonly Color ARROW_PRESSED  = Color.FromArgb(  0, 122, 204);
+		private static readonly Color ARROW_DISABLED = Color.FromArgb( 85,  85,  88);
+		private static readonly Color THUMB_NORMAL   = Color.FromArgb(104, 104, 104);
+		private static readonly Color THUMB_HOVER    = Color.FromArgb(158, 158, 158);
+		private static readonly Color THUMB_PRESSED  = Color.FromArgb(239, 235, 239);
+		private static readonly Color THUMB_DISABLED = Color.FromArgb( 85,  85,  88);
 
 		#endregion
 
 		#region IColorTable
 
 		public Color Background => BACKGROUND;
-
 		public Color ArrowNormal => ARROW_NORMAL;
-
 		public Color ArrowHover => ARROW_HOVER;
-
 		public Color ArrowPressed => ARROW_PRESSED;
-
 		public Color ArrowDisabled => ARROW_DISABLED;
-
 		public Color ThumbNormal => THUMB_NORMAL;
-
 		public Color ThumbHover => THUMB_HOVER;
-
 		public Color ThumbPressed => THUMB_PRESSED;
-
 		public Color ThumbDisabled => THUMB_DISABLED;
 
 		#endregion
@@ -100,36 +92,28 @@ public sealed class MSVS2012ScrollBarRenderer : CustomScrollBarRenderer
 	{
 		#region Static
 
-		private static readonly Color BACKGROUND		= MSVS2012LightColors.SCROLLBAR_SPACING;
-		private static readonly Color ARROW_NORMAL		= Color.FromArgb(134, 137, 153);
-		private static readonly Color ARROW_HOVER		= Color.FromArgb( 28, 151, 234);
-		private static readonly Color ARROW_PRESSED		= Color.FromArgb(  0, 122, 204);
-		private static readonly Color ARROW_DISABLED	= Color.FromArgb(202, 203, 211);
-		private static readonly Color THUMB_NORMAL		= Color.FromArgb(208, 209, 215);
-		private static readonly Color THUMB_HOVER		= Color.FromArgb(136, 136, 136);
-		private static readonly Color THUMB_PRESSED		= Color.FromArgb(106, 106, 106);
-		private static readonly Color THUMB_DISABLED	= Color.FromArgb(202, 203, 211);
+		private static readonly Color BACKGROUND     = MSVS2012LightColors.SCROLLBAR_SPACING;
+		private static readonly Color ARROW_NORMAL   = Color.FromArgb(134, 137, 153);
+		private static readonly Color ARROW_HOVER    = Color.FromArgb( 28, 151, 234);
+		private static readonly Color ARROW_PRESSED  = Color.FromArgb(  0, 122, 204);
+		private static readonly Color ARROW_DISABLED = Color.FromArgb(202, 203, 211);
+		private static readonly Color THUMB_NORMAL   = Color.FromArgb(208, 209, 215);
+		private static readonly Color THUMB_HOVER    = Color.FromArgb(136, 136, 136);
+		private static readonly Color THUMB_PRESSED  = Color.FromArgb(106, 106, 106);
+		private static readonly Color THUMB_DISABLED = Color.FromArgb(202, 203, 211);
 
 		#endregion
 
 		#region IColorTable
 
 		public Color Background => BACKGROUND;
-
 		public Color ArrowNormal => ARROW_NORMAL;
-
 		public Color ArrowHover => ARROW_HOVER;
-
 		public Color ArrowPressed => ARROW_PRESSED;
-
 		public Color ArrowDisabled => ARROW_DISABLED;
-
 		public Color ThumbNormal => THUMB_NORMAL;
-
 		public Color ThumbHover => THUMB_HOVER;
-
 		public Color ThumbPressed => THUMB_PRESSED;
-
 		public Color ThumbDisabled => THUMB_DISABLED;
 
 		#endregion
@@ -242,8 +226,12 @@ public sealed class MSVS2012ScrollBarRenderer : CustomScrollBarRenderer
 
 	#endregion
 
+#if !NET9_0_OR_GREATER
+
 	[ThreadStatic]
-	private static Point[] _triangle = new Point[3];
+	private static Point[]? _triangle;
+
+#endif
 
 	#region Constants
 
@@ -327,10 +315,15 @@ public sealed class MSVS2012ScrollBarRenderer : CustomScrollBarRenderer
 
 	private static void DrawTriangle(Graphics graphics, Brush brush, Point p1, Point p2, Point p3)
 	{
-		_triangle[0] = p1;
-		_triangle[1] = p2;
-		_triangle[2] = p3;
-		graphics.FillPolygon(brush, _triangle);
+#if NET9_0_OR_GREATER
+		Span<Point> triangle = [p1, p2, p3];
+#else
+		var triangle = _triangle ??= new Point[3];
+		triangle[0] = p1;
+		triangle[1] = p2;
+		triangle[2] = p3;
+#endif
+		graphics.FillPolygon(brush, triangle);
 	}
 
 	private void RenderArrow(Graphics graphics, Rectangle bounds, Color color, Point p1, Point p2, Point p3)

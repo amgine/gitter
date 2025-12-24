@@ -4,6 +4,7 @@
     <AssemblyName>gitter.git.fw</AssemblyName>
     <RootNamespace>gitter.Git.AccessLayer</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

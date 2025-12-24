@@ -27,8 +27,7 @@ public abstract class NamedRedmineObject : RedmineObject
 {
 	#region Static
 
-	public static readonly RedmineObjectProperty<string> NameProperty =
-		new RedmineObjectProperty<string>("name", "Name");
+	public static readonly RedmineObjectProperty<string> NameProperty = new("name", nameof(Name));
 
 	#endregion
 
@@ -58,8 +57,8 @@ public abstract class NamedRedmineObject : RedmineObject
 
 	public string Name
 	{
-		get { return _name; }
-		internal set { UpdatePropertyValue(ref _name, value, NameProperty); }
+		get => _name;
+		internal set => UpdatePropertyValue(ref _name, value, NameProperty);
 	}
 
 	#endregion
@@ -72,10 +71,7 @@ public abstract class NamedRedmineObject : RedmineObject
 		Name = RedmineUtility.LoadString(node[NameProperty.XmlNodeName]);
 	}
 
-	public override string ToString()
-	{
-		return _name;
-	}
+	public override string ToString() => Name;
 
 	#endregion
 }

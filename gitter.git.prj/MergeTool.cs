@@ -49,13 +49,7 @@ public sealed class MergeTool : INamedObject
 	public static MergeTool GetByName(string name) => _tools[name];
 
 	public static MergeTool GetCreateByName(string name)
-	{
-		if(!_tools.TryGetValue(name, out var res))
-		{
-			res = new MergeTool(name);
-		}
-		return res;
-	}
+		=> _tools.TryGetValue(name, out var res) ? res : new(name);
 
 	public static IEnumerable<MergeTool> KnownTools
 		=> _tools.Values;
@@ -74,13 +68,13 @@ public sealed class MergeTool : INamedObject
 			{ "tkdiff",			tkdiff			= new MergeTool("tkdiff",			@"http://sourceforge.net/projects/tkdiff/files/", true, true) },
 			{ "meld",			meld			= new MergeTool("meld",				@"http://ftp.gnome.org/pub/gnome/sources/meld/", false, true) },
 			{ "xxdiff",			xxdiff			= new MergeTool("xxdiff",			@"http://sourceforge.net/projects/xxdiff/files/", false, true) },
-			{ "emerge",			emerge			= new MergeTool("emerge",			@"", false, true) },
-			{ "vimdiff",		vimdiff			= new MergeTool("vimdiff",			@"", false, true) },
-			{ "gvimdiff",		gvimdiff		= new MergeTool("gvimdiff",			@"", false, true) },
+			{ "emerge",			emerge			= new MergeTool("emerge",			null, false, true) },
+			{ "vimdiff",		vimdiff			= new MergeTool("vimdiff",			null, false, true) },
+			{ "gvimdiff",		gvimdiff		= new MergeTool("gvimdiff",			null, false, true) },
 			{ "ecmerge",		ecmerge			= new MergeTool("ecmerge",			@"http://www.elliecomputing.com/Download/download_form.asp", true, true) },
 			{ "diffuse",		diffuse			= new MergeTool("diffuse",			@"http://diffuse.sourceforge.net/download.html", true, true) },
 			{ "tortoisemerge",	tortoisemerge	= new MergeTool("tortoisemerge",	@"http://tortoisesvn.net/downloads", true, false) },
-			{ "opendiff",		opendiff		= new MergeTool("opendiff",			@"", false, true) },
+			{ "opendiff",		opendiff		= new MergeTool("opendiff",			null, false, true) },
 			{ "p4merge",		p4merge			= new MergeTool("p4merge",			@"http://www.perforce.com/perforce/downloads/index.html", true, true) },
 			{ "araxis",			araxis			= new MergeTool("araxis",			@"http://www.araxis.com/merge/index.html", true, false) },
 		};
@@ -91,7 +85,7 @@ public sealed class MergeTool : INamedObject
 		Name = name;
 	}
 
-	private MergeTool(string name, string url, bool supportsWin, bool supportsLinux)
+	private MergeTool(string name, string? url, bool supportsWin, bool supportsLinux)
 	{
 		Name = name;
 		DownloadUrl = url;
@@ -105,7 +99,7 @@ public sealed class MergeTool : INamedObject
 
 	public string Name { get; }
 
-	public string DownloadUrl { get; }
+	public string? DownloadUrl { get; }
 
 	public bool SupportsWin { get; }
 

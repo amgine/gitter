@@ -32,7 +32,7 @@ public static class EventHandlerExtensions
 	/// <param name="sender">Event sender.</param>
 	public static void Raise(this EventHandlerList evhList, object @event, object sender)
 	{
-		((EventHandler)evhList[@event])?.Invoke(sender, EventArgs.Empty);
+		((EventHandler?)evhList[@event])?.Invoke(sender, EventArgs.Empty);
 	}
 
 	/// <summary>Raise event from <see cref="EventHandlerList"/>.</summary>
@@ -42,7 +42,7 @@ public static class EventHandlerExtensions
 	/// <param name="sender">Event sender.</param>
 	public static void Raise(this EventHandlerList evhList, object @event, object sender, EventArgs args)
 	{
-		((EventHandler)evhList[@event])?.Invoke(sender, args);
+		((EventHandler?)evhList[@event])?.Invoke(sender, args);
 	}
 
 	/// <summary>Raise event from <see cref="EventHandlerList"/>.</summary>
@@ -52,7 +52,7 @@ public static class EventHandlerExtensions
 	/// <param name="sender">Event sender.</param>
 	public static void Raise(this EventHandlerList evhList, object @event, object sender, Func<EventArgs> args)
 	{
-		((EventHandler)evhList[@event])?.Invoke(sender, args());
+		((EventHandler?)evhList[@event])?.Invoke(sender, args());
 	}
 
 	/// <summary>Raise event from <see cref="EventHandlerList"/>.</summary>
@@ -64,7 +64,7 @@ public static class EventHandlerExtensions
 	public static void Raise<T>(this EventHandlerList evhList, object @event, object sender, T args)
 		where T : EventArgs
 	{
-		((EventHandler<T>)evhList[@event])?.Invoke(sender, args);
+		((EventHandler<T>?)evhList[@event])?.Invoke(sender, args);
 	}
 
 	/// <summary>Raise event from <see cref="EventHandlerList"/>.</summary>
@@ -76,6 +76,6 @@ public static class EventHandlerExtensions
 	public static void Raise<T>(this EventHandlerList evhList, object @event, object sender, Func<T> args)
 		where T : EventArgs
 	{
-		((EventHandler<T>)evhList[@event])?.Invoke(sender, args());
+		((EventHandler<T>?)evhList[@event])?.Invoke(sender, args());
 	}
 }

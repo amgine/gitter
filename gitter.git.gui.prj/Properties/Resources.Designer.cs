@@ -3108,6 +3108,15 @@ namespace gitter.Git.Gui.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Local System.
+        /// </summary>
+        internal static string StrLocalSystem {
+            get {
+                return ResourceManager.GetString("StrLocalSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to refresh.
         /// </summary>
         internal static string StrlRefresh {

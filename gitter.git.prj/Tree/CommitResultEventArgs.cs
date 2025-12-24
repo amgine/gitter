@@ -22,9 +22,7 @@ namespace gitter.Git;
 
 using System;
 
-public class CommitResultEventArgs : EventArgs
+public class CommitResultEventArgs(CommitResult commitResult) : EventArgs
 {
-	public CommitResultEventArgs(CommitResult commitResult) => CommitResult = commitResult;
-
-	public CommitResult CommitResult { get; }
+	public CommitResult CommitResult { get; } = commitResult;
 }

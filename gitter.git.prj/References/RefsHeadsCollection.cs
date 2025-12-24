@@ -18,8 +18,6 @@
  */
 #endregion
 
-#nullable enable
-
 namespace gitter.Git;
 
 using System;
@@ -62,7 +60,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 
 	#region Create()
 
-	private static CreateBranchParameters GetCreateBranchParameters(string name, IRevisionPointer startingRevision,
+	private static CreateBranchRequest GetCreateBranchParameters(string name, IRevisionPointer startingRevision,
 		BranchTrackingMode tracking,
 		bool               createRefLog,
 		bool               checkout,
@@ -106,14 +104,14 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 		var rev = startingRevision.Dereference()
 			?? throw new ArgumentException($"Unable to dereference {startingRevision}.", nameof(startingRevision));
 
-		var notifications = checkout ?
-			new[] { RepositoryNotifications.Checkout, RepositoryNotifications.BranchChanged } :
-			new[] { RepositoryNotifications.BranchChanged };
+		object[] notifications = checkout
+			? [RepositoryNotifications.Checkout, RepositoryNotifications.BranchChanged]
+			: [RepositoryNotifications.BranchChanged];
 
-		var parameters = GetCreateBranchParameters(name, startingRevision, tracking, createRefLog, checkout, orphan);
+		var request = GetCreateBranchParameters(name, startingRevision, tracking, createRefLog, checkout, orphan);
 		using(Repository.Monitor.BlockNotifications(notifications))
 		{
-			Repository.Accessor.CreateBranch.Invoke(parameters);
+			Repository.Accessor.CreateBranch.Invoke(request);
 		}
 		return OnBranchCreated(name, rev, checkout);
 	}
@@ -141,15 +139,15 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 			.ConfigureAwait(continueOnCapturedContext: false)
 			?? throw new ArgumentException($"Unable to dereference {startingRevision}.", nameof(startingRevision));
 
-		var notifications = checkout ?
-			new[] { RepositoryNotifications.Checkout, RepositoryNotifications.BranchChanged } :
-			new[] { RepositoryNotifications.BranchChanged };
+		object[] notifications = checkout
+			? [RepositoryNotifications.Checkout, RepositoryNotifications.BranchChanged]
+			: [RepositoryNotifications.BranchChanged];
 
-		var parameters = GetCreateBranchParameters(name, startingRevision, tracking, createRefLog, checkout, orphan);
+		var request = GetCreateBranchParameters(name, startingRevision, tracking, createRefLog, checkout, orphan);
 		using(Repository.Monitor.BlockNotifications(notifications))
 		{
 			await Repository.Accessor.CreateBranch
-				.InvokeAsync(parameters)
+				.InvokeAsync(request)
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 		return OnBranchCreated(name, rev, checkout);
@@ -285,7 +283,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 			RepositoryNotifications.BranchChanged))
 		{
 			Repository.Accessor.RenameBranch.Invoke(
-				new RenameBranchParameters(branch.Name, name));
+				new RenameBranchRequest(branch.Name, name));
 		}
 	}
 
@@ -297,7 +295,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 		Assert.IsNotNull(branch);
 		Assert.IsNeitherNullNorWhitespace(oldName);
 
-		branch.Revision.References.Rename(GitConstants.LocalBranchPrefix + oldName, branch);
+		branch.Revision?.References.Rename(GitConstants.LocalBranchPrefix + oldName, branch);
 		lock(SyncRoot)
 		{
 			ObjectStorage.Remove(oldName);
@@ -325,7 +323,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 			RepositoryNotifications.BranchChanged))
 		{
 			Repository.Accessor.DeleteBranch
-				.Invoke(new DeleteBranchParameters(branch.Name, false, force));
+				.Invoke(new DeleteBranchRequest(branch.Name, false, force));
 		}
 		RemoveObject(branch);
 	}
@@ -345,7 +343,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 			RepositoryNotifications.BranchChanged))
 		{
 			await Repository.Accessor.DeleteBranch
-				.InvokeAsync(new DeleteBranchParameters(branch.Name, false, force))
+				.InvokeAsync(new DeleteBranchRequest(branch.Name, false, force))
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 		RemoveObject(branch);
@@ -378,7 +376,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	public void Refresh()
 	{
 		var refs = Repository.Accessor.QueryBranches.Invoke(
-			new QueryBranchesParameters(QueryBranchRestriction.Local));
+			new QueryBranchesRequest(QueryBranchRestriction.Local));
 		RefreshInternal(refs.Heads);
 	}
 
@@ -397,7 +395,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 		Verify.Argument.IsValidGitObject(branch, Repository);
 
 		var branchData = Repository.Accessor.QueryBranch
-			.Invoke(new QueryBranchParameters(branch.Name, branch.IsRemote));
+			.Invoke(new QueryBranchRequest(branch.Name, branch.IsRemote));
 		if(branchData is not null)
 		{
 			ObjectFactories.UpdateBranch(branch, branchData);
@@ -415,7 +413,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 		Verify.Argument.IsValidGitObject(branch, Repository);
 
 		var branchData = await Repository.Accessor.QueryBranch
-			.InvokeAsync(new QueryBranchParameters(branch.Name, branch.IsRemote))
+			.InvokeAsync(new QueryBranchRequest(branch.Name, branch.IsRemote))
 			.ConfigureAwait(continueOnCapturedContext: false);
 		if(branchData is not null)
 		{
@@ -438,19 +436,16 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 		{
 			return Preallocated<Branch>.EmptyArray;
 		}
-		else
+		var res = new List<Branch>(capacity: heads.Count);
+		lock(SyncRoot)
 		{
-			var res = new List<Branch>(heads.Count);
-			lock(SyncRoot)
+			foreach(var head in heads)
 			{
-				foreach(var head in heads)
-				{
-					var branch = TryGetItem(head.Name);
-					if(branch != null) res.Add(branch);
-				}
+				if(!TryGetItem(head.Name, out var branch)) continue;
+				res.Add(branch);
 			}
-			return res;
 		}
+		return res;
 	}
 
 	/// <summary>Gets the list of unmerged local branches.</summary>
@@ -458,7 +453,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	public IReadOnlyList<Branch> GetUnmerged()
 	{
 		var refs = Repository.Accessor.QueryBranches.Invoke(
-			new QueryBranchesParameters(QueryBranchRestriction.Local, BranchQueryMode.NoMerged));
+			new QueryBranchesRequest(QueryBranchRestriction.Local, BranchQueryMode.NoMerged));
 		return GetHeads(refs);
 	}
 
@@ -467,7 +462,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 	public IReadOnlyList<Branch> GetMerged()
 	{
 		var refs = Repository.Accessor.QueryBranches.Invoke(
-			new QueryBranchesParameters(QueryBranchRestriction.Local, BranchQueryMode.Merged));
+			new QueryBranchesRequest(QueryBranchRestriction.Local, BranchQueryMode.Merged));
 		return GetHeads(refs);
 	}
 
@@ -480,7 +475,7 @@ public sealed class RefsHeadsCollection : GitObjectsCollection<Branch, BranchEve
 		Verify.Argument.IsValidRevisionPointer(revision, Repository);
 
 		var refs = Repository.Accessor.QueryBranches.Invoke(
-			new QueryBranchesParameters(QueryBranchRestriction.Local, BranchQueryMode.Contains, revision.Pointer));
+			new QueryBranchesRequest(QueryBranchRestriction.Local, BranchQueryMode.Contains, revision.Pointer));
 		return GetHeads(refs);
 	}
 

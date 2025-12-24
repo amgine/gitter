@@ -27,13 +27,13 @@ using gitter.Framework;
 
 public interface IGitDownloader
 {
-	Version LatestVersion { get; }
+	Version? LatestVersion { get; }
 
 	bool IsAvailable { get; }
 
-	string DownloadUrl { get; }
+	string? DownloadUrl { get; }
 
-	Task DownloadAndInstallAsync(IProgress<OperationProgress> progress = default);
+	Task DownloadAndInstallAsync(IProgress<OperationProgress>? progress = default);
 
 	void Download();
 }

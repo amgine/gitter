@@ -20,13 +20,13 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Xml;
-
-using gitter.Framework;
 
 public abstract class RedmineObjectsCacheBase<T> : IEnumerable<T>
 	where T : RedmineObject
@@ -35,101 +35,71 @@ public abstract class RedmineObjectsCacheBase<T> : IEnumerable<T>
 	{
 		Verify.Argument.IsNotNull(context);
 
-		Cache = new Dictionary<int, T>();
 		Context = context;
 	}
 
 	protected abstract T Create(XmlNode node);
 
-	protected Dictionary<int, T> Cache { get; }
+	protected Dictionary<int, T> Cache { get; } = [];
 
 	protected RedmineServiceContext Context { get; }
 
-	public object SyncRoot => Context.SyncRoot;
+	public LockType SyncRoot => Context.SyncRoot;
 
 	internal T Lookup(XmlNode node)
 	{
 		Verify.Argument.IsNotNull(node);
 
 		var id = RedmineUtility.LoadInt(node[RedmineObject.IdProperty.XmlNodeName]);
-		T obj;
 		lock(SyncRoot)
 		{
-			if(!Cache.TryGetValue(id, out obj))
+			if(!Cache.TryGetValue(id, out var obj))
 			{
-				obj = Create(node);
-				Cache.Add(id, obj);
+				Cache.Add(id, obj = Create(node));
 			}
 			else
 			{
 				obj.Update(node);
 			}
+			return obj;
 		}
-		return obj;
 	}
 
-	protected internal T FetchSingleItem(string url)
+	protected internal async Task<T> FetchSingleItemAsync(string url, CancellationToken cancellationToken = default)
 	{
-		var xml = Context.GetXml(url);
-		return Lookup(xml.DocumentElement);
+		var xml = await Context
+			.GetXmlAsync(url, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		var root = xml?.DocumentElement ?? throw new ApplicationException("XML is empty");
+		return Lookup(root);
 	}
 
-	protected LinkedList<T> FetchItemsFromAllPages(string url)
+	protected async Task<List<T>> FetchItemsFromAllPagesAsync(string url, CancellationToken cancellationToken = default)
 	{
-		var list = new LinkedList<T>();
-		Context.GetAllDataPages(url,
+		var list = new List<T>();
+		await Context.GetAllDataPagesAsync(url,
 			xml =>
 			{
-				foreach(var item in Select(xml.DocumentElement))
+				var root = xml.DocumentElement;
+				if(root is null) return;
+				foreach(var item in Select(root))
 				{
-					list.AddLast(item);
+					list.Add(item);
 				}
-			});
+			}, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 		return list;
 	}
 
-	protected async Task<LinkedList<T>> FetchItemsFromAllPagesAsync(string url, CancellationToken cancellationToken)
+	protected async Task<List<T>> FetchItemsFromSinglePageAsync(string url, CancellationToken cancellationToken = default)
 	{
-		var list = new LinkedList<T>();
-		await Context
-			.GetAllDataPagesAsync(url,
-			xml =>
-			{
-				foreach(var item in Select(xml.DocumentElement))
-				{
-					list.AddLast(item);
-				}
-			},
-			cancellationToken);
-		return list;
-		//return Context
-		//	.GetAllDataPagesAsync(url,
-		//	xml =>
-		//	{
-		//		foreach(var item in Select(xml.DocumentElement))
-		//		{
-		//			list.AddLast(item);
-		//		}
-		//	},
-		//	cancellationToken)
-		//	.ContinueWith(
-		//	t =>
-		//	{
-		//		TaskUtility.PropagateFaultedStates(t);
-		//		return list;
-		//	},
-		//	cancellationToken,
-		//	TaskContinuationOptions.ExecuteSynchronously,
-		//	TaskScheduler.Default);
-	}
-
-	protected LinkedList<T> FetchItemsFromSinglePage(string url)
-	{
-		var xml = Context.GetXml(url);
-		var list = new LinkedList<T>();
-		foreach(var item in Select(xml.DocumentElement))
+		var xml = await Context
+			.GetXmlAsync(url, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		var root = xml?.DocumentElement ?? throw new ApplicationException("XML is empty");
+		var list = new List<T>();
+		foreach(var item in Select(root))
 		{
-			list.AddLast(item);
+			list.Add(item);
 		}
 		return list;
 	}
@@ -144,15 +114,9 @@ public abstract class RedmineObjectsCacheBase<T> : IEnumerable<T>
 		}
 	}
 
-	public T this[int id]
-	{
-		get { return Cache[id]; }
-	}
+	public T this[int id] => Cache[id];
 
-	public int Count
-	{
-		get { return Cache.Count; }
-	}
+	public int Count => Cache.Count;
 
 	internal bool Remove(T item)
 	{
@@ -183,14 +147,10 @@ public abstract class RedmineObjectsCacheBase<T> : IEnumerable<T>
 	#region IEnumerable
 
 	public IEnumerator<T> GetEnumerator()
-	{
-		return Cache.Values.GetEnumerator();
-	}
+		=> Cache.Values.GetEnumerator();
 
 	System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
-	{
-		return Cache.Values.GetEnumerator();
-	}
+		=> Cache.Values.GetEnumerator();
 
 	#endregion
 }

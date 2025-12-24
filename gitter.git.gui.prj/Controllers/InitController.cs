@@ -33,35 +33,37 @@ using gitter.Git.Gui.Interfaces;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class InitController : ViewControllerBase<IInitView>, IInitController
+sealed class InitController(IGitRepositoryProvider gitRepositoryProvider)
+	: ViewControllerBase<IInitView>, IInitController
 {
-	public InitController(IGitRepositoryProvider gitRepositoryProvider)
+	readonly record struct UserInput(
+		string  Path,
+		string? Template,
+		bool    Bare);
+
+	private static bool TryCollectUserInput(IInitView view, out UserInput input)
 	{
-		Verify.Argument.IsNotNull(gitRepositoryProvider);
-
-		GitRepositoryProvider = gitRepositoryProvider;
-	}
-
-	private IGitRepositoryProvider GitRepositoryProvider { get; }
-
-	private bool ValidateInput(out string path, out string template, out bool bare)
-	{
-		path     = View.RepositoryPath.Value.Trim();
-		template = null;
-		bare     = View.Bare.Value;
-		if(!GitControllerUtility.ValidateAbsolutePath(path, View.RepositoryPath, View.ErrorNotifier))
+		var path     = view.RepositoryPath.Value?.Trim();
+		var template = default(string);
+		var bare     = view.Bare.Value;
+		if(!GitControllerUtility.ValidateAbsolutePath(path, view.RepositoryPath, view.ErrorNotifier))
 		{
-			return false;
+			goto fail;
 		}
-		if(View.UseCustomTemplate.Value)
+		if(view.UseCustomTemplate.Value)
 		{
-			template = View.Template.Value.Trim();
-			if(!GitControllerUtility.ValidateAbsolutePath(template, View.Template, View.ErrorNotifier))
+			template = view.Template.Value?.Trim();
+			if(!GitControllerUtility.ValidateAbsolutePath(template, view.Template, view.ErrorNotifier))
 			{
-				return false;
+				goto fail;
 			}
 		}
+		input = new(path!, template, bare);
 		return true;
+
+	fail:
+		input = default;
+		return false;
 	}
 
 	private void OnCreateDirectoryFailed(Exception exc)
@@ -80,12 +82,8 @@ sealed class InitController : ViewControllerBase<IInitView>, IInitController
 			MessageBoxButton.Close,
 			MessageBoxIcon.Error);
 
-	public bool TryInit()
+	private bool EnsureDirectoryExists(string path)
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
-
-		if(!ValidateInput(out var path, out var template, out var bare)) return false;
-
 		try
 		{
 			if(!Directory.Exists(path))
@@ -93,16 +91,29 @@ sealed class InitController : ViewControllerBase<IInitView>, IInitController
 				Directory.CreateDirectory(path);
 			}
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			OnCreateDirectoryFailed(exc);
 			return false;
 		}
+		return true;
+	}
+
+	public bool TryInit()
+	{
+		var view = RequireView();
+
+		var accessor = gitRepositoryProvider.GitAccessor
+			?? throw new InvalidOperationException("Git is not configured.");
+
+		if(!TryCollectUserInput(view, out var input)) return false;
+		if(!EnsureDirectoryExists(input.Path)) return false;
+
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				Repository.Init(GitRepositoryProvider.GitAccessor, path, template, bare);
+				Repository.Init(accessor, input.Path, input.Template, input.Bare);
 			}
 		}
 		catch(GitException exc)
@@ -115,28 +126,20 @@ sealed class InitController : ViewControllerBase<IInitView>, IInitController
 
 	public async Task<bool> TryInitAsync()
 	{
-		Verify.State.IsTrue(View != null, "Controller is not attached to a view.");
+		var view = RequireView();
 
-		if(!ValidateInput(out var path, out var template, out var bare)) return false;
+		var accessor = gitRepositoryProvider.GitAccessor
+			?? throw new InvalidOperationException("Git is not configured.");
+
+		if(!TryCollectUserInput(view, out var input)) return false;
+		if(!EnsureDirectoryExists(input.Path)) return false;
 
 		try
 		{
-			if(!Directory.Exists(path))
-			{
-				Directory.CreateDirectory(path);
-			}
-		}
-		catch(Exception exc) when(!exc.IsCritical())
-		{
-			OnCreateDirectoryFailed(exc);
-			return false;
-		}
-		try
-		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
 				await Repository
-					.InitAsync(GitRepositoryProvider.GitAccessor, path, template, bare)
+					.InitAsync(accessor, input.Path, input.Template, input.Bare)
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 		}

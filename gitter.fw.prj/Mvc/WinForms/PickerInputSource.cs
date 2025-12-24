@@ -41,16 +41,16 @@ public class PickerInputSource<TListBox, TItem, TValue> : ControlInputSource<Cus
 	{
 	}
 
-	protected override TValue FetchValue() => Control.SelectedValue;
+	protected override TValue? FetchValue() => Control.SelectedValue;
 
-	protected override void SetValue(TValue value) => Control.SelectedValue = value;
+	protected override void SetValue(TValue? value) => Control.SelectedValue = value;
 
 	protected override void SubscribeToValueChangeEvent()
 	{
 		Control.SelectedValueChanged += OnControlValueChanged;
 	}
 
-	protected override void UnsubscribeToValueChangeEvent()
+	protected override void UnsubscribeFromValueChangeEvent()
 	{
 		Control.SelectedValueChanged -= OnControlValueChanged;
 	}

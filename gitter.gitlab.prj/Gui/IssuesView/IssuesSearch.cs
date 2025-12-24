@@ -25,13 +25,8 @@ using System.Globalization;
 
 using gitter.Framework.Controls;
 
-class IssuesSearch : ListBoxSearch<IssuesSearchOptions>
+class IssuesSearch(CustomListBox listBox) : ListBoxSearch<IssuesSearchOptions>(listBox)
 {
-	public IssuesSearch(CustomListBox listBox)
-		: base(listBox)
-	{
-	}
-
 	private static bool TestIssue(Api.Issue issue, IssuesSearchOptions search)
 	{
 		Assert.IsNotNull(issue);

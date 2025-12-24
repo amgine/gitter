@@ -27,6 +27,7 @@ using System.Windows.Forms;
 
 using gitter.Framework;
 using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Services;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
@@ -34,6 +35,282 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 /// <summary>Dialog for displaying and/or editing <see cref="Remote"/> object properties.</summary>
 public partial class RemotePropertiesDialog : GitDialogBase, IExecutableDialog
 {
+	readonly struct DialogControls
+	{
+		public readonly LabelControl _lblFetchURL;
+		public readonly LabelControl _lblPushURL;
+		public readonly TextBox _txtFetchURL;
+		public readonly TextBox _txtPushURL;
+		public readonly TextBox _txtProxy;
+		public readonly LabelControl _lblProxy;
+		public readonly GroupSeparator _grpUpdatedReferences;
+		public readonly GroupSeparator _grpOptions;
+		public readonly ICheckBoxWidget _chkMirror;
+		public readonly ICheckBoxWidget _chkSkipFetchAll;
+		public readonly LabelControl _lblVCS;
+		public readonly TextBox _txtVCS;
+		public readonly LabelControl _lblReceivePack;
+		public readonly LabelControl _lblUploadPack;
+		public readonly TextBox _txtReceivePack;
+		public readonly TextBox _txtUploadPack;
+		public readonly LabelControl _lblFetchTags;
+		public readonly IRadioButtonWidget _radNormal;
+		public readonly IRadioButtonWidget _radFetchAll;
+		public readonly IRadioButtonWidget _radFetchNone;
+		public readonly CustomListBox _lstUpdatedReferences;
+		public readonly IButtonWidget _btnAddRefspec;
+		public readonly LabelControl _lblRefspec;
+		public readonly TextBox _txtRefspec;
+		public readonly IRadioButtonWidget _radFetch;
+		public readonly IRadioButtonWidget _radPush;
+
+		public DialogControls(IGitterStyle style)
+		{
+			style ??= GitterApplication.Style;
+
+			var cbf = style.CheckBoxFactory;
+			var rbf = style.RadioButtonFactory;
+
+			_radFetchNone         = rbf.Create();
+			_radFetchAll          = rbf.Create();
+			_radNormal            = rbf.Create();
+			_lblFetchTags         = new();
+			_lblUploadPack        = new();
+			_lblReceivePack       = new();
+			_lblVCS               = new();
+			_chkSkipFetchAll      = cbf.Create();
+			_chkMirror            = cbf.Create();
+			_grpOptions           = new();
+			_grpUpdatedReferences = new();
+			_txtUploadPack        = new();
+			_txtReceivePack       = new();
+			_txtVCS               = new();
+			_txtProxy             = new();
+			_txtPushURL           = new();
+			_txtFetchURL          = new();
+			_lblProxy             = new();
+			_lblPushURL           = new();
+			_lblFetchURL          = new();
+			_lstUpdatedReferences = new() { Style = style, Multiselect = true, AllowColumnReorder = false };
+			_btnAddRefspec        = style.ButtonFactory.Create();
+			_lblRefspec           = new();
+			_txtRefspec           = new();
+			_radFetch             = rbf.Create();
+			_radPush              = rbf.Create();
+
+			_radFetch.IsChecked = true;
+
+			_lstUpdatedReferences.Columns.AddRange(
+			[
+				new CustomListBoxColumn(0, "") { SizeMode = ColumnSizeMode.Fixed, Width = 20 },
+				new CustomListBoxColumn(1, "") { SizeMode = ColumnSizeMode.Fixed, Width = 20 },
+				new CustomListBoxColumn(2, Resources.StrFrom) { SizeMode = ColumnSizeMode.Fill },
+				new CustomListBoxColumn(3, Resources.StrTo) { SizeMode = ColumnSizeMode.Fill },
+			]);
+
+			GitterApplication.FontManager.InputFont.Apply(
+				_txtFetchURL, _txtPushURL, _txtProxy, _txtVCS, _txtRefspec, _txtReceivePack, _txtUploadPack);
+		}
+
+		public void Localize()
+		{
+			_lblFetchURL.Text = Resources.StrFetchUrl.AddColon();
+			_lblPushURL.Text = Resources.StrPushUrl.AddColon();
+			_lblProxy.Text = Resources.StrProxy.AddColon();
+			_lblVCS.Text = Resources.StrVCS.AddColon();
+
+			_grpUpdatedReferences.Text = Resources.StrsUpdatedReferences;
+			_lblRefspec.Text = Resources.StrRefspec.AddColon();
+			_btnAddRefspec.Text = Resources.StrAdd;
+
+			_grpOptions.Text = Resources.StrsDefaultBehavior;
+
+			_lblReceivePack.Text = Resources.StrsReceivePack.AddColon();
+			_lblUploadPack.Text = Resources.StrsUploadPack.AddColon();
+
+			_chkMirror.Text = Resources.StrMirror;
+			_chkSkipFetchAll.Text = Resources.StrSkipFetchAll;
+			_lblFetchTags.Text = Resources.StrsFetchTags.AddColon();
+
+			_radNormal.Text = Resources.StrDefault;
+			_radFetchAll.Text = Resources.StrAll;
+			_radFetchNone.Text = Resources.StrNone;
+
+			_radFetch.Text = Resources.StrFetch;
+			_radPush.Text = Resources.StrPush;
+		}
+
+		public void Layout(Control parent)
+		{
+			var fetchDec   = new TextBoxDecorator(_txtFetchURL);
+			var pushDec    = new TextBoxDecorator(_txtPushURL);
+			var proxyDec   = new TextBoxDecorator(_txtProxy);
+			var vcsDec     = new TextBoxDecorator(_txtVCS);
+			var receiveDec = new TextBoxDecorator(_txtReceivePack);
+			var uploadDec  = new TextBoxDecorator(_txtUploadPack);
+			var refspecDec = new TextBoxDecorator(_txtRefspec);
+
+			var pnlFetchTags      = new Panel();
+			var pnlAddRefspecType = new Panel();
+
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					columns:
+					[
+						SizeSpec.Absolute(106),
+						SizeSpec.Everything(),
+					],
+					rows:
+					[
+						/*  0 */ LayoutConstants.TextInputRowHeight,
+						/*  1 */ LayoutConstants.TextInputRowHeight,
+						/*  2 */ LayoutConstants.TextInputRowHeight,
+						/*  3 */ LayoutConstants.TextInputRowHeight,
+						/*  4 */ LayoutConstants.GroupSeparatorRowHeight,
+						/*  5 */ LayoutConstants.TextInputRowHeight,
+						/*  6 */ LayoutConstants.TextInputRowHeight,
+						/*  7 */ LayoutConstants.RadioButtonRowHeight,
+						/*  8 */ LayoutConstants.CheckBoxRowHeight,
+						/*  9 */ LayoutConstants.CheckBoxRowHeight,
+						/* 10 */ LayoutConstants.GroupSeparatorRowHeight,
+						/* 11 */ SizeSpec.Everything(),
+						/* 12 */ LayoutConstants.TextInputRowHeight,
+						/* 13 */ LayoutConstants.RadioButtonRowHeight,
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblFetchURL,          marginOverride: LayoutConstants.TextBoxLabelMargin), row: 0, column: 0),
+						new GridContent(new ControlContent(fetchDec,              marginOverride: LayoutConstants.TextBoxMargin), row: 0, column: 1),
+						new GridContent(new ControlContent(_lblPushURL,           marginOverride: LayoutConstants.TextBoxLabelMargin), row: 1, column: 0),
+						new GridContent(new ControlContent(pushDec,               marginOverride: LayoutConstants.TextBoxMargin), row: 1, column: 1),
+						new GridContent(new ControlContent(_lblProxy,             marginOverride: LayoutConstants.TextBoxLabelMargin), row: 2, column: 0),
+						new GridContent(new ControlContent(proxyDec,              marginOverride: LayoutConstants.TextBoxMargin), row: 2, column: 1),
+						new GridContent(new ControlContent(_lblVCS,               marginOverride: LayoutConstants.TextBoxLabelMargin), row: 3, column: 0),
+						new GridContent(new ControlContent(vcsDec,                marginOverride: LayoutConstants.TextBoxMargin), row: 3, column: 1),
+						new GridContent(new ControlContent(_grpOptions,           marginOverride: LayoutConstants.NoMargin), row: 4, columnSpan: 2),
+						new GridContent(new ControlContent(_lblReceivePack,       marginOverride: LayoutConstants.TextBoxLabelMargin), row: 5, column: 0),
+						new GridContent(new ControlContent(receiveDec,            marginOverride: LayoutConstants.TextBoxMargin), row: 5, column: 1),
+						new GridContent(new ControlContent(_lblUploadPack,        marginOverride: LayoutConstants.TextBoxLabelMargin), row: 6, column: 0),
+						new GridContent(new ControlContent(uploadDec,             marginOverride: LayoutConstants.TextBoxMargin), row: 6, column: 1),
+						new GridContent(new ControlContent(_lblFetchTags,         marginOverride: LayoutConstants.NoMargin), row: 7, column: 0),
+						new GridContent(new ControlContent(pnlFetchTags,          marginOverride: LayoutConstants.NoMargin), row: 7, column: 1),
+						new GridContent(new WidgetContent (_chkMirror,            marginOverride: LayoutConstants.NoMargin), row:  8),
+						new GridContent(new WidgetContent (_chkSkipFetchAll,      marginOverride: LayoutConstants.NoMargin), row:  9),
+						new GridContent(new ControlContent(_grpUpdatedReferences, marginOverride: LayoutConstants.NoMargin), row: 10, columnSpan: 2),
+						new GridContent(new ControlContent(_lstUpdatedReferences, marginOverride: LayoutConstants.NoMargin), row: 11, columnSpan: 2),
+						new GridContent(new ControlContent(_lblRefspec,           marginOverride: LayoutConstants.TextBoxLabelMargin), row: 12, column: 0),
+						new GridContent(new Grid(
+							columns:
+							[
+								SizeSpec.Everything(),
+								SizeSpec.Absolute(4),
+								SizeSpec.Absolute(75),
+							],
+							content:
+							[
+								new GridContent(new ControlContent(refspecDec,     marginOverride: LayoutConstants.TextBoxMargin), column: 0),
+								new GridContent(new WidgetContent (_btnAddRefspec, marginOverride: LayoutConstants.TextBoxMargin), column: 2),
+							]), row: 12, column: 1),
+						new GridContent(new ControlContent(pnlAddRefspecType,     marginOverride: LayoutConstants.NoMargin), row: 13, column: 1),
+					]),
+			};
+
+			_ = new ControlLayout(pnlFetchTags)
+			{
+				Content = new Grid(
+					columns:
+					[
+						SizeSpec.Absolute(80),
+						SizeSpec.Absolute(80),
+						SizeSpec.Absolute(80),
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new WidgetContent(_radNormal,    marginOverride: LayoutConstants.NoMargin), column: 0),
+						new GridContent(new WidgetContent(_radFetchAll,  marginOverride: LayoutConstants.NoMargin), column: 1),
+						new GridContent(new WidgetContent(_radFetchNone, marginOverride: LayoutConstants.NoMargin), column: 2),
+					]),
+			};
+
+			_ = new ControlLayout(pnlAddRefspecType)
+			{
+				Content = new Grid(
+					columns:
+					[
+						SizeSpec.Absolute(80),
+						SizeSpec.Absolute(80),
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new WidgetContent(_radFetch, marginOverride: LayoutConstants.NoMargin), column: 0),
+						new GridContent(new WidgetContent(_radPush,  marginOverride: LayoutConstants.NoMargin), column: 1),
+					]),
+			};
+
+			var tabIndex = 0;
+			_lblFetchURL.TabIndex = tabIndex++;
+			fetchDec.TabIndex = tabIndex++;
+			_lblPushURL.TabIndex = tabIndex++;
+			pushDec.TabIndex = tabIndex++;
+			_lblProxy.TabIndex = tabIndex++;
+			proxyDec.TabIndex = tabIndex++;
+			_lblVCS.TabIndex = tabIndex++;
+			vcsDec.TabIndex = tabIndex++;
+			_grpOptions.TabIndex = tabIndex++;
+			_lblReceivePack.TabIndex = tabIndex++;
+			receiveDec.TabIndex = tabIndex++;
+			_lblUploadPack.TabIndex = tabIndex++;
+			uploadDec.TabIndex = tabIndex++;
+			_lblFetchTags.TabIndex = tabIndex++;
+			pnlFetchTags.TabIndex += tabIndex++;
+			_radNormal.TabIndex += tabIndex++;
+			_radFetchAll.TabIndex += tabIndex++;
+			_radFetchNone.TabIndex += tabIndex++;
+			_chkMirror.TabIndex = tabIndex++;
+			_chkSkipFetchAll.TabIndex = tabIndex++;
+			_grpUpdatedReferences.TabIndex = tabIndex++;
+			_lstUpdatedReferences.TabIndex = tabIndex++;
+			_lblRefspec.TabIndex = tabIndex++;
+			refspecDec.TabIndex = tabIndex++;
+			_btnAddRefspec.TabIndex = tabIndex++;
+			pnlAddRefspecType.TabIndex = tabIndex++;
+			_radFetch.TabIndex = tabIndex++;
+			_radPush.TabIndex = tabIndex++;
+
+			_lblFetchURL.Parent = parent;
+			fetchDec.Parent = parent;
+			_lblPushURL.Parent = parent;
+			pushDec.Parent = parent;
+			_lblProxy.Parent = parent;
+			proxyDec.Parent = parent;
+			_lblVCS.Parent = parent;
+			vcsDec.Parent = parent;
+			_grpOptions.Parent = parent;
+			_lblReceivePack.Parent = parent;
+			receiveDec.Parent = parent;
+			_lblUploadPack.Parent = parent;
+			uploadDec.Parent = parent;
+			_lblFetchTags.Parent = parent;
+			_radNormal.Parent = pnlFetchTags;
+			_radFetchAll.Parent = pnlFetchTags;
+			_radFetchNone.Parent = pnlFetchTags;
+			pnlFetchTags.Parent = parent;
+			_chkMirror.Parent = parent;
+			_chkSkipFetchAll.Parent = parent;
+			_grpUpdatedReferences.Parent = parent;
+			_lstUpdatedReferences.Parent = parent;
+			_lblRefspec.Parent = parent;
+			refspecDec.Parent = parent;
+			_btnAddRefspec.Parent = parent;
+			_radFetch.Parent = pnlAddRefspecType;
+			_radPush.Parent = pnlAddRefspecType;
+			pnlAddRefspecType.Parent = parent;
+		}
+	}
+
 	private sealed class RefspecItem : CustomListBoxItem<string>
 	{
 		private readonly bool _forced;
@@ -110,6 +387,8 @@ public partial class RemotePropertiesDialog : GitDialogBase, IExecutableDialog
 		}
 	}
 
+	private readonly DialogControls _controls;
+
 	/// <summary>Create <see cref="RemotePropertiesDialog"/>.</summary>
 	/// <param name="remote">Related remote.</param>
 	public RemotePropertiesDialog(Remote remote)
@@ -117,86 +396,60 @@ public partial class RemotePropertiesDialog : GitDialogBase, IExecutableDialog
 		Verify.Argument.IsNotNull(remote);
 
 		Remote = remote;
+		Name   = nameof(RemotePropertiesDialog);
+		Text   = string.Format("{0}: {1}", Resources.StrProperties, remote.Name);
 
-		InitializeComponent();
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		Size                = ScalableSize.GetValue(Dpi.Default);
+		_controls = new DialogControls(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
 
-		Text = string.Format("{0}: {1}", Resources.StrProperties, remote.Name);
-
-		_lblFetchURL.Text = Resources.StrFetchUrl.AddColon();
-		_lblPushURL.Text = Resources.StrPushUrl.AddColon();
-		_lblProxy.Text = Resources.StrProxy.AddColon();
-		_lblVCS.Text = Resources.StrVCS.AddColon();
-
-		_grpUpdatedReferences.Text = Resources.StrsUpdatedReferences;
-		_lblRefspec.Text = Resources.StrRefspec.AddColon();
-		_btnAddRefspec.Text = Resources.StrAdd;
-
-		_grpOptions.Text = Resources.StrsDefaultBehavior;
-
-		_lblReceivePack.Text = Resources.StrsReceivePack.AddColon();
-		_lblUploadPack.Text = Resources.StrsUploadPack.AddColon();
-
-		_chkMirror.Text = Resources.StrMirror;
-		_chkSkipFetchAll.Text = Resources.StrSkipFetchAll;
-		_lblFetchTags.Text = Resources.StrsFetchTags.AddColon();
-
-		_radNormal.Text = Resources.StrDefault;
-		_radFetchAll.Text = Resources.StrAll;
-		_radFetchNone.Text = Resources.StrNone;
-
-		GitterApplication.FontManager.InputFont.Apply(_txtFetchURL, _txtPushURL, _txtProxy, _txtVCS, _txtRefspec, _txtReceivePack, _txtUploadPack);
-
-		_txtFetchURL.Text = remote.FetchUrl;
-		_txtPushURL.Text = remote.PushUrl;
-		_txtProxy.Text = remote.Proxy;
-		_txtVCS.Text = remote.VCS;
-		_txtReceivePack.Text = remote.ReceivePack;
-		_txtUploadPack.Text = remote.ReceivePack;
-		_chkMirror.Checked = remote.Mirror;
-		_chkSkipFetchAll.Checked = remote.SkipFetchAll;
+		_controls._txtFetchURL.Text = remote.FetchUrl;
+		_controls._txtPushURL.Text = remote.PushUrl;
+		_controls._txtProxy.Text = remote.Proxy;
+		_controls._txtVCS.Text = remote.VCS;
+		_controls._txtReceivePack.Text = remote.ReceivePack;
+		_controls._txtUploadPack.Text = remote.ReceivePack;
+		_controls._chkMirror.IsChecked = remote.Mirror;
+		_controls._chkSkipFetchAll.IsChecked = remote.SkipFetchAll;
 		TagFetchMode = remote.TagFetchMode;
 
-		_radFetch.Text = Resources.StrFetch;
-		_radPush.Text = Resources.StrPush;
-
-		_lstUpdatedReferences.Style = GitterApplication.DefaultStyle;
-		_lstUpdatedReferences.Columns.AddRange(new[]
-			{
-				new CustomListBoxColumn(0, "") { SizeMode = ColumnSizeMode.Fixed, Width = 20 },
-				new CustomListBoxColumn(1, "") { SizeMode = ColumnSizeMode.Fixed, Width = 20 },
-				new CustomListBoxColumn(2, Resources.StrFrom) { SizeMode = ColumnSizeMode.Fill },
-				new CustomListBoxColumn(3, Resources.StrTo) { SizeMode = ColumnSizeMode.Fill },
-			});
-		var fetchRefspecs = remote.FetchRefspec.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+		var fetchRefspecs = remote.FetchRefspec.Split([' '], StringSplitOptions.RemoveEmptyEntries);
 		for(int i = 0; i < fetchRefspecs.Length; ++i)
 		{
-			_lstUpdatedReferences.Items.Add(new RefspecItem(fetchRefspecs[i], true));
+			_controls._lstUpdatedReferences.Items.Add(new RefspecItem(fetchRefspecs[i], true));
 		}
-		var pushRefspecs = remote.PushRefspec.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+		var pushRefspecs = remote.PushRefspec.Split([' '], StringSplitOptions.RemoveEmptyEntries);
 		for(int i = 0; i < pushRefspecs.Length; ++i)
 		{
-			_lstUpdatedReferences.Items.Add(new RefspecItem(pushRefspecs[i], false));
+			_controls._lstUpdatedReferences.Items.Add(new RefspecItem(pushRefspecs[i], false));
 		}
 
-		ToolTipService.Register(_txtFetchURL, Resources.TipRemoteFetchURL);
-		ToolTipService.Register(_txtPushURL, Resources.TipRemotePushURL);
-		ToolTipService.Register(_txtProxy, Resources.TipRemoteProxy);
-		ToolTipService.Register(_txtVCS, Resources.TipRemoteVCS);
-		ToolTipService.Register(_txtUploadPack, Resources.TipRemoteUploadPack);
-		ToolTipService.Register(_txtReceivePack, Resources.TipRemoteReceivePack);
-		ToolTipService.Register(_chkMirror, Resources.TipRemoteMirror);
-		ToolTipService.Register(_chkSkipFetchAll, Resources.TipRemoteSkipFetchAll);
+		ToolTipService.Register(_controls._txtFetchURL, Resources.TipRemoteFetchURL);
+		ToolTipService.Register(_controls._txtPushURL, Resources.TipRemotePushURL);
+		ToolTipService.Register(_controls._txtProxy, Resources.TipRemoteProxy);
+		ToolTipService.Register(_controls._txtVCS, Resources.TipRemoteVCS);
+		ToolTipService.Register(_controls._txtUploadPack, Resources.TipRemoteUploadPack);
+		ToolTipService.Register(_controls._txtReceivePack, Resources.TipRemoteReceivePack);
+		ToolTipService.Register(_controls._chkMirror.Control, Resources.TipRemoteMirror);
+		ToolTipService.Register(_controls._chkSkipFetchAll.Control, Resources.TipRemoteSkipFetchAll);
 
-		_lstUpdatedReferences.KeyDown += OnUpdatedReferencesKeyDown;
+		_controls._lstUpdatedReferences.KeyDown += OnUpdatedReferencesKeyDown;
+		_controls._btnAddRefspec.Click          += OnAddRefspecClick;
 	}
 
-	private void OnUpdatedReferencesKeyDown(object sender, KeyEventArgs e)
+	private void OnUpdatedReferencesKeyDown(object? sender, KeyEventArgs e)
 	{
 		if(e.KeyCode == Keys.Delete)
 		{
-			while(_lstUpdatedReferences.SelectedItems.Count != 0)
+			while(_controls._lstUpdatedReferences.SelectedItems.Count != 0)
 			{
-				_lstUpdatedReferences.SelectedItems[0].Remove();
+				_controls._lstUpdatedReferences.SelectedItems[0].Remove();
 			}
 		}
 	}
@@ -205,7 +458,7 @@ public partial class RemotePropertiesDialog : GitDialogBase, IExecutableDialog
 	{
 		var sbfetch = new StringBuilder();
 		var sbpush  = new StringBuilder();
-		foreach(RefspecItem refspec in _lstUpdatedReferences.Items)
+		foreach(RefspecItem refspec in _controls._lstUpdatedReferences.Items)
 		{
 			var sb = (refspec.Fetch) ? sbfetch : sbpush;
 			if(sb.Length != 0) sb.Append(' ');
@@ -218,82 +471,74 @@ public partial class RemotePropertiesDialog : GitDialogBase, IExecutableDialog
 	/// <inheritdoc/>
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(400, 452));
 
+	protected override bool ScaleChildren => false;
+
 	public Remote Remote { get; }
 
 	public string FetchURL
 	{
-		get => _txtFetchURL.Text;
-		set => _txtFetchURL.Text = value;
+		get => _controls._txtFetchURL.Text;
+		set => _controls._txtFetchURL.Text = value;
 	}
 
 	public string PushURL
 	{
-		get => _txtPushURL.Text;
-		set => _txtPushURL.Text = value;
+		get => _controls._txtPushURL.Text;
+		set => _controls._txtPushURL.Text = value;
 	}
 
 	public string Proxy
 	{
-		get => _txtProxy.Text;
-		set => _txtProxy.Text = value;
+		get => _controls._txtProxy.Text;
+		set => _controls._txtProxy.Text = value;
 	}
 
 	public string VCS
 	{
-		get => _txtVCS.Text;
-		set => _txtVCS.Text = value;
+		get => _controls._txtVCS.Text;
+		set => _controls._txtVCS.Text = value;
 	}
 
 	public bool Mirror
 	{
-		get => _chkMirror.Checked;
-		set => _chkMirror.Checked = value;
+		get => _controls._chkMirror.IsChecked;
+		set => _controls._chkMirror.IsChecked = value;
 	}
 
 	public bool SkipFetchAll
 	{
-		get => _chkSkipFetchAll.Checked;
-		set => _chkSkipFetchAll.Checked = value;
+		get => _controls._chkSkipFetchAll.IsChecked;
+		set => _controls._chkSkipFetchAll.IsChecked = value;
 	}
 
 	public TagFetchMode TagFetchMode
 	{
 		get
 		{
-			if(_radFetchAll.Checked)
-			{
-				return TagFetchMode.AllTags;
-			}
-			if(_radFetchNone.Checked)
-			{
-				return TagFetchMode.NoTags;
-			}
+			if(_controls._radFetchAll.IsChecked)  return TagFetchMode.AllTags;
+			if(_controls._radFetchNone.IsChecked) return TagFetchMode.NoTags;
 			return TagFetchMode.Default;
 		}
 		set
 		{
-			switch(value)
+			var radio = value switch
 			{
-				case TagFetchMode.AllTags:
-					_radFetchAll.Checked = true;
-					break;
-				case TagFetchMode.NoTags:
-					_radFetchNone.Checked = true;
-					break;
-				default:
-					_radNormal.Checked = true;
-					break;
-			}
+				TagFetchMode.AllTags => _controls._radFetchAll,
+				TagFetchMode.NoTags  => _controls._radFetchNone,
+				TagFetchMode.Default => _controls._radNormal,
+				_ => default,
+			};
+			if(radio is not null) radio.IsChecked = true;
 		}
 	}
 
-	private void _btnAddRefspec_Click(object sender, EventArgs e)
+	private void OnAddRefspecClick(object? sender, EventArgs e)
 	{
-		var refspec = _txtRefspec.Text.Trim();
+		var refspec = _controls._txtRefspec.Text.Trim();
 		if(string.IsNullOrWhiteSpace(refspec))
 		{
 			NotificationService.NotifyInputError(
-				_txtRefspec,
+				_controls._txtRefspec,
 				Resources.ErrInvalidRefspec,
 				Resources.ErrRefspecCannotBeEmpty);
 			return;
@@ -301,30 +546,28 @@ public partial class RemotePropertiesDialog : GitDialogBase, IExecutableDialog
 		if(refspec.IndexOf(' ') != -1)
 		{
 			NotificationService.NotifyInputError(
-				_txtRefspec,
+				_controls._txtRefspec,
 				Resources.ErrInvalidRefspec,
 				Resources.ErrRefspecCannotContainSpaces);
 			return;
 		}
-		_lstUpdatedReferences.Items.Add(new RefspecItem(refspec, _radFetch.Checked));
-		_txtRefspec.Clear();
+		_controls._lstUpdatedReferences.Items.Add(new RefspecItem(refspec, _controls._radFetch.IsChecked));
+		_controls._txtRefspec.Clear();
 	}
 
 	#region IExecutableDialog Members
 
 	public bool Execute()
 	{
-		string fetchUrl = _txtFetchURL.Text.Trim();
-		string pushUrl = _txtPushURL.Text.Trim();
-		string proxy = _txtProxy.Text.Trim();
-		string vcs = _txtVCS.Text.Trim();
-		string fetch;
-		string push;
-		GetRefspecs(out fetch, out push);
-		string receivePack = _txtReceivePack.Text.Trim();
-		string uploadPack = _txtUploadPack.Text.Trim();
-		bool mirror = _chkMirror.Checked;
-		bool skipFetchAll = _chkSkipFetchAll.Checked;
+		string fetchUrl = _controls._txtFetchURL.Text.Trim();
+		string pushUrl  = _controls._txtPushURL.Text.Trim();
+		string proxy    = _controls._txtProxy.Text.Trim();
+		string vcs      = _controls._txtVCS.Text.Trim();
+		GetRefspecs(out var fetch, out var push);
+		var receivePack  = _controls._txtReceivePack.Text.Trim();
+		var uploadPack   = _controls._txtUploadPack.Text.Trim();
+		var mirror       = _controls._chkMirror.IsChecked;
+		var skipFetchAll = _controls._chkSkipFetchAll.IsChecked;
 		var tagFetchMode = TagFetchMode;
 		try
 		{

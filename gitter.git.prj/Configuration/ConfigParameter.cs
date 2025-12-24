@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git;
@@ -30,7 +30,7 @@ public sealed class ConfigParameter : GitNamedObjectWithLifetime
 {
 	#region Events
 
-	public event EventHandler ValueChanged;
+	public event EventHandler? ValueChanged;
 
 	private void InvokeValueChanged()
 		=> ValueChanged?.Invoke(this, EventArgs.Empty);
@@ -41,7 +41,7 @@ public sealed class ConfigParameter : GitNamedObjectWithLifetime
 
 	private readonly IConfigAccessor _configAccessor;
 	private readonly ConfigFile _configFile;
-	private readonly string _fileName;
+	private readonly string? _fileName;
 	private string _value;
 
 	#endregion
@@ -105,39 +105,38 @@ public sealed class ConfigParameter : GitNamedObjectWithLifetime
 		{
 			Verify.State.IsNotDeleted(this);
 
-			if(_value != value)
+			if(_value == value) return;
+
+			if(Repository is not null)
 			{
-				if(Repository is not null)
-				{
-					using(Repository.Monitor.BlockNotifications(
-						RepositoryNotifications.ConfigUpdated))
-					{
-						CallGitSetValue(value);
-					}
-				}
-				else
+				using(Repository.Monitor.BlockNotifications(
+					RepositoryNotifications.ConfigUpdated))
 				{
 					CallGitSetValue(value);
 				}
-				_value = value;
-				InvokeValueChanged();
 			}
+			else
+			{
+				CallGitSetValue(value);
+			}
+			_value = value;
+			InvokeValueChanged();
 		}
 	}
 
 	private void CallGitSetValue(string value)
 	{
-		var parameters = new SetConfigValueParameters(Name, value)
+		var request = new SetConfigValueRequest(Name, value)
 		{
 			FileName   = _fileName,
 			ConfigFile = _configFile,
 		};
-		_configAccessor.SetConfigValue.Invoke(parameters);
+		_configAccessor.SetConfigValue.Invoke(request);
 	}
 
 	public ConfigFile ConfigFile => _configFile;
 
-	public string FileName => _fileName;
+	public string? FileName => _fileName;
 
 	#endregion
 
@@ -150,7 +149,7 @@ public sealed class ConfigParameter : GitNamedObjectWithLifetime
 		else
 		{
 			_configAccessor.UnsetConfigValue.Invoke(
-				new UnsetConfigValueParameters(Name)
+				new UnsetConfigValueRequest(Name)
 				{
 					ConfigFile = _configFile,
 				});
@@ -167,18 +166,18 @@ public sealed class ConfigParameter : GitNamedObjectWithLifetime
 		}
 		else
 		{
-			ConfigParameterData configParameterData;
+			ConfigParameterData? configParameterData;
 			if(_configFile == ConfigFile.Other)
 			{
 				configParameterData = _configAccessor.QueryConfigParameter
-					.Invoke(new QueryConfigParameterParameters(_fileName, Name));
+					.Invoke(new QueryConfigParameterRequest(_fileName!, Name));
 			}
 			else
 			{
 				configParameterData = _configAccessor.QueryConfigParameter
-					.Invoke(new QueryConfigParameterParameters(_configFile, Name));
+					.Invoke(new QueryConfigParameterRequest(_configFile, Name));
 			}
-			if(configParameterData == null)
+			if(configParameterData is null)
 			{
 				MarkAsDeleted();
 			}
@@ -200,20 +199,20 @@ public sealed class ConfigParameter : GitNamedObjectWithLifetime
 		}
 		else
 		{
-			ConfigParameterData configParameterData;
+			ConfigParameterData? configParameterData;
 			if(_configFile == ConfigFile.Other)
 			{
 				configParameterData = await _configAccessor.QueryConfigParameter
-					.InvokeAsync(new QueryConfigParameterParameters(_fileName, Name))
+					.InvokeAsync(new QueryConfigParameterRequest(_fileName!, Name))
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 			else
 			{
 				configParameterData = await _configAccessor.QueryConfigParameter
-					.InvokeAsync(new QueryConfigParameterParameters(_configFile, Name))
+					.InvokeAsync(new QueryConfigParameterRequest(_configFile, Name))
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
-			if(configParameterData == null)
+			if(configParameterData is null)
 			{
 				MarkAsDeleted();
 			}

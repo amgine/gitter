@@ -63,7 +63,7 @@ public abstract class TimestampPainterBase<T> : ISubItemPainter
 
 	protected virtual bool TryGetTextBrush(SubItemPaintEventArgs paintEventArgs, out Brush textBrush, out bool disposeBrush)
 	{
-		textBrush    = default;
+		textBrush    = default!;
 		disposeBrush = false;
 		return false;
 	}

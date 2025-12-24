@@ -22,6 +22,7 @@ namespace gitter.Redmine;
 
 using System;
 using System.Globalization;
+using System.Threading.Tasks;
 using System.Xml;
 
 public sealed class IssueModification : RedmineObjectModification<Issue>
@@ -57,7 +58,7 @@ public sealed class IssueModification : RedmineObjectModification<Issue>
 	internal IssueModification(Issue issue)
 		: base(issue)
 	{
-		_customFields = new CustomFieldsDefinition(issue.CustomFields);
+		_customFields = new(issue.CustomFields);
 	}
 
 	#endregion
@@ -148,10 +149,7 @@ public sealed class IssueModification : RedmineObjectModification<Issue>
 		set { _estimatedHours = value; }
 	}
 
-	public CustomFieldsDefinition CustomFields
-	{
-		get { return _customFields; }
-	}
+	public CustomFieldsDefinition CustomFields => _customFields;
 
 	#endregion
 
@@ -179,13 +177,10 @@ public sealed class IssueModification : RedmineObjectModification<Issue>
 		_doneRatio		= Original.DoneRatio;
 		_estimatedHours	= Original.EstimatedHours;
 
-		if(_customFields != null)
-		{
-			_customFields.Reset();
-		}
+		_customFields?.Reset();
 	}
 
-	protected override void CommitCore()
+	protected override async Task CommitCore()
 	{
 		var xml = new XmlDocument();
 		var root = xml.CreateElement("issue");
@@ -227,8 +222,12 @@ public sealed class IssueModification : RedmineObjectModification<Issue>
 		var url = string.Format(CultureInfo.InvariantCulture,
 			"issues/{0}.xml", Original.Id);
 
-		Original.Context.PutXml(url, xml);
-		Original.Update();
+		await Original.Context
+			.PutXmlAsync(url, xml)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		await Original
+			.UpdateAsync()
+			.ConfigureAwait(continueOnCapturedContext: false);
 	}
 
 	#endregion

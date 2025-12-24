@@ -83,7 +83,7 @@ internal sealed class TreeToolbar : ToolStrip
 						_dpiBindings.BindImage(subItem, Icons.Folder);
 						subItem.Click += (sender, _) =>
 						{
-							_treeView.CurrentDirectory = (TreeDirectory)((ToolStripItem)sender).Tag;
+							_treeView.CurrentDirectory = (TreeDirectory)((ToolStripItem)sender!).Tag!;
 						};
 						item.DropDownItems.Add(subItem);
 					}
@@ -97,7 +97,7 @@ internal sealed class TreeToolbar : ToolStrip
 				}
 				item.ButtonClick += (sender, _) =>
 				{
-					_treeView.CurrentDirectory = (TreeDirectory)((ToolStripItem)sender).Tag;
+					_treeView.CurrentDirectory = (TreeDirectory)((ToolStripItem)sender!).Tag!;
 				};
 				Items.Add(item);
 				prev = folder;
@@ -111,6 +111,8 @@ internal sealed class TreeToolbar : ToolStrip
 	{
 		Verify.Argument.IsNotNull(treeView);
 
+		GripStyle = ToolStripGripStyle.Hidden;
+
 		_treeView = treeView;
 		_treeView.CurrentDirectoryChanged += OnCurrentDirectoryChanged;
 
@@ -119,7 +121,7 @@ internal sealed class TreeToolbar : ToolStrip
 		var up = new ToolStripButton(Resources.StrGoUpOneLevel, null, (_, _) =>
 		{
 			var cd = _treeView.CurrentDirectory;
-			cd = cd.Parent;
+			cd = cd?.Parent;
 			if(cd is not null) _treeView.CurrentDirectory = cd;
 		})
 		{
@@ -130,7 +132,7 @@ internal sealed class TreeToolbar : ToolStrip
 		Items.Add(new ToolStripSeparator());
 	}
 
-	private void OnCurrentDirectoryChanged(object sender, EventArgs e)
+	private void OnCurrentDirectoryChanged(object? sender, EventArgs e)
 	{
 		BuildPath();
 	}

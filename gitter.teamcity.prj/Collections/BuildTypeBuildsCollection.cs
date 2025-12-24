@@ -21,6 +21,8 @@
 namespace gitter.TeamCity;
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 public sealed class BuildTypeBuildsCollection : CacheSegment<Build>
 {
@@ -37,8 +39,9 @@ public sealed class BuildTypeBuildsCollection : CacheSegment<Build>
 	protected override bool IsIncluded(Build item)
 		=> item.BuildType == _buildType;
 
-	public override void Refresh()
+	public override Task RefreshAsync(CancellationToken cancellationToken = default)
 	{
-		Context.Builds.UpdateCache(new BuildLocator() { BuildType = _buildType.CreateLocator() });
+		var locator = new BuildLocator() { BuildType = _buildType.CreateLocator() };
+		return Context.Builds.UpdateCacheAsync(locator, cancellationToken);
 	}
 }

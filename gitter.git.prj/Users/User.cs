@@ -31,7 +31,7 @@ public sealed class User : GitNamedObjectWithLifetime
 	private int _commits;
 
 	/// <summary><see cref="Commits"/> has changed.</summary>
-	public event EventHandler CommitsChanged;
+	public event EventHandler? CommitsChanged;
 
 	/// <summary>Create <see cref="User"/>.</summary>
 	/// <param name="repository">Related repository.</param>
@@ -39,7 +39,7 @@ public sealed class User : GitNamedObjectWithLifetime
 	/// <param name="email">User email.</param>
 	/// <param name="commits">Commit count.</param>
 	internal User(Repository repository, string name, string email, int commits)
-		: base(repository, name + "\n" + email)
+		: base(repository, name)
 	{
 		Name     = name;
 		Email    = email;

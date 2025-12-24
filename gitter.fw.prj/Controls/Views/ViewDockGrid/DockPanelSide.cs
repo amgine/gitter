@@ -41,13 +41,13 @@ public sealed class DockPanelSide : Control, IEnumerable<ViewHost>
 
 	private readonly AnchorStyles _side;
 	private readonly Orientation _orientation;
-	private readonly List<ViewHost> _dockedHosts;
-	private readonly List<DockPanelSideTab> _tabs;
+	private readonly List<ViewHost> _dockedHosts = [];
+	private readonly List<DockPanelSideTab> _tabs = [];
 	private readonly TrackingService<DockPanelSideTab> _tabHover;
 	private readonly TrackingService<DockPanelSideTab> _tabPress;
 	private readonly Timer _autoShowTimer;
 	private readonly Timer _autoHideTimer;
-	private ViewHost _visibleHost;
+	private ViewHost? _visibleHost;
 	private int _size;
 
 	#endregion
@@ -78,8 +78,6 @@ public sealed class DockPanelSide : Control, IEnumerable<ViewHost>
 		}
 		DockPanel = dockPanel;
 		_side = side;
-		_dockedHosts = new List<ViewHost>();
-		_tabs = new List<DockPanelSideTab>();
 
 		_tabHover = new TrackingService<DockPanelSideTab>(OnTabHoverChanged);
 		_tabPress = new TrackingService<DockPanelSideTab>(OnTabPressChanged);
@@ -250,9 +248,9 @@ public sealed class DockPanelSide : Control, IEnumerable<ViewHost>
 		}
 	}
 
-	private void OnViewAdded(object sender, ViewEventArgs e)
+	private void OnViewAdded(object? sender, ViewEventArgs e)
 	{
-		var host = (ViewHost)sender;
+		var host = (ViewHost)sender!;
 		int i = _tabs.Count - 1;
 		for(; i >= 0; --i)
 		{
@@ -302,7 +300,7 @@ public sealed class DockPanelSide : Control, IEnumerable<ViewHost>
 		Invalidate();
 	}
 
-	private void OnViewRemoved(object sender, ViewEventArgs e)
+	private void OnViewRemoved(object? sender, ViewEventArgs e)
 	{
 		e.View.TextChanged -= OnViewTextChanged;
 		var size = 0;
@@ -360,10 +358,11 @@ public sealed class DockPanelSide : Control, IEnumerable<ViewHost>
 		}
 	}
 
-	private void OnViewTextChanged(object sender, EventArgs e)
+	private void OnViewTextChanged(object? sender, EventArgs e)
 	{
-		var view   = (ViewBase)sender;
+		var view   = (ViewBase)sender!;
 		var tab    = GetTab(view);
+		if(tab is null) return;
 		var length = tab.Length;
 		tab.ResetLength(GraphicsUtility.MeasurementGraphics);
 		var dl = tab.Length - length;
@@ -406,7 +405,7 @@ public sealed class DockPanelSide : Control, IEnumerable<ViewHost>
 		return -1;
 	}
 
-	private DockPanelSideTab GetTab(ViewBase view)
+	private DockPanelSideTab? GetTab(ViewBase view)
 	{
 		for(int i = 0; i < _tabs.Count; ++i)
 		{
@@ -576,27 +575,27 @@ public sealed class DockPanelSide : Control, IEnumerable<ViewHost>
 		}
 	}
 
-	private void OnTabHoverChanged(object sender, TrackingEventArgs<DockPanelSideTab> e)
+	private void OnTabHoverChanged(object? sender, TrackingEventArgs<DockPanelSideTab> e)
 	{
 		if(e.IsTracked)
 		{
-			e.Item.OnMouseEnter();
+			e.Item?.OnMouseEnter();
 			_autoShowTimer.Enabled = true;
 		}
 		else
 		{
-			e.Item.OnMouseLeave();
+			e.Item?.OnMouseLeave();
 			_autoShowTimer.Enabled = false;
 		}
 		var bounds = GetTabBounds(e.Index);
 		Invalidate(bounds);
 	}
 
-	private void OnTabPressChanged(object sender, TrackingEventArgs<DockPanelSideTab> e)
+	private void OnTabPressChanged(object? sender, TrackingEventArgs<DockPanelSideTab> e)
 	{
 	}
 
-	private void OnAutoShowTimerTick(object sender, EventArgs e)
+	private void OnAutoShowTimerTick(object? sender, EventArgs e)
 	{
 		_autoShowTimer.Enabled = false;
 		var tab = _tabHover.Item;
@@ -631,7 +630,7 @@ public sealed class DockPanelSide : Control, IEnumerable<ViewHost>
 		}
 	}
 
-	private void OnAutoHideTimerTick(object sender, EventArgs e)
+	private void OnAutoHideTimerTick(object? sender, EventArgs e)
 	{
 		if(_visibleHost is null)
 		{
@@ -763,7 +762,7 @@ public sealed class DockPanelSide : Control, IEnumerable<ViewHost>
 		{
 			foreach(var host in _dockedHosts)
 			{
-				host.ViewAdded -= OnViewAdded;
+				host.ViewAdded   -= OnViewAdded;
 				host.ViewRemoved -= OnViewRemoved;
 			}
 			_dockedHosts.Clear();

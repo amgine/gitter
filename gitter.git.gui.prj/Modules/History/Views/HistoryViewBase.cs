@@ -38,9 +38,9 @@ abstract class HistoryViewBase : GitViewBase, ISearchableView<HistorySearchOptio
 {
 	#region Data
 
-	private ILogSource _logSource;
+	private ILogSource? _logSource;
 	private LogOptions _options;
-	private RevisionLogBinding _dataSource;
+	private RevisionLogBinding? _dataSource;
 	protected readonly ISearchToolBarController _searchToolbar;
 	private bool _showDetails;
 
@@ -57,7 +57,7 @@ abstract class HistoryViewBase : GitViewBase, ISearchableView<HistorySearchOptio
 	}
 
 	protected virtual void OnLogOptionsChanged()
-		=> ((EventHandler)Events[LogOptionsChangedEvent])?.Invoke(this, EventArgs.Empty);
+		=> ((EventHandler?)Events[LogOptionsChangedEvent])?.Invoke(this, EventArgs.Empty);
 
 	private static readonly object ShowDetailsChangedEvent = new();
 
@@ -68,7 +68,7 @@ abstract class HistoryViewBase : GitViewBase, ISearchableView<HistorySearchOptio
 	}
 
 	protected virtual void OnShowDetailsChanged()
-		=> ((EventHandler)Events[ShowDetailsChangedEvent])?.Invoke(this, EventArgs.Empty);
+		=> ((EventHandler?)Events[ShowDetailsChangedEvent])?.Invoke(this, EventArgs.Empty);
 
 	#endregion
 
@@ -110,18 +110,17 @@ abstract class HistoryViewBase : GitViewBase, ISearchableView<HistorySearchOptio
 
 	protected RevisionListBox RevisionListBox { get; }
 
-	protected ILogSource LogSource
+	protected ILogSource? LogSource
 	{
 		get => _logSource;
 		set
 		{
-			if(_logSource != value)
-			{
-				_logSource = value;
-				RevisionLogBinding = value is not null
-					? new RevisionLogBinding(value, RevisionListBox, LogOptions)
-					: default;
-			}
+			if(_logSource == value) return;
+
+			_logSource = value;
+			RevisionLogBinding = value is not null
+				? new RevisionLogBinding(value, RevisionListBox, LogOptions)
+				: default;
 		}
 	}
 
@@ -132,20 +131,19 @@ abstract class HistoryViewBase : GitViewBase, ISearchableView<HistorySearchOptio
 		{
 			Verify.Argument.IsNotNull(value);
 
-			if(_options != value)
+			if(_options == value) return;
+
+			_options.Changed -= OnLogOptionsChanged;
+			_options = value;
+			_options.Changed += OnLogOptionsChanged;
+
+			if(RevisionLogBinding is not null)
 			{
-				_options.Changed -= OnLogOptionsChanged;
-				_options = value;
-				_options.Changed += OnLogOptionsChanged;
-
-				if(RevisionLogBinding is not null)
-				{
-					RevisionLogBinding.LogOptions = value;
-				}
-
-				OnLogOptionsChanged();
-				RefreshContent();
+				RevisionLogBinding.LogOptions = value;
 			}
+
+			OnLogOptionsChanged();
+			RefreshContent();
 		}
 	}
 
@@ -166,7 +164,7 @@ abstract class HistoryViewBase : GitViewBase, ISearchableView<HistorySearchOptio
 		}
 	}
 
-	public Revision SelectedRevision
+	public Revision? SelectedRevision
 	{
 		get
 		{
@@ -190,17 +188,16 @@ abstract class HistoryViewBase : GitViewBase, ISearchableView<HistorySearchOptio
 		}
 	}
 
-	private RevisionLogBinding RevisionLogBinding
+	private RevisionLogBinding? RevisionLogBinding
 	{
 		get => _dataSource;
 		set
 		{
-			if(_dataSource != value)
-			{
-				_dataSource?.Dispose();
-				_dataSource = value;
-				_dataSource?.ReloadData();
-			}
+			if(_dataSource == value) return;
+
+			_dataSource?.Dispose();
+			_dataSource = value;
+			_dataSource?.ReloadData();
 		}
 	}
 
@@ -208,13 +205,13 @@ abstract class HistoryViewBase : GitViewBase, ISearchableView<HistorySearchOptio
 
 	#region Event Handlers
 
-	private void OnLogOptionsChanged(object sender, EventArgs e)
+	private void OnLogOptionsChanged(object? sender, EventArgs e)
 	{
 		RefreshContent();
 		OnLogOptionsChanged();
 	}
 
-	private void OnSelectionChanged(object sender, EventArgs e)
+	private void OnSelectionChanged(object? sender, EventArgs e)
 	{
 		if(ShowDetails)
 		{
@@ -222,7 +219,7 @@ abstract class HistoryViewBase : GitViewBase, ISearchableView<HistorySearchOptio
 		}
 	}
 
-	private void OnItemActivated(object sender, ItemEventArgs e)
+	private void OnItemActivated(object? sender, ItemEventArgs e)
 	{
 		var diffSource = GetDiffSourceFromItem(e.Item);
 		if(diffSource is not null)
@@ -265,26 +262,26 @@ abstract class HistoryViewBase : GitViewBase, ISearchableView<HistorySearchOptio
 		}
 	}
 
-	protected virtual IEnumerable<string> GetPaths()
+	protected virtual Many<string> GetPaths()
 		=> LogSource switch
 		{
-			PathLogSource pathLogSource => new[] { pathLogSource.Path },
-			_ => default,
+			PathLogSource pathLogSource => pathLogSource.Path,
+			_ => Many<string>.None,
 		};
 
-	protected virtual IDiffSource GetDiffSourceFromItem(CustomListBoxItem item)
+	protected virtual IDiffSource? GetDiffSourceFromItem(CustomListBoxItem item)
 		=> item switch
 		{
 			RevisionListItem revisionItem
 				=> revisionItem.DataContext.GetDiffSource(GetPaths()),
 			FakeRevisionListItem fakeItem when fakeItem.Type == FakeRevisionItemType.StagedChanges
-				=> Repository.Status.GetDiffSource(true, GetPaths()),
+				=> Repository?.Status.GetDiffSource(true, GetPaths()),
 			FakeRevisionListItem fakeItem when fakeItem.Type == FakeRevisionItemType.UnstagedChanges
-				=> Repository.Status.GetDiffSource(false, GetPaths()),
+				=> Repository?.Status.GetDiffSource(false, GetPaths()),
 			_ => default,
 		};
 
-	protected virtual IDiffSource GetDiffSourceFromItems(CustomListBoxItem item1, CustomListBoxItem item2)
+	protected virtual IDiffSource? GetDiffSourceFromItems(CustomListBoxItem? item1, CustomListBoxItem? item2)
 	{
 		if(item1 is not RevisionListItem revisionItem1) return null;
 		if(item2 is not RevisionListItem revisionItem2) return null;
@@ -294,9 +291,7 @@ abstract class HistoryViewBase : GitViewBase, ISearchableView<HistorySearchOptio
 	}
 
 	public bool SelectRevision(IRevisionPointer revision)
-	{
-		return RevisionListBox.SelectRevision(revision);
-	}
+		=> RevisionListBox.SelectRevision(revision);
 
 	/// <inheritdoc/>
 	protected override void Dispose(bool disposing)

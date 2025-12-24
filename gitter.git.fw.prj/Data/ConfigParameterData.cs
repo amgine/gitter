@@ -20,15 +20,11 @@
 
 namespace gitter.Git.AccessLayer;
 
-using System;
-
 using gitter.Framework;
 
 public sealed class ConfigParameterData : INamedObject
 {
-	#region .ctor
-
-	public ConfigParameterData(string name, string value, ConfigFile configFile, string fileName)
+	public ConfigParameterData(string name, string value, ConfigFile configFile, string? fileName)
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(name);
 		Verify.Argument.IsNotNull(value);
@@ -62,17 +58,11 @@ public sealed class ConfigParameterData : INamedObject
 		SpecifiedFile = fileName;
 	}
 
-	#endregion
+	public string Name { get; } = default!;
 
-	#region Properties
-
-	public string Name { get; }
-
-	public string Value { get; }
+	public string Value { get; } = default!;
 
 	public ConfigFile ConfigFile { get; }
 
-	public string SpecifiedFile { get; }
-
-	#endregion
+	public string? SpecifiedFile { get; }
 }

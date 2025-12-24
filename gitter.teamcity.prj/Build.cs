@@ -22,24 +22,30 @@ namespace gitter.TeamCity;
 
 using System;
 using System.Xml;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Threading;
 
 public sealed class Build : TeamCityObject
 {
-	#region Static
-
-	public static readonly TeamCityObjectProperty<BuildStatus> StatusProperty    = new("status",      nameof(Status));
-	public static readonly TeamCityObjectProperty<BuildType>   BuildTypeProperty = new("buildTypeId", nameof(BuildType));
-	public static readonly TeamCityObjectProperty<string>      NumberProperty    = new("number",      nameof(Number));
-	public static readonly TeamCityObjectProperty<DateTime>    StartDateProperty = new("startDate",   nameof(StartDate));
-
-	#endregion
+	public static class Properties
+	{
+		public static readonly TeamCityObjectProperty<BuildStatus>    Status     = new("status",      nameof(Status));
+		public static readonly TeamCityObjectProperty<BuildState>     State      = new("state",       nameof(State));
+		public static readonly TeamCityObjectProperty<BuildType?>     BuildType  = new("buildTypeId", nameof(BuildType));
+		public static readonly TeamCityObjectProperty<string?>        Number     = new("number",      nameof(Number));
+		public static readonly TeamCityObjectProperty<string?>        BranchName = new("branchName",  nameof(BranchName));
+		public static readonly TeamCityObjectProperty<DateTimeOffset> StartDate  = new("startDate",   nameof(StartDate));
+	}
 
 	#region Data
 
-	private BuildType _buildtype;
+	private BuildType? _buildtype;
 	private BuildStatus _status;
-	private string _number;
-	private DateTime _startDate;
+	private BuildState _state;
+	private string? _number;
+	private DateTimeOffset _startDate;
+	private string? _branchName;
 
 	#endregion
 
@@ -53,10 +59,13 @@ public sealed class Build : TeamCityObject
 	internal Build(TeamCityServiceContext context, XmlNode node)
 		: base(context, node)
 	{
-		_status		= TeamCityUtility.LoadBuildStatus(node.Attributes[StatusProperty.XmlNodeName]);
-		_number		= TeamCityUtility.LoadString(node.Attributes[NumberProperty.XmlNodeName]);
-		_startDate	= TeamCityUtility.LoadDateForSure(node.Attributes[StartDateProperty.XmlNodeName]);
-		_buildtype	= Context.BuildTypes.Lookup(node.Attributes[BuildTypeProperty.XmlNodeName].InnerText);
+		var attributes = node.Attributes ?? throw new ArgumentException("XML element was expected.", nameof(node));
+		_status     = TeamCityUtility.LoadBuildStatus(attributes[Properties.Status.XmlNodeName]);
+		_state      = TeamCityUtility.LoadBuildState(attributes[Properties.State.XmlNodeName]);
+		_number		= TeamCityUtility.LoadString(attributes[Properties.Number.XmlNodeName]);
+		_startDate	= TeamCityUtility.LoadRequiredDate(node.ChildNodes.Cast<XmlNode>().First(n => n.Name == Properties.StartDate.XmlNodeName));
+		_buildtype	= Context.BuildTypes.Lookup(attributes[Properties.BuildType.XmlNodeName]?.InnerText);
+		_branchName	= TeamCityUtility.LoadString(attributes[Properties.BranchName.XmlNodeName]);
 	}
 
 	#endregion
@@ -65,18 +74,19 @@ public sealed class Build : TeamCityObject
 
 	internal override void Update(XmlNode node)
 	{
-		Status		= TeamCityUtility.LoadBuildStatus(node.Attributes[StatusProperty.XmlNodeName]);
-		Number		= TeamCityUtility.LoadString(node.Attributes[NumberProperty.XmlNodeName]);
-		StartDate	= TeamCityUtility.LoadDateForSure(node.Attributes[StartDateProperty.XmlNodeName]);
-		BuildType	= Context.BuildTypes.Lookup(node.Attributes[BuildTypeProperty.XmlNodeName].InnerText);
+		var attributes = node.Attributes ?? throw new ArgumentException("XML element was expected.", nameof(node));
+		Status     = TeamCityUtility.LoadBuildStatus(attributes[Properties.Status.XmlNodeName]);
+		State      = TeamCityUtility.LoadBuildState(attributes[Properties.State.XmlNodeName]);
+		Number     = TeamCityUtility.LoadString(attributes[Properties.Number.XmlNodeName]);
+		StartDate  = TeamCityUtility.LoadRequiredDate(node.ChildNodes.Cast<XmlNode>().First(n => n.Name == Properties.StartDate.XmlNodeName));
+		BuildType  = Context.BuildTypes.Lookup(attributes[Properties.BuildType.XmlNodeName]?.InnerText);
+		BranchName = TeamCityUtility.LoadString(attributes[Properties.BranchName.XmlNodeName]);
 	}
 
 	public BuildLocator CreateLocator() => new() { Id = Id };
 
-	private string ReadSingleField(string fieldName)
-	{
-		return Context.GetPlainText("builds/" + "id:" + Id + "/" + fieldName);
-	}
+	private Task<string> ReadSingleFieldAsync(string fieldName, CancellationToken cancellationToken = default)
+		=> Context.GetPlainTextAsync("builds/" + "id:" + Id + "/" + fieldName, cancellationToken);
 
 	#endregion
 
@@ -85,25 +95,37 @@ public sealed class Build : TeamCityObject
 	public BuildStatus Status
 	{
 		get => _status;
-		private set => UpdatePropertyValue(ref _status, value, StatusProperty);
+		private set => UpdatePropertyValue(ref _status, value, Properties.Status);
 	}
 
-	public string Number
+	public BuildState State
+	{
+		get => _state;
+		private set => UpdatePropertyValue(ref _state, value, Properties.State);
+	}
+
+	public string? Number
 	{
 		get => _number;
-		private set => UpdatePropertyValue(ref _number, value, NumberProperty);
+		private set => UpdatePropertyValue(ref _number, value, Properties.Number);
 	}
 
-	public DateTime StartDate
+	public DateTimeOffset StartDate
 	{
 		get => _startDate;
-		private set => UpdatePropertyValue(ref _startDate, value, StartDateProperty);
+		private set => UpdatePropertyValue(ref _startDate, value, Properties.StartDate);
 	}
 
-	public BuildType BuildType
+	public BuildType? BuildType
 	{
 		get => _buildtype;
-		private set => UpdatePropertyValue(ref _buildtype, value, BuildTypeProperty);
+		private set => UpdatePropertyValue(ref _buildtype, value, Properties.BuildType);
+	}
+
+	public string? BranchName
+	{
+		get => _branchName;
+		private set => UpdatePropertyValue(ref _branchName, value, Properties.BranchName);
 	}
 
 	#endregion

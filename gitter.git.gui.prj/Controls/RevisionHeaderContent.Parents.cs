@@ -22,7 +22,6 @@ namespace gitter.Git.Gui;
 
 using System;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 using gitter.Framework;
@@ -32,15 +31,10 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 
 partial class RevisionHeaderContent
 {
-	sealed class ParentsElement : BaseElement
+	sealed class ParentsElement(RevisionHeaderContent owner) : BaseElement(owner)
 	{
 		private static readonly string SingleParentHeaderText    = Resources.StrParent.AddColon();
 		private static readonly string MultipleParentsHeaderText = Resources.StrParents.AddColon();
-
-		public ParentsElement(RevisionHeaderContent owner)
-			: base(owner)
-		{
-		}
 
 		public override Element Element => Element.Parents;
 
@@ -48,49 +42,44 @@ partial class RevisionHeaderContent
 		{
 			Assert.IsNotNull(revision);
 
-			var menu        = new ContextMenuStrip();
+			var menu        = new ContextMenuStrip() { Renderer = GitterApplication.Style.ToolStripRenderer };
 			var dpiBindings = new DpiBindings(menu);
 			var factory     = new GuiItemFactory(dpiBindings);
 
-			var sb = new StringBuilder(41 * revision.Parents.Count);
-			foreach(var p in revision.Parents)
-			{
-				sb.Append(p.Hash);
-				sb.Append('\n');
-			}
-			sb.Remove(sb.Length - 1, 1);
-			menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard, sb.ToString()));
-
+			menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard, CombineHashes(revision.Parents)));
 			Utility.MarkDropDownForAutoDispose(menu);
 			return menu;
 		}
 
+		public override bool IsAvailableFor(Revision revision)
+			=> !revision.Parents.IsEmpty;
+
 		private static Font GetFont(Dpi dpi)
 			=> HashColumn.Font.GetValue(dpi);
+
+		private static string CombineHashes(Many<Revision> revisions)
+		{
+			if(revisions.Count == 0) return "";
+			if(revisions.Count == 1) return revisions.First().HashString;
+			var first = true;
+			int index = 0;
+			var text = new char[(Sha1Hash.HexStringLength + 1) * revisions.Count - 1];
+			foreach(var p in revisions)
+			{
+				if(!first) text[index++] = '\n';
+				else first = false;
+				p.HashString.CopyTo(0, text, index, Sha1Hash.HexStringLength);
+				index += Sha1Hash.HexStringLength;
+			}
+			return new(text);
+		}
 
 		public override Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width)
 		{
 			Assert.IsNotNull(graphics);
 			Assert.IsNotNull(revision);
 
-			switch(revision.Parents.Count)
-			{
-				case 0:
-					return Size.Empty;
-				case 1:
-					return Measure(graphics, dpi, GetFont(dpi), revision.Parents[0].HashString, width);
-				default:
-					var sb = new StringBuilder(41 * revision.Parents.Count);
-					bool first = true;
-					for(int i = 0; i < revision.Parents.Count; ++i)
-					{
-						var p = revision.Parents[i];
-						if(!first) sb.Append('\n');
-						else first = false;
-						sb.Append(p.Hash);
-					}
-					return MeasureMultilineContent(graphics, dpi, GetFont(dpi), sb.ToString(), width);
-			}
+			return MeasureMultilineContent(graphics, dpi, GetFont(dpi), CombineHashes(revision.Parents), width);
 		}
 
 		public override void Paint(Graphics graphics, Dpi dpi, Revision revision, Rectangle rect)
@@ -98,20 +87,9 @@ partial class RevisionHeaderContent
 			Assert.IsNotNull(graphics);
 			Assert.IsNotNull(revision);
 
-			if(revision.Parents.Count == 1)
-			{
-				DefaultPaint(graphics, dpi, GetFont(dpi), SingleParentHeaderText, revision.Parents[0].HashString, rect);
-			}
-			else
-			{
-				var sb = new StringBuilder(41 * revision.Parents.Count);
-				foreach(var p in revision.Parents)
-				{
-					sb.Append(p.Hash);
-					sb.Append('\n');
-				}
-				DefaultPaint(graphics, dpi, GetFont(dpi), MultipleParentsHeaderText, sb.ToString(), rect);
-			}
+			var parents = revision.Parents;
+			var header  = parents.Count > 1 ? MultipleParentsHeaderText : SingleParentHeaderText;
+			DefaultPaint(graphics, dpi, GetFont(dpi), header, CombineHashes(parents), rect);
 		}
 	}
 }

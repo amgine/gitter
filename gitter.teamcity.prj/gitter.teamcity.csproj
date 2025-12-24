@@ -4,6 +4,7 @@
     <AssemblyName>gitter.teamcity</AssemblyName>
     <RootNamespace>gitter.TeamCity</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,11 +25,22 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="8.0.0" />
+    <PackageReference Include="Autofac" Version="8.4.0" />
+    <PackageReference Condition="'$(TargetFramework)'=='net48'" Include="System.Text.Json" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj" />
+    <ProjectReference Include="..\gitter.git.prj\gitter.git.csproj" />
+    <ProjectReference Include="..\gitter.git.gui.prj\gitter.git.gui.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net48'))">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(SolutionDir)\shared\HttpPolyfills.cs" Link="Shared\HttpPolyfills.cs" />
   </ItemGroup>
 
 </Project>

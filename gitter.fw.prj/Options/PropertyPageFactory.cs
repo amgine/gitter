@@ -30,13 +30,13 @@ public sealed class PropertyPageFactory : PropertyPageFactoryBase
 
 	private readonly Func<IWorkingEnvironment, PropertyPage> _getPropertyPage;
 
-	public PropertyPageFactory(Guid guid, string name, Bitmap icon, Guid groupGuid, Func<IWorkingEnvironment, PropertyPage> getPropertyPage)
+	public PropertyPageFactory(Guid guid, string name, Bitmap? icon, Guid groupGuid, Func<IWorkingEnvironment, PropertyPage> getPropertyPage)
 		: base(guid, name, icon, groupGuid)
 	{
 		_getPropertyPage = getPropertyPage;
 	}
 
-	public override PropertyPage CreatePropertyPage(IWorkingEnvironment environment)
+	public override PropertyPage? CreatePropertyPage(IWorkingEnvironment environment)
 	{
 		Verify.Argument.IsNotNull(environment);
 
@@ -47,7 +47,7 @@ public sealed class PropertyPageFactory : PropertyPageFactoryBase
 public sealed class PropertyPageFactory<T> : PropertyPageFactoryBase
 	where T : PropertyPage
 {
-	public PropertyPageFactory(Guid guid, string name, Bitmap icon, Guid groupGuid, IFactory<T> pageFactory)
+	public PropertyPageFactory(Guid guid, string name, Bitmap? icon, Guid groupGuid, IFactory<T> pageFactory)
 		: base(guid, name, icon, groupGuid)
 	{
 		Verify.Argument.IsNotNull(pageFactory);

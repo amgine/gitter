@@ -20,14 +20,12 @@
 
 namespace gitter.Framework.Controls;
 
-using System;
-
 public static class CustomListBoxManager
 {
-	private static CustomListBoxRenderer _renderer;
-	private static CustomListBoxRenderer _win7Renderer;
-	private static CustomListBoxRenderer _msvs2012LightRenderer;
-	private static CustomListBoxRenderer _msvs2012DarkRenderer;
+	private static CustomListBoxRenderer? _renderer;
+	private static CustomListBoxRenderer? _win7Renderer;
+	private static CustomListBoxRenderer? _msvs2012LightRenderer;
+	private static CustomListBoxRenderer? _msvs2012DarkRenderer;
 
 	public static CustomListBoxRenderer Renderer
 	{
@@ -44,8 +42,8 @@ public static class CustomListBoxManager
 		=> _win7Renderer ??= new Win7CustomListBoxRenderer();
 
 	public static CustomListBoxRenderer MSVS2012LightRenderer
-		=> _msvs2012LightRenderer ??= new MSVS2012CustomListBoxRenderer(MSVS2012CustomListBoxRenderer.LightColors);
+		=> _msvs2012LightRenderer ??= new MSVS2012CustomListBoxRenderer(MSVS2012CustomListBoxRenderer.ColorTable.Light);
 
 	public static CustomListBoxRenderer MSVS2012DarkRenderer
-		=> _msvs2012DarkRenderer ??= new MSVS2012CustomListBoxRenderer(MSVS2012CustomListBoxRenderer.DarkColors);
+		=> _msvs2012DarkRenderer ??= new MSVS2012CustomListBoxRenderer(MSVS2012CustomListBoxRenderer.ColorTable.Dark);
 }

@@ -23,26 +23,16 @@ namespace gitter.Framework.CLI;
 using System;
 
 /// <summary>Reads text from <c>stdio</c>/<c>stderr</c> and parses it with a <see cref="IBinaryParser"/>.</summary>
-public sealed class AsyncBinaryParser : AsyncOutputReceiverBase
+/// <param name="parser">Output parser.</param>
+/// <param name="bufferSize">Size of the internal buffer.</param>
+public sealed class AsyncBinaryParser(IBinaryParser parser, int bufferSize = 0x400)
+	: AsyncOutputReceiverBase(bufferSize)
 {
-	/// <summary>Initializes a new instance of the <see cref="AsyncTextParser"/> class.</summary>
-	/// <param name="parser">Output parser.</param>
-	/// <param name="bufferSize">Size of the internal buffer.</param>
-	public AsyncBinaryParser(IBinaryParser parser, int bufferSize = 0x400)
-		: base(bufferSize)
-	{
-		Verify.Argument.IsNotNull(parser);
-
-		Parser = parser;
-	}
-
-	private IBinaryParser Parser { get; }
-
 	/// <inheritdoc/>
 	protected override void Process(ArraySegment<byte> buffer)
-		=> Parser.Parse(buffer);
+		=> parser.Parse(buffer);
 
 	/// <inheritdoc/>
 	protected override void Complete()
-		=> Parser.Complete();
+		=> parser.Complete();
 }

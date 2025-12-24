@@ -1,24 +1,22 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
-
-#nullable enable
 
 namespace gitter.Git.AccessLayer.CLI;
 
@@ -34,23 +32,15 @@ using gitter.Framework.CLI;
 
 using Resources = gitter.Git.AccessLayer.CLI.Properties.Resources;
 
-sealed class CloneAction : IGitAction<CloneRepositoryParameters>
+sealed class CloneAction(
+	ICommandExecutor commandExecutor,
+	Func<CloneRepositoryRequest, bool, Command> commandFactory)
+	: IGitAction<CloneRepositoryRequest>
 {
-	private readonly ICommandExecutor _commandExecutor;
-	private readonly Func<CloneRepositoryParameters, bool, Command> _commandFactory;
-
-	public CloneAction(ICommandExecutor commandExecutor, Func<CloneRepositoryParameters, bool, Command> commandFactory)
-	{
-		Assert.IsNotNull(commandExecutor);
-
-		_commandExecutor = commandExecutor;
-		_commandFactory  = commandFactory;
-	}
-
 	/// <summary>Clone existing repository.</summary>
-	/// <param name="parameters"><see cref="CloneRepositoryParameters"/>.</param>
+	/// <param name="parameters"><see cref="CloneRepositoryRequest"/>.</param>
 	/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
-	public void Invoke(CloneRepositoryParameters parameters)
+	public void Invoke(CloneRepositoryRequest parameters)
 	{
 		/*
 		 * git clone [--template=<template_directory>] [-l] [-s] [--no-hardlinks]
@@ -66,29 +56,29 @@ sealed class CloneAction : IGitAction<CloneRepositoryParameters>
 				Directory.CreateDirectory(parameters.Path);
 			}
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			throw new GitException(exc.Message, exc);
 		}
-		var command = _commandFactory(parameters, false);
-		var output = _commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
+		var command = commandFactory(parameters, false);
+		var output = commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
 		output.ThrowOnBadReturnCode();
 	}
 
 	/// <summary>Clone existing repository.</summary>
-	/// <param name="parameters"><see cref="CloneRepositoryParameters"/>.</param>
+	/// <param name="request"><see cref="CloneRepositoryRequest"/>.</param>
 	/// <param name="progress">Progress tracker.</param>
 	/// <param name="cancellationToken">Cancellation token.</param>
-	/// <exception cref="ArgumentNullException"><paramref name="parameters"/> == <c>null</c>.</exception>
-	public async Task InvokeAsync(CloneRepositoryParameters parameters,
+	/// <exception cref="ArgumentNullException"><paramref name="request"/> == <c>null</c>.</exception>
+	public async Task InvokeAsync(CloneRepositoryRequest request,
 		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
-		Verify.Argument.IsNotNull(parameters);
+		Verify.Argument.IsNotNull(request);
 
-		var command = _commandFactory(parameters, true);
-		if(!Directory.Exists(parameters.Path))
+		var command = commandFactory(request, true);
+		if(!Directory.Exists(request.Path))
 		{
-			Directory.CreateDirectory(parameters.Path);
+			Directory.CreateDirectory(request.Path);
 		}
 		progress?.Report(new(Resources.StrsConnectingToRemoteHost.AddEllipsis()));
 
@@ -106,7 +96,7 @@ sealed class CloneAction : IGitAction<CloneRepositoryParameters>
 				{
 					if(!string.IsNullOrWhiteSpace(operationProgress.ActionName))
 					{
-						errorMessages ??= new List<string>();
+						errorMessages ??= [];
 						errorMessages.Add(operationProgress.ActionName);
 					}
 				}
@@ -117,7 +107,7 @@ sealed class CloneAction : IGitAction<CloneRepositoryParameters>
 			}
 		};
 
-		var processExitCode = await _commandExecutor
+		var processExitCode = await commandExecutor
 			.ExecuteCommandAsync(command, stdOutReceiver, stdErrReceiver, CommandExecutionFlags.None, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 		if(processExitCode != 0)

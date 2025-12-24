@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git;
@@ -36,7 +36,7 @@ abstract class DiffSourceBase : IDiffSource
 {
 	#region Events
 
-	public event EventHandler Updated;
+	public event EventHandler? Updated;
 
 	protected virtual void OnUpdated() => Updated?.Invoke(this, EventArgs.Empty);
 
@@ -60,37 +60,37 @@ abstract class DiffSourceBase : IDiffSource
 
 	#endregion
 
-	public virtual IEnumerable<FlowPanel> GetInformationPanels() => null;
+	public virtual IEnumerable<FlowPanel>? GetInformationPanels() => null;
 
-	protected static void ApplyCommonDiffOptions(BaseQueryDiffParameters queryParameters, DiffOptions options)
+	protected static void ApplyCommonDiffOptions(BaseQueryDiffRequest request, DiffOptions options)
 	{
-		Assert.IsNotNull(queryParameters);
+		Assert.IsNotNull(request);
 		Assert.IsNotNull(options);
 
-		queryParameters.Context           = options.Context;
-		queryParameters.Patience          = options.UsePatienceAlgorithm;
-		queryParameters.IgnoreSpaceChange = options.IgnoreWhitespace;
-		queryParameters.Binary            = options.Binary;
+		request.Context           = options.Context;
+		request.Patience          = options.UsePatienceAlgorithm;
+		request.IgnoreSpaceChange = options.IgnoreWhitespace;
+		request.Binary            = options.Binary;
 	}
 
 	protected abstract Diff GetDiffCore(DiffOptions options);
 
 	protected abstract Task<Diff> GetDiffCoreAsync(DiffOptions options,
-		IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+		IProgress<OperationProgress>? progress, CancellationToken cancellationToken);
 
 	public Diff GetDiff(DiffOptions options)
 	{
 		Verify.Argument.IsNotNull(options);
-		Verify.State.IsFalse(IsDisposed, "Object is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		return GetDiffCore(options);
 	}
 
 	public async Task<Diff> GetDiffAsync(DiffOptions options,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(options);
-		Verify.State.IsFalse(IsDisposed, "Object is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		progress?.Report(new OperationProgress(Resources.StrLoadingDiff.AddEllipsis()));
 		var result = await GetDiffCoreAsync(options, progress, cancellationToken)

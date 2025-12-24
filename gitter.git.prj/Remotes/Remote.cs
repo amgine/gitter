@@ -37,7 +37,7 @@ public sealed class Remote : GitNamedObjectWithLifetime
 	#region Events
 
 	/// <summary>Remote is renamed.</summary>
-	public event EventHandler<NameChangeEventArgs> Renamed;
+	public event EventHandler<NameChangeEventArgs>? Renamed;
 
 	/// <summary>Invoke <see cref="Renamed"/>.</summary>
 	private void InvokeRenamed(string oldName, string newName)
@@ -47,8 +47,8 @@ public sealed class Remote : GitNamedObjectWithLifetime
 
 	#region Data
 
-	private string _fetchUrl;
-	private string _pushUrl;
+	private string? _fetchUrl;
+	private string? _pushUrl;
 
 	#endregion
 
@@ -59,7 +59,7 @@ public sealed class Remote : GitNamedObjectWithLifetime
 	/// <param name="name">Remote name.</param>
 	/// <param name="fetchUrl">Fetch URL.</param>
 	/// <param name="pushUrl">Push URL.</param>
-	internal Remote(Repository repository, string name, string fetchUrl, string pushUrl)
+	internal Remote(Repository repository, string name, string? fetchUrl, string? pushUrl)
 		: base(repository, name)
 	{
 		_fetchUrl = fetchUrl;
@@ -81,7 +81,7 @@ public sealed class Remote : GitNamedObjectWithLifetime
 	/// <summary>Url used by fetch/pull commands.</summary>
 	public string FetchUrl
 	{
-		get => _fetchUrl;
+		get => _fetchUrl ?? "";
 		set
 		{
 			Verify.Argument.IsNotNull(value);
@@ -109,7 +109,7 @@ public sealed class Remote : GitNamedObjectWithLifetime
 	/// <summary>Url used by push command.</summary>
 	public string PushUrl
 	{
-		get => _pushUrl;
+		get => _pushUrl ?? "";
 		set
 		{
 			Verify.Argument.IsNotNull(value);
@@ -129,243 +129,88 @@ public sealed class Remote : GitNamedObjectWithLifetime
 		_pushUrl = pushUrl;
 	}
 
+	private string GetConfigurationProperty(string propertySuffix)
+	{
+		var p = Repository.Configuration.TryGetParameter("remote." + Name + propertySuffix);
+		return p is not null ? p.Value : string.Empty;
+	}
+
+	private void SetConfigurationProperty(string propertySuffix, string value)
+	{
+		Verify.Argument.IsNotNull(value);
+		Verify.State.IsNotDeleted(this);
+
+		var pname = "remote." + Name + propertySuffix;
+		var p = Repository.Configuration.TryGetParameter(pname);
+		if(p == null)
+		{
+			if(value == "") return;
+			Repository.Configuration.SetValue(pname, value);
+		}
+		else
+		{
+			p.Value = value;
+		}
+	}
+
 	/// <summary>Proxy.</summary>
 	public string Proxy
 	{
-		get
-		{
-			var p = Repository.Configuration.TryGetParameter("remote." + Name + ".proxy");
-			if(p != null) return p.Value;
-			return string.Empty;
-		}
-		set
-		{
-			Verify.Argument.IsNotNull(value);
-			Verify.State.IsNotDeleted(this);
-
-			var pname = "remote." + Name + ".proxy";
-			var p = Repository.Configuration.TryGetParameter(pname);
-			if(p == null)
-			{
-				if(value == "") return;
-				Repository.Configuration.SetValue(pname, value);
-			}
-			else
-			{
-				p.Value = value;
-			}
-		}
+		get => GetConfigurationProperty(".proxy");
+		set => SetConfigurationProperty(".proxy", value);
 	}
 
 	/// <summary>Version control system.</summary>
 	public string VCS
 	{
-		get
-		{
-			var p = Repository.Configuration.TryGetParameter("remote." + Name + ".vcs");
-			if(p != null) return p.Value;
-			return string.Empty;
-		}
-		set
-		{
-			Verify.Argument.IsNotNull(value);
-			Verify.State.IsNotDeleted(this);
-
-			var pname = "remote." + Name + ".vcs";
-			var p = Repository.Configuration.TryGetParameter(pname);
-			if(p == null)
-			{
-				if(value == "") return;
-				Repository.Configuration.SetValue(pname, value);
-			}
-			else
-			{
-				p.Value = value;
-			}
-		}
+		get => GetConfigurationProperty(".vcs");
+		set => SetConfigurationProperty(".vcs", value);
 	}
 
 	public string ReceivePack
 	{
-		get
-		{
-			var p = Repository.Configuration.TryGetParameter("remote." + Name + ".receivepack");
-			if(p != null) return p.Value;
-			return string.Empty;
-		}
-		set
-		{
-			Verify.Argument.IsNotNull(value);
-			Verify.State.IsNotDeleted(this);
-
-			var pname = "remote." + Name + ".receivepack";
-			var p = Repository.Configuration.TryGetParameter(pname);
-			if(p == null)
-			{
-				if(value == "") return;
-				Repository.Configuration.SetValue(pname, value);
-			}
-			else
-			{
-				p.Value = value;
-			}
-		}
+		get => GetConfigurationProperty(".receivepack");
+		set => SetConfigurationProperty(".receivepack", value);
 	}
 
 	public string UploadPack
 	{
-		get
-		{
-			var p = Repository.Configuration.TryGetParameter("remote." + Name + ".uploadpack");
-			if(p != null) return p.Value;
-			return string.Empty;
-		}
-		set
-		{
-			Verify.Argument.IsNotNull(value);
-			Verify.State.IsNotDeleted(this);
-
-			var pname = "remote." + Name + ".uploadpack";
-			var p = Repository.Configuration.TryGetParameter(pname);
-			if(p == null)
-			{
-				if(value == "") return;
-				Repository.Configuration.SetValue(pname, value);
-			}
-			else
-			{
-				p.Value = value;
-			}
-		}
+		get => GetConfigurationProperty(".uploadpack");
+		set => SetConfigurationProperty(".uploadpack", value);
 	}
 
 	public string FetchRefspec
 	{
-		get
-		{
-			var p = Repository.Configuration.TryGetParameter("remote." + Name + ".fetch");
-			if(p != null) return p.Value;
-			return string.Empty;
-		}
-		set
-		{
-			Verify.Argument.IsNotNull(value);
-			Verify.State.IsNotDeleted(this);
-
-			var pname = "remote." + Name + ".fetch";
-			var p = Repository.Configuration.TryGetParameter(pname);
-			if(p == null)
-			{
-				if(value == "") return;
-				Repository.Configuration.SetValue(pname, value);
-			}
-			else
-			{
-				p.Value = value;
-			}
-		}
+		get => GetConfigurationProperty(".fetch");
+		set => SetConfigurationProperty(".fetch", value);
 	}
 
 	public string PushRefspec
 	{
-		get
-		{
-			var p = Repository.Configuration.TryGetParameter("remote." + Name + ".push");
-			if(p != null) return p.Value;
-			return string.Empty;
-		}
-		set
-		{
-			Verify.Argument.IsNotNull(value);
-			Verify.State.IsNotDeleted(this);
-
-			var pname = "remote." + Name + ".push";
-			var p = Repository.Configuration.TryGetParameter(pname);
-			if(p == null)
-			{
-				if(value == "") return;
-				Repository.Configuration.SetValue(pname, value);
-			}
-			else
-			{
-				p.Value = value;
-			}
-		}
+		get => GetConfigurationProperty(".push");
+		set => SetConfigurationProperty(".push", value);
 	}
 
 	public bool Mirror
 	{
-		get
-		{
-			var pname = "remote." + Name + ".mirror";
-			var p = Repository.Configuration.TryGetParameter(pname);
-			if(p == null)
-				return false;
-			return p.Value == "true";
-		}
-		set
-		{
-			Verify.State.IsNotDeleted(this);
-
-			var pname = "remote." + Name + ".mirror";
-			var p = Repository.Configuration.TryGetParameter(pname);
-			if(p == null)
-			{
-				if(!value) return;
-				Repository.Configuration.SetValue(pname, value ? "true" : "false");
-			}
-			else
-			{
-				p.Value = value ? "true" : "false";
-			}
-		}
+		get => GetConfigurationProperty(".mirror") == "true";
+		set => SetConfigurationProperty(".mirror", value ? "true" : "false");
 	}
 
 	public bool SkipFetchAll
 	{
-		get
-		{
-			var pname = "remote." + Name + ".skipfetchall";
-			var p = Repository.Configuration.TryGetParameter(pname);
-			if(p == null)
-				return false;
-			return p.Value == "true";
-		}
-		set
-		{
-			Verify.State.IsNotDeleted(this);
-
-			var pname = "remote." + Name + ".skipfetchall";
-			var p = Repository.Configuration.TryGetParameter(pname);
-			if(p == null)
-			{
-				if(!value) return;
-				Repository.Configuration.SetValue(pname, value ? "true" : "false");
-			}
-			else
-			{
-				p.Value = value ? "true" : "false";
-			}
-		}
+		get => GetConfigurationProperty(".skipfetchall") == "true";
+		set => SetConfigurationProperty(".skipfetchall", value ? "true" : "false");
 	}
 
 	public TagFetchMode TagFetchMode
 	{
-		get
+		get => GetConfigurationProperty(".tagopt") switch
 		{
-			var p = Repository.Configuration.TryGetParameter("remote." + Name + ".tagopt");
-			if(p != null)
-			{
-				switch(p.Value)
-				{
-					case "--tags":
-						return TagFetchMode.AllTags;
-					case "--no-tags":
-						return TagFetchMode.NoTags;
-				}
-			}
-			return TagFetchMode.Default;
-		}
+			"--tags"    => TagFetchMode.AllTags,
+			"--no-tags" => TagFetchMode.NoTags,
+			_           => TagFetchMode.Default,
+		};
 		set
 		{
 			var strvalue = value switch
@@ -374,16 +219,7 @@ public sealed class Remote : GitNamedObjectWithLifetime
 				TagFetchMode.NoTags  => "--no-tags",
 				_ => "",
 			};
-			var pname = "remote." + Name + ".tagopt";
-			var p = Repository.Configuration.TryGetParameter(pname);
-			if(p != null)
-			{
-				p.Value = strvalue;
-			}
-			else if(strvalue.Length == 0)
-			{
-				Repository.Configuration.SetValue(pname, strvalue);
-			}
+			SetConfigurationProperty(".tagopt", strvalue);
 		}
 	}
 
@@ -421,7 +257,7 @@ public sealed class Remote : GitNamedObjectWithLifetime
 	}
 
 	/// <summary>Download new objects from remote repository.</summary>
-	public Task FetchAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	public Task FetchAsync(IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.State.IsNotDeleted(this);
 
@@ -437,7 +273,7 @@ public sealed class Remote : GitNamedObjectWithLifetime
 	}
 
 	/// <summary>Download new objects from remote repository and merge tracking branches.</summary>
-	public Task PullAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	public Task PullAsync(IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.State.IsNotDeleted(this);
 
@@ -445,56 +281,46 @@ public sealed class Remote : GitNamedObjectWithLifetime
 	}
 
 	/// <summary>Send local objects to remote repository.</summary>
-	public void Push(ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
+	public void Push(Many<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
 	{
 		Verify.State.IsNotDeleted(this);
 		Verify.Argument.IsValidRevisionPointerSequence(branches, Repository, nameof(branches));
-		Verify.Argument.IsTrue(branches.Count != 0, nameof(branches),
+		Verify.Argument.IsFalse(branches.IsEmpty, nameof(branches),
 			Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("branch"));
 
-		var names = new List<string>(branches.Count);
-		foreach(var branch in branches)
-		{
-			names.Add(branch.Name);
-		}
-		IList<ReferencePushResult> res;
+		var names = branches.ConvertAll(static b => b.Name);
+		Many<ReferencePushResult> res;
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.BranchChanged))
 		{
 			res = Repository.Accessor.Push.Invoke(
-				new PushParameters(Name, sendTags?PushMode.Tags:PushMode.Default, names)
+				new PushRequest(Name, sendTags?PushMode.Tags:PushMode.Default, names)
 				{
 					Force = forceOverwrite,
 					ThinPack = thinPack,
 				});
 		}
 
-		bool changed = false;
-		for(int i = 0; i < res.Count; ++i)
-		{
-			if(res[i].Type != PushResultType.UpToDate && res[i].Type != PushResultType.Rejected)
-			{
-				changed = true;
-				break;
-			}
-		}
+		var changed = res.Any(static r
+			=> r.Type != PushResultType.UpToDate
+			&& r.Type != PushResultType.Rejected);
 		if(changed)
 		{
 			Repository.Refs.Remotes.Refresh();
 		}
 	}
 
-	public Task PushAsync(ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	public Task PushAsync(Many<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.State.IsNotDeleted(this);
 
 		return RemotesUtility.PushAsync(Repository, this, branches, forceOverwrite, thinPack, sendTags, progress, cancellationToken);
 	}
 
-	private PruneRemoteParameters GetPruneParameters()
+	private PruneRemoteRequest GetPruneRequest()
 	{
-		return new PruneRemoteParameters(Name);
+		return new PruneRemoteRequest(Name);
 	}
 
 	/// <summary>Deletes all stale tracking branches.</summary>
@@ -502,38 +328,38 @@ public sealed class Remote : GitNamedObjectWithLifetime
 	{
 		Verify.State.IsNotDeleted(this);
 
-		var state1 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
+		var before = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.BranchChanged))
 		{
-			var parameters = GetPruneParameters();
-			Repository.Accessor.PruneRemote.Invoke(parameters);
+			var request = GetPruneRequest();
+			Repository.Accessor.PruneRemote.Invoke(request);
 		}
 		Repository.Refs.Remotes.Refresh();
-		var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
-		var changes = RefsDiff.Calculate(state1, state2);
+		var after = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
+		var changes = RefsDiff.Calculate(before, after);
 		Repository.Remotes.OnPruneCompleted(this, changes);
 	}
 
 	/// <summary>Deletes all stale tracking branches.</summary>
-	public async Task PruneAsync(IProgress<OperationProgress> progress = null, CancellationToken cancellationToken = default)
+	public async Task PruneAsync(IProgress<OperationProgress>? progress = null, CancellationToken cancellationToken = default)
 	{
 		Verify.State.IsNotDeleted(this);
 
 		progress?.Report(new OperationProgress(Resources.StrsSearchingStaleBranches.AddEllipsis()));
-		var state1 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
+		var before = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
 		using(var block = Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
 		{
-			var parameters = GetPruneParameters();
+			var request = GetPruneRequest();
 			await Repository
 				.Accessor
 				.PruneRemote
-				.InvokeAsync(parameters, progress, cancellationToken)
+				.InvokeAsync(request, progress, cancellationToken)
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 		Repository.Refs.Remotes.Refresh();
-		var state2 = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
-		var changes = RefsDiff.Calculate(state1, state2);
+		var after = RefsState.Capture(Repository, ReferenceType.RemoteBranch);
+		var changes = RefsDiff.Calculate(before, after);
 		Repository.Remotes.OnPruneCompleted(this, changes);
 	}
 

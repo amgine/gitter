@@ -25,6 +25,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 
 using gitter.Framework;
+using gitter.Framework.Controls;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -32,7 +33,10 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public abstract class GitDialogBase : DialogBase
 {
-	protected void SetupReferenceNameInputBox(TextBox textBox, ReferenceType referenceType)
+	protected void SetupReferenceNameInputBox(TextBoxDecorator textBoxDecorator, ReferenceType referenceType)
+		=> SetupReferenceNameInputBox(textBoxDecorator.Decorated, referenceType);
+
+	protected void SetupReferenceNameInputBox(TextBoxBase textBox, ReferenceType referenceType)
 	{
 		Verify.Argument.IsNotNull(textBox);
 
@@ -40,29 +44,24 @@ public abstract class GitDialogBase : DialogBase
 		textBox.Tag = referenceType;
 	}
 
-	private void OnRevisionInputBoxKeyPress(object sender, KeyPressEventArgs e)
+	private void OnRevisionInputBoxKeyPress(object? sender, KeyPressEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
-		var textBox = (TextBox)sender;
-		string refTypeName = (ReferenceType)textBox.Tag switch
+		if(e.KeyChar is ' ' or '~' or ':' or '?' or '^' or '*' or '[' or '\\')
 		{
-			ReferenceType.LocalBranch => Resources.StrBranch,
-			ReferenceType.Tag         => Resources.StrTag,
-			ReferenceType.Remote      => Resources.StrRemote,
-			_ => Resources.StrReference,
-		};
-		if(!char.IsControl(e.KeyChar))
-		{
-			switch(e.KeyChar)
+			if(sender is not TextBox textBox) return;
+			e.Handled = true;
+			var refTypeName = textBox.Tag switch
 			{
-				case ' ' or '~' or ':' or '?' or '^' or '*' or '[' or '\\':
-					e.Handled = true;
-					NotificationService.NotifyInputError(
-						textBox, string.Empty, Resources.ErrNameCannotContainCharacter.UseAsFormat(
-							refTypeName, e.KeyChar));
-					break;
-			}
+				ReferenceType.LocalBranch => Resources.StrBranch,
+				ReferenceType.Tag         => Resources.StrTag,
+				ReferenceType.Remote      => Resources.StrRemote,
+				_                         => Resources.StrReference,
+			};
+			NotificationService.NotifyInputError(
+				textBox, string.Empty, Resources.ErrNameCannotContainCharacter.UseAsFormat(
+					refTypeName, e.KeyChar));
 		}
 	}
 }

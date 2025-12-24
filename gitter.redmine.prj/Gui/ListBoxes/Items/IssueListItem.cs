@@ -295,16 +295,16 @@ public sealed class IssueListItem : CustomListBoxItem<Issue>
 		Verify.Argument.IsNotNull(issue);
 	}
 
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		DataContext.PropertyChanged += OnIssuePropertyChanged;
 	}
 
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.PropertyChanged -= OnIssuePropertyChanged;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
 	private void OnIssuePropertyChanged(object sender, RedmineObjectPropertyChangedEventArgs e)

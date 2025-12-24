@@ -18,8 +18,6 @@
  */
 #endregion
 
-#nullable enable
-
 namespace gitter.Git;
 
 using System;
@@ -33,6 +31,7 @@ using gitter.Framework;
 using gitter.Git.AccessLayer;
 
 using Resources = gitter.Git.Properties.Resources;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>Repository submodules collection.</summary>
 public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, SubmoduleEventArgs>
@@ -45,14 +44,14 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 	/// <inheritdoc/>
 	protected override SubmoduleEventArgs CreateEventArgs(Submodule item) => new(item);
 
-	private UpdateSubmoduleParameters GetUpdateParameters()
+	private UpdateSubmoduleRequest GetUpdateRequest()
 		=> new()
 		{
 			Recursive = true,
 			Init      = true,
 		};
 
-	private SyncSubmoduleParameters GetSyncParameters(bool recursive)
+	private SyncSubmoduleRequest GetSyncRequest(bool recursive)
 		=> new()
 		{
 			Recursive = recursive,
@@ -60,21 +59,21 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 
 	public void Update()
 	{
-		var parameters = GetUpdateParameters();
-		Repository.Accessor.UpdateSubmodule.Invoke(parameters);
+		var request = GetUpdateRequest();
+		Repository.Accessor.UpdateSubmodule.Invoke(request);
 	}
 
 	public Task UpdateAsync(IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		progress?.Report(new OperationProgress(Resources.StrsUpdatingSubmodules.AddEllipsis()));
-		var parameters = GetUpdateParameters();
-		return Repository.Accessor.UpdateSubmodule.InvokeAsync(parameters, progress, cancellationToken);
+		var request = GetUpdateRequest();
+		return Repository.Accessor.UpdateSubmodule.InvokeAsync(request, progress, cancellationToken);
 	}
 
 	public void Sync(bool recursive = true)
 	{
-		var parameters = GetSyncParameters(recursive);
-		Repository.Accessor.SyncSubmodule.Invoke(parameters);
+		var request = GetSyncRequest(recursive);
+		Repository.Accessor.SyncSubmodule.Invoke(request);
 	}
 
 	public async Task SyncAsync(bool recursive = true,
@@ -82,9 +81,9 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 		CancellationToken cancellationToken = default)
 	{
 		progress?.Report(new OperationProgress(Resources.StrsSynchronizingSubmodules.AddEllipsis()));
-		var parameters = GetSyncParameters(recursive);
+		var request = GetSyncRequest(recursive);
 		await Repository.Accessor.SyncSubmodule
-			.InvokeAsync(parameters, progress, cancellationToken)
+			.InvokeAsync(request, progress, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 		Refresh();
 	}
@@ -117,7 +116,8 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 		return false;
 	}
 
-	public bool TryGetSubmoduleByPath(string path, out Submodule? submodule)
+	public bool TryGetSubmoduleByPath(string path,
+		[MaybeNullWhen(returnValue: false)] out Submodule submodule)
 	{
 		Verify.Argument.IsNotNull(path);
 
@@ -153,7 +153,8 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 		return null;
 	}
 
-	public bool TryGetSubmoduleByUrl(string url, out Submodule? submodule)
+	public bool TryGetSubmoduleByUrl(string url,
+		[MaybeNullWhen(returnValue: false)] out Submodule submodule)
 	{
 		Verify.Argument.IsNotNull(url);
 
@@ -186,8 +187,8 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 		return null;
 	}
 
-	private static AddSubmoduleParameters GetAddSubmoduleParameters(string path, string url, string? branch = default)
-		=> new AddSubmoduleParameters
+	private static AddSubmoduleRequest GetAddSubmoduleRequest(string path, string url, string? branch = default)
+		=> new()
 		{
 			Branch     = branch,
 			Path       = "./" + path,
@@ -205,8 +206,8 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 		{
 			try
 			{
-				var parameters = GetAddSubmoduleParameters(path, url, branch);
-				Repository.Accessor.AddSubmodule.Invoke(parameters);
+				var request = GetAddSubmoduleRequest(path, url, branch);
+				Repository.Accessor.AddSubmodule.Invoke(request);
 			}
 			finally
 			{
@@ -232,9 +233,9 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 		{
 			try
 			{
-				var parameters = GetAddSubmoduleParameters(path, url, branch);
+				var request = GetAddSubmoduleRequest(path, url, branch);
 				await Repository.Accessor.AddSubmodule
-					.InvokeAsync(parameters)
+					.InvokeAsync(request)
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 			finally
@@ -302,11 +303,11 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 			{
 				cfgFile = new ConfigurationFile(Repository, GitConstants.SubmodulesConfigFile, load: true);
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 				skipUpdate = true;
 			}
-			if(cfgFile != null)
+			if(cfgFile is not null)
 			{
 				submodules = ParseConfig(cfgFile);
 			}
@@ -314,7 +315,7 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 
 		if(!skipUpdate)
 		{
-			submodules ??= new();
+			submodules ??= [];
 			lock(SyncRoot)
 			{
 				CacheUpdater.UpdateObjectDictionary<Submodule, SubmoduleData>(
@@ -346,7 +347,7 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 					.RefreshAsync()
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 				skipUpdate = true;
 			}
@@ -358,7 +359,7 @@ public sealed class SubmodulesCollection : GitObjectsCollection<Submodule, Submo
 
 		if(!skipUpdate)
 		{
-			submodules ??= new();
+			submodules ??= [];
 			lock(SyncRoot)
 			{
 				CacheUpdater.UpdateObjectDictionary<Submodule, SubmoduleData>(

@@ -51,25 +51,26 @@ static class DateTimeHelper
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static unsafe void WriteISO8601Offset(char* p, TimeSpan offset)
 	{
+		var h = offset.Hours;
+		var m = offset.Minutes;
 		if(offset.Ticks < 0)
 		{
 			p[0] = '-';
-			Write2Digits(p + 1, -offset.Hours);
-			Write2Digits(p + 3, -offset.Minutes);
+			h = -h;
+			m = -m;
 		}
 		else
 		{
 			p[0] = '+';
-			Write2Digits(p + 1, offset.Hours);
-			Write2Digits(p + 3, offset.Minutes);
 		}
+		Write2Digits(p + 1, h);
+		Write2Digits(p + 3, m);
 	}
 
 	public static unsafe string FormatISO8601(DateTimeOffset date)
 	{
 		var offset = date.Offset;
-		var len    = offset.Ticks == 0 ? 20 : 24;
-		var chars  = stackalloc char[len];
+		var chars  = stackalloc char[24];
 
 		Write4Digits(chars + 0, date.Year);
 		chars[4] = '-';
@@ -85,12 +86,12 @@ static class DateTimeHelper
 		if(offset.Ticks == 0)
 		{
 			chars[19] = 'Z';
+			return new(chars, 0, 20);
 		}
 		else
 		{
-			WriteISO8601Offset(chars + 19, date.Offset);
+			WriteISO8601Offset(chars + 19, offset);
+			return new(chars, 0, 24);
 		}
-
-		return new(chars, 0, len);
 	}
 }

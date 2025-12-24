@@ -26,12 +26,15 @@ using System.Globalization;
 using System.Windows.Forms;
 
 using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Services;
 
 using Resources = gitter.Framework.Properties.Resources;
 
 public partial class SpellingPage : PropertyPage, IExecutableDialog
 {
+	protected override bool ScaleChildren => false;
+
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(521, 328));
 
 	public static readonly new Guid Guid = new("ECAC85BA-3093-42E6-8142-EA4EEFC81D16");
@@ -39,15 +42,75 @@ public partial class SpellingPage : PropertyPage, IExecutableDialog
 	private const string NHunspellHomepage = @"http://nhunspell.sourceforge.net/";
 	private const string DownloadUrl = @"http://ftp.osuosl.org/pub/openoffice/contrib/dictionaries/";
 
+	readonly struct DialogControls
+	{
+		private readonly LabelControl label1;
+		public readonly CustomListBox _lstDictionaries;
+		//public readonly LinkLabel _lnkDownload;
+
+		public DialogControls(IGitterStyle style)
+		{
+			style ??= GitterApplication.Style;
+
+			label1 = new();
+			_lstDictionaries = new()
+			{
+				Style          = style,
+				HeaderStyle    = HeaderStyle.Hidden,
+				ShowCheckBoxes = true,
+				Text           = "No dictionaries found",
+			};
+
+
+			_lstDictionaries.Columns.Add(new CustomListBoxColumn(0, Resources.StrName) { SizeMode = ColumnSizeMode.Fill });
+		}
+
+		public void Localize()
+		{
+			label1.Text = "Dictionaries:";
+		}
+
+		public void Layout(Control parent)
+		{
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					rows:
+					[
+						LayoutConstants.LabelRowHeight,
+						LayoutConstants.LabelRowSpacing,
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(label1,           marginOverride: LayoutConstants.NoMargin), row: 0),
+						new GridContent(new ControlContent(_lstDictionaries, marginOverride: LayoutConstants.NoMargin), row: 2),
+					]),
+			};
+			label1.Parent = parent;
+			_lstDictionaries.Parent = parent;
+		}
+	}
+
+	private readonly DialogControls _controls;
+
 	public SpellingPage()
 		: base(Guid)
 	{
-		InitializeComponent();
-
+		Name = nameof(SpellingPage);
 		Text = Resources.StrSpelling;
 
-		_lstDictionaries.Style = GitterApplication.DefaultStyle;
-		_lstDictionaries.Columns.Add(new CustomListBoxColumn(0, Resources.StrName) { SizeMode = ColumnSizeMode.Fill });
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		Size                = ScalableSize.GetValue(Dpi.Default);
+		_controls = new(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
+
+		//_controls._lnkDownload.LinkClicked += _lnkDownload_LinkClicked;
 
 		var loaded = SpellingService.GetLoadedLocales();
 		foreach(var locale in SpellingService.GetAvailableLocales())
@@ -59,7 +122,7 @@ public partial class SpellingPage : PropertyPage, IExecutableDialog
 				cultureName = ci.DisplayName;
 			}
 			catch { }
-			_lstDictionaries.Items.Add(new CustomListBoxRow<string>(locale, new TextSubItem(0, cultureName))
+			_controls._lstDictionaries.Items.Add(new CustomListBoxRow<string>(locale, new TextSubItem(0, cultureName))
 				{
 					IsChecked = loaded.Contains(locale),
 				});
@@ -68,7 +131,7 @@ public partial class SpellingPage : PropertyPage, IExecutableDialog
 
 	public bool Execute()
 	{
-		foreach(CustomListBoxRow<string> item in _lstDictionaries.Items)
+		foreach(CustomListBoxRow<string> item in _controls._lstDictionaries.Items)
 		{
 			bool loaded = SpellingService.IsLoaded(item.DataContext);
 			if(loaded)

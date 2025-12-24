@@ -64,9 +64,9 @@ internal sealed class ReferencesToolbar : ToolStrip
 		dpiBindings.BindImage(_btnCreateTag,    Icons.TagAdd);
 	}
 
-	private void OnCreateBranchButtonClick(object sender, EventArgs e)
+	private void OnCreateBranchButtonClick(object? sender, EventArgs e)
 		=> _referencesView.Gui.StartCreateBranchDialog();
 
-	private void OnCreateTagButtonClick(object sender, EventArgs e)
+	private void OnCreateTagButtonClick(object? sender, EventArgs e)
 		=> _referencesView.Gui.StartCreateTagDialog();
 }

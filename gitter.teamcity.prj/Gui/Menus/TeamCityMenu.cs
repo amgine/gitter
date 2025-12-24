@@ -21,7 +21,6 @@
 namespace gitter.TeamCity.Gui;
 
 using System;
-using System.Globalization;
 using System.ComponentModel;
 using System.Windows.Forms;
 
@@ -31,25 +30,38 @@ using Resources = gitter.TeamCity.Properties.Resources;
 
 [ToolboxItem(false)]
 [DesignerCategory("")]
-sealed class TeamCityMenu : ContextMenuStrip
+sealed class TeamCityMenu : gitter.Framework.Controls.HyperlinkContextMenu
 {
 	private readonly IWorkingEnvironment _workingEnvironment;
 	private readonly TeamCityGuiProvider _guiProvider;
 
+	static string FormatUrl(TeamCityGuiProvider guiProvider)
+	{
+		var uri = guiProvider.ServiceContext.ServiceUri;
+		var id  = guiProvider.ServiceContext.DefaultProjectId;
+		return uri.EndsWith('/')
+			? uri +  "project/" + id
+			: uri + "/project/" + id;
+	}
+
 	public TeamCityMenu(IWorkingEnvironment environment, TeamCityGuiProvider guiProvider)
+		: base(FormatUrl(guiProvider))
 	{
 		Verify.Argument.IsNotNull(environment);
 		Verify.Argument.IsNotNull(guiProvider);
 
+		Renderer = GitterApplication.Style.ToolStripRenderer;
+
 		_workingEnvironment = environment;
 		_guiProvider = guiProvider;
 
+		Items.Add(new ToolStripSeparator());
 		Items.Add(new ToolStripMenuItem("Setup...", null, OnSetupClick));
 	}
 
-	private void OnSetupClick(object sender, EventArgs e)
+	private void OnSetupClick(object? sender, EventArgs e)
 	{
-		using var dlg = new ProviderSetupControl(_guiProvider.Repository);
-		dlg.Run(GitterApplication.MainForm);
+		using var dialog = new ProviderSetupDialog(_guiProvider.Repository, _guiProvider.Servers);
+		dialog.Run(GitterApplication.MainForm);
 	}
 }

@@ -49,7 +49,7 @@ sealed class BlameFileBinding : AsyncDataBinding<BlameFile>
 		_blameOptions = blameOptions;
 		_progressPanel = new FlowProgressPanel();
 
-		Progress = _progressPanel.ProgressMonitor;
+		Progress = _progressPanel;
 	}
 
 	#endregion
@@ -75,9 +75,9 @@ sealed class BlameFileBinding : AsyncDataBinding<BlameFile>
 
 	#region Methods
 
-	protected override Task<BlameFile> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	protected override Task<BlameFile> FetchDataAsync(IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
 	{
-		Verify.State.IsFalse(IsDisposed, "BlameFileBinding is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		BlameViewer.Panels.Clear();
 		BlameViewer.Panels.Add(_progressPanel);

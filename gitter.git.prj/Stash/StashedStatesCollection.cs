@@ -18,8 +18,6 @@
  */
 #endregion
 
-#nullable enable
-
 namespace gitter.Git;
 
 using System;
@@ -68,7 +66,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 
 	#region Data
 
-	private readonly List<StashedState> _stash;
+	private readonly List<StashedState> _stash = [];
 
 	#endregion
 
@@ -79,21 +77,20 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 	internal StashedStatesCollection(Repository repository)
 		: base(repository)
 	{
-		_stash = new List<StashedState>();
 	}
 
 	#endregion
 
 	#region Drop()
 
-	private static StashDropParameters GetStashDropParameters(StashedState stashedState)
+	private static StashDropRequest GetStashDropRequest(StashedState stashedState)
 	{
-		return new StashDropParameters(((IRevisionPointer)stashedState).Pointer);
+		return new StashDropRequest(((IRevisionPointer)stashedState).Pointer);
 	}
 
-	private static StashDropParameters GetStashDropParameters()
+	private static StashDropRequest GetStashDropRequest()
 	{
-		return new StashDropParameters();
+		return new StashDropRequest();
 	}
 
 	private void OnStashedStateDropped(StashedState stashedState)
@@ -135,11 +132,11 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 	{
 		Verify.Argument.IsValidGitObject(stashedState, Repository);
 
-		var parameters = GetStashDropParameters(stashedState);
+		var request = GetStashDropRequest(stashedState);
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.StashChanged))
 		{
-			Repository.Accessor.StashDrop.Invoke(parameters);
+			Repository.Accessor.StashDrop.Invoke(request);
 		}
 		OnStashedStateDropped(stashedState);
 	}
@@ -149,11 +146,11 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		Verify.Argument.IsValidGitObject(stashedState, Repository);
 
 		progress?.Report(new OperationProgress(Resources.StrPerformingStashDrop.AddEllipsis()));
-		var parameters = GetStashDropParameters(stashedState);
+		var request = GetStashDropRequest(stashedState);
 		using(Repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged))
 		{
 			await Repository.Accessor.StashDrop
-				.InvokeAsync(parameters, progress, CancellationToken.None)
+				.InvokeAsync(request, progress, CancellationToken.None)
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 		OnStashedStateDropped(stashedState);
@@ -163,11 +160,11 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 	{
 		Verify.State.IsTrue(_stash.Count != 0);
 
-		var parameters = GetStashDropParameters();
+		var request = GetStashDropRequest();
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.StashChanged))
 		{
-			Repository.Accessor.StashDrop.Invoke(parameters);
+			Repository.Accessor.StashDrop.Invoke(request);
 		}
 		OnStashedStateDropped();
 	}
@@ -177,11 +174,11 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		Verify.State.IsTrue(_stash.Count != 0);
 
 		progress?.Report(new OperationProgress(Resources.StrPerformingStashDrop.AddEllipsis()));
-		var parameters = GetStashDropParameters();
+		var request = GetStashDropRequest();
 		using(Repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged))
 		{
 			await Repository.Accessor.StashDrop
-				.InvokeAsync(parameters, progress, CancellationToken.None)
+				.InvokeAsync(request, progress, CancellationToken.None)
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 		OnStashedStateDropped();
@@ -191,9 +188,9 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 
 	#region Clear()
 
-	private static StashClearParameters GetClearStashParameters()
+	private static StashClearRequest GetClearStashRequest()
 	{
-		return new StashClearParameters();
+		return new StashClearRequest();
 	}
 
 	private void OnStashCleared()
@@ -214,11 +211,11 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 
 	public void Clear()
 	{
-		var parameters = GetClearStashParameters();
+		var request = GetClearStashRequest();
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.StashChanged))
 		{
-			Repository.Accessor.StashClear.Invoke(parameters);
+			Repository.Accessor.StashClear.Invoke(request);
 		}
 		OnStashCleared();
 	}
@@ -226,11 +223,11 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 	public async Task ClearAsync(IProgress<OperationProgress>? progress = default)
 	{
 		progress?.Report(new OperationProgress(Resources.StrsCleaningStash.AddEllipsis()));
-		var parameters = GetClearStashParameters();
+		var request = GetClearStashRequest();
 		using(Repository.Monitor.BlockNotifications(RepositoryNotifications.StashChanged))
 		{
 			await Repository.Accessor.StashClear
-				.InvokeAsync(parameters, progress, CancellationToken.None)
+				.InvokeAsync(request, progress, CancellationToken.None)
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 		OnStashCleared();
@@ -244,8 +241,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		{
 			lock(SyncRoot)
 			{
-				if(_stash.Count == 0) return null;
-				return _stash[0];
+				return _stash.Count != 0 ? _stash[0] : default;
 			}
 		}
 	}
@@ -321,7 +317,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 	}
 
 	/// <summary>Object used for cross-thread synchronization.</summary>
-	public object SyncRoot => _stash;
+	public LockType SyncRoot { get; } = new();
 
 	private void Refresh(IList<StashedStateData> stash)
 	{
@@ -341,7 +337,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 				}
 				else
 				{
-					var d = new Dictionary<Hash, StashedState>(_stash.Count, Hash.EqualityComparer);
+					var d = new Dictionary<Sha1Hash, StashedState>(_stash.Count, Sha1Hash.EqualityComparer);
 					foreach(var s in _stash)
 					{
 						d.Add(s.Revision.Hash, s);
@@ -390,10 +386,10 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 	public void Refresh()
 	{
 		var top = Repository.Accessor.QueryStashTop
-			.Invoke(new QueryStashTopParameters(false));
-		var stash = top == null
+			.Invoke(new QueryStashTopRequest(false));
+		var stash = top is null
 			? Preallocated<StashedStateData>.EmptyArray
-			: Repository.Accessor.QueryStash.Invoke(new QueryStashParameters());
+			: Repository.Accessor.QueryStash.Invoke(new QueryStashRequest());
 		Refresh(stash);
 	}
 
@@ -401,7 +397,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 	public async Task RefreshAsync()
 	{
 		var top = await Repository.Accessor.QueryStashTop
-			.InvokeAsync(new QueryStashTopParameters(false))
+			.InvokeAsync(new QueryStashTopRequest(false))
 			.ConfigureAwait(continueOnCapturedContext: false);
 		if(top == null)
 		{
@@ -410,7 +406,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		else
 		{
 			var stash = await Repository.Accessor.QueryStash
-				.InvokeAsync(new QueryStashParameters())
+				.InvokeAsync(new QueryStashRequest())
 				.ConfigureAwait(continueOnCapturedContext: false);
 			Refresh(stash);
 		}
@@ -434,27 +430,27 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 
 	#region Apply()
 
-	private static StashApplyParameters GetStashApplyParameters(StashedState stashedState, bool restoreIndex)
+	private static StashApplyRequest GetStashApplyRequest(StashedState stashedState, bool restoreIndex)
 	{
-		return new StashApplyParameters(((IRevisionPointer)stashedState).Pointer, restoreIndex);
+		return new StashApplyRequest(((IRevisionPointer)stashedState).Pointer, restoreIndex);
 	}
 
-	private static StashApplyParameters GetStashApplyParameters(bool restoreIndex)
+	private static StashApplyRequest GetStashApplyRequest(bool restoreIndex)
 	{
-		return new StashApplyParameters(restoreIndex);
+		return new StashApplyRequest(restoreIndex);
 	}
 
 	internal void Apply(StashedState stashedState, bool restoreIndex)
 	{
 		Verify.Argument.IsValidGitObject(stashedState, Repository, nameof(stashedState));
 
-		var parameters = GetStashApplyParameters(stashedState, restoreIndex);
+		var request = GetStashApplyRequest(stashedState, restoreIndex);
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.StashChanged,
 			RepositoryNotifications.WorktreeUpdated,
 			RepositoryNotifications.IndexUpdated))
 		{
-			Repository.Accessor.StashApply.Invoke(parameters);
+			Repository.Accessor.StashApply.Invoke(request);
 		}
 
 		Repository.Status.Refresh();
@@ -465,7 +461,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		Verify.Argument.IsValidGitObject(stashedState, Repository, nameof(stashedState));
 
 		progress?.Report(new OperationProgress(Resources.StrPerformingStashApply.AddEllipsis()));
-		var parameters = GetStashApplyParameters(stashedState, restoreIndex);
+		var request = GetStashApplyRequest(stashedState, restoreIndex);
 		try
 		{
 			using(Repository.Monitor.BlockNotifications(
@@ -474,7 +470,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 				RepositoryNotifications.IndexUpdated))
 			{
 				await Repository.Accessor.StashApply
-					.InvokeAsync(parameters, progress, CancellationToken.None)
+					.InvokeAsync(request, progress, CancellationToken.None)
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 		}
@@ -490,13 +486,13 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 	{
 		Verify.State.IsTrue(_stash.Count != 0);
 
-		var parameters = GetStashApplyParameters(restoreIndex);
+		var request = GetStashApplyRequest(restoreIndex);
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.StashChanged,
 			RepositoryNotifications.WorktreeUpdated,
 			RepositoryNotifications.IndexUpdated))
 		{
-			Repository.Accessor.StashApply.Invoke(parameters);
+			Repository.Accessor.StashApply.Invoke(request);
 		}
 
 		Repository.Status.Refresh();
@@ -507,7 +503,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		Verify.State.IsTrue(_stash.Count != 0);
 
 		progress?.Report(new OperationProgress(Resources.StrPerformingStashApply.AddEllipsis()));
-		var parameters = GetStashApplyParameters(restoreIndex);
+		var request = GetStashApplyRequest(restoreIndex);
 		try
 		{
 			using(Repository.Monitor.BlockNotifications(
@@ -516,7 +512,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 				RepositoryNotifications.IndexUpdated))
 			{
 				await Repository.Accessor.StashApply
-					.InvokeAsync(parameters, progress, CancellationToken.None)
+					.InvokeAsync(request, progress, CancellationToken.None)
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 		}
@@ -532,14 +528,14 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 
 	#region Pop()
 
-	private static StashPopParameters GetStashPopParameters(StashedState stashedState, bool restoreIndex)
+	private static StashPopRequest GetStashPopRequest(StashedState stashedState, bool restoreIndex)
 	{
-		return new StashPopParameters(((IRevisionPointer)stashedState).Pointer, restoreIndex);
+		return new StashPopRequest(((IRevisionPointer)stashedState).Pointer, restoreIndex);
 	}
 
-	private static StashPopParameters GetStashPopParameters(bool restoreIndex)
+	private static StashPopRequest GetStashPopRequest(bool restoreIndex)
 	{
-		return new StashPopParameters(restoreIndex);
+		return new StashPopRequest(restoreIndex);
 	}
 
 	private void OnStashPopCompleted(StashedState stashedState)
@@ -582,14 +578,14 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		Verify.Argument.IsValidGitObject(stashedState, Repository);
 		Verify.State.IsTrue(_stash.Count != 0);
 
-		var parameters = GetStashPopParameters(stashedState, restoreIndex);
+		var request = GetStashPopRequest(stashedState, restoreIndex);
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.StashChanged,
 			RepositoryNotifications.WorktreeUpdated,
 			RepositoryNotifications.IndexUpdated))
 		{
 			await Repository.Accessor.StashPop
-				.InvokeAsync(parameters, progress, CancellationToken.None)
+				.InvokeAsync(request, progress, CancellationToken.None)
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 		OnStashPopCompleted(stashedState);
@@ -600,13 +596,13 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		Verify.Argument.IsValidGitObject(stashedState, Repository);
 		Verify.State.IsTrue(_stash.Count != 0);
 
-		var parameters = GetStashPopParameters(stashedState, restoreIndex);
+		var request = GetStashPopRequest(stashedState, restoreIndex);
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.StashChanged,
 			RepositoryNotifications.WorktreeUpdated,
 			RepositoryNotifications.IndexUpdated))
 		{
-			Repository.Accessor.StashPop.Invoke(parameters);
+			Repository.Accessor.StashPop.Invoke(request);
 		}
 		OnStashPopCompleted(stashedState);
 	}
@@ -615,14 +611,14 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 	{
 		Verify.State.IsTrue(_stash.Count != 0);
 
-		var parameters = GetStashPopParameters(restoreIndex);
+		var request = GetStashPopRequest(restoreIndex);
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.StashChanged,
 			RepositoryNotifications.WorktreeUpdated,
 			RepositoryNotifications.IndexUpdated))
 		{
 			await Repository.Accessor.StashPop
-				.InvokeAsync(parameters, progress, CancellationToken.None)
+				.InvokeAsync(request, progress, CancellationToken.None)
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 		OnStashPopCompleted();
@@ -632,13 +628,13 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 	{
 		Verify.State.IsTrue(_stash.Count != 0);
 
-		var parameters = GetStashPopParameters(restoreIndex);
+		var request = GetStashPopRequest(restoreIndex);
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.StashChanged,
 			RepositoryNotifications.WorktreeUpdated,
 			RepositoryNotifications.IndexUpdated))
 		{
-			Repository.Accessor.StashPop.Invoke(parameters);
+			Repository.Accessor.StashPop.Invoke(request);
 		}
 
 		OnStashPopCompleted();
@@ -660,7 +656,7 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 			RepositoryNotifications.StashChanged))
 		{
 			Repository.Accessor.StashToBranch.Invoke(
-				new StashToBranchParameters(((IRevisionPointer)stashedState).Pointer, name));
+				new StashToBranchRequest(((IRevisionPointer)stashedState).Pointer, name));
 		}
 
 		lock(SyncRoot)
@@ -692,9 +688,9 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		return Save(keepIndex, false, null);
 	}
 
-	private StashSaveParameters GetStashSaveParameters(bool keepIndex, bool includeUntracked, string? message)
+	private StashSaveRequest GetStashSaveRequest(bool keepIndex, bool includeUntracked, string? message)
 	{
-		return new StashSaveParameters(message, keepIndex, includeUntracked);
+		return new StashSaveRequest(message, keepIndex, includeUntracked);
 	}
 
 	private StashedState? OnStashSaveCompleted(bool created)
@@ -702,7 +698,13 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		if(!created) return default;
 
 		var stashTopData = Repository.Accessor.QueryStashTop.Invoke(
-			new QueryStashTopParameters(true));
+			new QueryStashTopRequest(true));
+
+		if(stashTopData is null)
+		{
+			throw new ApplicationException("Stash is empty after stash save.");
+		}
+
 		Revision revision;
 		lock(Repository.Revisions.SyncRoot)
 		{
@@ -732,14 +734,14 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		Verify.State.IsFalse(Repository.IsEmpty,
 			Resources.ExcCantDoOnEmptyRepository.UseAsFormat("stash save"));
 
-		var parameters = GetStashSaveParameters(keepIndex, includeUntracked, message);
+		var request = GetStashSaveRequest(keepIndex, includeUntracked, message);
 		bool created;
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.IndexUpdated,
 			RepositoryNotifications.WorktreeUpdated,
 			RepositoryNotifications.StashChanged))
 		{
-			created = Repository.Accessor.StashSave.Invoke(parameters);
+			created = Repository.Accessor.StashSave.Invoke(request);
 		}
 		return OnStashSaveCompleted(created);
 	}
@@ -753,14 +755,14 @@ public sealed class StashedStatesCollection : GitObject, IReadOnlyCollection<Sta
 		bool created;
 
 		progress?.Report(new OperationProgress(Resources.StrPerformingStashSave.AddEllipsis()));
-		var parameters = GetStashSaveParameters(keepIndex, includeUntracked, message);
+		var request = GetStashSaveRequest(keepIndex, includeUntracked, message);
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.IndexUpdated,
 			RepositoryNotifications.WorktreeUpdated,
 			RepositoryNotifications.StashChanged))
 		{
 			created = await Repository.Accessor.StashSave
-				.InvokeAsync(parameters, progress, CancellationToken.None)
+				.InvokeAsync(request, progress, CancellationToken.None)
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 		return OnStashSaveCompleted(created);

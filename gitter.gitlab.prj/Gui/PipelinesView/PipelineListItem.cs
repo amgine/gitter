@@ -133,7 +133,10 @@ sealed class PipelineListItem : CustomListBoxItem<Pipeline>
 	{
 		Assert.IsNotNull(requestEventArgs);
 
-		var menu = new ContextMenuStrip();
+		var menu = new ContextMenuStrip
+		{
+			Renderer = GitterApplication.Style.ToolStripRenderer,
+		};
 		var dpiBindings = new DpiBindings(menu);
 
 		HyperlinkContextMenu.AddItemsTo(dpiBindings, menu.Items, DataContext.WebUrl.ToString());

@@ -27,41 +27,21 @@ using gitter.Framework.Controls;
 
 abstract class MSVS2012Style
 {
-	protected sealed class BackgroundWithBorder : IBackgroundStyle
+	protected sealed class BackgroundWithBorder(
+		Color backgroundColor,
+		Color borderColor) : IBackgroundStyle
 	{
-		private readonly Color _backgroundColor;
-		private readonly Color _borderColor;
-
-		public BackgroundWithBorder(Color backgroundColor, Color borderColor)
+		public void Draw(Graphics graphics, BackgroundBounds background)
 		{
-			_backgroundColor = backgroundColor;
-			_borderColor     = borderColor;
-		}
-
-		public void Draw(Graphics graphics, Dpi dpi, Rectangle rect)
-		{
-			graphics.GdiFill(_backgroundColor, rect);
-			using(var pen = new Pen(_borderColor))
-			{
-				rect.Width  -= 1;
-				rect.Height -= 1;
-				graphics.DrawRectangle(pen, rect);
-			}
+			using var gdi = graphics.AsGdi();
+			gdi.DrawBorder(background.Bounds, borderColor, backgroundColor, 1);
 		}
 	}
 
-	protected sealed class SolidBackground : IBackgroundStyle
+	protected sealed class SolidBackground(
+		Color backgroundColor) : IBackgroundStyle
 	{
-		private readonly Color _backgroundColor;
-
-		public SolidBackground(Color backgroundColor)
-		{
-			_backgroundColor = backgroundColor;
-		}
-
-		public void Draw(Graphics graphics, Dpi dpi, Rectangle rect)
-		{
-			graphics.GdiFill(_backgroundColor, rect);
-		}
+		public void Draw(Graphics graphics, BackgroundBounds background)
+			=> graphics.GdiFill(backgroundColor, background.Clip);
 	}
 }

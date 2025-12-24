@@ -31,9 +31,9 @@ public class NotifyCollection<T> : Collection<T>
 	#region Events
 
 	/// <summary>Collection is about to be changed.</summary>
-	public event EventHandler<NotifyCollectionEventArgs> Changing;
+	public event EventHandler<NotifyCollectionEventArgs>? Changing;
 	/// <summary>Collection has changed.</summary>
-	public event EventHandler<NotifyCollectionEventArgs> Changed;
+	public event EventHandler<NotifyCollectionEventArgs>? Changed;
 
 	#endregion
 

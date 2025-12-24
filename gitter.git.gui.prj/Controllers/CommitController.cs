@@ -32,56 +32,58 @@ using gitter.Git.Gui.Interfaces;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class CommitController : ViewControllerBase<ICommitView>, ICommitController
+sealed class CommitController(Repository repository)
+	: ViewControllerBase<ICommitView>, ICommitController
 {
-	public CommitController(Repository repository)
+	readonly record struct UserInput(
+		string Message,
+		bool   Amend);
+
+	private bool TryCollectUserInput(out UserInput input)
 	{
-		Verify.Argument.IsNotNull(repository);
-
-		Repository = repository;
-	}
-
-	private Repository Repository { get; }
-
-	private bool ValidateInput(out string message, out bool amend)
-	{
-		message = View.Message.Value;
-		amend   = View.Amend.Value;
+		var view    = RequireView();
+		var message = view.Message.Value;
+		var amend   = view.Amend.Value;
 
 		if(!amend)
 		{
 			bool hasStagedItems;
-			lock(Repository.Status.SyncRoot)
+			lock(repository.Status.SyncRoot)
 			{
-				hasStagedItems = Repository.Status.StagedFiles.Count != 0;
+				hasStagedItems = repository.Status.StagedFiles.Count != 0;
 			}
 			if(!hasStagedItems)
 			{
-				View.ErrorNotifier.NotifyError(View.StagedItems,
+				view.ErrorNotifier.NotifyError(view.StagedItems,
 					new UserInputError(
 						Resources.ErrNothingToCommit,
 						Resources.ErrNofilesStagedForCommit));
-				return false;
+				goto fail;
 			}
 		}
 		if(string.IsNullOrWhiteSpace(message))
 		{
-			View.ErrorNotifier.NotifyError(View.Message,
+			view.ErrorNotifier.NotifyError(view.Message,
 				new UserInputError(
 					Resources.ErrEmptyCommitMessage,
 					Resources.ErrEnterCommitMessage));
-			return false;
+			goto fail;
 		}
-		message = message.Trim();
+		message = message!.Trim();
 		if(message.Length < GitConstants.MinCommitMessageLength)
 		{
-			View.ErrorNotifier.NotifyError(View.Message,
+			view.ErrorNotifier.NotifyError(view.Message,
 				new UserInputError(
 					Resources.ErrShortCommitMessage,
 					Resources.ErrEnterLongerCommitMessage.UseAsFormat(GitConstants.MinCommitMessageLength)));
-			return false;
+			goto fail;
 		}
+		input = new(message, amend);
 		return true;
+
+	fail:
+		input = default;
+		return false;
 	}
 
 	private void OnCommitFailed(Exception exc)
@@ -94,15 +96,14 @@ sealed class CommitController : ViewControllerBase<ICommitView>, ICommitControll
 
 	public bool TryCommit()
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+		if(!TryCollectUserInput(out var input)) return false;
 
-		if(!ValidateInput(out var message, out var amend)) return false;
-
+		var view = RequireView();
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				Repository.Status.Commit(message, amend);
+				repository.Status.Commit(input.Message, input.Amend);
 			}
 		}
 		catch(GitException exc)
@@ -115,15 +116,14 @@ sealed class CommitController : ViewControllerBase<ICommitView>, ICommitControll
 
 	public async Task<bool> TryCommitAsync()
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+		if(!TryCollectUserInput(out var input)) return false;
 
-		if(!ValidateInput(out var message, out var amend)) return false;
-
+		var view = RequireView();
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				await Repository.Status.CommitAsync(message, amend);
+				await repository.Status.CommitAsync(input.Message, input.Amend);
 			}
 		}
 		catch(GitException exc)

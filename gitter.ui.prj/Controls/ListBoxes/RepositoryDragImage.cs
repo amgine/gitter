@@ -45,7 +45,7 @@ static class RepositoryDragImage
 	{
 		var rc   = new Rectangle(Point.Empty, size);
 		var conv = DpiConverter.FromDefaultTo(dpi);
-		BackgroundStyle.Selected.Draw(e.Graphics, conv.To, rc);
+		BackgroundStyle.Selected.Draw(e.Graphics, new(conv.To, rc, e.ClipRectangle));
 		var icon = Icons.Repository.GetImage(conv.ConvertX(16));
 		if(icon is not null)
 		{

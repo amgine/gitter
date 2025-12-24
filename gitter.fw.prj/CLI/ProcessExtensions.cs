@@ -27,40 +27,42 @@ using System.Threading.Tasks;
 /// <summary>Extensions for <see cref="Process"/>.</summary>
 public static class ProcessExtensions
 {
-	/// <summary>Starts <see cref="Process"/> ans represents it as a <see cref="Task"/>.</summary>
-	/// <param name="process">Process to represent.</param>
-	/// <returns>
-	/// <see cref="Task"/>, representing <paramref name="process"/> lifetime
-	/// and returning its <see cref="Process.ExitCode"/> as result.
-	/// </returns>
-	/// <exception cref="ArgumentNullException"><paramref name="process"/> == <c>null</c>.</exception>
-	public static Task<int> StartAsync(this Process process)
+	extension(Process process)
 	{
-		Verify.Argument.IsNotNull(process);
-
-#if NET46_OR_GREATER || NETCOREAPP
-		var taskCompletionSource = new TaskCompletionSource<int>(
-			TaskCreationOptions.RunContinuationsAsynchronously);
-#else
-		var taskCompletionSource = new TaskCompletionSource<int>();
-#endif
-		process.EnableRaisingEvents = true;
-		process.Exited += (s, _) =>
+		/// <summary>Starts <see cref="Process"/> ans represents it as a <see cref="Task"/>.</summary>
+		/// <returns>
+		/// <see cref="Task"/>, representing <see cref="Process"/> lifetime
+		/// and returning its <see cref="Process.ExitCode"/> as result.
+		/// </returns>
+		/// <exception cref="ArgumentNullException"/>
+		public Task<int> StartAsync()
 		{
-			if(taskCompletionSource.Task.IsCanceled) return;
-			int exitCode;
-			try
+			Verify.Argument.IsNotNull(process);
+
+			var taskCompletionSource = new TaskCompletionSource<int>(
+				#if NET46_OR_GREATER || NETCOREAPP
+				TaskCreationOptions.RunContinuationsAsynchronously
+				#endif
+				);
+
+			process.EnableRaisingEvents = true;
+			process.Exited += (s, _) =>
 			{
-				exitCode = ((Process)s).ExitCode;
-			}
-			catch(Exception exc) when(!exc.IsCritical())
-			{
-				taskCompletionSource.TrySetException(exc);
-				return;
-			}
-			taskCompletionSource.TrySetResult(exitCode);
-		};
-		process.Start();
-		return taskCompletionSource.Task;
+				if(taskCompletionSource.Task.IsCanceled) return;
+				int exitCode;
+				try
+				{
+					exitCode = ((Process)s!).ExitCode;
+				}
+				catch(Exception exc) when(!exc.IsCritical)
+				{
+					taskCompletionSource.TrySetException(exc);
+					return;
+				}
+				taskCompletionSource.TrySetResult(exitCode);
+			};
+			process.Start();
+			return taskCompletionSource.Task;
+		}
 	}
 }

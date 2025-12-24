@@ -30,8 +30,8 @@ using System.Buffers;
 public class AsyncTextReader : AsyncOutputReceiverBase, IOutputReceiver
 {
 	private readonly StringBuilder _stringBuilder;
-	private char[] _charBuffer;
-	private Decoder _decoder;
+	private char[]? _charBuffer;
+	private Decoder? _decoder;
 
 	/// <summary>Initializes a new instance of the <see cref="AsyncTextReader"/> class.</summary>
 	/// <param name="bufferSize">Size of the internal buffer.</param>
@@ -65,8 +65,8 @@ public class AsyncTextReader : AsyncOutputReceiverBase, IOutputReceiver
 	/// <inheritdoc/>
 	protected sealed override void Process(ArraySegment<byte> buffer)
 	{
-		int charsCount = _decoder.GetChars(buffer.Array, buffer.Offset, buffer.Count, _charBuffer, 0);
-		OnStringDecoded(_charBuffer, 0, charsCount);
+		int charsCount = _decoder!.GetChars(buffer.Array!, buffer.Offset, buffer.Count, _charBuffer!, 0);
+		OnStringDecoded(_charBuffer!, 0, charsCount);
 	}
 
 	/// <summary>Returns the length of composed text.</summary>

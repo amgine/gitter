@@ -22,7 +22,6 @@ namespace gitter.Git;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -31,8 +30,6 @@ using gitter.Framework;
 using gitter.Git.AccessLayer;
 
 using Resources = gitter.Git.Properties.Resources;
-
-#nullable enable
 
 /// <summary>Extension methods for <see cref="IRevisionPointer"/>.</summary>
 public static class RevisionPointerExtensions
@@ -66,7 +63,7 @@ public static class RevisionPointerExtensions
 			RepositoryNotifications.IndexUpdated))
 		{
 			repository.Accessor.Checkout.Invoke(
-				new CheckoutParameters(pointer, force));
+				new CheckoutRequest(pointer, force));
 		}
 
 		repository.Head.Pointer = revision;
@@ -104,7 +101,7 @@ public static class RevisionPointerExtensions
 			RepositoryNotifications.IndexUpdated))
 		{
 			await repository.Accessor.Checkout
-				.InvokeAsync(new CheckoutParameters(pointer, force))
+				.InvokeAsync(new CheckoutRequest(pointer, force))
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 
@@ -125,7 +122,7 @@ public static class RevisionPointerExtensions
 			RepositoryNotifications.WorktreeUpdated))
 		{
 			repository.Accessor.CheckoutFiles.Invoke(
-				new CheckoutFilesParameters(revision.Pointer, path)
+				new CheckoutFilesRequest(revision.Pointer, path)
 				{
 				});
 		}
@@ -133,7 +130,7 @@ public static class RevisionPointerExtensions
 		repository.Status.Refresh();
 	}
 
-	public static void CheckoutPaths(this IRevisionPointer revision, IList<string> paths)
+	public static void CheckoutPaths(this IRevisionPointer revision, Many<string> paths)
 	{
 		Verify.Argument.IsValidRevisionPointer(revision);
 
@@ -142,7 +139,7 @@ public static class RevisionPointerExtensions
 			RepositoryNotifications.WorktreeUpdated))
 		{
 			repository.Accessor.CheckoutFiles.Invoke(
-				new CheckoutFilesParameters(revision.Pointer, paths)
+				new CheckoutFilesRequest(revision.Pointer, paths)
 				{
 				});
 		}
@@ -172,7 +169,7 @@ public static class RevisionPointerExtensions
 		if(repository is null) throw new ArgumentException("Unspecified repository.", nameof(revisions));
 		try
 		{
-			repository.Accessor.CherryPick.Invoke(new CherryPickParameters(list));
+			repository.Accessor.CherryPick.Invoke(new CherryPickRequest(list));
 			repository.OnUpdated();
 			repository.Head.NotifyReflogRecordAdded();
 		}
@@ -212,10 +209,10 @@ public static class RevisionPointerExtensions
 
 		var rev = repository.Head.Revision;
 		var cb = repository.Head.Pointer as Branch;
-		var parameters = new CherryPickParameters(revision.Pointer, noCommit);
+		var request = new CherryPickRequest(revision.Pointer, noCommit);
 		if(mainline > 0)
 		{
-			parameters.Mainline = mainline;
+			request.Mainline = mainline;
 		}
 		try
 		{
@@ -225,12 +222,12 @@ public static class RevisionPointerExtensions
 				RepositoryNotifications.BranchChanged,
 				RepositoryNotifications.Checkout))
 			{
-				repository.Accessor.CherryPick.Invoke(parameters);
-				if(cb != null)
+				repository.Accessor.CherryPick.Invoke(request);
+				if(cb is not null)
 				{
 					cb.Refresh();
 					var branchTip = cb.Revision;
-					if(branchTip != rev)
+					if(branchTip != rev && branchTip is not null)
 					{
 						repository.OnCommitCreated(branchTip);
 					}
@@ -239,7 +236,7 @@ public static class RevisionPointerExtensions
 				{
 					repository.Head.Refresh();
 					var headRev = repository.Head.Revision;
-					if(headRev != rev)
+					if(headRev != rev && headRev is not null)
 					{
 						repository.OnCommitCreated(headRev);
 					}
@@ -320,17 +317,17 @@ public static class RevisionPointerExtensions
 			};
 		using(repository.Monitor.BlockNotifications(notifications))
 		{
-			var parameters = new RevertParameters(revision.Pointer, noCommit);
+			var request = new RevertRequest(revision.Pointer, noCommit);
 			if(mainline > 0)
 			{
-				parameters.Mainline = mainline;
+				request.Mainline = mainline;
 			}
 			try
 			{
-				repository.Accessor.Revert.Invoke(parameters);
+				repository.Accessor.Revert.Invoke(request);
 				if(!noCommit)
 				{
-					if(currentBranch != null)
+					if(currentBranch is not null)
 					{
 						currentBranch.Refresh();
 					}
@@ -339,7 +336,7 @@ public static class RevisionPointerExtensions
 						repository.Head.Refresh();
 					}
 					var headRev = repository.Head.Revision;
-					if(headRev != rev)
+					if(headRev != rev && headRev is not null)
 					{
 						repository.OnCommitCreated(headRev);
 						repository.Head.NotifyReflogRecordAdded();
@@ -372,16 +369,16 @@ public static class RevisionPointerExtensions
 		foreach(var rev in revisions)
 		{
 			list.Add(rev.Pointer);
-			repository = rev.Repository;
+			repository ??= rev.Repository;
 		}
 		Verify.Argument.IsTrue(list.Count != 0, nameof(revisions),
 			Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("revision"));
 
-		var oldHeadRev = repository.Head.Revision;
+		var oldHeadRev = repository!.Head.Revision;
 		try
 		{
 			repository.Accessor.Revert.Invoke(
-				new RevertParameters(list, noCommit));
+				new RevertRequest(list, noCommit));
 			if(!noCommit)
 			{
 				if(repository.Head.Pointer is Branch currentBranch)
@@ -443,11 +440,11 @@ public static class RevisionPointerExtensions
 
 	#region rebase
 
-	private static RebaseParameters GetRebaseParameters(IRevisionPointer revision)
+	private static RebaseRequest GetRebaseRequest(IRevisionPointer revision)
 	{
 		Assert.IsNotNull(revision);
 
-		return new RebaseParameters(revision.Pointer);
+		return new RebaseRequest(revision.Pointer);
 	}
 
 	public static void RebaseHeadHere(this IRevisionPointer revision)
@@ -456,7 +453,7 @@ public static class RevisionPointerExtensions
 
 		var repository = revision.Repository;
 		var oldHead = repository.Head.CurrentBranch;
-		var parameters = GetRebaseParameters(revision);
+		var request = GetRebaseRequest(revision);
 		using(repository.Monitor.BlockNotifications(
 			RepositoryNotifications.BranchChanged,
 			RepositoryNotifications.Checkout,
@@ -465,7 +462,7 @@ public static class RevisionPointerExtensions
 		{
 			try
 			{
-				repository.Accessor.Rebase.Invoke(parameters);
+				repository.Accessor.Rebase.Invoke(request);
 			}
 			finally
 			{
@@ -489,7 +486,7 @@ public static class RevisionPointerExtensions
 
 		var repository = revision.Repository;
 		var oldHead = repository.Head.CurrentBranch;
-		var parameters = GetRebaseParameters(revision);
+		var request = GetRebaseRequest(revision);
 		var block = repository.Monitor.BlockNotifications(
 			RepositoryNotifications.BranchChanged,
 			RepositoryNotifications.Checkout,
@@ -499,7 +496,7 @@ public static class RevisionPointerExtensions
 		progress?.Report(new OperationProgress(Resources.StrsRebaseIsInProcess.AddEllipsis()));
 		var task = repository.Accessor
 			.Rebase
-			.InvokeAsync(parameters, progress, CancellationToken.None);
+			.InvokeAsync(request, progress, CancellationToken.None);
 		//FIXME: may be to rework the logic
 		try
 		{
@@ -561,7 +558,7 @@ public static class RevisionPointerExtensions
 		var repository = revision.Repository;
 
 		var tag = repository.Accessor.Describe.Invoke(
-			new DescribeParameters(revision.Pointer));
+			new DescribeRequest(revision.Pointer));
 		if(tag is not null)
 		{
 			return repository.Refs.Tags.TryGetItem(tag);
@@ -640,13 +637,13 @@ public static class RevisionPointerExtensions
 	/// <param name="revision">Revision to add note for.</param>
 	/// <param name="message">Note message to add.</param>
 	/// <returns>Created <see cref="Note"/>.</returns>
-	public static Note AddNote(this IRevisionPointer revision, string message)
+	public static void AppendNote(this IRevisionPointer revision, string message)
 	{
 		Verify.Argument.IsValidRevisionPointer(revision);
 		Verify.Argument.IsNeitherNullNorEmpty(message);
 
 		var repository = revision.Repository;
-		return repository.Notes.Add(revision, message);
+		repository.Notes.Append(revision, message);
 	}
 
 	#endregion
@@ -680,60 +677,55 @@ public static class RevisionPointerExtensions
 
 	#region diff
 
-	public static IRevisionDiffSource GetDiffSource(this IRevisionPointer revision, IEnumerable<string>? paths = null)
+	public static IRevisionDiffSource GetDiffSource(this IRevisionPointer revision, Many<string> paths = default)
 	{
 		Verify.Argument.IsValidRevisionPointer(revision);
 
 		if(revision is StashedState stashedState)
 		{
-			return paths is null
+			return paths.IsEmpty
 				? new StashedChangesDiffSource(stashedState)
-				: new StashedChangesDiffSource(stashedState, paths.ToList());
+				: new StashedChangesDiffSource(stashedState, paths);
 		}
 		else
 		{
-			return paths is null
+			return paths.IsEmpty
 				? new RevisionChangesDiffSource(revision)
-				: new RevisionChangesDiffSource(revision, paths.ToList());
+				: new RevisionChangesDiffSource(revision, paths);
 		}
 	}
 
-	public static IDiffSource GetCompareDiffSource(this IRevisionPointer revision1, IRevisionPointer revision2, IEnumerable<string>? paths = null)
+	public static IDiffSource GetCompareDiffSource(this IRevisionPointer revision1, IRevisionPointer revision2, Many<string> paths = default)
 	{
 		Verify.Argument.AreValidRevisionPointers(revision1, revision2);
 
-		return paths is null
+		return paths.IsEmpty
 			? new RevisionCompareDiffSource(revision1, revision2)
-			: new RevisionCompareDiffSource(revision1, revision2, paths.ToList());
+			: new RevisionCompareDiffSource(revision1, revision2, paths);
 	}
 
 	#endregion
 
 	#region FormatPatch
 
-	private static QueryRevisionDiffParameters GetFormatPatchParameters(IRevisionPointer revision)
+	private static QueryRevisionDiffRequest GetFormatPatchRequest(IRevisionPointer revision)
 	{
 		Assert.IsNotNull(revision);
 
-		return new QueryRevisionDiffParameters(revision.Pointer)
+		return new QueryRevisionDiffRequest(revision.Pointer)
 			{
 				EnableTextConvFilters = false,
 				Binary = true
 			};
 	}
 
-	private static IGitFunction<QueryRevisionDiffParameters, byte[]> GetFormatPatchFunction(IRevisionPointer revision)
+	private static IGitFunction<QueryRevisionDiffRequest, byte[]> GetFormatPatchFunction(IRevisionPointer revision)
 	{
 		Assert.IsNotNull(revision);
 
-		if(revision.Type == ReferenceType.Stash)
-		{
-			return revision.Repository.Accessor.QueryStashPatch;
-		}
-		else
-		{
-			return revision.Repository.Accessor.QueryRevisionPatch;
-		}
+		return revision.Type == ReferenceType.Stash
+			? revision.Repository.Accessor.QueryStashPatch
+			: revision.Repository.Accessor.QueryRevisionPatch;
 	}
 
 	/// <summary>Get diff for this revision.</summary>
@@ -744,10 +736,10 @@ public static class RevisionPointerExtensions
 	{
 		Verify.Argument.IsValidRevisionPointer(revision);
 
-		var parameters = GetFormatPatchParameters(revision);
-		var function   = GetFormatPatchFunction(revision);
+		var request  = GetFormatPatchRequest(revision);
+		var function = GetFormatPatchFunction(revision);
 
-		return function.Invoke(parameters);
+		return function.Invoke(request);
 	}
 
 	/// <summary>Get diff for this revision.</summary>
@@ -762,10 +754,10 @@ public static class RevisionPointerExtensions
 		Verify.Argument.IsValidRevisionPointer(revision);
 
 		progress?.Report(new OperationProgress(Resources.StrsFetchingPatch.AddEllipsis()));
-		var parameters = GetFormatPatchParameters(revision);
-		var function   = GetFormatPatchFunction(revision);
+		var request  = GetFormatPatchRequest(revision);
+		var function = GetFormatPatchFunction(revision);
 
-		return function.InvokeAsync(parameters, progress, cancellationToken);
+		return function.InvokeAsync(request, progress, cancellationToken);
 	}
 
 	#endregion
@@ -783,35 +775,33 @@ public static class RevisionPointerExtensions
 
 	#region archive
 
-	private static ArchiveParameters GetArchiveParameters(IRevisionPointer revision, string outputFile, string path, string format)
-	{
-		return new ArchiveParameters()
+	private static ArchiveRequest GetArchiveRequest(IRevisionPointer revision, string outputFile, string? path, string? format)
+		=> new()
 		{
 			Tree       = revision.FullName,
 			Path       = path,
 			OutputFile = outputFile,
 			Format     = format,
 		};
-	}
 
 	public static void Archive(this IRevisionPointer revision, string outputFile, string path, string format)
 	{
 		Verify.Argument.IsValidRevisionPointer(revision);
 		Verify.Argument.IsNeitherNullNorWhitespace(outputFile);
 
-		var parameters = GetArchiveParameters(revision, outputFile, path, format);
-		revision.Repository.Accessor.Archive.Invoke(parameters);
+		var request = GetArchiveRequest(revision, outputFile, path, format);
+		revision.Repository.Accessor.Archive.Invoke(request);
 	}
 
-	public static Task ArchiveAsync(this IRevisionPointer revision, string outputFile, string path, string format, IProgress<OperationProgress> progress)
+	public static Task ArchiveAsync(this IRevisionPointer revision, string outputFile, string? path, string? format, IProgress<OperationProgress> progress)
 	{
 		Verify.Argument.IsValidRevisionPointer(revision);
 		Verify.Argument.IsNeitherNullNorWhitespace(outputFile);
 
-		var parameters = GetArchiveParameters(revision, outputFile, path, format);
-		progress?.Report(new OperationProgress(Resources.StrfCreatingArchiveFrom.UseAsFormat(parameters.Tree).AddEllipsis()));
+		var request = GetArchiveRequest(revision, outputFile, path, format);
+		progress?.Report(new OperationProgress(Resources.StrfCreatingArchiveFrom.UseAsFormat(request.Tree).AddEllipsis()));
 		return revision.Repository.Accessor.Archive.InvokeAsync(
-			parameters, progress, CancellationToken.None);
+			request, progress, CancellationToken.None);
 	}
 
 	#endregion

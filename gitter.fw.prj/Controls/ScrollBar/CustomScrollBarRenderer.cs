@@ -26,8 +26,8 @@ using System.Windows.Forms;
 
 public abstract class CustomScrollBarRenderer : ICustomScrollBarRenderer
 {
-	private static ICustomScrollBarRenderer _msvs2012Dark;
-	private static ICustomScrollBarRenderer _msvs2012Light;
+	private static ICustomScrollBarRenderer? _msvs2012Dark;
+	private static ICustomScrollBarRenderer? _msvs2012Light;
 
 	public static ICustomScrollBarRenderer MSVS2012Dark
 		=> _msvs2012Dark ??= new MSVS2012ScrollBarRenderer(MSVS2012ScrollBarRenderer.DarkColor);

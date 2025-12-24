@@ -23,35 +23,28 @@ namespace gitter.Framework.Controls;
 using System;
 using System.Drawing;
 
-public class SubItemMeasureEventArgs : EventArgs, IDpiConverterProvider
+public class SubItemMeasureEventArgs(Graphics graphics, CustomListBoxItem item, int columnIndex, CustomListBoxColumn column)
+	: EventArgs, IDpiConverterProvider
 {
-	public SubItemMeasureEventArgs(Graphics graphics, CustomListBoxItem item, int columnIndex, CustomListBoxColumn column)
-	{
-		Gaphics     = graphics;
-		Item        = item;
-		ColumnIndex = columnIndex;
-		Column      = column;
-	}
+	public Graphics Gaphics { get; } = graphics;
 
-	public Graphics Gaphics { get; }
-
-	public CustomListBoxItem Item { get; }
+	public CustomListBoxItem Item { get; } = item;
 
 	public int SubItemId => Column.Id;
 
-	public CustomListBox ListBox => Column.ListBox;
+	public CustomListBox ListBox => Column.ListBox!;
 
-	public CustomListBoxColumn Column { get; }
+	public CustomListBoxColumn Column { get; } = column;
 
 	public Font Font => Column.ContentFont;
 
-	public int ColumnIndex { get; }
+	public int ColumnIndex { get; } = columnIndex;
 
 	public Dpi Dpi => ListBox is not null ? new Dpi(ListBox.DeviceDpi) : Dpi.Default;
 
 	public DpiConverter DpiConverter => DpiConverter.FromDefaultTo(Dpi);
 
-	public Size MeasureImage(Image image)
+	public Size MeasureImage(Image? image)
 	{
 		int w = 2 * ListBoxConstants.ContentSpacing + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
 		int h = 0;
@@ -68,7 +61,7 @@ public class SubItemMeasureEventArgs : EventArgs, IDpiConverterProvider
 		return new Size(w, h);
 	}
 
-	public Size MeasureIcon(Icon icon)
+	public Size MeasureIcon(Icon? icon)
 	{
 		int w = 2 * ListBoxConstants.ContentSpacing + ListBoxConstants.SpaceBeforeImage + ListBoxConstants.SpaceAfterImage;
 		int h = 0;
@@ -85,8 +78,10 @@ public class SubItemMeasureEventArgs : EventArgs, IDpiConverterProvider
 		return new Size(w, h);
 	}
 
-	private Size MeasureTextCore(string text, Font font)
+	private Size MeasureTextCore(string? text, Font font)
 	{
+		if(text is not { Length: not 0 }) return Size.Empty;
+
 		var s = GitterApplication.TextRenderer.MeasureText(
 			Gaphics, text, font, int.MaxValue);
 
@@ -105,14 +100,14 @@ public class SubItemMeasureEventArgs : EventArgs, IDpiConverterProvider
 
 #endif
 
-	public Size MeasureText(string text, Font font)
+	public Size MeasureText(string? text, Font font)
 	{
 		Verify.Argument.IsNotNull(font);
 
 		return MeasureTextCore(text, font);
 	}
 
-	public Size MeasureText(string text)
+	public Size MeasureText(string? text)
 	{
 		return MeasureTextCore(text, Column.ContentFont);
 	}
@@ -133,7 +128,7 @@ public class SubItemMeasureEventArgs : EventArgs, IDpiConverterProvider
 
 #endif
 
-	private Size MeasureImageAndTextCore(Image image, string text, Font font)
+	private Size MeasureImageAndTextCore(Image? image, string? text, Font font)
 	{
 		var conv = DpiConverter;
 		var s = GitterApplication.TextRenderer.MeasureText(
@@ -144,49 +139,49 @@ public class SubItemMeasureEventArgs : EventArgs, IDpiConverterProvider
 			+ (iconW + conv.ConvertX(ListBoxConstants.SpaceBeforeImage) + conv.ConvertX(ListBoxConstants.SpaceAfterImage)), s.Height);
 	}
 
-	public Size MeasureImageAndText(Image image, string text, Font font)
+	public Size MeasureImageAndText(Image? image, string text, Font font)
 	{
 		Verify.Argument.IsNotNull(font);
 
 		return MeasureImageAndTextCore(image, text, font);
 	}
 
-	public Size MeasureImageAndText(IImageProvider image, string text, Font font)
+	public Size MeasureImageAndText(IImageProvider? image, string? text, Font font)
 	{
 		Verify.Argument.IsNotNull(font);
 
 		return MeasureImageAndTextCore(null, text, font);
 	}
 
-	public Size MeasureImageAndText(Image image, string text)
+	public Size MeasureImageAndText(Image? image, string? text)
 	{
 		return MeasureImageAndTextCore(image, text, Column.ContentFont);
 	}
 
-	public Size MeasureImageAndText(IImageProvider image, string text)
+	public Size MeasureImageAndText(IImageProvider? image, string? text)
 	{
 		return MeasureImageAndTextCore(null, text, Column.ContentFont);
 	}
 
-	private Size MeasureIconAndTextCore(Icon icon, string text, Font font)
+	private Size MeasureIconAndTextCore(Icon? icon, string? text, Font font)
 	{
 		var conv = DpiConverter;
 		var s = GitterApplication.TextRenderer.MeasureText(
 			Gaphics, text, font, int.MaxValue);
-		var iconW = icon is null ? icon.Width : conv.ConvertX(ListBoxConstants.DefaultImageWidth);
+		var iconW = icon is not null ? icon.Width : conv.ConvertX(ListBoxConstants.DefaultImageWidth);
 		return new Size(s.Width + 1 +
 			2 * conv.ConvertX(ListBoxConstants.ContentSpacing)
 			+ (iconW + conv.ConvertX(ListBoxConstants.SpaceBeforeImage) + conv.ConvertX(ListBoxConstants.SpaceAfterImage)), s.Height);
 	}
 
-	public Size MeasureIconAndText(Icon icon, string text, Font font)
+	public Size MeasureIconAndText(Icon? icon, string? text, Font font)
 	{
 		Verify.Argument.IsNotNull(font);
 
 		return MeasureIconAndTextCore(icon, text, font);
 	}
 
-	public Size MeasureIconAndText(Icon icon, string text)
+	public Size MeasureIconAndText(Icon? icon, string? text)
 	{
 		return MeasureIconAndTextCore(icon, text, Column.ContentFont);
 	}

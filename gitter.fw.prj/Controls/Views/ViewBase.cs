@@ -22,6 +22,7 @@ namespace gitter.Framework.Controls;
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -54,8 +55,8 @@ public class ViewBase : UserControl
 		where TOptions : SearchOptions
 	{
 		private readonly TView _view;
-		private TOptions _options;
-		private TBar _toolbar;
+		private TOptions? _options;
+		private TBar? _toolbar;
 
 		public SearchToolBarController(TView view)
 		{
@@ -80,11 +81,11 @@ public class ViewBase : UserControl
 
 		public void Show()
 		{
-			if(_toolbar == null)
+			if(_toolbar is null)
 			{
 				_toolbar = new TBar
 				{
-					Options = _options,
+					Options = _options!,
 					View    = _view,
 				};
 				_view.AddBottomToolStrip(_toolbar);
@@ -95,21 +96,20 @@ public class ViewBase : UserControl
 
 		public void Hide()
 		{
-			if(_toolbar != null)
-			{
-				_options = _toolbar.Options;
-				_view.RemoveToolStrip(_toolbar);
-				_toolbar.Dispose();
-				_toolbar = default;
-			}
+			if(_toolbar is null) return;
+
+			_options = _toolbar.Options;
+			_view.RemoveToolStrip(_toolbar);
+			_toolbar.Dispose();
+			_toolbar = default;
 		}
 	}
 
 	#region Data
 
-	private object _viewModel;
-	private INotificationService _notificationService;
-	private IToolTipService _toolTipService;
+	private object? _viewModel;
+	private INotificationService? _notificationService;
+	private IToolTipService? _toolTipService;
 
 	#endregion
 
@@ -129,15 +129,20 @@ public class ViewBase : UserControl
 	}
 
 	protected virtual void OnClosing()
-		=> ((EventHandler)Events[ClosingEvent])?.Invoke(this, EventArgs.Empty);
+		=> ((EventHandler?)Events[ClosingEvent])?.Invoke(this, EventArgs.Empty);
 
 	#endregion
 
 	#region .ctor
 
-	/// <summary>To keep designer happy.</summary>
-	public ViewBase()
+	/// <summary>Create <see cref="ViewBase"/>.</summary>
+	public ViewBase(Guid guid, IWorkingEnvironment environment)
 	{
+		Verify.Argument.IsNotNull(environment);
+
+		Guid               = guid;
+		WorkingEnvironment = environment;
+
 		SuspendLayout();
 		Size = new Size(555, 362);
 		if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
@@ -151,16 +156,6 @@ public class ViewBase : UserControl
 			Font = SystemFonts.MessageBoxFont ?? SystemFonts.DefaultFont;
 		}
 		ResumeLayout(performLayout: false);
-	}
-
-	/// <summary>Create <see cref="ViewBase"/>.</summary>
-	public ViewBase(Guid guid, IWorkingEnvironment environment)
-		: this()
-	{
-		Verify.Argument.IsNotNull(environment);
-
-		Guid        = guid;
-		WorkingEnvironment = environment;
 	}
 
 	#endregion
@@ -207,22 +202,21 @@ public class ViewBase : UserControl
 
 	public Guid Guid { get; }
 
-	public object ViewModel
+	public object? ViewModel
 	{
 		get => _viewModel;
 		set
 		{
-			if(!object.Equals(_viewModel, value))
+			if(object.Equals(_viewModel, value)) return;
+
+			if(_viewModel is not null)
 			{
-				if(_viewModel != null)
-				{
-					DetachViewModel(_viewModel);
-				}
-				_viewModel = value;
-				if(_viewModel != null)
-				{
-					AttachViewModel(_viewModel);
-				}
+				DetachViewModel(_viewModel);
+			}
+			_viewModel = value;
+			if(_viewModel is not null)
+			{
+				AttachViewModel(_viewModel);
 			}
 		}
 	}
@@ -235,7 +229,7 @@ public class ViewBase : UserControl
 		{
 			if(Host.Status == ViewHostStatus.AutoHide)
 			{
-				Host.DockSide.ActivateView(this);
+				Host.DockSide?.ActivateView(this);
 			}
 			else
 			{
@@ -262,9 +256,9 @@ public class ViewBase : UserControl
 	{
 	}
 
-	internal ViewHost Host { get; set; }
+	internal ViewHost? Host { get; set; }
 
-	internal bool IsHosted =>  Host != null;
+	internal bool IsHosted =>  Host is not null;
 
 	public virtual void OnActivated()
 	{
@@ -274,6 +268,9 @@ public class ViewBase : UserControl
 	public virtual string IdentificationString => GetType().Name;
 
 	/// <summary>View's text.</summary>
+	#if NETCOREAPP
+	[AllowNull]
+	#endif
 	public override string Text
 	{
 		get => base.Text;
@@ -281,18 +278,19 @@ public class ViewBase : UserControl
 	}
 
 	/// <summary>View's image provider.</summary>
-	public virtual IImageProvider ImageProvider => default;
+	public virtual IImageProvider? ImageProvider => default;
 
 	protected void AddTopToolStrip(ToolStrip toolStrip)
 	{
 		Verify.Argument.IsNotNull(toolStrip);
 
 		toolStrip.GripStyle = ToolStripGripStyle.Hidden;
-		toolStrip.Stretch = true;
-		toolStrip.Padding = new Padding(2);
-		toolStrip.Dock = DockStyle.Top;
+		toolStrip.Stretch   = true;
+		toolStrip.Padding   = new Padding(2);
+		toolStrip.Dock      = DockStyle.Top;
+		toolStrip.Renderer  = GitterApplication.Style.ToolStripRenderer;
 		Controls.Add(toolStrip);
-		toolStrip.MouseDown += OnToolStripClick;
+		toolStrip.MouseDown += OnToolStripMouseDown;
 		foreach(Control c in Controls)
 		{
 			if(c.Dock == DockStyle.None)
@@ -314,11 +312,12 @@ public class ViewBase : UserControl
 		Verify.Argument.IsNotNull(toolStrip);
 
 		toolStrip.GripStyle = ToolStripGripStyle.Hidden;
-		toolStrip.Stretch = true;
-		toolStrip.Padding = new Padding(2);
-		toolStrip.Dock = DockStyle.Bottom;
+		toolStrip.Stretch   = true;
+		toolStrip.Padding   = new Padding(2);
+		toolStrip.Dock      = DockStyle.Bottom;
+		toolStrip.Renderer  = GitterApplication.Style.ToolStripRenderer;
 		Controls.Add(toolStrip);
-		toolStrip.MouseDown += OnToolStripClick;
+		toolStrip.MouseDown += OnToolStripMouseDown;
 		foreach(Control c in Controls)
 		{
 			if(c.Dock == DockStyle.None)
@@ -345,7 +344,7 @@ public class ViewBase : UserControl
 
 		var dock = toolStrip.Dock;
 		toolStrip.Parent = null;
-		toolStrip.Click -= OnToolStripClick;
+		toolStrip.Click -= OnToolStripMouseDown;
 		switch(dock)
 		{
 			case DockStyle.Top:
@@ -394,7 +393,7 @@ public class ViewBase : UserControl
 		}
 	}
 
-	private void OnToolStripClick(object sender, EventArgs e)
+	private void OnToolStripMouseDown(object? sender, EventArgs e)
 	{
 		Focus();
 	}
@@ -404,12 +403,12 @@ public class ViewBase : UserControl
 		if(disposing)
 		{
 			OnClosing();
-			if(_notificationService != null)
+			if(_notificationService is not null)
 			{
 				_notificationService.Dispose();
 				_notificationService = null;
 			}
-			if(_toolTipService != null)
+			if(_toolTipService is not null)
 			{
 				_toolTipService.Dispose();
 				_toolTipService = null;

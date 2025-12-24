@@ -20,8 +20,6 @@
 
 namespace gitter.Git.AccessLayer;
 
-using System;
-
 using gitter.Framework;
 
 public sealed class RemoteData : INamedObject

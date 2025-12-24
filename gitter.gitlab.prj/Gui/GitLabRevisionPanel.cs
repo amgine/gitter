@@ -21,8 +21,9 @@
 namespace gitter.GitLab.Gui;
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
-using System.Globalization;
+using System.Threading;
 using System.Windows.Forms;
 
 using gitter.Framework;
@@ -37,24 +38,29 @@ class GitLabRevisionPanel : FlowPanel
 {
 	static readonly LoggingService Log = new(@"GitLab");
 
-	const int PipelineId   = 1;
-	const int TestCases    = 2;
-	const int ViewOnGitLab = 3;
+	enum HitTestArea
+	{
+		Empty,
+		PipelineId,
+		TestCases,
+		ViewOnGitLab,
+	}
 
-	private static readonly StringFormat F1 = new() { Alignment = StringAlignment.Far, LineAlignment = StringAlignment.Center };
+	readonly record struct HitTetResult(int Index, HitTestArea Area)
+	{
+		public static HitTetResult Empty        = new(-1, HitTestArea.Empty);
+		public static HitTetResult ViewOnGitLab = new(-1, HitTestArea.ViewOnGitLab);
+	}
 
-	private static readonly StringFormat F2 = new() { Alignment = StringAlignment.Near, LineAlignment = StringAlignment.Center };
+	readonly record struct RenderedArea(HitTetResult HitTestResult, Rectangle Bounds);
 
-	private Pipeline _pipeline;
-	private TestReportSummary _testReportSummary;
+	readonly record struct PipelineEntry(Pipeline Pipeline, TestReportSummary? Tests);
+
+	private readonly List<PipelineEntry> _entries = [];
+	private readonly List<RenderedArea> _rendered = [];
 	private bool _isUpdating;
 	private bool _failed;
-	//private IReadOnlyList<Job> _jobs;
-	private Rectangle _pipelineIdBounds;
-	private Rectangle _testCasesBounds;
-	private Rectangle _viewOnGitLabBounds;
-
-	private int _hoveredItem;
+	private HitTetResult _hovered = HitTetResult.Empty;
 	private int _height = 0;
 	private Dpi _heightDpi;
 
@@ -68,53 +74,109 @@ class GitLabRevisionPanel : FlowPanel
 	}
 
 	/// <inheritdoc/>
-	protected override void OnFlowControlAttached()
+	protected override void OnFlowControlAttached(FlowLayoutControl flowControl)
 	{
-		base.OnFlowControlAttached();
-		Init();
+		base.OnFlowControlAttached(flowControl);
+		ReloadPipelineInfo();
 	}
 
 	/// <inheritdoc/>
-	protected override void OnFlowControlDetached()
+	protected override void OnFlowControlDetached(FlowLayoutControl flowControl)
 	{
-		base.OnFlowControlDetached();
+		Restart(null);
+		base.OnFlowControlDetached(flowControl);
 	}
 
-	private async void Init()
+	private CancellationTokenSource? _currentOperation;
+
+	private void Restart(CancellationTokenSource? cts)
 	{
-		_isUpdating = true;
+		var current = Interlocked.Exchange(ref _currentOperation, cts);
 		try
 		{
-			var pipelines = await ServiceContext.GetPipelinesAsync(sha: Revision.HashString);
-			if(FlowControl is null) return;
-			_pipeline = pipelines is { Count: > 0 } ? pipelines[0] : default;
-			Invalidate();
-			//if(_pipeline != null)
-			//{
-			//	_jobs = await _api.GetJobsAsync(ProjectId, _pipeline.Id);
-			//}
-			if(_pipeline is not null)
+			current?.Cancel();
+		}
+		catch
+		{
+		}
+	}
+
+	private bool TryComplete(CancellationTokenSource? cts)
+		=> Interlocked.CompareExchange(ref _currentOperation, null, cts) == cts;
+
+	private async void ReloadPipelineInfo()
+	{
+		_isUpdating = true;
+		using var cts = new CancellationTokenSource();
+		try
+		{
+			Restart(cts);
+			var pipelines = await ServiceContext
+				.GetPipelinesAsync(sha: Revision.HashString, cancellationToken: cts.Token);
+			if(FlowControl is null || cts.IsCancellationRequested) return;
+			var linesBefore = _entries.Count;
+			if(linesBefore == 0) linesBefore = 1;
+			_entries.Clear();
+			if(pipelines is not null)
 			{
-				try
+				for(int i = 0, count = pipelines.Count; i < count; ++i)
 				{
-					_testReportSummary = await ServiceContext.GetTestReportSummaryAsync(_pipeline.Id);
+					var pipeline = pipelines[i];
+					if(pipeline is null) continue;
+					_entries.Add(new(pipeline, null));
 				}
-				catch
+			}
+			var linesAfter = _entries.Count;
+			if(linesAfter == 0) linesAfter = 1;
+			if(linesBefore != linesAfter)
+			{
+				_heightDpi = default;
+				InvalidateSize();
+			}
+			Invalidate();
+			if(pipelines is not null)
+			{
+				for(int i = 0, count = pipelines.Count; i < count; ++i)
 				{
+					var pipeline = pipelines[i];
+					if(pipeline is null) continue;
+					var tests = default(TestReportSummary);
+					try
+					{
+						tests = await ServiceContext
+							.GetTestReportSummaryAsync(pipeline.Id, cancellationToken: cts.Token);
+					}
+					catch
+					{
+					}
+					if(FlowControl is null || cts.IsCancellationRequested) return;
+					if(tests is not null)
+					{
+						var index = _entries.FindIndex(e => e.Pipeline == pipeline);
+						if(index >= 0)
+						{
+							_entries[index] = new(pipeline, tests);
+							Invalidate();
+						}
+					}
 				}
-				if(FlowControl is null) return;
-				Invalidate();
 			}
 		}
 		catch(Exception exc)
 		{
-			Log.Error(exc, exc.Message);
-			_failed = true;
+			if(!cts.IsCancellationRequested)
+			{
+				Log.Error(exc, exc.Message);
+				_failed = true;
+			}
 		}
 		finally
 		{
 			_isUpdating = false;
-			Invalidate();
+			if(TryComplete(cts))
+			{
+				Invalidate();
+			}
 		}
 	}
 
@@ -127,60 +189,69 @@ class GitLabRevisionPanel : FlowPanel
 		if(_heightDpi != measureEventArgs.Dpi)
 		{
 			var font   = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(measureEventArgs.Dpi);
-			_height    = TextRenderer.MeasureText(measureEventArgs.Graphics, "W", font).Height;
+			var lines = _entries.Count;
+			if(lines < 1) lines = 1;
+			_height    = TextRenderer.MeasureText(measureEventArgs.Graphics, "W", font).Height * lines;
 			_heightDpi = measureEventArgs.Dpi;
 		}
 		return new Size(measureEventArgs.Width, _height);
 	}
 
-	private int GetHoverItemId(int x, int y)
+	private HitTetResult HitTest(int x, int y)
 	{
-		if(_pipelineIdBounds.Contains(x, y))   return PipelineId;
-		if(_testCasesBounds.Contains(x, y))    return TestCases;
-		if(_viewOnGitLabBounds.Contains(x, y)) return ViewOnGitLab;
-		return 0;
+		foreach(var item in _rendered)
+		{
+			if(item.Bounds.Contains(x, y))
+			{
+				return item.HitTestResult;
+			}
+		}
+		return HitTetResult.Empty;
 	}
 
-	private Rectangle GetBounds(int itemId)
-		=> itemId switch
+	private Rectangle GetBounds(HitTetResult hit)
+	{
+		foreach(var item in _rendered)
 		{
-			PipelineId   => _pipelineIdBounds,
-			TestCases    => _testCasesBounds,
-			ViewOnGitLab => _viewOnGitLabBounds,
-			_ => Rectangle.Empty,
-		};
+			if(item.HitTestResult == hit) return item.Bounds;
+		}
+		return Rectangle.Empty;
+	}
 
 	protected override void OnMouseMove(int x, int y)
 	{
-		var hovered = GetHoverItemId(x, y);
-		if(_hoveredItem != hovered)
+		var hovered = HitTest(x, y);
+		if(_hovered != hovered)
 		{
-			if(_hoveredItem != 0)
+			if(_hovered.Area != HitTestArea.Empty)
 			{
-				Invalidate(GetBounds(_hoveredItem));
+				Invalidate(GetBounds(_hovered));
 			}
-			if(hovered != 0)
+			if(hovered.Area != HitTestArea.Empty)
 			{
 				Invalidate(GetBounds(hovered));
 			}
-			_hoveredItem = hovered;
-			FlowControl.Cursor = hovered != 0
-				? Cursors.Hand
-				: Cursors.Default;
+			_hovered = hovered;
+			if(FlowControl is not null)
+			{
+				FlowControl.Cursor = hovered.Area != HitTestArea.Empty
+					? Cursors.Hand
+					: Cursors.Default;
+			}
 		}
 		base.OnMouseMove(x, y);
 	}
 
 	protected override void OnMouseLeave()
 	{
-		if(_hoveredItem != 0)
+		if(_hovered.Area != HitTestArea.Empty)
 		{
-			if(_hoveredItem != 0)
+			Invalidate(GetBounds(_hovered));
+			_hovered = HitTetResult.Empty;
+			if(FlowControl is not null)
 			{
-				Invalidate(GetBounds(_hoveredItem));
+				FlowControl.Cursor = Cursors.Default;
 			}
-			_hoveredItem = 0;
-			FlowControl.Cursor = Cursors.Default;
 		}
 		base.OnMouseLeave();
 	}
@@ -190,43 +261,56 @@ class GitLabRevisionPanel : FlowPanel
 		switch(button)
 		{
 			case MouseButtons.Left:
-				switch(GetHoverItemId(x, y))
 				{
-					case PipelineId:
-						if(_pipeline is not null)
-						{
-							Utility.OpenUrl(_pipeline.WebUrl.ToString());
-						}
-						break;
-					case TestCases when _pipeline is not null && _testReportSummary is { Total.Count: > 0 }:
-						GitterApplication
-							.WorkingEnvironment
-							.ViewDockService
-							.ShowView(Guids.TestReportViewGuid, new TestReportViewModel(_pipeline.Id));
-						break;
-					case ViewOnGitLab:
-						Utility.OpenUrl(ServiceContext.FormatCommitUrl(Revision.HashString));
-						break;
+					var hit = HitTest(x, y);
+					switch(hit.Area)
+					{
+						case HitTestArea.PipelineId:
+							if(hit.Index >= 0 && hit.Index < _entries.Count)
+							{
+								Utility.OpenUrl(_entries[hit.Index].Pipeline.WebUrl.ToString());
+							}
+							break;
+						case HitTestArea.TestCases:
+							if(hit.Index >= 0 && hit.Index < _entries.Count)
+							{
+								if(_entries[hit.Index].Tests is { Total.Count: > 0 })
+								{
+									GitterApplication
+										.WorkingEnvironment
+										.ViewDockService
+										.ShowView(Guids.TestReportViewGuid, new TestReportViewModel(_entries[hit.Index].Pipeline.Id));
+								}
+							}
+							break;
+						case HitTestArea.ViewOnGitLab:
+							Utility.OpenUrl(ServiceContext.FormatCommitUrl(Revision.HashString));
+							break;
+					}
 				}
 				break;
 			case MouseButtons.Right:
-				switch(GetHoverItemId(x, y))
 				{
-					case PipelineId:
-						if(_pipeline is not null)
-						{
-							var menu = new HyperlinkContextMenu(_pipeline.WebUrl.ToString());
-							Utility.MarkDropDownForAutoDispose(menu);
-							menu.Show(Cursor.Position);
-						}
-						break;
-					case ViewOnGitLab:
-						{
-							var menu = new HyperlinkContextMenu(ServiceContext.FormatCommitUrl(Revision.HashString));
-							Utility.MarkDropDownForAutoDispose(menu);
-							menu.Show(Cursor.Position);
-						}
-						break;
+					var hit = HitTest(x, y);
+					switch(hit.Area)
+					{
+						case HitTestArea.PipelineId:
+							if(hit.Index >= 0 && hit.Index < _entries.Count)
+							{
+								var menu = new HyperlinkContextMenu(_entries[hit.Index].Pipeline.WebUrl.ToString());
+								Utility.MarkDropDownForAutoDispose(menu);
+								menu.Show(Cursor.Position);
+							}
+							break;
+						case HitTestArea.ViewOnGitLab:
+							if(hit.Index >= 0 && hit.Index < _entries.Count)
+							{
+								var menu = new HyperlinkContextMenu(ServiceContext.FormatCommitUrl(Revision.HashString));
+								Utility.MarkDropDownForAutoDispose(menu);
+								menu.Show(Cursor.Position);
+							}
+							break;
+					}
 				}
 				break;
 		}
@@ -235,230 +319,137 @@ class GitLabRevisionPanel : FlowPanel
 
 	static readonly string HeaderText = Resources.StrGitLab.AddColon();
 
-	private int RenderTests(Graphics graphics, Dpi dpi, Color normalText, Color grayText, Rectangle bounds)
+	private Rectangle RenderTests(ref PaintContext context, TestReportSummary? tests)
 	{
-		if(_testReportSummary is null) return bounds.X;
+		if(tests?.Total is not { } total) return Rectangle.Empty;
+		if(context.Bounds.Width <= 0) return Rectangle.Empty;
 
-		var conv = DpiConverter.FromDefaultTo(dpi);
-		var iconSize = conv.Convert(new Size(16, 16));
-
-		void RenderCount(IImageProvider icon, int count, ref Rectangle bounds)
+		var icon = total.Count > 0 ? CommonIcons.Test : CommonIcons.TestEmpty;
+		var bounds = context.RenderCount(icon, total.Count);
+		if(total.Count > 0)
 		{
-			var iconBounds = bounds;
-			iconBounds.Size = iconSize;
-			iconBounds.Y   += (bounds.Height - iconBounds.Height) / 2;
-
-			var w = conv.ConvertX(2) + iconBounds.Width;
-			if(icon?.GetImage(iconBounds.Width) is { } image)
+			context.RenderCount(Icons.TestSuccess, total.Success);
+			if(total.Skipped > 0)
 			{
-				graphics.DrawImage(image, iconBounds);
-				bounds.X     += w;
-				bounds.Width -= w;
+				var b = context.RenderCount(Icons.TestSkipped, total.Skipped);
+				bounds = Rectangle.Union(bounds, b);
 			}
-
-			var font = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi);
-
-#if NET5_0_OR_GREATER
-			Span<char> chars = stackalloc char[11];
-			if(count.TryFormat(chars, out int charsWritten, provider: CultureInfo.InvariantCulture))
+			if(total.Failed > 0)
 			{
-				chars = chars.Slice(0, charsWritten);
-				w = GitterApplication.TextRenderer.MeasureText(
-					graphics, chars, font, bounds.Size, F2).Width;
-				GitterApplication.TextRenderer.DrawText(
-					graphics, chars, font, count != 0 ? normalText : grayText, bounds, F2);
+				var b = context.RenderCount(Icons.TestFailed, total.Failed);
+				bounds = Rectangle.Union(bounds, b);
 			}
-			else
+			if(total.Error > 0)
 			{
-#endif
-				var text = count.ToString(CultureInfo.InvariantCulture);
-				w = GitterApplication.TextRenderer.MeasureText(
-					graphics, text, font, bounds.Size, F2).Width;
-				GitterApplication.TextRenderer.DrawText(
-					graphics, text, font, count != 0 ? normalText : grayText, bounds, F2);
-#if NET5_0_OR_GREATER
-			}
-#endif
-
-			w += conv.ConvertX(4);
-			bounds.X     += w;
-			bounds.Width -= w;
-		}
-
-		RenderCount(_testReportSummary.Total.Count != 0 ? CommonIcons.Test : CommonIcons.TestEmpty, _testReportSummary.Total.Count, ref bounds);
-		if(_testReportSummary.Total.Count > 0)
-		{
-			RenderCount(Icons.TestSuccess, _testReportSummary.Total.Success, ref bounds);
-			if(_testReportSummary.Total.Skipped > 0)
-			{
-				RenderCount(Icons.TestSkipped, _testReportSummary.Total.Skipped, ref bounds);
-			}
-			if(_testReportSummary.Total.Failed > 0)
-			{
-				RenderCount(Icons.TestFailed, _testReportSummary.Total.Failed, ref bounds);
-			}
-			if(_testReportSummary.Total.Error > 0)
-			{
-				RenderCount(Icons.TestError, _testReportSummary.Total.Error, ref bounds);
+				var b = context.RenderCount(Icons.TestError, total.Error);
+				bounds = Rectangle.Union(bounds, b);
 			}
 		}
 
-		return bounds.X;
+		return bounds;
+	}
+
+	private void RenderPipeline(ref PaintContext context, int i)
+	{
+		var pipeline = _entries[i].Pipeline;
+
+		var normalText = context.Style.Colors.WindowText;
+
+		context.RenderTextAndAdvance(Resources.StrlPipeline, normalText);
+		context.MeasureTextAndAdvance(" ");
+
+		var id = "#" + pipeline.Id;
+
+		var pipelineIdBounds = context.RenderLinkTextAndAdvance(id, isHovered: _hovered.Index == i && _hovered.Area == HitTestArea.PipelineId);
+		pipelineIdBounds.X -= context.InitialBounds.X;
+		pipelineIdBounds.Y -= context.InitialBounds.Y;
+
+		_rendered.Add(new(new(i, HitTestArea.PipelineId), pipelineIdBounds));
+
+		context.Advance(context.DpiConverter.ConvertX(4));
+
+		if(!string.IsNullOrWhiteSpace(pipeline.Ref))
+		{
+			if(context.RenderIconAndAdvance(CommonIcons.Branch).Width != 0)
+			{
+				context.Advance(context.DpiConverter.ConvertX(2));
+			}
+			context.RenderTextAndAdvance(pipeline.Ref, normalText);
+			context.MeasureTextAndAdvance(" ");
+		}
+
+		GuiUtils.GetPipelineStatusIconAndName(pipeline.Status, out var imageProvider, out var status);
+
+		if(imageProvider?.GetImage(context.DpiConverter.ConvertX(16)) is { } image)
+		{
+			if(context.RenderIconAndAdvance(imageProvider).Width != 0)
+			{
+				context.Advance(context.DpiConverter.ConvertX(2));
+			}
+		}
+
+		if(status is not null)
+		{
+			context.RenderTextAndAdvance(status, normalText);
+			context.Advance(context.DpiConverter.ConvertX(4));
+		}
+
+		var testCasesBounds = RenderTests(ref context, _entries[i].Tests);
+		if(testCasesBounds.Width > 0 && testCasesBounds.Height > 0)
+		{
+			testCasesBounds.X -= context.InitialBounds.X;
+			testCasesBounds.Y -= context.InitialBounds.Y;
+			_rendered.Add(new(new(i, HitTestArea.TestCases), testCasesBounds));
+		}
+	}
+
+	private void RenderViewOnGitLabLink(ref PaintContext context)
+	{
+		var bounds = context.RenderRightAlignedLink(
+			Resources.StrsViewCommitOnGitLab,
+			isHovered: _hovered.Area == HitTestArea.ViewOnGitLab);
+		if(bounds.Width > 0 && bounds.Height > 0)
+		{
+			_rendered.Add(new(HitTetResult.ViewOnGitLab, bounds));
+		}
 	}
 
 	protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
 	{
-		Rectangle textBounds;
-		int w;
+		if(FlowControl is null) return;
 
-		var graphics = paintEventArgs.Graphics;
-		var conv = new DpiConverter(FlowControl);
-		var font = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(paintEventArgs.Dpi);
+		var context = new PaintContext(FlowControl, paintEventArgs);
 
-		var grayText   = Style.Colors.GrayText;
-		var normalText = Style.Colors.WindowText;
-		var linkText   = Style.Colors.HyperlinkText;
+		context.RenderHeader(HeaderText);
 
-		textBounds = paintEventArgs.Bounds;
-		textBounds.Width = conv.ConvertX(66);
-		GitterApplication.TextRenderer.DrawText(
-			graphics, HeaderText, font, grayText, textBounds, F1);
-
-		textBounds = paintEventArgs.Bounds;
-		var dx = conv.ConvertX(70);
-		textBounds.Width -= dx;
-		textBounds.X     += dx;
-
-		int x;
-
-		if(_pipeline is null)
+		_rendered.Clear();
+		if(_entries.Count == 0)
 		{
-			_pipelineIdBounds = default;
-			_testCasesBounds  = default;
-
 			var text = _isUpdating
 				? Resources.StrlFetchingPipelineInformation
 				: _failed
 				? Resources.StrlFailedToFetchPipelineInformation
 				: Resources.StrlNoPipelinesFound;
 
-			GitterApplication.TextRenderer.DrawText(
-				graphics, text, font, grayText, textBounds, F2);
+			context.RenderTextAndAdvance(text, context.Style.Colors.GrayText);
 
-			x = textBounds.X + GitterApplication.TextRenderer.MeasureText(graphics, text, font, textBounds.Size, F2).Width;
+			RenderViewOnGitLabLink(ref context);
 		}
 		else
 		{
-			var text = Resources.StrlPipeline;
-			GitterApplication.TextRenderer.DrawText(
-				graphics, text, font, normalText, textBounds, F2);
-
-			w = GitterApplication.TextRenderer.MeasureText(
-				graphics, text + " ", font, textBounds.Size, F2).Width;
-
-			textBounds.X     += w;
-			textBounds.Width -= w;
-			var id = "#" + _pipeline.Id;
-
-			_pipelineIdBounds = textBounds;
-			_pipelineIdBounds.X -= paintEventArgs.Bounds.X;
-			_pipelineIdBounds.Y -= paintEventArgs.Bounds.Y;
-
-			if(_hoveredItem == PipelineId)
+			for(int i = 0; i < _entries.Count; ++i)
 			{
-				using var u = new Font(font, FontStyle.Underline);
-				GitterApplication.TextRenderer.DrawText(
-					graphics, id, u, linkText, textBounds, F2);
+				if(i != 0) context.NextLine();
+
+				RenderPipeline(ref context, i);
+
+				if(i == 0)
+				{
+					RenderViewOnGitLabLink(ref context);
+				}
 			}
-			else
-			{
-				GitterApplication.TextRenderer.DrawText(
-					graphics, id, font, linkText, textBounds, F2);
-			}
-
-			w = GitterApplication.TextRenderer.MeasureText(
-				graphics, id, font, textBounds.Size, F2).Width;
-
-			_pipelineIdBounds.Width = w;
-			w += conv.ConvertX(4);
-
-			textBounds.X     += w;
-			textBounds.Width -= w;
-
-			GitterApplication.TextRenderer.DrawText(
-				graphics, "status", font, normalText, textBounds, F2);
-
-			w = GitterApplication.TextRenderer.MeasureText(
-				graphics, "status ", font, textBounds.Size, F2).Width;
-
-			textBounds.X += w;
-			textBounds.Width -= w;
-
-			var iconBounds = textBounds;
-			iconBounds.Size = conv.Convert(new Size(16, 16));
-			iconBounds.Y   += (textBounds.Height - iconBounds.Height) / 2;
-
-			GuiUtils.GetPipelineStatusIconAndName(_pipeline.Status, out var imageProvider, out var status);
-
-			if(imageProvider is not null)
-			{
-				var image = imageProvider.GetImage(conv.ConvertX(16));
-				graphics.DrawImage(image, iconBounds);
-			}
-
-			textBounds.X += iconBounds.Width + conv.ConvertX(2);
-
-			if(status is not null)
-			{
-				GitterApplication.TextRenderer.DrawText(
-					graphics, status, font, normalText, textBounds, F2);
-
-				w = GitterApplication.TextRenderer.MeasureText(
-					graphics, status, font, textBounds.Size, F2).Width;
-
-				w += conv.ConvertX(4);
-
-				textBounds.X     += w;
-				textBounds.Width -= w;
-			}
-
-			x = RenderTests(graphics, paintEventArgs.Dpi, normalText, grayText, textBounds);
-			_testCasesBounds = textBounds;
-			_testCasesBounds.Width = x - textBounds.X;
-			_testCasesBounds.X -= paintEventArgs.Bounds.X;
-			_testCasesBounds.Y -= paintEventArgs.Bounds.Y;
 		}
 
-		textBounds = paintEventArgs.Bounds;
-		textBounds.Width -= conv.ConvertX(5);
-
-		var viewOnGitlabText = Resources.StrsViewCommitOnGitLab;
-		w = GitterApplication.TextRenderer.MeasureText(
-			graphics, viewOnGitlabText, font, textBounds.Size, F1).Width;
-
-		if(w > paintEventArgs.Bounds.Width - x)
-		{
-			_viewOnGitLabBounds = Rectangle.Empty;
-			return;
-		}
-
-		_viewOnGitLabBounds = textBounds;
-		_viewOnGitLabBounds.X -= paintEventArgs.Bounds.X;
-		_viewOnGitLabBounds.Y -= paintEventArgs.Bounds.Y;
-
-		if(_hoveredItem == ViewOnGitLab)
-		{
-			using var u = new Font(font, FontStyle.Underline);
-			GitterApplication.TextRenderer.DrawText(
-				graphics, viewOnGitlabText, u, linkText, textBounds, F1);
-		}
-		else
-		{
-			GitterApplication.TextRenderer.DrawText(
-				graphics, viewOnGitlabText, font, linkText, textBounds, F1);
-		}
-
-		_viewOnGitLabBounds.X += _viewOnGitLabBounds.Width - w;
-		_viewOnGitLabBounds.Width = w;
+		context.Dispose();
 	}
 }

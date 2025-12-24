@@ -25,5 +25,5 @@ using System.Drawing;
 
 public interface IImageProvider
 {
-	Image GetImage(int size);
+	Image? GetImage(int size);
 }

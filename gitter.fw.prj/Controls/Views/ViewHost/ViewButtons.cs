@@ -31,13 +31,13 @@ public sealed class ViewButtons : IEnumerable<ViewButton>
 {
 	#region Data
 
-	private ViewButton[] _buttons;
+	private ViewButton[] _buttons = Preallocated<ViewButton>.EmptyArray;
 	private readonly TrackingService<ViewButton> _buttonHover;
 	private readonly TrackingService<ViewButton> _buttonPress;
 
 	#endregion
 
-	public event EventHandler<ViewButtonClickEventArgs> ButtonClick;
+	public event EventHandler<ViewButtonClickEventArgs>? ButtonClick;
 
 	internal ViewButtons(Control hostControl)
 	{
@@ -48,7 +48,7 @@ public sealed class ViewButtons : IEnumerable<ViewButton>
 		_buttonPress = new TrackingService<ViewButton>(_ => Host.Invalidate());
 	}
 
-	public void SetAvailableButtons(params ViewButtonType[] buttons)
+	public void SetAvailableButtons(params ViewButtonType[]? buttons)
 	{
 		var dpi = Dpi.FromControl(Host);
 		var viewButtonSize = ViewManager.Renderer.ViewButtonSize.GetValue(dpi);
@@ -56,7 +56,7 @@ public sealed class ViewButtons : IEnumerable<ViewButton>
 		_buttonPress.Reset(-1, null);
 		if(buttons is not { Length: not 0 })
 		{
-			_buttons = null;
+			_buttons = Preallocated<ViewButton>.EmptyArray;
 		}
 		else
 		{
@@ -78,7 +78,7 @@ public sealed class ViewButtons : IEnumerable<ViewButton>
 	{
 		_buttonHover.Reset(-1, null);
 		_buttonPress.Reset(-1, null);
-		_buttons = null;
+		_buttons = Preallocated<ViewButton>.EmptyArray;
 		Host.Invalidate();
 	}
 
@@ -86,11 +86,11 @@ public sealed class ViewButtons : IEnumerable<ViewButton>
 
 	public Control Host { get; }
 
-	public ViewButton PressedButton => _buttonPress.Item;
+	public ViewButton? PressedButton => _buttonPress.Item;
 
-	public ViewButton HoveredButton => _buttonHover.Item;
+	public ViewButton? HoveredButton => _buttonHover.Item;
 
-	public int Count => _buttons != null ? _buttons.Length : 0;
+	public int Count => _buttons.Length;
 
 	public int Width
 	{
@@ -158,7 +158,7 @@ public sealed class ViewButtons : IEnumerable<ViewButton>
 		}
 		else
 		{
-			_buttonPress.Track(id, _buttons[id]);
+			_buttonPress.Track(id, _buttons![id]);
 		}
 	}
 
@@ -171,7 +171,7 @@ public sealed class ViewButtons : IEnumerable<ViewButton>
 		}
 		else
 		{
-			_buttonHover.Track(id, _buttons[id]);
+			_buttonHover.Track(id, _buttons![id]);
 		}
 	}
 
@@ -182,7 +182,7 @@ public sealed class ViewButtons : IEnumerable<ViewButton>
 			int id = HitTest(x, y);
 			if(id == _buttonPress.Index)
 			{
-				ButtonClick?.Invoke(this, new ViewButtonClickEventArgs(_buttonPress.Item.Type));
+				ButtonClick?.Invoke(this, new ViewButtonClickEventArgs(_buttonPress.Item!.Type));
 			}
 			_buttonPress.Drop();
 		}

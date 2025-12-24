@@ -31,10 +31,13 @@ public partial class BranchPropertiesDialog : GitDialogBase
 	{
 		Verify.Argument.IsNotNull(branch);
 
-		Branch = branch;
+		Name = nameof(BranchPropertiesDialog);
 
-		InitializeComponent();
+		Branch = branch;
 	}
+
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
 
 	/// <inheritdoc/>
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 53));

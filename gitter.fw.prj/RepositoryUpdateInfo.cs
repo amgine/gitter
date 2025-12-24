@@ -23,30 +23,18 @@ namespace gitter.Framework;
 using System;
 using System.Drawing;
 
-public sealed class RepositoryUpdateInfo
+public sealed class RepositoryUpdateInfo(string name, Image icon)
 {
-	public RepositoryUpdateInfo(string name, Image icon)
-	{
-		Name = name;
-		Icon = icon;
-	}
+	public Image Icon { get; } = icon;
 
-	public Image Icon { get; }
-
-	public string Name { get; }
+	public string Name { get; } = name;
 }
 
-public sealed class UpdatedItem
+public sealed class UpdatedItem(string name, Image icon)
 {
-	public UpdatedItem(string name, Image icon)
-	{
-		Name = name;
-		Icon = icon;
-	}
+	public Image Icon { get; } = icon;
 
-	public Image Icon { get; }
-
-	public string Name { get; }
+	public string Name { get; } = name;
 
 	public override string ToString() => Name;
 }

@@ -18,8 +18,6 @@
  */
 #endregion
 
-#nullable enable
-
 namespace gitter.Framework.Controls;
 
 using System;
@@ -293,6 +291,7 @@ internal sealed class ViewSplit : ContainerControl
 		Verify.Argument.IsNotNull(slot1);
 		Verify.Argument.IsNotNull(slot2);
 
+		SuspendLayout();
 		AutoScaleMode = AutoScaleMode.None;
 
 		SetStyle(ControlStyles.ContainerControl, true);
@@ -305,7 +304,7 @@ internal sealed class ViewSplit : ContainerControl
 		_size  = bounds.Size;
 		slot1.Content.Dock = DockStyle.None;
 		slot2.Content.Dock = DockStyle.None;
-		_slots.Apply();
+		ResumeLayout(performLayout: false);
 	}
 
 	/// <summary>Initializes a new instance of the <see cref="ViewSplit"/> class.</summary>
@@ -316,6 +315,7 @@ internal sealed class ViewSplit : ContainerControl
 	{
 		Verify.Argument.IsNotNull(slots);
 
+		SuspendLayout();
 		AutoScaleMode = AutoScaleMode.None;
 
 		SetStyle(ControlStyles.ContainerControl, true);
@@ -331,7 +331,7 @@ internal sealed class ViewSplit : ContainerControl
 			_slots.Add(slot);
 		}
 		_size = bounds.Size;
-		_slots.Apply();
+		ResumeLayout(performLayout: false);
 	}
 
 	/// <summary>Layout orientation.</summary>
@@ -506,13 +506,6 @@ internal sealed class ViewSplit : ContainerControl
 #if NETCOREAPP || NET48_OR_GREATER
 	/// <inheritdoc/>
 	protected override bool ScaleChildren => false;
-
-	/// <inheritdoc/>
-	protected override void OnDpiChangedAfterParent(EventArgs e)
-	{
-		_slots.Apply();
-		base.OnDpiChangedAfterParent(e);
-	}
 #endif
 
 	/// <inheritdoc/>
@@ -535,10 +528,10 @@ internal sealed class ViewSplit : ContainerControl
 	}
 
 	/// <inheritdoc/>
-	protected override void OnResize(EventArgs eventargs)
+	protected override void OnLayout(LayoutEventArgs e)
 	{
-		base.OnResize(eventargs);
-		if(Size is not { Width: > 0, Height: > 0 } size) return;
+		base.OnLayout(e);
+		if(Size is not { Width: > 0, Height: > 0 }) return;
 		_slots.Apply();
 	}
 

@@ -28,6 +28,7 @@ using System.Windows.Forms;
 
 using gitter.Framework;
 using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Mvc;
 using gitter.Framework.Mvc.WinForms;
 using gitter.Git.Gui.Controls;
@@ -35,18 +36,115 @@ using gitter.Git.Gui.Controls;
 [DesignerCategory("")]
 partial class HistoryFilterDropDown : UserControl
 {
-	private Repository _repository;
-	private LogOptions _logOptions;
+	readonly struct DialogControls
+	{
+		public readonly TextBox _txtSearch;
+		public readonly ReferencesListBox _lstReferences;
+		public readonly IRadioButtonWidget radioButton1;
+		public readonly IRadioButtonWidget radioButton2;
+		public readonly IRadioButtonWidget radioButton3;
 
-	public IUserInputSource<string> Search { get; }
+		public DialogControls(IGitterStyle style)
+		{
+			style ??= GitterApplication.Style;
+
+			var rbf = style.RadioButtonFactory;
+			_lstReferences = new()
+			{
+				Style               = style,
+				DisableContextMenus = true,
+				HeaderStyle         = HeaderStyle.Hidden,
+				ShowCheckBoxes      = true,
+				ShowTreeLines       = true,
+			};
+			_txtSearch = new();
+			radioButton1 = rbf.Create();
+			radioButton2 = rbf.Create();
+			radioButton3 = rbf.Create();
+		}
+
+		public void Localize()
+		{
+			radioButton1.Text = "All references";
+			radioButton2.Text = GitConstants.HEAD;
+			radioButton3.Text = "Only selected references:";
+#if NETCOREAPP
+			_txtSearch.PlaceholderText = "Filter";
+#endif
+		}
+
+		public void Layout(Control parent)
+		{
+			var filterDec = new TextBoxDecorator(_txtSearch);
+
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					padding: DpiBoundValue.Padding(new(4)),
+					rows:
+					[
+						LayoutConstants.RadioButtonRowHeight,
+						LayoutConstants.RadioButtonRowHeight,
+						LayoutConstants.TextInputRowHeight,
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new Grid(
+							columns:
+							[
+								SizeSpec.Absolute(130),
+								SizeSpec.Everything(),
+							],
+							content:
+							[
+								new GridContent(new WidgetContent(radioButton1, marginOverride: LayoutConstants.NoMargin), column: 0),
+								new GridContent(new WidgetContent(radioButton2, marginOverride: LayoutConstants.NoMargin), column: 1)
+							]), row: 0),
+						new GridContent(new WidgetContent (radioButton3,   marginOverride: LayoutConstants.NoMargin),      row: 1),
+						new GridContent(new ControlContent(filterDec,      marginOverride: LayoutConstants.TextBoxMargin), row: 2),
+						new GridContent(new ControlContent(_lstReferences, marginOverride: LayoutConstants.NoMargin),      row: 3),
+					]),
+			};
+
+			var tabIndex = 0;
+			radioButton1.TabIndex = tabIndex++;
+			radioButton2.TabIndex = tabIndex++;
+			radioButton3.TabIndex = tabIndex++;
+			filterDec.TabIndex = tabIndex++;
+			_lstReferences.TabIndex = tabIndex++;
+
+			radioButton1.Parent = parent;
+			radioButton2.Parent = parent;
+			radioButton3.Parent = parent;
+			filterDec.Parent = parent;
+			_lstReferences.Parent = parent;
+		}
+	}
+
+	private readonly DialogControls _controls;
+	private Repository? _repository;
+	private LogOptions? _logOptions;
+
+	public IUserInputSource<string?> Search { get; }
 
 	public HistoryFilterDropDown()
 	{
-		InitializeComponent();
+		Name = nameof(HistoryFilterDropDown);
 
-#if NETCOREAPP
-		_txtSearch.PlaceholderText = "Filter";
-#endif
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		BorderStyle         = BorderStyle.FixedSingle;
+		MaximumSize         = new(241, 500);
+		MinimumSize         = new(241, 279);
+		Size                = new(239, 279);
+		_controls = new(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		VisibleChanged += HistoryFilterDropDown_VisibleChanged;
+		ResumeLayout(false);
+		PerformLayout();
 
 		if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
 		{
@@ -56,46 +154,49 @@ partial class HistoryFilterDropDown : UserControl
 		}
 		else
 		{
-			Font = SystemFonts.MessageBoxFont;
+			Font      = SystemFonts.MessageBoxFont;
+			BackColor = SystemColors.Window;
 		}
-		_txtSearch.BackColor = BackColor;
-		_txtSearch.ForeColor = ForeColor;
-		_txtSearch.TextChanged += _txtSearch_TextChanged;
-		Search = new TextBoxInputSource(_txtSearch);
+		_controls._txtSearch.TextChanged += _txtSearch_TextChanged;
+		_controls.radioButton1.IsCheckedChanged += OnFilterTypeCheckedChanged;
+		_controls.radioButton2.IsCheckedChanged += OnFilterTypeCheckedChanged;
+		_controls.radioButton3.IsCheckedChanged += OnFilterTypeCheckedChanged;
+
+		Search = new TextBoxInputSource(_controls._txtSearch);
 	}
 
-	public LogOptions LogOptions
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
+
+	public LogOptions? LogOptions
 	{
 		get => _logOptions;
 		set
 		{
-			if(_logOptions != value)
+			if(_logOptions == value) return;
+
+			_logOptions = value;
+			if(value is not null)
 			{
-				_logOptions = value;
-				if(value is not null)
+				var radio = value.Filter switch
 				{
-					switch(value.Filter)
-					{
-						case LogReferenceFilter.All:
-							radioButton1.Checked = true;
-							break;
-						case LogReferenceFilter.HEAD:
-							radioButton2.Checked = true;
-							break;
-						case LogReferenceFilter.Allowed:
-							radioButton3.Checked = true;
-							break;
-					}
-				}
-				_lstReferences.ItemCheckedChanged -= OnItemCheckedChanged;
-				UpdateCheckStatuses();
-				_lstReferences.ItemCheckedChanged += OnItemCheckedChanged;
+					LogReferenceFilter.All     => _controls.radioButton1,
+					LogReferenceFilter.HEAD    => _controls.radioButton2,
+					LogReferenceFilter.Allowed => _controls.radioButton3,
+					_ => default,
+				};
+				if(radio is not null) radio.IsChecked = true;
 			}
+			_controls._lstReferences.ItemCheckedChanged -= OnItemCheckedChanged;
+			UpdateCheckStatuses();
+			_controls._lstReferences.ItemCheckedChanged += OnItemCheckedChanged;
 		}
 	}
 
-	private void OnItemCheckedChanged(object sender, ItemEventArgs e)
+	private void OnItemCheckedChanged(object? sender, ItemEventArgs e)
 	{
+		if(_logOptions is null) return;
+
 		if(e.Item is IRevisionPointerListItem item && item.RevisionPointer is Reference reference)
 		{
 			if(e.Item.IsChecked)
@@ -113,7 +214,7 @@ partial class HistoryFilterDropDown : UserControl
 	{
 		if(_logOptions is not null)
 		{
-			UpdateCheckStatuses(_lstReferences.Items);
+			UpdateCheckStatuses(_controls._lstReferences.Items);
 		}
 	}
 
@@ -123,63 +224,63 @@ partial class HistoryFilterDropDown : UserControl
 		{
 			if(item is IRevisionPointerListItem { RevisionPointer: Reference reference })
 			{
-				item.IsChecked = _logOptions.AllowedReferences.Contains(reference);
+				item.IsChecked = _logOptions is not null
+					&& _logOptions.AllowedReferences.Contains(reference);
 			}
 			UpdateCheckStatuses(item.Items);
 		}
 	}
 
-	public Repository Repository
+	public Repository? Repository
 	{
 		get => _repository;
 		set
 		{
-			if(_repository != value)
-			{
-				_repository = value;
-				LoadReferences(value, null);
-			}
+			if(_repository == value) return;
+
+			_repository = value;
+			LoadReferences(value, null);
 		}
 	}
 
-	private void OnFilterTypeCheckedChanged(object sender, EventArgs e)
+	private void OnFilterTypeCheckedChanged(object? sender, EventArgs e)
 	{
-		if(((RadioButton)sender).Checked && _logOptions != null)
-		{
-			if(radioButton1.Checked) _logOptions.Filter = LogReferenceFilter.All;
-			if(radioButton2.Checked) _logOptions.Filter = LogReferenceFilter.HEAD;
-			if(radioButton3.Checked) _logOptions.Filter = LogReferenceFilter.Allowed;
-		}
+		if(sender is not IRadioButtonWidget { IsChecked: true }) return;
+		if(_logOptions is null) return;
+
+		if(_controls.radioButton1.IsChecked) _logOptions.Filter = LogReferenceFilter.All;
+		if(_controls.radioButton2.IsChecked) _logOptions.Filter = LogReferenceFilter.HEAD;
+		if(_controls.radioButton3.IsChecked) _logOptions.Filter = LogReferenceFilter.Allowed;
 	}
 
-	private void LoadReferences(Repository repository, string filter)
+	private void LoadReferences(Repository? repository, string? filter)
 	{
-		_lstReferences.ItemCheckedChanged -= OnItemCheckedChanged;
+		_controls._lstReferences.ItemCheckedChanged -= OnItemCheckedChanged;
 		if(string.IsNullOrEmpty(filter))
 		{
-			_lstReferences.LoadData(repository);
+			_controls._lstReferences.LoadData(repository);
 		}
 		else
 		{
-			_lstReferences.LoadData(repository, ReferenceType.Reference, true, true, x =>
+			_controls._lstReferences.LoadData(repository, ReferenceType.Reference, true, true, x =>
 			{
 				if(x is Reference reference) return reference.Name.Contains(filter);
 				return x.FullName.Contains(filter);
 			});
 		}
-		_lstReferences.EnableCheckboxes();
-		_lstReferences.ExpandAll();
+		_controls._lstReferences.EnableCheckboxes();
+		_controls._lstReferences.ExpandAll();
 		UpdateCheckStatuses();
-		_lstReferences.ItemCheckedChanged += OnItemCheckedChanged;
+		_controls._lstReferences.ItemCheckedChanged += OnItemCheckedChanged;
 	}
 
-	private void _txtSearch_TextChanged(object sender, EventArgs e)
+	private void _txtSearch_TextChanged(object? sender, EventArgs e)
 	{
-		if(_lstReferences.Items.Count == 0) return;
+		if(_controls._lstReferences.Items.Count == 0) return;
 		LoadReferences(Repository, Search.Value);
 	}
 
-	private void HistoryFilterDropDown_VisibleChanged(object sender, EventArgs e)
+	private void HistoryFilterDropDown_VisibleChanged(object? sender, EventArgs e)
 	{
 		Search.Value = string.Empty;
 	}

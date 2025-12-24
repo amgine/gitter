@@ -32,13 +32,13 @@ public sealed class ReferenceTreeBinding : IDisposable
 	private readonly CustomListBoxItemsCollection _itemHost;
 	private readonly bool _groupItems;
 	private readonly bool _groupRemotes;
-	private readonly Predicate<IRevisionPointer> _predicate;
+	private readonly Predicate<IRevisionPointer>? _predicate;
 	private readonly ReferenceType _referenceTypes;
-	private readonly List<RemoteListItem> _remotes;
+	private readonly List<RemoteListItem>? _remotes;
 
 	#endregion
 
-	public event EventHandler<RevisionPointerEventArgs> ReferenceItemActivated;
+	public event EventHandler<RevisionPointerEventArgs>? ReferenceItemActivated;
 
 	private void InvokeReferenceItemActivated(IRevisionPointer revision)
 		=> ReferenceItemActivated?.Invoke(this, new RevisionPointerEventArgs(revision));
@@ -46,7 +46,7 @@ public sealed class ReferenceTreeBinding : IDisposable
 	#region .ctor
 
 	public ReferenceTreeBinding(CustomListBoxItemsCollection itemHost, Repository repository,
-		bool groupItems, bool groupRemoteBranches, Predicate<IRevisionPointer> predicate, ReferenceType referenceTypes)
+		bool groupItems, bool groupRemoteBranches, Predicate<IRevisionPointer>? predicate, ReferenceType referenceTypes)
 	{
 		Verify.Argument.IsNotNull(itemHost);
 		Verify.Argument.IsNotNull(repository);
@@ -89,10 +89,10 @@ public sealed class ReferenceTreeBinding : IDisposable
 			{
 				foreach(var branch in refs)
 				{
-					if(predicate != null && !predicate(branch)) continue;
+					if(predicate is not null && !predicate(branch)) continue;
 					var item = new BranchListItem(branch);
 					item.Activated += OnItemActivated;
-					var host = groupItems ? Heads.Items : _itemHost;
+					var host = Heads?.Items ?? _itemHost;
 					host.Add(item);
 				}
 				refs.ObjectAdded += OnBranchCreated;
@@ -106,14 +106,14 @@ public sealed class ReferenceTreeBinding : IDisposable
 			{
 				foreach(var branch in refs)
 				{
-					if(predicate != null && !predicate(branch)) continue;
-					var host = groupItems ? Remotes.Items : _itemHost;
+					if(predicate is not null && !predicate(branch)) continue;
+					var host = Remotes?.Items ?? _itemHost;
 					var item = new RemoteBranchListItem(branch);
 					item.Activated += OnItemActivated;
 					if(groupRemoteBranches)
 					{
 						var ritem = GetRemoteListItem(branch);
-						if(ritem != null)
+						if(ritem is not null)
 						{
 							host = ritem.Items;
 						}
@@ -131,10 +131,10 @@ public sealed class ReferenceTreeBinding : IDisposable
 			{
 				foreach(var tag in refs)
 				{
-					if(predicate != null && !predicate(tag)) continue;
+					if(predicate is not null && !predicate(tag)) continue;
 					var item = new TagListItem(tag);
 					item.Activated += OnItemActivated;
-					var host = groupItems ? Tags.Items : _itemHost;
+					var host = Tags?.Items ?? _itemHost;
 					host.Add(item);
 				}
 				refs.ObjectAdded += OnTagCreated;
@@ -143,9 +143,9 @@ public sealed class ReferenceTreeBinding : IDisposable
 
 		if(groupItems)
 		{
-			_itemHost.Add(Heads);
-			_itemHost.Add(Remotes);
-			_itemHost.Add(Tags);
+			if(Heads   is not null) _itemHost.Add(Heads);
+			if(Remotes is not null) _itemHost.Add(Remotes);
+			if(Tags    is not null) _itemHost.Add(Tags);
 		}
 	}
 
@@ -153,13 +153,13 @@ public sealed class ReferenceTreeBinding : IDisposable
 
 	public Repository Repository { get; }
 
-	public ReferenceGroupListItem Heads { get; }
+	public ReferenceGroupListItem? Heads { get; }
 
-	public ReferenceGroupListItem Remotes { get; }
+	public ReferenceGroupListItem? Remotes { get; }
 
-	public ReferenceGroupListItem Tags { get; }
+	public ReferenceGroupListItem? Tags { get; }
 
-	private RemoteListItem GetRemoteListItem(RemoteBranch branch)
+	private RemoteListItem? GetRemoteListItem(RemoteBranch branch)
 	{
 		lock(Repository.Remotes.SyncRoot)
 		{
@@ -167,21 +167,24 @@ public sealed class ReferenceTreeBinding : IDisposable
 			{
 				if(branch.Name.StartsWith(remote.Name + "/"))
 				{
-					RemoteListItem ritem = null;
-					foreach(var i in _remotes)
+					RemoteListItem? ritem = null;
+					if(_remotes is not null)
 					{
-						if(i.DataContext.Name == remote.Name)
+						foreach(var i in _remotes)
 						{
-							ritem = i;
-							break;
+							if(i.DataContext.Name == remote.Name)
+							{
+								ritem = i;
+								break;
+							}
 						}
 					}
-					if(ritem == null)
+					if(ritem is null)
 					{
 						ritem = new RemoteListItem(remote);
 						ritem.Items.Comparison = RemoteBranchListItem.CompareByName;
-						_remotes.Add(ritem);
-						var host = Remotes == null ? _itemHost : Remotes.Items;
+						_remotes?.Add(ritem);
+						var host = Remotes?.Items ?? _itemHost;
 						host.AddSafe(ritem);
 					}
 					return ritem;
@@ -193,87 +196,60 @@ public sealed class ReferenceTreeBinding : IDisposable
 
 	#region Event Handlers
 
-	private void OnBranchCreated(object sender, BranchEventArgs e)
+	private void OnBranchCreated(object? sender, BranchEventArgs e)
 	{
 		var branch = e.Object;
-		if(_predicate == null || _predicate(branch))
+		if(_predicate is null || _predicate(branch))
 		{
 			var item = new BranchListItem(branch);
 			item.Activated += OnItemActivated;
-			var host = _groupItems ? Heads.Items: _itemHost;
+			var host = Heads?.Items ?? _itemHost;
 			host.AddSafe(item);
 		}
 	}
 
-	private void OnRemoteBranchCreated(object sender, RemoteBranchEventArgs e)
+	private void OnRemoteBranchCreated(object? sender, RemoteBranchEventArgs e)
 	{
 		var branch = e.Object;
-		if(_predicate == null || _predicate(branch))
+		if(_predicate is null || _predicate(branch))
 		{
 			var item = new RemoteBranchListItem(branch);
 			item.Activated += OnItemActivated;
 			CustomListBoxItemsCollection host;
 			if(_groupItems)
 			{
-				if(_groupRemotes)
-				{
-					var p = GetRemoteListItem(branch);
-					if(p == null)
-					{
-						host = Remotes.Items;
-					}
-					else
-					{
-						host = p.Items;
-					}
-				}
-				else
-				{
-					host = Remotes.Items;
-				}
+				host = _groupRemotes
+					? GetRemoteListItem(branch)?.Items ?? Remotes?.Items ?? _itemHost
+					: Remotes?.Items ?? _itemHost;
 			}
 			else
 			{
-				if(_groupRemotes)
-				{
-					var p = GetRemoteListItem(branch);
-					if(p == null)
-					{
-						host = _itemHost;
-					}
-					else
-					{
-						host = p.Items;
-					}
-				}
-				else
-				{
-					host = _itemHost;
-				}
+				host = _groupRemotes
+					? GetRemoteListItem(branch)?.Items ?? _itemHost
+					: _itemHost;
 			}
 			host.AddSafe(item);
 		}
 	}
 
-	private void OnTagCreated(object sender, TagEventArgs e)
+	private void OnTagCreated(object? sender, TagEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
 		var tag = e.Object;
-		if(_predicate == null || _predicate(tag))
+		if(_predicate is null || _predicate(tag))
 		{
 			var item = new TagListItem(tag);
 			item.Activated += OnItemActivated;
-			var host = _groupItems
-				? Tags.Items
-				: _itemHost;
+			var host = Tags?.Items ?? _itemHost;
 			host.AddSafe(item);
 		}
 	}
 
-	private void OnItemActivated(object sender, EventArgs e)
+	private void OnItemActivated(object? sender, EventArgs e)
 	{
-		var item = (IRevisionPointerListItem)sender;
+		var item = sender as IRevisionPointerListItem;
+		if(item is null) return;
 		var revision = item.RevisionPointer;
 		InvokeReferenceItemActivated(revision);
 	}
@@ -282,9 +258,9 @@ public sealed class ReferenceTreeBinding : IDisposable
 
 	public void Dispose()
 	{
-		Repository.Refs.Heads.ObjectAdded -= OnBranchCreated;
+		Repository.Refs.Heads.ObjectAdded   -= OnBranchCreated;
 		Repository.Refs.Remotes.ObjectAdded -= OnRemoteBranchCreated;
-		Repository.Refs.Tags.ObjectAdded -= OnTagCreated;
+		Repository.Refs.Tags.ObjectAdded    -= OnTagCreated;
 		_itemHost.Clear();
 	}
 }

@@ -20,28 +20,21 @@
 
 namespace gitter.Redmine.Gui;
 
+#nullable enable
+
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 using gitter.Framework;
 using gitter.Framework.Configuration;
 
-sealed class RedmineGuiProvider : IGuiProvider
+sealed class RedmineGuiProvider(IRepository repository, RedmineServiceContext context) : IGuiProvider
 {
-	private readonly IRepository _repository;
-	private readonly RedmineServiceContext _service;
-	private RepositoryExplorer _repositoryExplorer;
+	private RepositoryExplorer? _repositoryExplorer;
 
-	public RedmineGuiProvider(IRepository repository, RedmineServiceContext svc)
-	{
-		_repository = repository;
-		_service = svc;
-	}
+	public IRepository Repository => repository;
 
-	public IRepository Repository => _repository;
-
-	public RedmineServiceContext ServiceContext => _service;
+	public RedmineServiceContext ServiceContext => context;
 
 	public void AttachToEnvironment(IWorkingEnvironment environment)
 	{
@@ -57,8 +50,11 @@ sealed class RedmineGuiProvider : IGuiProvider
 		foreach(var view in views2) view.Close();
 		var views3 = environment.ViewDockService.FindViews(Guids.VersionsViewGuid).ToList();
 		foreach(var view in views3) view.Close();
-		environment.RemoveRepositoryExplorerItem(_repositoryExplorer.RootItem);
-		_repositoryExplorer = null;
+		if(_repositoryExplorer is not null)
+		{
+			environment.RemoveRepositoryExplorerItem(_repositoryExplorer.RootItem);
+			_repositoryExplorer = null;
+		}
 	}
 
 	public void SaveTo(Section section)

@@ -26,21 +26,11 @@ using System.Collections.Generic;
 
 public sealed class RevisionParentsCollection : IReadOnlyList<Revision>
 {
-	#region Data
-
 	private readonly List<Revision> _container = new(capacity: 2);
-
-	#endregion
-
-	#region .ctor
 
 	internal RevisionParentsCollection()
 	{
 	}
-
-	#endregion
-
-	#region Properties
 
 	public Revision this[int index]
 	{
@@ -54,10 +44,6 @@ public sealed class RevisionParentsCollection : IReadOnlyList<Revision>
 	}
 
 	public int Count => _container.Count;
-
-	#endregion
-
-	#region Internal Methods
 
 	internal void AddInternal(Revision item)
 	{
@@ -80,9 +66,10 @@ public sealed class RevisionParentsCollection : IReadOnlyList<Revision>
 		_container.Remove(item);
 	}
 
-	#endregion
-
-	#region Public Methods
+	internal void ClearInternal()
+	{
+		_container.Clear();
+	}
 
 	public int IndexOf(Revision item)
 		=> _container.IndexOf(item);
@@ -93,15 +80,7 @@ public sealed class RevisionParentsCollection : IReadOnlyList<Revision>
 	public void CopyTo(Revision[] array, int arrayIndex)
 		=> _container.CopyTo(array, arrayIndex);
 
-	#endregion
-
-	#region IList<Revision>
-
 	Revision IReadOnlyList<Revision>.this[int index] => _container[index];
-
-	#endregion
-
-	#region IEnumerable<Revision>
 
 	public List<Revision>.Enumerator GetEnumerator()
 		=> _container.GetEnumerator();
@@ -111,6 +90,4 @@ public sealed class RevisionParentsCollection : IReadOnlyList<Revision>
 
 	IEnumerator IEnumerable.GetEnumerator()
 		=> _container.GetEnumerator();
-
-	#endregion
 }

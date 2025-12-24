@@ -25,8 +25,6 @@ using System.Drawing;
 using System.ComponentModel;
 using System.Windows.Forms;
 
-using gitter.Framework.Options;
-
 /// <summary>Form with Windows7 taskbar support.</summary>
 [DesignerCategory("")]
 public partial class FormEx : Form
@@ -37,9 +35,9 @@ public partial class FormEx : Form
 	public FormEx()
 	{
 		SuspendLayout();
-		AutoScaleDimensions = new SizeF(96F, 96F);
-		AutoScaleMode = AutoScaleMode.Dpi;
-		ClientSize = new Size(624, 435);
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		ClientSize          = new Size(624, 435);
 		if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
 		{
 			Font = GitterApplication.FontManager.UIFont;
@@ -69,11 +67,15 @@ public partial class FormEx : Form
 
 	protected bool CanUseWin7Api => _canUseWin7Api;
 
-	public void SetTaskbarOverlayIcon(Icon icon, string description)
+	public void SetTaskbarOverlayIcon(Icon? icon, string description)
 	{
-		Verify.Argument.IsNotNull(icon);
-
 		if(!CanUseWin7Api || IsDisposed) return;
+
+		if(icon is null)
+		{
+			RemoveTaskbarOverlayIcon();
+			return;
+		}
 
 		if(InvokeRequired)
 		{
@@ -88,7 +90,7 @@ public partial class FormEx : Form
 		}
 		else
 		{
-			Utility.TaskBarList.SetOverlayIcon(Handle, icon.Handle, description);
+			Utility.TaskBarList?.SetOverlayIcon(Handle, icon.Handle, description);
 		}
 	}
 
@@ -109,20 +111,22 @@ public partial class FormEx : Form
 		}
 		else
 		{
-			Utility.TaskBarList.SetOverlayIcon(Handle, IntPtr.Zero, null);
+			Utility.TaskBarList?.SetOverlayIcon(Handle, IntPtr.Zero, null);
 		}
 	}
+
+	private TbpFlag _targetProgressState;
 
 	public void SetTaskbarProgressState(TbpFlag state)
 	{
 		if(!CanUseWin7Api || IsDisposed) return;
 
+		_targetProgressState = state;
 		if(InvokeRequired)
 		{
 			try
 			{
-				BeginInvoke(new MethodInvoker(
-					() => SetTaskbarProgressState(state)));
+				BeginInvoke(new MethodInvoker(SetTaskbarProgressStateSync));
 			}
 			catch
 			{
@@ -130,8 +134,14 @@ public partial class FormEx : Form
 		}
 		else
 		{
-			Utility.TaskBarList.SetProgressState(Handle, state);
+			SetTaskbarProgressStateSync();
 		}
+	}
+
+	private void SetTaskbarProgressStateSync()
+	{
+		if(!IsHandleCreated || IsDisposed) return;
+		Utility.TaskBarList?.SetProgressState(Handle, _targetProgressState);
 	}
 
 	public void SetTaskbarProgressValue(long current, long total)
@@ -151,7 +161,7 @@ public partial class FormEx : Form
 		}
 		else
 		{
-			Utility.TaskBarList.SetProgressValue(Handle, (ulong)current, (ulong)total);
+			Utility.TaskBarList?.SetProgressValue(Handle, (ulong)current, (ulong)total);
 		}
 	}
 }

@@ -20,6 +20,7 @@
 
 namespace gitter.Git.Gui.Controls;
 
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
 using gitter.Framework;
@@ -29,7 +30,7 @@ abstract class UserPainterBase<T> : ISubItemPainter
 {
 	private const string EmailFormat = "{0} <{1}>";
 
-	protected abstract User GetUser(T item);
+	protected abstract User? GetUser(T item);
 
 	private static async void ReloadAvatar(IAvatar avatar, CustomListBoxItem item, CustomListBoxColumn column)
 	{
@@ -39,7 +40,9 @@ abstract class UserPainterBase<T> : ISubItemPainter
 		item.InvalidateSubItem(column.Id);
 	}
 
-	protected virtual bool TryGetTextBrush(SubItemPaintEventArgs paintEventArgs, out Brush textBrush, out bool disposeBrush)
+	protected virtual bool TryGetTextBrush(SubItemPaintEventArgs paintEventArgs,
+		[MaybeNullWhen(returnValue: false)] out Brush textBrush,
+		[MaybeNullWhen(returnValue: false)] out bool disposeBrush)
 	{
 		textBrush    = default;
 		disposeBrush = false;
@@ -66,9 +69,16 @@ abstract class UserPainterBase<T> : ISubItemPainter
 
 		var showEmail  = column.ShowEmail;
 		var showAvatar = column.ShowAvatar;
-		var text = showEmail
+		var text = showEmail && !string.IsNullOrEmpty(user.Email)
 			? string.Format(EmailFormat, user.Name, user.Email)
 			: user.Name;
+
+		if(string.IsNullOrEmpty(text))
+		{
+			size = Size.Empty;
+			return true;
+		}
+
 		size = showAvatar
 			? measureEventArgs.MeasureImageAndText(default(Image), text)
 			: measureEventArgs.MeasureText(text);
@@ -87,9 +97,12 @@ abstract class UserPainterBase<T> : ISubItemPainter
 
 		var showEmail  = column.ShowEmail;
 		var showAvatar = column.ShowAvatar;
-		var text = showEmail
+		var text = showEmail && !string.IsNullOrEmpty(user.Email)
 			? string.Format(EmailFormat, user.Name, user.Email)
 			: user.Name;
+
+		if(string.IsNullOrEmpty(text)) return true;
+
 		if(!TryGetTextBrush(paintEventArgs, out var brush, out var disposeBrush))
 		{
 			brush = paintEventArgs.Brush;

@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git.AccessLayer.CLI;
@@ -28,52 +28,41 @@ using System.Threading.Tasks;
 
 using gitter.Framework;
 
-sealed class QueryReflogFunction : IGitFunction<QueryReflogParameters, IList<ReflogRecordData>>
+sealed class QueryReflogFunction(
+	ICommandExecutor                  commandExecutor,
+	Func<QueryReflogRequest, Command> commandFactory)
+	: IGitFunction<QueryReflogRequest, IList<ReflogRecordData>>
 {
-	#region Data
-
-	private readonly ICommandExecutor _commandExecutor;
-	private readonly Func<QueryReflogParameters, Command> _commandFactory;
-
-	#endregion
-
-	public QueryReflogFunction(ICommandExecutor commandExecutor, Func<QueryReflogParameters, Command> commandFcatory)
+	private static Command GetCommand2(QueryReflogRequest parameters)
 	{
-		_commandExecutor = commandExecutor;
-		_commandFactory  = commandFcatory;
-	}
-
-	private static Command GetCommand2(QueryReflogParameters parameters)
-	{
-		var args = new List<ICommandArgument>();
-		args.Add(LogCommand.WalkReflogs());
+		var builder = new LogCommand.Builder();
+		builder.WalkReflogs();
 		if(parameters.MaxCount != 0)
 		{
-			args.Add(LogCommand.MaxCount(parameters.MaxCount));
+			builder.MaxCount(parameters.MaxCount);
 		}
-		args.Add(LogCommand.NullTerminate());
-		args.Add(LogCommand.FormatRaw());
+		builder.FormatRaw();
 		if(parameters.Reference is not null)
 		{
-			args.Add(new CommandParameter(parameters.Reference));
+			builder.AddArgument(new CommandParameter(parameters.Reference));
 		}
-		return new LogCommand(args);
+		return builder.Build();
 	}
 
-	public IList<ReflogRecordData> Invoke(QueryReflogParameters parameters)
+	public IList<ReflogRecordData> Invoke(QueryReflogRequest parameters)
 	{
 		Verify.Argument.IsNotNull(parameters);
 
-		var command = _commandFactory(parameters);
-		var output = _commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
+		var command = commandFactory(parameters);
+		var output = commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
 		output.ThrowOnBadReturnCode();
 
-		var cache = new Dictionary<Hash, RevisionData>(Hash.EqualityComparer);
+		var cache = new Dictionary<Sha1Hash, RevisionData>(Sha1Hash.EqualityComparer);
 		var list  = ParseResult1(output, cache);
 
 		// get real commit parents
 		command = GetCommand2(parameters);
-		output = _commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
+		output = commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
 		output.ThrowOnBadReturnCode();
 		var parser = new GitParser(output.Output);
 		parser.ParseCommitParentsFromRaw(list.Select(rrd => rrd.Revision), cache);
@@ -81,7 +70,7 @@ sealed class QueryReflogFunction : IGitFunction<QueryReflogParameters, IList<Ref
 		return list;
 	}
 
-	private static IList<ReflogRecordData> ParseResult1(GitOutput output, Dictionary<Hash, RevisionData> cache)
+	private static IList<ReflogRecordData> ParseResult1(GitOutput output, Dictionary<Sha1Hash, RevisionData> cache)
 	{
 		if(output.Output.Length < 40)
 		{
@@ -109,15 +98,19 @@ sealed class QueryReflogFunction : IGitFunction<QueryReflogParameters, IList<Ref
 		return list;
 	}
 
-	public Task<IList<ReflogRecordData>> InvokeAsync(QueryReflogParameters parameters,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	public Task<IList<ReflogRecordData>> InvokeAsync(QueryReflogRequest parameters,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(parameters);
 
-		var command1 = _commandFactory(parameters);
+		var command1 = commandFactory(parameters);
 		var command2 = GetCommand2(parameters);
 
-		var tcs = new TaskCompletionSource<object>();
+#if NETCOREAPP
+		var tcs = new TaskCompletionSource();
+#else
+		var tcs = new TaskCompletionSource<object?>();
+#endif
 		if(cancellationToken.CanBeCanceled)
 		{
 			cancellationToken.Register(() => tcs.TrySetCanceled());
@@ -125,8 +118,8 @@ sealed class QueryReflogFunction : IGitFunction<QueryReflogParameters, IList<Ref
 
 		int completedTasks = 0;
 
-		var task1 = _commandExecutor.ExecuteCommandAsync(command1, CommandExecutionFlags.None, cancellationToken);
-		var task2 = _commandExecutor.ExecuteCommandAsync(command2, CommandExecutionFlags.None, cancellationToken);
+		var task1 = commandExecutor.ExecuteCommandAsync(command1, CommandExecutionFlags.None, cancellationToken);
+		var task2 = commandExecutor.ExecuteCommandAsync(command2, CommandExecutionFlags.None, cancellationToken);
 
 		task1.ContinueWith(
 			_ => tcs.TrySetCanceled(),
@@ -139,12 +132,12 @@ sealed class QueryReflogFunction : IGitFunction<QueryReflogParameters, IList<Ref
 			TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnCanceled,
 			TaskScheduler.Default);
 		task1.ContinueWith(
-			t => tcs.TrySetException(t.Exception),
+			t => tcs.TrySetException(t.Exception!),
 			cancellationToken,
 			TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted,
 			TaskScheduler.Default);
 		task2.ContinueWith(
-			t => tcs.TrySetException(t.Exception),
+			t => tcs.TrySetException(t.Exception!),
 			cancellationToken,
 			TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted,
 			TaskScheduler.Default);
@@ -153,7 +146,11 @@ sealed class QueryReflogFunction : IGitFunction<QueryReflogParameters, IList<Ref
 			{
 				if(Interlocked.Increment(ref completedTasks) == 2)
 				{
+#if NETCOREAPP
+					tcs.TrySetResult();
+#else
 					tcs.TrySetResult(null);
+#endif
 				}
 			},
 			cancellationToken,
@@ -164,7 +161,11 @@ sealed class QueryReflogFunction : IGitFunction<QueryReflogParameters, IList<Ref
 			{
 				if(Interlocked.Increment(ref completedTasks) == 2)
 				{
+#if NETCOREAPP
+					tcs.TrySetResult();
+#else
 					tcs.TrySetResult(null);
+#endif
 				}
 			},
 			cancellationToken,
@@ -182,7 +183,7 @@ sealed class QueryReflogFunction : IGitFunction<QueryReflogParameters, IList<Ref
 				var output2 = TaskUtility.UnwrapResult(task2);
 				output2.ThrowOnBadReturnCode();
 
-				var cache  = new Dictionary<Hash, RevisionData>(Hash.EqualityComparer);
+				var cache  = new Dictionary<Sha1Hash, RevisionData>(Sha1Hash.EqualityComparer);
 				var list   = ParseResult1(output1, cache);
 				var parser = new GitParser(output2.Output);
 				parser.ParseCommitParentsFromRaw(list.Select(static rrd => rrd.Revision), cache);

@@ -27,10 +27,8 @@ public sealed class IssueStatus : NamedRedmineObject
 {
 	#region Static
 
-	public static readonly RedmineObjectProperty<bool> IsDefaultProperty =
-		new RedmineObjectProperty<bool>("is_default", "IsDefault");
-	public static readonly RedmineObjectProperty<bool> IsClosedProperty =
-		new RedmineObjectProperty<bool>("is_closed", "IsClosed");
+	public static readonly RedmineObjectProperty<bool> IsDefaultProperty = new ("is_default", nameof(IsDefault));
+	public static readonly RedmineObjectProperty<bool> IsClosedProperty  = new ("is_closed",  nameof(IsClosed));
 
 	#endregion
 
@@ -51,8 +49,8 @@ public sealed class IssueStatus : NamedRedmineObject
 	internal IssueStatus(RedmineServiceContext context, XmlNode node)
 		: base(context, node)
 	{
-		_isDefault	= RedmineUtility.LoadBoolean(node[IsDefaultProperty.XmlNodeName]);
-		_isClosed	= RedmineUtility.LoadBoolean(node[IsClosedProperty.XmlNodeName]);
+		_isDefault = RedmineUtility.LoadBoolean(node[IsDefaultProperty.XmlNodeName]);
+		_isClosed  = RedmineUtility.LoadBoolean(node[IsClosedProperty.XmlNodeName]);
 	}
 
 	#endregion
@@ -63,9 +61,9 @@ public sealed class IssueStatus : NamedRedmineObject
 	{
 		base.Update(node);
 
-		Name		= RedmineUtility.LoadString(node[NameProperty.XmlNodeName]);
-		IsDefault	= RedmineUtility.LoadBoolean(node[IsDefaultProperty.XmlNodeName]);
-		IsClosed	= RedmineUtility.LoadBoolean(node[IsClosedProperty.XmlNodeName]);
+		Name      = RedmineUtility.LoadString(node[NameProperty.XmlNodeName]);
+		IsDefault = RedmineUtility.LoadBoolean(node[IsDefaultProperty.XmlNodeName]);
+		IsClosed  = RedmineUtility.LoadBoolean(node[IsClosedProperty.XmlNodeName]);
 	}
 
 	#endregion
@@ -74,14 +72,14 @@ public sealed class IssueStatus : NamedRedmineObject
 
 	public bool IsDefault
 	{
-		get { return _isDefault; }
-		private set { UpdatePropertyValue(ref _isDefault, value, IsDefaultProperty); }
+		get => _isDefault;
+		private set => UpdatePropertyValue(ref _isDefault, value, IsDefaultProperty);
 	}
 
 	public bool IsClosed
 	{
-		get { return _isClosed; }
-		private set { UpdatePropertyValue(ref _isDefault, value, IsClosedProperty); }
+		get => _isClosed;
+		private set => UpdatePropertyValue(ref _isDefault, value, IsClosedProperty);
 	}
 
 	#endregion

@@ -37,8 +37,8 @@ partial class UserColumnExtender : ExtenderBase
 {
 	private readonly DpiBindings _dpiBindings;
 	private readonly ControlLayout _layout;
-	private ICheckBoxWidget _chkShowEmail;
-	private ICheckBoxWidget _chkShowAvatar;
+	private ICheckBoxWidget? _chkShowEmail;
+	private ICheckBoxWidget? _chkShowAvatar;
 	private bool _disableEvents;
 
 	/// <summary>Create <see cref="UserColumnExtender"/>.</summary>
@@ -59,6 +59,9 @@ partial class UserColumnExtender : ExtenderBase
 	}
 
 	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
+
+	/// <inheritdoc/>
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(138, 52));
 
 	/// <inheritdoc/>
@@ -66,16 +69,8 @@ partial class UserColumnExtender : ExtenderBase
 	{
 		if(disposing)
 		{
-			if(_chkShowEmail is not null)
-			{
-				_chkShowEmail.Dispose();
-				_chkShowEmail = null;
-			}
-			if(_chkShowAvatar is not null)
-			{
-				_chkShowAvatar.Dispose();
-				_chkShowAvatar = null;
-			}
+			DisposableUtility.Dispose(ref _chkShowEmail);
+			DisposableUtility.Dispose(ref _chkShowAvatar);
 			UnsubscribeFromColumnEvents();
 		}
 		base.Dispose(disposing);
@@ -90,16 +85,16 @@ partial class UserColumnExtender : ExtenderBase
 
 		_dpiBindings.UnbindAll();
 
-		_chkShowEmail?.Dispose();
-		_chkShowEmail = Style.CreateCheckBox();
+		DisposableUtility.Dispose(ref _chkShowEmail);
+		_chkShowEmail = Style.CheckBoxFactory.Create();
 		_chkShowEmail.IsChecked = Column.ShowEmail;
 		_chkShowEmail.IsCheckedChanged += OnShowEmailCheckedChanged;
 		_chkShowEmail.Text = Resources.StrShowEmail;
 		_chkShowEmail.Control.Parent = this;
 		_dpiBindings.BindImage(_chkShowEmail, Icons.Mail);
 
-		_chkShowAvatar?.Dispose();
-		_chkShowAvatar = Style.CreateCheckBox();
+		DisposableUtility.Dispose(ref _chkShowAvatar);
+		_chkShowAvatar = Style.CheckBoxFactory.Create();
 		_chkShowAvatar.IsChecked = Column.ShowAvatar;
 		_chkShowAvatar.IsCheckedChanged += OnShowAvatarCheckedChanged;
 		_chkShowAvatar.Text = Resources.StrShowAvatar;
@@ -109,16 +104,16 @@ partial class UserColumnExtender : ExtenderBase
 		var noMargin = DpiBoundValue.Constant(Padding.Empty);
 		_layout.Content = new Grid(
 			padding: DpiBoundValue.Padding(new(6, 2, 6, 2)),
-			rows: new[]
-			{
+			rows:
+			[
 				SizeSpec.Absolute(23),
 				SizeSpec.Absolute(23),
-			},
-			content: new[]
-			{
+			],
+			content:
+			[
 				new GridContent(new ControlContent(_chkShowEmail.Control,  marginOverride: noMargin), row: 0),
 				new GridContent(new ControlContent(_chkShowAvatar.Control, marginOverride: noMargin), row: 1),
-			});
+			]);
 	}
 
 	/// <inheritdoc/>
@@ -142,12 +137,12 @@ partial class UserColumnExtender : ExtenderBase
 		Column.ShowAvatarChanged -= OnColumnShowAvatarChanged;
 	}
 
-	private void OnColumnShowEmailChanged(object sender, EventArgs e)
+	private void OnColumnShowEmailChanged(object? sender, EventArgs e)
 	{
 		ShowEmail = Column.ShowEmail;
 	}
 
-	private void OnColumnShowAvatarChanged(object sender, EventArgs e)
+	private void OnColumnShowAvatarChanged(object? sender, EventArgs e)
 	{
 		ShowAvatar = Column.ShowAvatar;
 	}
@@ -180,23 +175,23 @@ partial class UserColumnExtender : ExtenderBase
 		}
 	}
 
-	private void OnShowEmailCheckedChanged(object sender, EventArgs e)
+	private void OnShowEmailCheckedChanged(object? sender, EventArgs e)
 	{
-		if(!_disableEvents)
-		{
-			_disableEvents = true;
-			Column.ShowEmail = _chkShowEmail.IsChecked;
-			_disableEvents = false;
-		}
+		if(_disableEvents) return;
+		if(sender is not ICheckBoxWidget check) return;
+
+		_disableEvents = true;
+		Column.ShowEmail = check.IsChecked;
+		_disableEvents = false;
 	}
 
-	private void OnShowAvatarCheckedChanged(object sender, EventArgs e)
+	private void OnShowAvatarCheckedChanged(object? sender, EventArgs e)
 	{
-		if(!_disableEvents)
-		{
-			_disableEvents = true;
-			Column.ShowAvatar = _chkShowAvatar.IsChecked;
-			_disableEvents = false;
-		}
+		if(_disableEvents) return;
+		if(sender is not ICheckBoxWidget check) return;
+
+		_disableEvents = true;
+		Column.ShowAvatar = check.IsChecked;
+		_disableEvents = false;
 	}
 }

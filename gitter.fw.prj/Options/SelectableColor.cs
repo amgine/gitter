@@ -27,7 +27,7 @@ public sealed class SelectableColor : IDisposable
 {
 	private Color _color;
 
-	public event EventHandler Changed;
+	public event EventHandler? Changed;
 
 	public SelectableColor(string id, string name, Color color, string categoryId)
 	{
@@ -54,7 +54,7 @@ public sealed class SelectableColor : IDisposable
 
 	public string Name { get; }
 
-	public string CategoryId { get; }
+	public string? CategoryId { get; }
 
 	public Color Color
 	{
@@ -91,8 +91,8 @@ public sealed class SelectableColor : IDisposable
 		Pen?.Dispose();
 		if(disposing)
 		{
-			Brush = null;
-			Pen = null;
+			Brush = null!;
+			Pen = null!;
 		}
 	}
 

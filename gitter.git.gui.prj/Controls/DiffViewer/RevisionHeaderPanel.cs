@@ -41,7 +41,7 @@ public sealed class RevisionHeaderPanel : FlowPanel
 	#region Data
 
 	private readonly RevisionHeaderContent _content;
-	private Revision _revision;
+	private Revision? _revision;
 	private bool _isSelected;
 
 	#endregion
@@ -60,39 +60,42 @@ public sealed class RevisionHeaderPanel : FlowPanel
 
 	#endregion
 
-	private void OnContentContextMenuRequested(object sender, ContentContextMenuEventArgs e)
+	private void OnContentContextMenuRequested(object? sender, ContentContextMenuEventArgs e)
 	{
 		int x = e.Position.X;
 		int y = e.Position.Y;
 		if(IsSelectable)
 		{
-			var dpi  = Dpi.FromControl(FlowControl);
+			var dpi  = Dpi.FromControlOrSystem(FlowControl);
 			var conv = DpiConverter.FromDefaultTo(dpi);
 			x += conv.ConvertX(SelectionMargin);
 		}
 		ShowContextMenu(e.ContextMenu, x, y);
 	}
 
-	private void OnContentInvalidated(object sender, ContentInvalidatedEventArgs e)
+	private void OnContentInvalidated(object? sender, ContentInvalidatedEventArgs e)
 	{
 		var bounds = e.Bounds;
 		if(IsSelectable)
 		{
-			var dpi  = Dpi.FromControl(FlowControl);
+			var dpi  = Dpi.FromControlOrSystem(FlowControl);
 			var conv = DpiConverter.FromDefaultTo(dpi);
 			bounds.X += conv.ConvertX(SelectionMargin);
 		}
 		InvalidateSafe(bounds);
 	}
 
-	private void OnContentSizeChanged(object sender, EventArgs e)
+	private void OnContentSizeChanged(object? sender, EventArgs e)
 	{
 		InvalidateSize();
 	}
 
-	private void OnContentCursorChanged(object sender, EventArgs e)
+	private void OnContentCursorChanged(object? sender, EventArgs e)
 	{
-		FlowControl.Cursor = _content.Cursor;
+		if(FlowControl is not null)
+		{
+			FlowControl.Cursor = _content.Cursor;
+		}
 	}
 
 	/// <inheritdoc/>
@@ -100,7 +103,7 @@ public sealed class RevisionHeaderPanel : FlowPanel
 	{
 		if(IsSelectable)
 		{
-			var dpi  = Dpi.FromControl(FlowControl);
+			var dpi  = Dpi.FromControlOrSystem(FlowControl);
 			var conv = DpiConverter.FromDefaultTo(dpi);
 			x -= conv.ConvertX(SelectionMargin);
 		}
@@ -148,36 +151,35 @@ public sealed class RevisionHeaderPanel : FlowPanel
 	}
 
 	/// <summary>Displayed <see cref="T:gitter.Git.Revision"/>.</summary>
-	public Revision Revision
+	public Revision? Revision
 	{
 		get => _revision;
 		set
 		{
-			if(_revision != value)
+			if(_revision == value) return;
+
+			_revision = value;
+			if(FlowControl is not null)
 			{
-				_revision = value;
-				if(FlowControl is not null)
-				{
-					_content.Revision = _revision;
-				}
+				_content.Revision = _revision;
 			}
 		}
 	}
 
-	public List<IHyperlinkExtractor> AdditionalHyperlinkExtractors { get; } = new();
+	public List<IHyperlinkExtractor> AdditionalHyperlinkExtractors { get; } = [];
 
 	/// <inheritdoc/>
-	protected override void OnFlowControlAttached()
+	protected override void OnFlowControlAttached(FlowLayoutControl flowControl)
 	{
 		_content.Revision = _revision;
-		base.OnFlowControlAttached();
+		base.OnFlowControlAttached(flowControl);
 	}
 
 	/// <inheritdoc/>
-	protected override void OnFlowControlDetached()
+	protected override void OnFlowControlDetached(FlowLayoutControl flowControl)
 	{
-		_content.Revision = null;
-		base.OnFlowControlDetached();
+		_content.Revision = default;
+		base.OnFlowControlDetached(flowControl);
 	}
 
 	/// <inheritdoc/>
@@ -190,7 +192,7 @@ public sealed class RevisionHeaderPanel : FlowPanel
 			{
 				IsSelected = true;
 			}
-			var dpi  = Dpi.FromControl(FlowControl);
+			var dpi  = Dpi.FromControlOrSystem(FlowControl);
 			var conv = DpiConverter.FromDefaultTo(dpi);
 			x -= conv.ConvertX(SelectionMargin);
 		}
@@ -210,7 +212,7 @@ public sealed class RevisionHeaderPanel : FlowPanel
 			width -= marginX;
 		}
 		_content.Style = Style;
-		var size = _content.OnMeasure(measureEventArgs.Graphics, new Dpi(FlowControl.DeviceDpi), width);
+		var size = _content.OnMeasure(measureEventArgs.Graphics, measureEventArgs.Dpi, width);
 		if(IsSelectable)
 		{
 			size.Width += marginX;
@@ -244,7 +246,7 @@ public sealed class RevisionHeaderPanel : FlowPanel
 		if(clip is { Width: > 0, Height: > 0 })
 		{
 			graphics.SetClip(clip);
-			_content.OnPaint(graphics, new Dpi(FlowControl.DeviceDpi), bounds, clip);
+			_content.OnPaint(graphics, paintEventArgs.Dpi, bounds, clip);
 		}
 	}
 }

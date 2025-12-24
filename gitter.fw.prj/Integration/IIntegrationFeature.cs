@@ -36,7 +36,7 @@ public interface IIntegrationFeature : INamedObject
 
 	bool AdministratorRightsRequired { get; }
 
-	string GetEnableAction(bool enable);
+	string? GetEnableAction(bool enable);
 
 	bool HasConfiguration { get; }
 

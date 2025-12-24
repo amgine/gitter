@@ -44,6 +44,7 @@ public sealed class RevisionMenu : ContextMenuStrip
 		var dpiBindings = new DpiBindings(this);
 		var factory     = new GuiItemFactory(dpiBindings);
 
+		Renderer = GitterApplication.Style.ToolStripRenderer;
 		Revision = revision;
 
 		AddViewItems(factory);
@@ -89,6 +90,7 @@ public sealed class RevisionMenu : ContextMenuStrip
 		Assert.IsNotNull(factory);
 
 		var item = new ToolStripMenuItem(Resources.StrCopyToClipboard);
+		item.DropDown.Renderer = GitterApplication.Style.ToolStripRenderer;
 		item.DropDownItems.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, Revision.HashString));
 		item.DropDownItems.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrTreeHash, Revision.TreeHashString));
 		item.DropDownItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSubject, Revision.Subject));

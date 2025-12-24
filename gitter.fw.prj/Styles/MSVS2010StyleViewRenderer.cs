@@ -27,7 +27,7 @@ using System.Windows.Forms;
 
 public class MSVS2010StyleViewRenderer : ViewRenderer
 {
-	private static Bitmap LoadBitmap(string name)
+	private static Bitmap? LoadBitmap(string name)
 	{
 		using var stream = typeof(MSVS2010StyleViewRenderer)
 			.Assembly
@@ -36,15 +36,15 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		return new Bitmap(stream);
 	}
 
-	private static readonly Lazy<Bitmap> ImgMenu        = new(() => LoadBitmap(@"arrow-small"));
-	private static readonly Lazy<Bitmap> ImgNormalize   = new(() => LoadBitmap(@"normalize"));
-	private static readonly Lazy<Bitmap> ImgMaximize    = new(() => LoadBitmap(@"maximize"));
-	private static readonly Lazy<Bitmap> ImgPin         = new(() => LoadBitmap(@"pin-small"));
-	private static readonly Lazy<Bitmap> ImgClose       = new(() => LoadBitmap(@"cross-small"));
-	private static readonly Lazy<Bitmap> ImgScrollLeft  = new(() => LoadBitmap(@"tab-scroll-left"));
-	private static readonly Lazy<Bitmap> ImgScrollRight = new(() => LoadBitmap(@"tab-scroll-right"));
-	private static readonly Lazy<Bitmap> ImgTabMenu     = new(() => LoadBitmap(@"tab-menu"));
-	private static readonly Lazy<Bitmap> ImgTabMenuExt  = new(() => LoadBitmap(@"tab-menu-extends"));
+	private static readonly Lazy<Bitmap?> ImgMenu        = new(() => LoadBitmap(@"arrow-small"));
+	private static readonly Lazy<Bitmap?> ImgNormalize   = new(() => LoadBitmap(@"normalize"));
+	private static readonly Lazy<Bitmap?> ImgMaximize    = new(() => LoadBitmap(@"maximize"));
+	private static readonly Lazy<Bitmap?> ImgPin         = new(() => LoadBitmap(@"pin-small"));
+	private static readonly Lazy<Bitmap?> ImgClose       = new(() => LoadBitmap(@"cross-small"));
+	private static readonly Lazy<Bitmap?> ImgScrollLeft  = new(() => LoadBitmap(@"tab-scroll-left"));
+	private static readonly Lazy<Bitmap?> ImgScrollRight = new(() => LoadBitmap(@"tab-scroll-right"));
+	private static readonly Lazy<Bitmap?> ImgTabMenu     = new(() => LoadBitmap(@"tab-menu"));
+	private static readonly Lazy<Bitmap?> ImgTabMenuExt  = new(() => LoadBitmap(@"tab-menu-extends"));
 
 	protected static class ColorTable
 	{
@@ -120,20 +120,11 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 
 	public override Color AccentColor => ColorTable.TabSelectedBackgroundActiveStart;
 
-	public override Color BackgroundColor
-	{
-		get { return ColorTable.BackgroundColor; }
-	}
+	public override Color BackgroundColor => ColorTable.BackgroundColor;
 
-	public override Color DockMarkerBackgroundColor
-	{
-		get { return ColorTable.DockMarkerBackground; }
-	}
+	public override Color DockMarkerBackgroundColor => ColorTable.DockMarkerBackground;
 
-	public override Color DockMarkerBorderColor
-	{
-		get { return ColorTable.DockMarkerBorder; }
-	}
+	public override Color DockMarkerBorderColor => ColorTable.DockMarkerBorder;
 
 	public override IDpiBoundValue<int> TabHeight { get; } = DpiBoundValue.ScaleY(Constants.TabHeight);
 
@@ -145,10 +136,7 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 
 	public override IDpiBoundValue<int> ViewButtonSize { get; } = DpiBoundValue.ScaleY(Constants.ViewButtonSize);
 
-	public override int SideTabSpacing
-	{
-		get { return Constants.SideTabSpacing; }
-	}
+	public override int SideTabSpacing => Constants.SideTabSpacing;
 
 	public override IDpiBoundValue<Size> SideTabSize { get; } = DpiBoundValue.Size(new(Constants.SideTabHeight, Constants.SideTabHeight));
 
@@ -173,9 +161,11 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 
 	private static int MeasureTabLength(ViewTabBase tab, Graphics graphics)
 	{
-		var conv   = new DpiConverter(tab.ViewHost);
+		var dpi    = Dpi.FromControl(tab.ViewHost);
+		var conv   = DpiConverter.FromDefaultTo(dpi);
+		var font   = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi);
 		var length = GitterApplication.TextRenderer.MeasureText(
-			graphics, tab.Text, GitterApplication.FontManager.UIFont, int.MaxValue, NormalStringFormat).Width;
+			graphics, tab.Text, font, int.MaxValue, NormalStringFormat).Width;
 		if(tab.ImageProvider is not null)
 		{
 			length += conv.ConvertX(16) + conv.ConvertX(ViewConstants.ImageSpacing);
@@ -205,7 +195,6 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		int h = bounds.Height;
 		var linePoints = new Point[6];
 		var polyPoints = new Point[6];
-		LinearGradientMode gradient;
 		switch(tab.Anchor)
 		{
 			case AnchorStyles.Right:
@@ -267,21 +256,16 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 			default:
 				throw new ApplicationException();
 		}
-		switch(tab.Orientation)
+		var gradient = tab.Orientation switch
 		{
-			case Orientation.Horizontal:
-				gradient = LinearGradientMode.Vertical;
-				break;
-			case Orientation.Vertical:
-				gradient = LinearGradientMode.Horizontal;
-				break;
-			default:
-				throw new ApplicationException();
-		}
+			Orientation.Horizontal => LinearGradientMode.Vertical,
+			Orientation.Vertical   => LinearGradientMode.Horizontal,
+			_ => throw new ApplicationException($"Unknown tab orientation: {tab.Orientation}"),
+		};
 		var host = tab.View.Host;
 		if(tab.IsActive)
 		{
-			if(host.IsDocumentWell)
+			if(host is { IsDocumentWell: true })
 			{
 				Color start, end;
 				if(host.IsActive)
@@ -302,10 +286,8 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 			}
 			else
 			{
-				using(var brush = new SolidBrush(ColorTable.TabSelectedBackground))
-				{
-					graphics.FillPolygon(brush, polyPoints);
-				}
+				using var brush = SolidBrushCache.Get(ColorTable.TabSelectedBackground);
+				graphics.FillPolygon(brush, polyPoints);
 			}
 		}
 		else if(tab.IsMouseOver)
@@ -324,7 +306,7 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		}
 		else
 		{
-			if(!host.IsDocumentWell)
+			if(host is { IsDocumentWell: false })
 			{
 				using(var brush = new LinearGradientBrush(bounds,
 					ColorTable.TabNormalBackgroundStart,
@@ -341,9 +323,24 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		}
 	}
 
+	private static Bitmap? _cache;
+
+	private static Bitmap GetCacheBitmap(int width, int height)
+	{
+		if(_cache is not null && _cache.Width >= width && _cache.Height >= height)
+		{
+			return _cache;
+		}
+		_cache?.Dispose();
+		if(width <= 0) width = 1;
+		if(height <= 0) height = 1;
+		return _cache = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+	}
+
 	private static void RenderTabContent(ViewTabBase tab, Rectangle bounds, Graphics graphics)
 	{
-		var conv = new DpiConverter(tab.ViewHost);
+		var dpi  = Dpi.FromControl(tab.ViewHost);
+		var conv = DpiConverter.FromDefaultTo(dpi);
 		int x = bounds.X;
 		int y = bounds.Y;
 		int w = bounds.Width;
@@ -364,7 +361,7 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 			default:
 				throw new ApplicationException();
 		}
-		var textBrush = tab.IsActive ? Brushes.Black : Brushes.White;
+		var textBrush = tab.IsActive ? Color.Black : Color.White;
 		var image = tab.ImageProvider?.GetImage(iconSize.Width);
 		if(image is not null)
 		{
@@ -392,20 +389,43 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 					throw new ApplicationException();
 			}
 		}
+		var font = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi);
 		switch(tab.Orientation)
 		{
 			case Orientation.Horizontal:
 				bounds.X     += conv.ConvertX(ViewConstants.BeforeTabContent);
 				bounds.Width -= conv.ConvertX(ViewConstants.BeforeTabContent) + conv.ConvertX(ViewConstants.AfterTabContent) - 1;
 				GitterApplication.TextRenderer.DrawText(
-					graphics, tab.Text, GitterApplication.FontManager.UIFont, textBrush, bounds, stringFormat);
+					graphics, tab.Text, font, textBrush, bounds, stringFormat);
 				break;
 			case Orientation.Vertical:
 				bounds.Y      += conv.ConvertY(ViewConstants.BeforeTabContent);
 				bounds.Height -= conv.ConvertY(ViewConstants.BeforeTabContent) + conv.ConvertY(ViewConstants.AfterTabContent) - 1;
-				bounds.Height += 10;
-				GitterApplication.GdiPlusTextRenderer.DrawText(
-					graphics, tab.Text, GitterApplication.FontManager.UIFont, textBrush, bounds, stringFormat);
+				var src = new Rectangle(0, 0, bounds.Height, bounds.Width);
+				var bitmap = GetCacheBitmap(src.Width, src.Height);
+				using(var g = Graphics.FromImage(bitmap))
+				{
+					const TextFormatFlags flags =
+						TextFormatFlags.VerticalCenter |
+						TextFormatFlags.EndEllipsis |
+						TextFormatFlags.GlyphOverhangPadding |
+						TextFormatFlags.NoClipping |
+						TextFormatFlags.NoPadding;
+					using var brush = SolidBrushCache.Get(ColorTable.BackgroundColor);
+					var fill = src;
+					fill.X -= 1;
+					fill.Y -= 1;
+					fill.Width += 2;
+					fill.Height += 2;
+					g.FillRectangle(brush, fill);
+					TextRenderer.DrawText(g, tab.Text, font, src, textBrush, ColorTable.BackgroundColor, flags);
+					graphics.DrawImage(bitmap,
+					[
+						new Point(bounds.X + bounds.Width, bounds.Y),
+						new Point(bounds.X + bounds.Width, bounds.Y + bounds.Height),
+						new Point(bounds.X, bounds.Y)
+					], src, GraphicsUnit.Pixel);
+				}
 				break;
 			default:
 				throw new ApplicationException();
@@ -438,16 +458,13 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 	{
 		var graphics = e.Graphics;
 
-		using(var brush = new SolidBrush(ColorTable.ViewHostTabsBackground))
+		using(var brush = SolidBrushCache.Get(ColorTable.ViewHostTabsBackground))
 		{
 			graphics.FillRectangle(brush, e.ClipRectangle);
 		}
 		if(tabs.ViewHost.IsDocumentWell)
 		{
-			using(var brush = new SolidBrush(
-				tabs.ViewHost.IsActive ?
-					ColorTable.ViewHostTabsSelectedBackgroundActiveEnd :
-					ColorTable.ViewHostTabsSelectedBackgroundNormalEnd))
+			using(var brush = SolidBrushCache.Get(tabs.ViewHost.IsActive ? ColorTable.ViewHostTabsSelectedBackgroundActiveEnd : ColorTable.ViewHostTabsSelectedBackgroundNormalEnd))
 			{
 				var dpi  = Dpi.FromControl(tabs);
 				var rc = new RectangleF(
@@ -482,7 +499,7 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 				border = ColorTable.ViewButtonHoverBorder;
 				background = ColorTable.ViewButtonHoverBackground;
 			}
-			using(var brush = new SolidBrush(background))
+			using(var brush = SolidBrushCache.Get(background))
 			{
 				graphics.FillRectangle(brush, rc);
 			}
@@ -544,7 +561,7 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 	#region  View Host Header Rendering
 
 	private static readonly StringFormat ViewHostHeaderTextFormat =
-		new StringFormat(StringFormat.GenericDefault)
+		new(StringFormat.GenericDefault)
 		{
 			Alignment = StringAlignment.Near,
 			LineAlignment = StringAlignment.Center,
@@ -587,7 +604,7 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 
 		var dpi = Dpi.FromControl(header);
 		if(header.ViewHost.Status == ViewHostStatus.Floating &&
-			((Form)header.ViewHost.TopLevelControl).WindowState == FormWindowState.Maximized)
+			((Form)header.ViewHost.TopLevelControl!).WindowState == FormWindowState.Maximized)
 		{
 			using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
 			using(var brush = new LinearGradientBrush(Point.Empty, new Point(0, HeaderHeight.GetValue(dpi)), backgroundStart, backgroundEnd))
@@ -613,10 +630,11 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		{
 			rect.Width -= header.Buttons.Width + BetweenTextAndButtons;
 		}
+		var font = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi);
 		GitterApplication.TextRenderer.DrawText(
 			graphics,
 			header.Text,
-			GitterApplication.FontManager.UIFont,
+			font,
 			textColor,
 			Rectangle.Truncate(rect),
 			ViewHostHeaderTextFormat);
@@ -628,10 +646,8 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 
 	public override void RenderViewDockSide(DockPanelSide side, PaintEventArgs e)
 	{
-		using(var brush = new SolidBrush(ColorTable.ViewDockSideBackground))
-		{
-			e.Graphics.FillRectangle(brush, e.ClipRectangle);
-		}
+		using var brush = SolidBrushCache.Get(ColorTable.ViewDockSideBackground);
+		e.Graphics.FillRectangle(brush, e.ClipRectangle);
 	}
 
 	#endregion
@@ -702,12 +718,12 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		var rc = new Rectangle(rect.X + conv.ConvertX(4), rect.Y + conv.ConvertY(4), conv.ConvertX(24), conv.ConvertY(12));
 		var arrow = new PointF[]
 			{
-				new PointF(rect.X + conv.ConvertX(11) + .5f, rect.Y + conv.ConvertY(25) + .5f),
-				new PointF(rect.X + conv.ConvertX(15) + .5f, rect.Y + conv.ConvertY(21) + .5f),
-				new PointF(rect.X + conv.ConvertX(16) + .5f, rect.Y + conv.ConvertY(21) + .5f),
-				new PointF(rect.X + conv.ConvertX(19) + .5f, rect.Y + conv.ConvertY(25) + .5f),
+				new(rect.X + conv.ConvertX(11) + .5f, rect.Y + conv.ConvertY(25) + .5f),
+				new(rect.X + conv.ConvertX(15) + .5f, rect.Y + conv.ConvertY(21) + .5f),
+				new(rect.X + conv.ConvertX(16) + .5f, rect.Y + conv.ConvertY(21) + .5f),
+				new(rect.X + conv.ConvertX(19) + .5f, rect.Y + conv.ConvertY(25) + .5f),
 			};
-		using(var brush = new SolidBrush(border))
+		using(var brush = SolidBrushCache.Get(border))
 		{
 			graphics.FillRectangle(brush, rc);
 			graphics.FillPolygon(brush, arrow);
@@ -732,7 +748,7 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		InitDockMarkerButtonContentColors(hover, out var start, out var end, out var border);
 		var conv = DpiConverter.FromDefaultTo(dpi);
 		var rc = new Rectangle(rect.X + conv.ConvertX(4), rect.Y + conv.ConvertY(4), conv.ConvertX(24), conv.ConvertY(24));
-		using(var brush = new SolidBrush(border))
+		using(var brush = SolidBrushCache.Get(border))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -763,12 +779,12 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		var rc = new Rectangle(rect.X + conv.ConvertX(4), rect.Y + conv.ConvertY(4), conv.ConvertX(12), conv.ConvertY(24));
 		var arrow = new PointF[]
 			{
-				new PointF(rect.X + conv.ConvertX(25) + .5f, rect.Y + conv.ConvertY(11) + .5f),
-				new PointF(rect.X + conv.ConvertX(25) + .5f, rect.Y + conv.ConvertY(19) + .5f),
-				new PointF(rect.X + conv.ConvertX(21) + .5f, rect.Y + conv.ConvertY(15) + .5f),
-				new PointF(rect.X + conv.ConvertX(21) + .5f, rect.Y + conv.ConvertY(14) + .5f),
+				new(rect.X + conv.ConvertX(25) + .5f, rect.Y + conv.ConvertY(11) + .5f),
+				new(rect.X + conv.ConvertX(25) + .5f, rect.Y + conv.ConvertY(19) + .5f),
+				new(rect.X + conv.ConvertX(21) + .5f, rect.Y + conv.ConvertY(15) + .5f),
+				new(rect.X + conv.ConvertX(21) + .5f, rect.Y + conv.ConvertY(14) + .5f),
 			};
-		using(var brush = new SolidBrush(border))
+		using(var brush = SolidBrushCache.Get(border))
 		{
 			graphics.FillRectangle(brush, rc);
 			graphics.FillPolygon(brush, arrow);
@@ -793,7 +809,7 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		InitDockMarkerButtonContentColors(hover, out var start, out var end, out var border);
 		var conv = DpiConverter.FromDefaultTo(dpi);
 		var rc = new Rectangle(rect.X + conv.ConvertX(4), rect.Y + conv.ConvertY(4), conv.ConvertX(24), conv.ConvertY(24));
-		using(var brush = new SolidBrush(border))
+		using(var brush = SolidBrushCache.Get(border))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -822,7 +838,7 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		InitDockMarkerButtonContentColors(hover, out var start, out var end, out var border);
 		var conv = DpiConverter.FromDefaultTo(dpi);
 		var rc = new Rectangle(rect.X + conv.ConvertX(4), rect.Y + conv.ConvertY(4), conv.ConvertX(24), conv.ConvertY(24));
-		using(var brush = new SolidBrush(border))
+		using(var brush = SolidBrushCache.Get(border))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -848,12 +864,12 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		var rc = new Rectangle(rect.X + conv.ConvertX(16), rect.Y + conv.ConvertY(4), conv.ConvertX(12), conv.ConvertY(24));
 		var arrow = new PointF[]
 			{
-				new PointF(rect.X + conv.ConvertX(5) + .5f, rect.Y + conv.ConvertY(20) + .5f),
-				new PointF(rect.X + conv.ConvertX(5) + .5f, rect.Y + conv.ConvertY(11) + .5f),
-				new PointF(rect.X + conv.ConvertX(9) + .5f, rect.Y + conv.ConvertY(14) + .5f),
-				new PointF(rect.X + conv.ConvertX(9) + .5f, rect.Y + conv.ConvertY(16) + .5f),
+				new(rect.X + conv.ConvertX(5) + .5f, rect.Y + conv.ConvertY(20) + .5f),
+				new(rect.X + conv.ConvertX(5) + .5f, rect.Y + conv.ConvertY(11) + .5f),
+				new(rect.X + conv.ConvertX(9) + .5f, rect.Y + conv.ConvertY(14) + .5f),
+				new(rect.X + conv.ConvertX(9) + .5f, rect.Y + conv.ConvertY(16) + .5f),
 			};
-		using(var brush = new SolidBrush(border))
+		using(var brush = SolidBrushCache.Get(border))
 		{
 			graphics.FillRectangle(brush, rc);
 			graphics.FillPolygon(brush, arrow);
@@ -878,7 +894,7 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		InitDockMarkerButtonContentColors(hover, out var start, out var end, out var border);
 		var conv = DpiConverter.FromDefaultTo(dpi);
 		var rc = new Rectangle(rect.X + conv.ConvertX(4), rect.Y + conv.ConvertY(4), conv.ConvertX(24), conv.ConvertY(24));
-		using(var brush = new SolidBrush(border))
+		using(var brush = SolidBrushCache.Get(border))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -911,12 +927,12 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		var rc = new Rectangle(rect.X + conv.ConvertX(4), rect.Y + conv.ConvertY(16), conv.ConvertX(24), conv.ConvertY(12));
 		var arrow = new PointF[]
 			{
-				new PointF(rect.X + conv.ConvertX(10) + .5f, rect.Y + conv.ConvertY(5) + .5f),
-				new PointF(rect.X + conv.ConvertX(15) + .5f, rect.Y + conv.ConvertY(9) + .5f),
-				new PointF(rect.X + conv.ConvertX(16) + .5f, rect.Y + conv.ConvertY(9) + .5f),
-				new PointF(rect.X + conv.ConvertX(20) + .5f, rect.Y + conv.ConvertY(5) + .5f),
+				new(rect.X + conv.ConvertX(10) + .5f, rect.Y + conv.ConvertY(5) + .5f),
+				new(rect.X + conv.ConvertX(15) + .5f, rect.Y + conv.ConvertY(9) + .5f),
+				new(rect.X + conv.ConvertX(16) + .5f, rect.Y + conv.ConvertY(9) + .5f),
+				new(rect.X + conv.ConvertX(20) + .5f, rect.Y + conv.ConvertY(5) + .5f),
 			};
-		using(var brush = new SolidBrush(border))
+		using(var brush = SolidBrushCache.Get(border))
 		{
 			graphics.FillRectangle(brush, rc);
 			graphics.FillPolygon(brush, arrow);
@@ -941,7 +957,7 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		InitDockMarkerButtonContentColors(hover, out var start, out var end, out var border);
 		var conv = DpiConverter.FromDefaultTo(dpi);
 		var rc = new Rectangle(rect.X + conv.ConvertX(4), rect.Y + conv.ConvertY(4), conv.ConvertX(24), conv.ConvertY(24));
-		using(var brush = new SolidBrush(border))
+		using(var brush = SolidBrushCache.Get(border))
 		{
 			graphics.FillRectangle(brush, rc);
 		}
@@ -1052,10 +1068,11 @@ public class MSVS2010StyleViewRenderer : ViewRenderer
 		{
 			rect.Width -= header.Buttons.Width + BetweenTextAndButtons;
 		}
+		var font = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi);
 		GitterApplication.TextRenderer.DrawText(
 			graphics,
 			header.Text,
-			GitterApplication.FontManager.UIFont,
+			font,
 			textColor,
 			Rectangle.Truncate(rect),
 			ViewHostHeaderTextFormat);

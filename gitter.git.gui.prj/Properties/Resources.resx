@@ -2232,4 +2232,7 @@ Can be used to clear the sequencer state after a failed revert.</value>
   <data name="StrFillBackground" xml:space="preserve">
     <value>Fill Background</value>
   </data>
+  <data name="StrLocalSystem" xml:space="preserve">
+    <value>Local System</value>
+  </data>
 </root>

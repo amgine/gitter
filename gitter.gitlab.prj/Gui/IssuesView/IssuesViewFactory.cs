@@ -20,32 +20,19 @@
 
 namespace gitter.GitLab.Gui;
 
-using System;
-using System.Collections.Generic;
-
 using gitter.Framework;
 using gitter.Framework.Controls;
 
 using Resources = gitter.GitLab.Properties.Resources;
 
-sealed class IssuesViewFactory : ViewFactoryBase
+sealed class IssuesViewFactory(GitLabGuiProvider guiProvider)
+	: ViewFactoryBase(Guids.IssuesViewGuid, Resources.StrIssues,
+		new ScaledImageProvider(CachedResources.ScaledBitmaps, @"issues"), singleton: true)
 {
-	public IssuesViewFactory(GitLabGuiProvider guiProvider)
-		: base(Guids.IssuesViewGuid, Resources.StrIssues, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"issues"), singleton: true)
-	{
-		Verify.Argument.IsNotNull(guiProvider);
-
-		GuiProvider = guiProvider;
-	}
-
-	private GitLabGuiProvider GuiProvider { get; }
-
 	/// <inheritdoc/>
 	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-	{
-		return new IssuesView(environment)
+		=> new IssuesView(environment)
 		{
-			ServiceContext = GuiProvider.ServiceContext,
+			ServiceContext = guiProvider.ServiceContext,
 		};
-	}
 }

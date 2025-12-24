@@ -107,7 +107,7 @@ sealed class SubmodulesView : GitViewBase, ISearchableView<SubmodulesSearchOptio
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 

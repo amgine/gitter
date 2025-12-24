@@ -1,24 +1,22 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
-
-#nullable enable
 
 namespace gitter.Git.AccessLayer.CLI;
 
@@ -29,30 +27,11 @@ using System.Threading.Tasks;
 
 using gitter.Framework;
 
-sealed class QueryTagMessageFunction : IGitFunction<QueryTagMessageParameters, string>
+sealed class QueryTagMessageFunction(
+	ICommandExecutor                      commandExecutor,
+	Func<QueryTagMessageRequest, Command> commandFactory)
+	: IGitFunction<QueryTagMessageRequest, string>
 {
-	#region Data
-
-	private readonly ICommandExecutor _commandExecutor;
-	private readonly Func<QueryTagMessageParameters, Command> _commandFactory;
-
-	#endregion
-
-	#region .ctor
-
-	public QueryTagMessageFunction(ICommandExecutor commandExecutor, Func<QueryTagMessageParameters, Command> commandFactory)
-	{
-		Assert.IsNotNull(commandExecutor);
-		Assert.IsNotNull(commandFactory);
-
-		_commandExecutor = commandExecutor;
-		_commandFactory  = commandFactory;
-	}
-
-	#endregion
-
-	#region Methods
-
 	private string ParseTagMessage(Command command, GitOutput output)
 	{
 		Assert.IsNotNull(output);
@@ -70,7 +49,7 @@ sealed class QueryTagMessageFunction : IGitFunction<QueryTagMessageParameters, s
 			const char c = '�';
 			if(message.ContainsAnyOf(c))
 			{
-				output = _commandExecutor.ExecuteCommand(command, Encoding.Default, CommandExecutionFlags.None);
+				output = commandExecutor.ExecuteCommand(command, Encoding.Default, CommandExecutionFlags.None);
 				output.ThrowOnBadReturnCode();
 				parser = new GitParser(output.Output);
 				while(!parser.IsAtEndOfLine)
@@ -95,26 +74,24 @@ sealed class QueryTagMessageFunction : IGitFunction<QueryTagMessageParameters, s
 		}
 	}
 
-	public string Invoke(QueryTagMessageParameters parameters)
+	public string Invoke(QueryTagMessageRequest parameters)
 	{
 		Verify.Argument.IsNotNull(parameters);
 
-		var command = _commandFactory(parameters);
-		var output = _commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
+		var command = commandFactory(parameters);
+		var output = commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
 		return ParseTagMessage(command, output);
 	}
 
-	public async Task<string> InvokeAsync(QueryTagMessageParameters parameters,
+	public async Task<string> InvokeAsync(QueryTagMessageRequest parameters,
 		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(parameters);
 
-		var command = _commandFactory(parameters);
-		var output = await _commandExecutor
+		var command = commandFactory(parameters);
+		var output = await commandExecutor
 			.ExecuteCommandAsync(command, CommandExecutionFlags.None, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 		return ParseTagMessage(command, output);
 	}
-
-	#endregion
 }

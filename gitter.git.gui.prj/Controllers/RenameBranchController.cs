@@ -31,41 +31,32 @@ using gitter.Git.Gui.Interfaces;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class RenameBranchController : ViewControllerBase<IRenameBranchView>, IRenameBranchController
+sealed class RenameBranchController(Branch branch)
+	: ViewControllerBase<IRenameBranchView>, IRenameBranchController
 {
-	public RenameBranchController(Branch branch)
-	{
-		Verify.Argument.IsNotNull(branch);
-
-		Branch = branch;
-	}
-
-	private Branch Branch { get; }
-
 	public bool TryRename()
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
-
-		var repository = Branch.Repository;
-		var oldName = Branch.Name;
-		var newName = View.NewName.Value.Trim();
+		var view = RequireView();
+		var repository = branch.Repository;
+		var oldName = branch.Name;
+		var newName = view.NewName.Value?.Trim();
 
 		if(oldName == newName) return true;
-		if(!GitControllerUtility.ValidateNewBranchName(newName, repository, View.NewName, View.ErrorNotifier))
+		if(!GitControllerUtility.ValidateNewBranchName(newName, repository, view.NewName, view.ErrorNotifier))
 		{
 			return false;
 		}
 
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				Branch.Name = newName;
+				branch.Name = newName!;
 			}
 		}
 		catch(BranchAlreadyExistsException)
 		{
-			View.ErrorNotifier.NotifyError(View.NewName,
+			view.ErrorNotifier.NotifyError(view.NewName,
 				new UserInputError(
 					Resources.ErrInvalidBranchName,
 					Resources.ErrBranchAlreadyExists));
@@ -73,7 +64,7 @@ sealed class RenameBranchController : ViewControllerBase<IRenameBranchView>, IRe
 		}
 		catch(InvalidBranchNameException exc)
 		{
-			View.ErrorNotifier.NotifyError(View.NewName,
+			view.ErrorNotifier.NotifyError(view.NewName,
 				new UserInputError(
 					Resources.ErrInvalidBranchName,
 					exc.Message));
@@ -82,7 +73,7 @@ sealed class RenameBranchController : ViewControllerBase<IRenameBranchView>, IRe
 		catch(GitException exc)
 		{
 			GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
+				view as IWin32Window,
 				exc.Message,
 				string.Format(Resources.ErrFailedToRenameBranch, oldName),
 				MessageBoxButton.Close,

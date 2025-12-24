@@ -24,53 +24,40 @@ using System;
 using System.Drawing;
 
 /// <summary>SubItem paint event args.</summary>
-public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
+/// <param name="graphics">Graphics surface to draw the item on.</param>
+/// <param name="dpi">DPI.</param>
+/// <param name="column">Column.</param>
+/// <param name="columnIndex">Column index.</param>
+/// <param name="clipRectangle">Clipping rectangle.</param>
+/// <param name="bounds">Rectangle that represents the bounds of the item that is being drawn.</param>
+/// <param name="index">Index value of the item that is being drawn.</param>
+/// <param name="state">State of the item being drawn.</param>
+/// <param name="hoveredPart">Hovered part of the item.</param>
+/// <param name="hostControlFocused">Host control is focused.</param>
+/// <param name="item">Item to paint.</param>
+public class SubItemPaintEventArgs(
+	Graphics graphics, Dpi dpi, Rectangle clipRectangle, Rectangle bounds, int index,
+	ItemState state, int hoveredPart, bool hostControlFocused,
+	CustomListBoxItem item, int columnIndex, CustomListBoxColumn column)
+	: ItemPaintEventArgs(graphics, dpi, clipRectangle, bounds, index, state, hoveredPart, hostControlFocused)
+	, IDpiConverterProvider
 {
-	#region .ctor
-
-	/// <summary>Create <see cref="ItemPaintEventArgs"/>.</summary>
-	/// <param name="graphics">Graphics surface to draw the item on.</param>
-	/// <param name="dpi">DPI.</param>
-	/// <param name="column">Column.</param>
-	/// <param name="columnIndex">Column index.</param>
-	/// <param name="clipRectangle">Clipping rectangle.</param>
-	/// <param name="bounds">Rectangle that represents the bounds of the item that is being drawn.</param>
-	/// <param name="index">Index value of the item that is being drawn.</param>
-	/// <param name="state">State of the item being drawn.</param>
-	/// <param name="hoveredPart">Hovered part of the item.</param>
-	/// <param name="hostControlFocused">Host control is focused.</param>
-	/// <param name="item">Item to paint.</param>
-	public SubItemPaintEventArgs(
-		Graphics graphics, Dpi dpi, Rectangle clipRectangle, Rectangle bounds, int index,
-		ItemState state, int hoveredPart, bool hostControlFocused,
-		CustomListBoxItem item, int columnIndex, CustomListBoxColumn column)
-		: base(graphics, dpi, clipRectangle, bounds, index, state, hoveredPart, hostControlFocused)
-	{
-		Item        = item;
-		ColumnIndex = columnIndex;
-		Column      = column;
-	}
-
-	#endregion
-
-	#region Properties
-
-	public CustomListBoxItem Item { get; }
+	public CustomListBoxItem Item { get; } = item;
 
 	/// <summary>Subitem column index.</summary>
-	public int ColumnIndex { get; }
+	public int ColumnIndex { get; } = columnIndex;
 
 	/// <summary>Host listbox.</summary>
-	public CustomListBox ListBox => Column.ListBox;
+	public CustomListBox ListBox => Column.ListBox!;
 
 	/// <summary>Subitem column.</summary>
-	public CustomListBoxColumn Column { get; }
+	public CustomListBoxColumn Column { get; } = column;
 
 	/// <summary>Column id.</summary>
 	public int SubItemId => Column.Id;
 
 	/// <summary>Font for painting subitem.</summary>
-	public Font Font => Column.ContentFont;
+	public Font Font { get; set; } = column.ContentFont;
 
 	/// <summary>Text brush to use.</summary>
 	public Brush Brush => Column.ContentBrush;
@@ -79,10 +66,6 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	public StringAlignment Alignment => Column.ContentAlignment;
 
 	public DpiConverter DpiConverter => DpiConverter.FromDefaultTo(Dpi);
-
-	#endregion
-
-	#region Methods
 
 	/// <summary>Get <see cref="StringFormat"/> for <see cref="StringAlignment"/>.</summary>
 	/// <param name="alignment">Text horizontal alignment</param>
@@ -111,18 +94,16 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="rect">Rectangle to prepare.</param>
 	public void PrepareTextRectangle(Font font, ref Rectangle rect)
 	{
-		var h1 = GitterApplication.TextRenderer.GetFontHeight(Graphics, Column.ContentFont);
-		var h  = GitterApplication.TextRenderer.GetFontHeight(Graphics, font);
+		var h1 = GitterApplication.TextRenderer.GetFontHeight(Graphics, Font);
+		var h  = font != Font ? GitterApplication.TextRenderer.GetFontHeight(Graphics, font) : h1;
 		var d  = (int)((rect.Height - h1) / 2.0f + h1 - h);
 		rect.Y      += d;
 		rect.Height -= d;
 	}
 
-	#region PaintImage()
-
 	/// <summary>Paint image content.</summary>
 	/// <param name="image"><see cref="Image"/> to paint.</param>
-	public void PaintImage(Image image)
+	public void PaintImage(Image? image)
 	{
 		if(image is null) return;
 
@@ -150,7 +131,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <summary>Paint image with overlay content.</summary>
 	/// <param name="image">Image to paint.</param>
 	/// <param name="overlay">Overlay to paint.</param>
-	public void PaintImage(Image image, Image overlay)
+	public void PaintImage(Image? image, Image? overlay)
 	{
 		if(image is null) return;
 
@@ -165,19 +146,17 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 		var src = new Rectangle(0, 0, w, h);
 		graphics.DrawImage(image, dest, src, GraphicsUnit.Pixel);
 		if(overlay is not null)
+		{
 			graphics.DrawImage(overlay, dest, src, GraphicsUnit.Pixel);
+		}
 	}
-
-	#endregion
-
-	#region PaintText()
 
 	/// <summary>Paint text content.</summary>
 	/// <param name="text">Text to paint.</param>
 	/// <param name="font">Font to use.</param>
 	/// <param name="brush">Brush to use.</param>
 	/// <param name="stringFormat"><see cref="StringFormat"/> to use.</param>
-	private void PaintTextCore(string text, Font font, Brush brush, StringFormat stringFormat)
+	private void PaintTextCore(string? text, Font font, Brush brush, StringFormat stringFormat)
 	{
 		if(text is not { Length: not 0 }) return;
 
@@ -218,7 +197,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	///		<para><paramref name="brush"/> == null or</para>
 	///		<para><paramref name="stringFormat"/> == null.</para>
 	/// </exception>
-	public void PaintText(string text, Font font, Brush brush, StringFormat stringFormat)
+	public void PaintText(string? text, Font font, Brush brush, StringFormat stringFormat)
 	{
 		Verify.Argument.IsNotNull(font);
 		Verify.Argument.IsNotNull(brush);
@@ -236,7 +215,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	///		<para><paramref name="font"/> == null or</para>
 	///		<para><paramref name="brush"/> == null.</para>
 	/// </exception>
-	public void PaintText(string text, Font font, Brush brush, StringAlignment stringAlignment)
+	public void PaintText(string? text, Font font, Brush brush, StringAlignment stringAlignment)
 	{
 		Verify.Argument.IsNotNull(font);
 		Verify.Argument.IsNotNull(brush);
@@ -252,7 +231,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	///		<para><paramref name="font"/> == null or</para>
 	///		<para><paramref name="brush"/> == null.</para>
 	/// </exception>
-	public void PaintText(string text, Font font, Brush brush)
+	public void PaintText(string? text, Font font, Brush brush)
 	{
 		Verify.Argument.IsNotNull(font);
 		Verify.Argument.IsNotNull(brush);
@@ -268,12 +247,12 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	///		<para><paramref name="brush"/> == null or</para>
 	///		<para><paramref name="stringFormat"/> == null.</para>
 	/// </exception>
-	public void PaintText(string text, Brush brush, StringFormat stringFormat)
+	public void PaintText(string? text, Brush brush, StringFormat stringFormat)
 	{
 		Verify.Argument.IsNotNull(brush);
 		Verify.Argument.IsNotNull(stringFormat);
 
-		PaintTextCore(text, Column.ContentFont, brush, stringFormat);
+		PaintTextCore(text, Font, brush, stringFormat);
 	}
 
 	/// <summary>Paint text content.</summary>
@@ -281,22 +260,22 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="brush"><see cref="Brush"/> to use.</param>
 	/// <param name="stringAlignment"><see cref="StringAlignment"/> to use.</param>
 	/// <exception cref="T:System.ArgumentNullException"><paramref name="brush"/> == <c>null</c>.</exception>
-	public void PaintText(string text, Brush brush, StringAlignment stringAlignment)
+	public void PaintText(string? text, Brush brush, StringAlignment stringAlignment)
 	{
 		Verify.Argument.IsNotNull(brush);
 
-		PaintTextCore(text, Column.ContentFont, brush, GetFormat(stringAlignment));
+		PaintTextCore(text, Font, brush, GetFormat(stringAlignment));
 	}
 
 	/// <summary>Paint text content.</summary>
 	/// <param name="text">Text to paint.</param>
 	/// <param name="brush"><see cref="Brush"/> to use.</param>
 	/// <exception cref="T:System.ArgumentNullException"><paramref name="brush"/> == <c>null</c>.</exception>
-	public void PaintText(string text, Brush brush)
+	public void PaintText(string? text, Brush brush)
 	{
 		Verify.Argument.IsNotNull(brush);
 
-		PaintTextCore(text, Column.ContentFont, brush, GetFormat(Column.ContentAlignment));
+		PaintTextCore(text, Font, brush, GetFormat(Column.ContentAlignment));
 	}
 
 	/// <summary>Paint text content.</summary>
@@ -307,7 +286,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	///		<para><paramref name="font"/> == null or</para>
 	///		<para><paramref name="stringFormat"/> == null.</para>
 	/// </exception>
-	public void PaintText(string text, Font font, StringFormat stringFormat)
+	public void PaintText(string? text, Font font, StringFormat stringFormat)
 	{
 		Verify.Argument.IsNotNull(font);
 		Verify.Argument.IsNotNull(stringFormat);
@@ -319,7 +298,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="text">Text to paint.</param>
 	/// <param name="font"><see cref="Font"/> to use.</param>
 	/// <exception cref="T:System.ArgumentNullException"><paramref name="font"/> == <c>null</c>.</exception>
-	public void PaintText(string text, Font font)
+	public void PaintText(string? text, Font font)
 	{
 		Verify.Argument.IsNotNull(font);
 
@@ -329,26 +308,26 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <summary>Paint text content.</summary>
 	/// <param name="text">Text to paint.</param>
 	/// <param name="stringFormat"><see cref="StringFormat"/> to use.</param>
-	public void PaintText(string text, StringFormat stringFormat)
+	public void PaintText(string? text, StringFormat stringFormat)
 	{
 		Verify.Argument.IsNotNull(stringFormat);
 
-		PaintTextCore(text, Column.ContentFont, Column.ContentBrush, stringFormat);
+		PaintTextCore(text, Font, Column.ContentBrush, stringFormat);
 	}
 
 	/// <summary>Paint text content.</summary>
 	/// <param name="text">Text to paint.</param>
 	/// <param name="stringAlignment"><see cref="StringAlignment"/> to use.</param>
-	public void PaintText(string text, StringAlignment stringAlignment)
+	public void PaintText(string? text, StringAlignment stringAlignment)
 	{
-		PaintTextCore(text, Column.ContentFont, Column.ContentBrush, GetFormat(stringAlignment));
+		PaintTextCore(text, Font, Column.ContentBrush, GetFormat(stringAlignment));
 	}
 
 	/// <summary>Paint text content.</summary>
 	/// <param name="text">Text to paint.</param>
-	public void PaintText(string text)
+	public void PaintText(string? text)
 	{
-		PaintTextCore(text, Column.ContentFont, Column.ContentBrush, GetFormat(Column.ContentAlignment));
+		PaintTextCore(text, Font, Column.ContentBrush, GetFormat(Column.ContentAlignment));
 	}
 
 	#if NETCOREAPP
@@ -430,7 +409,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	{
 		Verify.Argument.IsNotNull(brush);
 
-		PaintTextCore(text, Column.ContentFont, brush, GetFormat(stringAlignment));
+		PaintTextCore(text, Font, brush, GetFormat(stringAlignment));
 	}
 
 	/// <summary>Paint text content.</summary>
@@ -441,7 +420,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	{
 		Verify.Argument.IsNotNull(brush);
 
-		PaintTextCore(text, Column.ContentFont, brush, GetFormat(Column.ContentAlignment));
+		PaintTextCore(text, Font, brush, GetFormat(Column.ContentAlignment));
 	}
 
 	/// <summary>Paint text content.</summary>
@@ -478,7 +457,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	{
 		Verify.Argument.IsNotNull(stringFormat);
 
-		PaintTextCore(text, Column.ContentFont, Column.ContentBrush, stringFormat);
+		PaintTextCore(text, Font, Column.ContentBrush, stringFormat);
 	}
 
 	/// <summary>Paint text content.</summary>
@@ -486,21 +465,17 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="stringAlignment"><see cref="StringAlignment"/> to use.</param>
 	public void PaintText(ReadOnlySpan<char> text, StringAlignment stringAlignment)
 	{
-		PaintTextCore(text, Column.ContentFont, Column.ContentBrush, GetFormat(stringAlignment));
+		PaintTextCore(text, Font, Column.ContentBrush, GetFormat(stringAlignment));
 	}
 
 	/// <summary>Paint text content.</summary>
 	/// <param name="text">Text to paint.</param>
 	public void PaintText(ReadOnlySpan<char> text)
 	{
-		PaintTextCore(text, Column.ContentFont, Column.ContentBrush, GetFormat(Column.ContentAlignment));
+		PaintTextCore(text, Font, Column.ContentBrush, GetFormat(Column.ContentAlignment));
 	}
 
 	#endif
-
-	#endregion
-
-	#region PaintImageAndText()
 
 	/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
 	/// <param name="image">Image to paint.</param>
@@ -510,7 +485,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="font">Font to use for text painting.</param>
 	/// <param name="brush">Brush to use for text painting.</param>
 	/// <param name="stringFormat"><see cref="StringFormat"/> to use for text painting.</param>
-	private void PaintImageAndTextCore(Image image, Size imageDrawSize, IImagePainter imagePainter, string text, Font font, Brush brush, StringFormat stringFormat)
+	private void PaintImageAndTextCore(Image? image, Size imageDrawSize, IImagePainter? imagePainter, string? text, Font font, Brush brush, StringFormat stringFormat)
 	{
 		var rect = Bounds;
 		var conv = DpiConverter;
@@ -551,7 +526,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 			rect.X     += dx;
 			rect.Width -= dx;
 		}
-		if(rect.Width > 0)
+		if(rect.Width > 0 && text is { Length: not 0 })
 		{
 			PrepareTextRectangle(font, ref rect);
 			GitterApplication.TextRenderer.DrawText(
@@ -570,7 +545,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	///		<para><paramref name="brush"/> == null or</para>
 	///		<para><paramref name="stringFormat"/> == null.</para>
 	/// </exception>
-	public void PaintImageAndText(Image image, string text, Font font, Brush brush, StringFormat stringFormat)
+	public void PaintImageAndText(Image? image, string? text, Font font, Brush brush, StringFormat stringFormat)
 	{
 		Verify.Argument.IsNotNull(font);
 		Verify.Argument.IsNotNull(brush);
@@ -589,7 +564,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	///		<para><paramref name="font"/> == null or</para>
 	///		<para><paramref name="brush"/> == null.</para>
 	/// </exception>
-	public void PaintImageAndText(Image image, string text, Font font, Brush brush, StringAlignment stringAlignment)
+	public void PaintImageAndText(Image? image, string? text, Font font, Brush brush, StringAlignment stringAlignment)
 	{
 		Verify.Argument.IsNotNull(font);
 		Verify.Argument.IsNotNull(brush);
@@ -606,7 +581,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	///		<para><paramref name="font"/> == null or</para>
 	///		<para><paramref name="stringFormat"/> == null.</para>
 	/// </exception>
-	public void PaintImageAndText(Image image, string text, Font font, StringFormat stringFormat)
+	public void PaintImageAndText(Image? image, string? text, Font font, StringFormat stringFormat)
 	{
 		Verify.Argument.IsNotNull(font);
 		Verify.Argument.IsNotNull(stringFormat);
@@ -620,7 +595,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="font"><see cref="Font"/> to use for text painting.</param>
 	/// <param name="stringAlignment"><see cref="StringAlignment"/> to use for text horizontal alignment.</param>
 	/// <exception cref="T:System.ArgumentNullException"><paramref name="font"/> == <c>null</c>.</exception>
-	public void PaintImageAndText(Image image, string text, Font font, StringAlignment stringAlignment)
+	public void PaintImageAndText(Image? image, string? text, Font font, StringAlignment stringAlignment)
 	{
 		Verify.Argument.IsNotNull(font);
 
@@ -632,7 +607,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="text">Text to paint.</param>
 	/// <param name="font"><see cref="Font"/> to use for text painting.</param>
 	/// <exception cref="T:System.ArgumentNullException"><paramref name="font"/> == <c>null</c>.</exception>
-	public void PaintImageAndText(Image image, string text, Font font)
+	public void PaintImageAndText(Image? image, string? text, Font font)
 	{
 		Verify.Argument.IsNotNull(font);
 
@@ -648,19 +623,19 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	///		<para><paramref name="brush"/> == null or</para>
 	///		<para><paramref name="stringFormat"/> == null.</para>
 	/// </exception>
-	public void PaintImageAndText(Image image, string text, Brush brush, StringFormat stringFormat)
+	public void PaintImageAndText(Image? image, string? text, Brush brush, StringFormat stringFormat)
 	{
 		Verify.Argument.IsNotNull(brush);
 		Verify.Argument.IsNotNull(stringFormat);
 
-		PaintImageAndTextCore(image, default, default, text, Column.ContentFont, brush, stringFormat);
+		PaintImageAndTextCore(image, default, default, text, Font, brush, stringFormat);
 	}
 
-	public void PaintImageAndText(Image image, string text, Brush brush, StringAlignment stringAlignment)
+	public void PaintImageAndText(Image? image, string? text, Brush brush, StringAlignment stringAlignment)
 	{
 		Verify.Argument.IsNotNull(brush);
 
-		PaintImageAndTextCore(image, default, default, text, Column.ContentFont, brush, GetFormat(stringAlignment));
+		PaintImageAndTextCore(image, default, default, text, Font, brush, GetFormat(stringAlignment));
 	}
 
 	/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -668,11 +643,11 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="text">Text to paint.</param>
 	/// <param name="brush"><see cref="Brush"/> to use for text painting.</param>
 	/// <exception cref="T:System.ArgumentNullException"><paramref name="brush"/> == <c>null</c>.</exception>
-	public void PaintImageAndText(Image image, string text, Brush brush)
+	public void PaintImageAndText(Image? image, string? text, Brush brush)
 	{
 		Verify.Argument.IsNotNull(brush);
 
-		PaintImageAndTextCore(image, default, default, text, Column.ContentFont, brush, GetFormat(Column.ContentAlignment));
+		PaintImageAndTextCore(image, default, default, text, Font, brush, GetFormat(Column.ContentAlignment));
 	}
 
 	/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -681,11 +656,11 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="text">Text to paint.</param>
 	/// <param name="brush"><see cref="Brush"/> to use for text painting.</param>
 	/// <exception cref="T:System.ArgumentNullException"><paramref name="brush"/> == <c>null</c>.</exception>
-	public void PaintImageAndText(Image image, IImagePainter imagePainter, string text, Brush brush)
+	public void PaintImageAndText(Image? image, IImagePainter imagePainter, string? text, Brush brush)
 	{
 		Verify.Argument.IsNotNull(brush);
 
-		PaintImageAndTextCore(image, default, imagePainter, text, Column.ContentFont, brush, GetFormat(Column.ContentAlignment));
+		PaintImageAndTextCore(image, default, imagePainter, text, Font, brush, GetFormat(Column.ContentAlignment));
 	}
 
 	/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -693,60 +668,56 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="text">Text to paint.</param>
 	/// <param name="stringFormat"><see cref="StringFormat"/> to use for text painting.</param>
 	/// <exception cref="T:System.ArgumentNullException"><paramref name="stringFormat"/> == <c>null</c>.</exception>
-	public void PaintImageAndText(Image image, string text, StringFormat stringFormat)
+	public void PaintImageAndText(Image? image, string? text, StringFormat stringFormat)
 	{
 		Verify.Argument.IsNotNull(stringFormat);
 
-		PaintImageAndTextCore(image, default, default, text, Column.ContentFont, Column.ContentBrush, stringFormat);
+		PaintImageAndTextCore(image, default, default, text, Font, Column.ContentBrush, stringFormat);
 	}
 
 	/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
 	/// <param name="image">Image to paint.</param>
 	/// <param name="text">Text to paint.</param>
 	/// <param name="stringAlignment"><see cref="StringAlignment"/> to use for text horizontal alignment.</param>
-	public void PaintImageAndText(Image image, string text, StringAlignment stringAlignment)
+	public void PaintImageAndText(Image? image, string? text, StringAlignment stringAlignment)
 	{
-		PaintImageAndTextCore(image, default, default, text, Column.ContentFont, Column.ContentBrush, GetFormat(stringAlignment));
+		PaintImageAndTextCore(image, default, default, text, Font, Column.ContentBrush, GetFormat(stringAlignment));
 	}
 
 	/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
 	/// <param name="image">Image to paint.</param>
 	/// <param name="text">Text to paint.</param>
-	public void PaintImageAndText(Image image, string text)
+	public void PaintImageAndText(Image? image, string? text)
 	{
-		PaintImageAndTextCore(image, default, default, text, Column.ContentFont, Column.ContentBrush, GetFormat(Column.ContentAlignment));
+		PaintImageAndTextCore(image, default, default, text, Font, Column.ContentBrush, GetFormat(Column.ContentAlignment));
 	}
 
 	/// <summary>Paint <paramref name="imageProvider"/> and <paramref name="text"/> content.</summary>
 	/// <param name="imageProvider">Image to paint.</param>
 	/// <param name="text">Text to paint.</param>
-	public void PaintImageAndText(IImageProvider imageProvider, string text)
+	public void PaintImageAndText(IImageProvider? imageProvider, string? text)
 	{
 		var image = imageProvider?.GetImage(Dpi.X * 16 / 96);
-		PaintImageAndTextCore(image, default, default, text, Column.ContentFont, Column.ContentBrush, GetFormat(Column.ContentAlignment));
+		PaintImageAndTextCore(image, default, default, text, Font, Column.ContentBrush, GetFormat(Column.ContentAlignment));
 	}
 
 	/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
 	/// <param name="image">Image to paint.</param>
 	/// <param name="imagePainter">Image painter.</param>
 	/// <param name="text">Text to paint.</param>
-	public void PaintImageAndText(Image image, IImagePainter imagePainter, string text)
+	public void PaintImageAndText(Image? image, IImagePainter imagePainter, string? text)
 	{
-		PaintImageAndTextCore(image, default, imagePainter, text, Column.ContentFont, Column.ContentBrush, GetFormat(Column.ContentAlignment));
+		PaintImageAndTextCore(image, default, imagePainter, text, Font, Column.ContentBrush, GetFormat(Column.ContentAlignment));
 	}
 
 	/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
 	/// <param name="image">Image to paint.</param>
 	/// <param name="imageDrawSize">Drawn image size.</param>
 	/// <param name="text">Text to paint.</param>
-	public void PaintImageAndText(Image image, Size imageDrawSize, string text)
+	public void PaintImageAndText(Image? image, Size imageDrawSize, string? text)
 	{
-		PaintImageAndTextCore(image, imageDrawSize, default, text, Column.ContentFont, Column.ContentBrush, GetFormat(Column.ContentAlignment));
+		PaintImageAndTextCore(image, imageDrawSize, default, text, Font, Column.ContentBrush, GetFormat(Column.ContentAlignment));
 	}
-
-	#endregion
-
-	#region PaintImageOverlayAndText()
 
 	/// <summary>Paint <paramref name="icon"/> and <paramref name="text"/> content.</summary>
 	/// <param name="icon">Image to paint.</param>
@@ -755,7 +726,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="font"><see cref="Font"/> to use for text painting.</param>
 	/// <param name="brush"><see cref="Brush"/> to use for text painting.</param>
 	/// <param name="stringFormat"><see cref="StringFormat"/> to use for text painting.</param>
-	private void PaintImageOverlayAndTextCore(Image icon, Image overlay, string text, Font font, Brush brush, StringFormat stringFormat)
+	private void PaintImageOverlayAndTextCore(Image? icon, Image? overlay, string? text, Font font, Brush brush, StringFormat stringFormat)
 	{
 		var rect = Bounds;
 		var conv = DpiConverter;
@@ -788,7 +759,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 			rect.X     += dx;
 			rect.Width -= dx;
 		}
-		if(rect.Width > 0)
+		if(rect.Width > 0 && text is { Length: not 0 })
 		{
 			PrepareTextRectangle(font, ref rect);
 			GitterApplication.TextRenderer.DrawText(
@@ -808,7 +779,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	///		<para><paramref name="brush"/> == null or</para>
 	///		<para><paramref name="stringFormat"/> == null.</para>
 	/// </exception>
-	public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font, Brush brush, StringFormat stringFormat)
+	public void PaintImageOverlayAndText(Image? image, Image? overlay, string? text, Font font, Brush brush, StringFormat stringFormat)
 	{
 		Verify.Argument.IsNotNull(font);
 		Verify.Argument.IsNotNull(brush);
@@ -828,7 +799,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	///		<para><paramref name="font"/> == null or</para>
 	///		<para><paramref name="brush"/> == null.</para>
 	/// </exception>
-	public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font, Brush brush, StringAlignment stringAlignment)
+	public void PaintImageOverlayAndText(Image? image, Image? overlay, string? text, Font font, Brush brush, StringAlignment stringAlignment)
 	{
 		Verify.Argument.IsNotNull(font);
 		Verify.Argument.IsNotNull(brush);
@@ -846,12 +817,12 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	///		<para><paramref name="brush"/> == null or</para>
 	///		<para><paramref name="stringFormat"/> == null.</para>
 	/// </exception>
-	public void PaintImageOverlayAndText(Image image, Image overlay, string text, Brush brush, StringFormat stringFormat)
+	public void PaintImageOverlayAndText(Image image, Image overlay, string? text, Brush brush, StringFormat stringFormat)
 	{
 		Verify.Argument.IsNotNull(brush);
 		Verify.Argument.IsNotNull(stringFormat);
 
-		PaintImageOverlayAndTextCore(image, overlay, text, Column.ContentFont, brush, stringFormat);
+		PaintImageOverlayAndTextCore(image, overlay, text, Font, brush, stringFormat);
 	}
 
 	/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -861,11 +832,11 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="brush"><see cref="Brush"/> to use for text painting.</param>
 	/// <param name="stringAlignment"><see cref="StringAlignment"/> to use for text horizontal alignment.</param>
 	/// <exception cref="T:System.ArgumentNullException"><paramref name="brush"/> == <c>null</c>.</exception>
-	public void PaintImageOverlayAndText(Image image, Image overlay, string text, Brush brush, StringAlignment stringAlignment)
+	public void PaintImageOverlayAndText(Image? image, Image? overlay, string text, Brush brush, StringAlignment stringAlignment)
 	{
 		Verify.Argument.IsNotNull(brush);
 
-		PaintImageOverlayAndTextCore(image, overlay, text, Column.ContentFont, brush, GetFormat(stringAlignment));
+		PaintImageOverlayAndTextCore(image, overlay, text, Font, brush, GetFormat(stringAlignment));
 	}
 
 	/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -878,7 +849,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	///		<para><paramref name="font"/> == null or</para>
 	///		<para><paramref name="stringFormat"/> == null.</para>
 	/// </exception>
-	public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font, StringFormat stringFormat)
+	public void PaintImageOverlayAndText(Image? image, Image? overlay, string text, Font font, StringFormat stringFormat)
 	{
 		Verify.Argument.IsNotNull(font);
 		Verify.Argument.IsNotNull(stringFormat);
@@ -893,7 +864,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="font"><see cref="Font"/> to use for text painting.</param>
 	/// <param name="stringAlignment"><see cref="StringAlignment"/> to use for text horizontal alignment.</param>
 	/// <exception cref="T:System.ArgumentNullException"><paramref name="font"/> == <c>null</c>.</exception>
-	public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font, StringAlignment stringAlignment)
+	public void PaintImageOverlayAndText(Image? image, Image? overlay, string text, Font font, StringAlignment stringAlignment)
 	{
 		Verify.Argument.IsNotNull(font);
 
@@ -906,11 +877,11 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="text">Text to paint.</param>
 	/// <param name="stringFormat"><see cref="StringFormat"/> to use for text painting.</param>
 	/// <exception cref="T:System.ArgumentNullException"><paramref name="stringFormat"/> == <c>null</c>.</exception>
-	public void PaintImageOverlayAndText(Image image, Image overlay, string text, StringFormat stringFormat)
+	public void PaintImageOverlayAndText(Image? image, Image? overlay, string text, StringFormat stringFormat)
 	{
 		Verify.Argument.IsNotNull(stringFormat);
 
-		PaintImageOverlayAndTextCore(image, overlay, text, Column.ContentFont, Column.ContentBrush, stringFormat);
+		PaintImageOverlayAndTextCore(image, overlay, text, Font, Column.ContentBrush, stringFormat);
 	}
 
 	/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -918,9 +889,9 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="overlay">Image overlay to paint.</param>
 	/// <param name="text">Text to paint.</param>
 	/// <param name="stringAlignment"><see cref="StringAlignment"/> to use for text horizontal alignment.</param>
-	public void PaintImageOverlayAndText(Image image, Image overlay, string text, StringAlignment stringAlignment)
+	public void PaintImageOverlayAndText(Image? image, Image? overlay, string text, StringAlignment stringAlignment)
 	{
-		PaintImageOverlayAndTextCore(image, overlay, text, Column.ContentFont, Column.ContentBrush, GetFormat(stringAlignment));
+		PaintImageOverlayAndTextCore(image, overlay, text, Font, Column.ContentBrush, GetFormat(stringAlignment));
 	}
 
 	/// <summary>Paint <paramref name="image"/> and <paramref name="text"/> content.</summary>
@@ -933,7 +904,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	///		<para><paramref name="font"/> == null or</para>
 	///		<para><paramref name="brush"/> == null.</para>
 	/// </exception>
-	public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font, Brush brush)
+	public void PaintImageOverlayAndText(Image? image, Image? overlay, string text, Font font, Brush brush)
 	{
 		Verify.Argument.IsNotNull(font);
 		Verify.Argument.IsNotNull(brush);
@@ -947,7 +918,7 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="text">Text to paint.</param>
 	/// <param name="font"><see cref="Font"/> to use for text painting.</param>
 	/// <exception cref="T:System.ArgumentNullException"><paramref name="font"/> == <c>null</c>.</exception>
-	public void PaintImageOverlayAndText(Image image, Image overlay, string text, Font font)
+	public void PaintImageOverlayAndText(Image? image, Image? overlay, string text, Font font)
 	{
 		Verify.Argument.IsNotNull(font);
 
@@ -958,12 +929,8 @@ public class SubItemPaintEventArgs : ItemPaintEventArgs, IDpiConverterProvider
 	/// <param name="image">Image to paint.</param>
 	/// <param name="overlay">Image overlay to paint.</param>
 	/// <param name="text">Text to paint.</param>
-	public void PaintImageOverlayAndText(Image image, Image overlay, string text)
+	public void PaintImageOverlayAndText(Image? image, Image? overlay, string text)
 	{
-		PaintImageOverlayAndTextCore(image, overlay, text, Column.ContentFont, Column.ContentBrush, GetFormat(Column.ContentAlignment));
+		PaintImageOverlayAndTextCore(image, overlay, text, Font, Column.ContentBrush, GetFormat(Column.ContentAlignment));
 	}
-
-	#endregion
-
-	#endregion
 }

@@ -135,7 +135,11 @@ sealed class Win7CustomListBoxRenderer : CustomListBoxRenderer
 				var p1 = new PointF(rect.Right - w / 2, rect.Y + (rect.Height + arrowSize) / 2);
 				var p2 = new PointF(p1.X + arrowSize, p1.Y - arrowSize);
 				var p3 = new PointF(p1.X - arrowSize + 1, p1.Y - arrowSize);
+#if NET9_0_OR_GREATER
+				Span<PointF> triangle = [p1, p2, p3,];
+#else
 				var triangle = new PointF[3] { p1, p2, p3, };
+#endif
 				using(var brush = SolidBrushCache.Get(Color.FromArgb(76, 96, 122)))
 				{
 					graphics.FillPolygon(brush, triangle);
@@ -189,7 +193,11 @@ sealed class Win7CustomListBoxRenderer : CustomListBoxRenderer
 				var p1 = new PointF(rect.Right - w / 2, rect.Y + (rect.Height + arrowSize) / 2);
 				var p2 = new PointF(p1.X + arrowSize, p1.Y - arrowSize);
 				var p3 = new PointF(p1.X - arrowSize + 1, p1.Y - arrowSize);
+#if NET9_0_OR_GREATER
+				Span<PointF> triangle = [p1, p2, p3,];
+#else
 				var triangle = new PointF[3] { p1, p2, p3, };
+#endif
 				using(var brush = SolidBrushCache.Get(Color.FromArgb(76, 96, 122)))
 				{
 					graphics.FillPolygon(brush, triangle);
@@ -231,34 +239,19 @@ sealed class Win7CustomListBoxRenderer : CustomListBoxRenderer
 		bool hovered  = (state & ItemState.Hovered)  == ItemState.Hovered;
 		bool selected = (state & ItemState.Selected) == ItemState.Selected;
 		bool focused  = (state & ItemState.Focused)  == ItemState.Focused;
-		IBackgroundStyle background = null;
+		var background = default(IBackgroundStyle);
 		if(selected)
 		{
 			if(paintEventArgs.IsHostControlFocused)
 			{
-				if(hovered)
-				{
-					background = BackgroundStyle.SelectedFocused;
-				}
-				else if(focused)
-				{
-					background = BackgroundStyle.SelectedFocused;
-				}
-				else
-				{
-					background = BackgroundStyle.Selected;
-				}
+				     if(hovered) background = BackgroundStyle.SelectedFocused;
+				else if(focused) background = BackgroundStyle.SelectedFocused;
+				else             background = BackgroundStyle.Selected;
 			}
 			else
 			{
-				if(hovered)
-				{
-					background = BackgroundStyle.SelectedFocused;
-				}
-				else
-				{
-					background = BackgroundStyle.SelectedNoFocus;
-				}
+				if(hovered) background = BackgroundStyle.SelectedFocused;
+				else        background = BackgroundStyle.SelectedNoFocus;
 			}
 		}
 		else
@@ -282,14 +275,11 @@ sealed class Win7CustomListBoxRenderer : CustomListBoxRenderer
 				}
 			}
 		}
-		background?.Draw(paintEventArgs.Graphics, paintEventArgs.Dpi, paintEventArgs.Bounds);
+		background?.Draw(paintEventArgs.Graphics, new(paintEventArgs.Dpi, paintEventArgs.Bounds, paintEventArgs.ClipRectangle));
 	}
 
 	private static void PaintCheckBox(CustomListBoxItem item, ItemPaintEventArgs paintEventArgs, int x, ref int offset, ref int w2)
 	{
-		Assert.IsNotNull(item);
-		Assert.IsNotNull(paintEventArgs);
-
 		var iconLookup = paintEventArgs.HoveredPart == ItemHitTestResults.CheckBox
 			? ImgCheckedStateHovered
 			: ImgCheckedState;
@@ -345,7 +335,7 @@ sealed class Win7CustomListBoxRenderer : CustomListBoxRenderer
 		Assert.IsNotNull(item);
 		Assert.IsNotNull(paintEventArgs);
 
-		var listBox = item.ListBox;
+		var listBox = item.ListBox!;
 		var level   = item.Level;
 		if(!listBox.ShowRootTreeLines && level != 0)
 		{
@@ -371,34 +361,37 @@ sealed class Win7CustomListBoxRenderer : CustomListBoxRenderer
 					imageProvider = item.IsExpanded ? CommonIcons.TreeLines.Minus : CommonIcons.TreeLines.Plus;
 				}
 				var image = imageProvider.GetImage(16 * paintEventArgs.Dpi.X / 96);
-				var bounds = paintEventArgs.Bounds;
-				Rectangle destRect, srcRect;
-				if(w2 < imageSize.Width + spaceBefore)
+				if(image is not null)
 				{
-					destRect = new Rectangle(
-						x + offset,
-						bounds.Y + (bounds.Height - imageSize.Width) / 2,
-						w2 - spaceBefore,
-						imageSize.Height);
-					srcRect = new Rectangle(
-						0,
-						0,
-						image.Width * (w2 - spaceBefore) / imageSize.Width,
-						image.Height);
+					var bounds = paintEventArgs.Bounds;
+					Rectangle destRect, srcRect;
+					if(w2 < imageSize.Width + spaceBefore)
+					{
+						destRect = new Rectangle(
+							x + offset,
+							bounds.Y + (bounds.Height - imageSize.Width) / 2,
+							w2 - spaceBefore,
+							imageSize.Height);
+						srcRect = new Rectangle(
+							0,
+							0,
+							image.Width * (w2 - spaceBefore) / imageSize.Width,
+							image.Height);
+					}
+					else
+					{
+						destRect = new Rectangle(
+							x + offset,
+							bounds.Y + (bounds.Height - imageSize.Width) / 2,
+							imageSize.Width,
+							imageSize.Height);
+						srcRect = new Rectangle(
+							0, 0,
+							image.Width,
+							image.Height);
+					}
+					paintEventArgs.Graphics.DrawImage(image, destRect, srcRect, GraphicsUnit.Pixel);
 				}
-				else
-				{
-					destRect = new Rectangle(
-						x + offset,
-						bounds.Y + (bounds.Height - imageSize.Width) / 2,
-						imageSize.Width,
-						imageSize.Height);
-					srcRect = new Rectangle(
-						0, 0,
-						image.Width,
-						image.Height);
-				}
-				paintEventArgs.Graphics.DrawImage(image, destRect, srcRect, GraphicsUnit.Pixel);
 			}
 
 			var spaceAfter = ListBoxConstants.SpaceAfterPlusMinus.GetValue(paintEventArgs.Dpi);
@@ -421,7 +414,7 @@ sealed class Win7CustomListBoxRenderer : CustomListBoxRenderer
 		var clip = paintEventArgs.ClipRectangle;
 		var clipX1 = clip.X;
 		var clipX2 = clip.Right;
-		var columns = item.ListBox.Columns;
+		var columns = item.ListBox!.Columns;
 		int columnsCount = columns.Count;
 		int x = rect.X;
 

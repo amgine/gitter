@@ -20,35 +20,20 @@
 
 namespace NHunspell;
 
-public class HyphenResult
+public class HyphenResult(
+	string   hyphenatedWord,
+	byte[]   hyphenationPoints,
+	string[] hyphenationRep,
+	int[]    hyphenationPos,
+	int[]    hyphenationCut)
 {
-	private readonly int[] cut;
-	private readonly byte[] points;
-	private readonly int[] pos;
-	private readonly string[] rep;
-	private readonly string word;
+	public string HyphenatedWord => hyphenatedWord;
 
-	public HyphenResult(
-	  string hyphenatedWord,
-	  byte[] hyphenationPoints,
-	  string[] hyphenationRep,
-	  int[] hyphenationPos,
-	  int[] hyphenationCut)
-	{
-		this.word = hyphenatedWord;
-		this.points = hyphenationPoints;
-		this.rep = hyphenationRep;
-		this.pos = hyphenationPos;
-		this.cut = hyphenationCut;
-	}
+	public int[] HyphenationCuts => hyphenationCut;
 
-	public string HyphenatedWord => this.word;
+	public byte[] HyphenationPoints => hyphenationPoints;
 
-	public int[] HyphenationCuts => this.cut;
+	public int[] HyphenationPositions => hyphenationPos;
 
-	public byte[] HyphenationPoints => this.points;
-
-	public int[] HyphenationPositions => this.pos;
-
-	public string[] HyphenationReplacements => this.rep;
+	public string[] HyphenationReplacements => hyphenationRep;
 }

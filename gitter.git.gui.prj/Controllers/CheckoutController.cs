@@ -31,40 +31,23 @@ using gitter.Git.Gui.Interfaces;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class CheckoutController : ViewControllerBase<ICheckoutView>, ICheckoutController
+sealed class CheckoutController(Repository repository)
+	: ViewControllerBase<ICheckoutView>, ICheckoutController
 {
-	#region .ctor
-
-	public CheckoutController(Repository repository)
-	{
-		Verify.Argument.IsNotNull(repository);
-
-		Repository = repository;
-	}
-
-	#endregion
-
-	#region Properties
-
-	private Repository Repository { get; }
-
-	#endregion
-
-	#region ICheckoutController Members
-
 	private void ProceedCheckout(IRevisionPointer revision)
 	{
+		var view = RequireView();
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				revision.Checkout(true);
+				revision.Checkout(force: true);
 			}
 		}
 		catch(GitException exc)
 		{
 			GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
+				view as IWin32Window,
 				exc.Message,
 				string.Format(Resources.ErrFailedToCheckout, revision.Pointer),
 				MessageBoxButton.Close,
@@ -74,28 +57,27 @@ sealed class CheckoutController : ViewControllerBase<ICheckoutView>, ICheckoutCo
 
 	public bool TryCheckout()
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
-
-		var revision = View.Revision.Value;
+		var view = RequireView();
+		var revision = view.Revision.Value;
 		if(string.IsNullOrWhiteSpace(revision))
 		{
 			return true;
 		}
-		revision = revision.Trim();
+		revision = revision!.Trim();
 
-		var pointer = Repository.GetRevisionPointer(revision);
-		bool force = Control.ModifierKeys == Keys.Shift;
+		var pointer = repository.GetRevisionPointer(revision);
+		var force = Control.ModifierKeys == Keys.Shift;
 
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
 				pointer.Checkout(force);
 			}
 		}
 		catch(UnknownRevisionException)
 		{
-			View.ErrorNotifier.NotifyError(View.Revision,
+			view.ErrorNotifier.NotifyError(view.Revision,
 				new UserInputError(
 					Resources.ErrInvalidRevisionExpression,
 					Resources.ErrRevisionIsUnknown));
@@ -104,7 +86,7 @@ sealed class CheckoutController : ViewControllerBase<ICheckoutView>, ICheckoutCo
 		catch(UntrackedFileWouldBeOverwrittenException)
 		{
 			if(GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
+				view as IWin32Window,
 				string.Format(Resources.AskOverwriteUntracked, revision),
 				Resources.StrCheckout,
 				MessageBoxButtons.YesNo,
@@ -116,7 +98,7 @@ sealed class CheckoutController : ViewControllerBase<ICheckoutView>, ICheckoutCo
 		catch(HaveLocalChangesException)
 		{
 			if(GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
+				view as IWin32Window,
 				string.Format(Resources.AskThrowAwayLocalChanges, revision),
 				Resources.StrCheckout,
 				MessageBoxButtons.YesNo,
@@ -128,7 +110,7 @@ sealed class CheckoutController : ViewControllerBase<ICheckoutView>, ICheckoutCo
 		catch(HaveConflictsException)
 		{
 			if(GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
+				view as IWin32Window,
 				string.Format(Resources.AskThrowAwayConflictedChanges, revision),
 				Resources.StrCheckout,
 				MessageBoxButtons.YesNo,
@@ -140,7 +122,7 @@ sealed class CheckoutController : ViewControllerBase<ICheckoutView>, ICheckoutCo
 		catch(GitException exc)
 		{
 			GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
+				view as IWin32Window,
 				exc.Message,
 				string.Format(Resources.ErrFailedToCheckout, revision),
 				MessageBoxButton.Close,
@@ -149,6 +131,4 @@ sealed class CheckoutController : ViewControllerBase<ICheckoutView>, ICheckoutCo
 		}
 		return true;
 	}
-
-	#endregion
 }

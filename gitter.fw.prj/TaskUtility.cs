@@ -47,6 +47,6 @@ public static class TaskUtility
 		Assert.IsNotNull(task);
 
 		if(task.IsCanceled) throw new OperationCanceledException();
-		if(task.IsFaulted)  throw UnwrapException(task.Exception);
+		if(task.IsFaulted)  throw UnwrapException(task.Exception!);
 	}
 }

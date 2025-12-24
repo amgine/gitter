@@ -25,25 +25,18 @@ using System.Xml;
 
 static class TeamCityUtility
 {
-	public static string LoadString(XmlNode node)
-	{
-		if(node == null) return null;
-		return node.InnerText;
-	}
+	public static string? LoadString(XmlNode? node)
+		=> node?.InnerText;
 
 	public static bool LoadBoolean(XmlNode node)
-	{
-		if(node == null) return false;
-		return node.InnerText == "true";
-	}
+		=> node?.InnerText == "true";
 
-	public static int LoadInt(XmlNode node)
+	public static int LoadInt(XmlNode? node)
 	{
-		if(node == null) return 0;
-		int res;
+		if(node is null) return 0;
 		if(!int.TryParse(node.InnerText,
 			System.Globalization.NumberStyles.Number,
-			System.Globalization.CultureInfo.InvariantCulture, out res))
+			System.Globalization.CultureInfo.InvariantCulture, out var res))
 		{
 			return 0;
 		}
@@ -75,34 +68,33 @@ static class TeamCityUtility
 		return res;
 	}
 
-	public static DateTime LoadDateForSure(XmlNode node)
+	public static DateTimeOffset LoadRequiredDate(XmlNode node)
 	{
 		var text			= node.InnerText;
 		var dateString		= text.Substring(0, 15);
-		var date			= DateTime.ParseExact(dateString, @"yyyyMMdd\THHmmss", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AssumeUniversal);
+		var date			= DateTime.ParseExact(dateString, @"yyyyMMdd\THHmmss", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None);
 		var offsetHours		= int.Parse(text.Substring(16, 2), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
 		var offsetMinutes	= int.Parse(text.Substring(18, 2), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
-		var offset = new TimeSpan(offsetHours, offsetMinutes, 0);
-		if(text[15] == '+')
-		{
-			date += offset;
-		}
-		else if(text[15] == '-')
-		{
-			date -= offset;
-		}
-		return date.ToLocalTime();
+		var offset          = new TimeSpan(offsetHours, offsetMinutes, 0);
+		if(text[15] == '-') offset = new(-offset.Ticks);
+		return new(date, offset);
 	}
 
-	public static BuildStatus LoadBuildStatus(XmlNode node)
-	{
-		if(node is null) return BuildStatus.Unknown;
-		return node.InnerText switch
+	public static BuildStatus LoadBuildStatus(XmlNode? node)
+		=> node?.InnerText switch
 		{
 			"ERROR"   => BuildStatus.Error,
 			"FAILURE" => BuildStatus.Failure,
 			"SUCCESS" => BuildStatus.Success,
 			_ => BuildStatus.Unknown,
 		};
-	}
+
+	public static BuildState LoadBuildState(XmlNode? node)
+		=> node?.InnerText switch
+		{
+			"queued"   => BuildState.Queued,
+			"running"  => BuildState.Running,
+			"finished" => BuildState.Finished,
+			_ => BuildState.Unknown,
+		};
 }

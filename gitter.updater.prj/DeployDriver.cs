@@ -21,9 +21,6 @@
 namespace gitter.Updater;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using Resources = gitter.Updater.Properties.Resources;
 
@@ -31,32 +28,24 @@ sealed class DeployDriver : IUpdateDriver
 {
 	public string Name => "deploy";
 
-	public IUpdateProcess CreateProcess(CommandLine cmdline)
+	public IUpdateProcess? CreateProcess(CommandLine cmdline)
 	{
 		var source = cmdline["source"];
-		if(source == null) return null;
+		if(source is null) return null;
 		var target = cmdline["target"];
-		if(target == null) return null;
+		if(target is null) return null;
 		return new DeployProcess(source, target);
 	}
 }
 
-sealed class DeployProcess : IUpdateProcess
+sealed class DeployProcess(string source, string target) : IUpdateProcess
 {
-	private readonly string _source;
-	private readonly string _target;
-	private IAsyncResult _currentProcess;
-	private UpdateProcessMonitor _monitor;
-
-	public DeployProcess(string source, string target)
-	{
-		_source = source;
-		_target = target;
-	}
+	private IAsyncResult? _currentProcess;
+	private UpdateProcessMonitor? _monitor;
 
 	public void BeginUpdate(UpdateProcessMonitor monitor)
 	{
-		if(_currentProcess != null) throw new InvalidOperationException();
+		if(_currentProcess is null) throw new InvalidOperationException();
 
 		monitor.Stage = Resources.StrInitializing + "...";
 		monitor.MaximumProgress = 10;
@@ -77,28 +66,37 @@ sealed class DeployProcess : IUpdateProcess
 	{
 		try
 		{
-			if(_monitor.CancelRequested)
+			if(_monitor is { CancelRequested: true })
 			{
 				_monitor.ReportCancelled();
 				return;
 			}
-			_monitor.Stage = "Closing running application instances...";
-			Utility.KillAllGitterProcesses(_target);
-			_monitor.CurrentProgress = 3;
-			if(_monitor.CancelRequested)
+			if(_monitor is not null)
 			{
-				_monitor.ReportCancelled();
-				return;
+				_monitor.Stage = "Closing running application instances...";
 			}
-			_monitor.CanCancel = false;
-			_monitor.Stage = "Installing application...";
-			Utility.CopyDirectoryContent(_source, _target);
-			_monitor.CurrentProgress = _monitor.MaximumProgress;
-			_monitor.ReportSuccess();
+			Utility.KillAllGitterProcesses(target);
+			if(_monitor is not null)
+			{
+				_monitor.CurrentProgress = 3;
+				if(_monitor.CancelRequested)
+				{
+					_monitor.ReportCancelled();
+					return;
+				}
+				_monitor.CanCancel = false;
+				_monitor.Stage = "Installing application...";
+			}
+			Utility.CopyDirectoryContent(source, target);
+			if(_monitor is not null)
+			{
+				_monitor.CurrentProgress = _monitor.MaximumProgress;
+				_monitor.ReportSuccess();
+			}
 		}
 		catch(Exception exc)
 		{
-			_monitor.ReportFailure("Unexpected error:\n" + exc.Message);
+			_monitor?.ReportFailure("Unexpected error:\n" + exc.Message);
 		}
 	}
 
@@ -106,14 +104,14 @@ sealed class DeployProcess : IUpdateProcess
 
 	private void UpdateProcCallback(IAsyncResult ar)
 	{
-		var proc = (Action)ar.AsyncState;
+		var proc = (Action)ar.AsyncState!;
 		try
 		{
 			proc.EndInvoke(ar);
 		}
 		catch(Exception exc)
 		{
-			_monitor.ReportFailure("Unexpected error:\n" + exc.Message);
+			_monitor?.ReportFailure("Unexpected error:\n" + exc.Message);
 		}
 		_monitor = null;
 		_currentProcess = null;

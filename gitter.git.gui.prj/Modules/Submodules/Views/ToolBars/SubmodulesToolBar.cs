@@ -58,8 +58,10 @@ internal sealed class SubmodulesToolbar : ToolStrip
 		Items.Add(_btnAddSubmodule = new ToolStripButton(Resources.StrAddSubmodule, null,
 			(_, _) =>
 			{
-				using var dlg = new AddSubmoduleDialog(_submodulesView.Repository);
-				dlg.Run(_submodulesView);
+				if(_submodulesView.Repository is null) return;
+
+				using var dialog = new AddSubmoduleDialog(_submodulesView.Repository);
+				dialog.Run(_submodulesView);
 			})
 			{
 				DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,

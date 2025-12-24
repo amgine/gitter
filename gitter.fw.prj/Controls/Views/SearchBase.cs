@@ -31,12 +31,12 @@ public abstract class SearchBase
 	/// <c>true</c>, if <paramref name="value"/> satisfies <paramref name="search"/>;<br/>
 	/// <c>false</c> otherwise.
 	/// </returns>
-	protected static bool TestString(string value, SearchOptions search)
+	protected static bool TestString(string? value, SearchOptions search)
 	{
 		Assert.IsNotNull(search);
 
-		if(string.IsNullOrEmpty(search.Text)) return true;
-		if(string.IsNullOrEmpty(value)) return false;
+		if(search.Text is not { Length: not 0 }) return true;
+		if(value       is not { Length: not 0 }) return false;
 
 		const StringComparison CaseSensitive   = StringComparison.Ordinal;
 		const StringComparison CaseInsensitive = StringComparison.OrdinalIgnoreCase;

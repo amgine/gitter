@@ -32,8 +32,6 @@ using gitter.Framework.Configuration;
 
 using Resources = gitter.Git.Properties.Resources;
 
-#nullable enable
-
 /// <summary>git repository.</summary>
 public sealed class Repository : IGitRepository
 {
@@ -148,7 +146,7 @@ public sealed class Repository : IGitRepository
 		{
 			using var sr = new StreamReader(gitDirectory);
 			var  line = sr.ReadLine();
-			while(line != null)
+			while(line is not null)
 			{
 				if(line.StartsWith(GitDirPrefix))
 				{
@@ -179,7 +177,7 @@ public sealed class Repository : IGitRepository
 				configurationManager = new ConfigurationManager(new XmlAdapter(fs));
 			}
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 		}
 		return configurationManager ?? new ConfigurationManager(@"Gitter");
@@ -200,7 +198,7 @@ public sealed class Repository : IGitRepository
 		WorkingDirectory     = GetWorkingDirectory(workingDirectory);
 		GitDirectory         = GetGitDirectory(WorkingDirectory);
 		ConfigurationManager = GetConfigurationManager(GitDirectory);
-		NullRevisionPointer  = new NowherePointer(this, default);
+		NullRevisionPointer  = new NowherePointer(this, "");
 
 		Accessor      = gitAccessor.CreateRepositoryAccessor(this);
 		Revisions     = new RevisionCache(this);
@@ -233,7 +231,7 @@ public sealed class Repository : IGitRepository
 		{
 			return Head;
 		}
-		if(Hash.TryParse(revisionExpression, out var hash))
+		if(Sha1Hash.TryParse(revisionExpression, out var hash))
 		{
 			var revision = Revisions.TryGetRevision(hash);
 			if(revision is not null) return revision;
@@ -360,7 +358,7 @@ public sealed class Repository : IGitRepository
 				}
 			}
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 		}
 		return default;
@@ -467,41 +465,41 @@ public sealed class Repository : IGitRepository
 
 	#region init
 
-	private static InitRepositoryParameters GetInitRepositoryParameters(string path, string? template = default, bool bare = false)
+	private static InitRepositoryRequest GetInitRepositoryRequest(string path, string? template = default, bool bare = false)
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(path);
 
-		return new InitRepositoryParameters(path, template, bare);
+		return new InitRepositoryRequest(path, template, bare);
 	}
 
 	public static void Init(IGitAccessor gitAccessor, string path, string? template = default, bool bare = false)
 	{
 		Verify.Argument.IsNotNull(gitAccessor);
 
-		var parameters = GetInitRepositoryParameters(path, template, bare);
-		gitAccessor.InitRepository.Invoke(parameters);
+		var request = GetInitRepositoryRequest(path, template, bare);
+		gitAccessor.InitRepository.Invoke(request);
 	}
 
 	public static Task InitAsync(IGitAccessor gitAccessor, string path, string? template = default, bool bare = false)
 	{
 		Verify.Argument.IsNotNull(gitAccessor);
 
-		var parameters = GetInitRepositoryParameters(path, template, bare);
-		return gitAccessor.InitRepository.InvokeAsync(parameters);
+		var request = GetInitRepositoryRequest(path, template, bare);
+		return gitAccessor.InitRepository.InvokeAsync(request);
 	}
 
 	#endregion
 
 	#region clone
 
-	private static CloneRepositoryParameters GetCloneRepositoryParameters(
+	private static CloneRepositoryRequest GetCloneRepositoryRequest(
 		string url, string path, string? template = null, string? remoteName = null,
 		bool shallow = false, int depth = -1, bool bare = false, bool mirror = false, bool recursive = true, bool noCheckout = false)
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(url);
 		Verify.Argument.IsNeitherNullNorWhitespace(path);
 
-		return new CloneRepositoryParameters
+		return new CloneRepositoryRequest
 		{
 			Url        = url,
 			Path       = path,
@@ -524,8 +522,8 @@ public sealed class Repository : IGitRepository
 	{
 		Verify.Argument.IsNotNull(gitAccessor);
 
-		var parameters = GetCloneRepositoryParameters(url, path, template, remoteName, shallow, depth, bare, mirror, recursive, noCheckout);
-		gitAccessor.CloneRepository.Invoke(parameters);
+		var request = GetCloneRepositoryRequest(url, path, template, remoteName, shallow, depth, bare, mirror, recursive, noCheckout);
+		gitAccessor.CloneRepository.Invoke(request);
 	}
 
 	public static Task CloneAsync(
@@ -536,8 +534,8 @@ public sealed class Repository : IGitRepository
 	{
 		Verify.Argument.IsNotNull(gitAccessor);
 
-		var parameters = GetCloneRepositoryParameters(url, path, template, remoteName, shallow, depth, bare, mirror, recursive, noCheckout);
-		return gitAccessor.CloneRepository.InvokeAsync(parameters, progress, cancellationToken);
+		var request = GetCloneRepositoryRequest(url, path, template, remoteName, shallow, depth, bare, mirror, recursive, noCheckout);
+		return gitAccessor.CloneRepository.InvokeAsync(request, progress, cancellationToken);
 	}
 
 	#endregion
@@ -566,7 +564,7 @@ public sealed class Repository : IGitRepository
 
 	public async Task CherryPickAsync(CherryPickControl control, IProgress<OperationProgress>? progress = default)
 	{
-		Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		BeforeCherryPick(control, progress);
 		try
@@ -577,7 +575,7 @@ public sealed class Repository : IGitRepository
 				RepositoryNotifications.IndexUpdated))
 			{
 				await Accessor.CherryPick
-					.InvokeAsync(new CherryPickParameters(control), progress, CancellationToken.None)
+					.InvokeAsync(new CherryPickRequest(control), progress, CancellationToken.None)
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 		}
@@ -628,7 +626,7 @@ public sealed class Repository : IGitRepository
 
 	public async Task RevertAsync(RevertControl control, IProgress<OperationProgress>? progress = default)
 	{
-		Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		BeforeRevert(control, progress);
 		try
@@ -639,7 +637,7 @@ public sealed class Repository : IGitRepository
 				RepositoryNotifications.IndexUpdated))
 			{
 				await Accessor.Revert
-					.InvokeAsync(new RevertParameters(control), progress, CancellationToken.None)
+					.InvokeAsync(new RevertRequest(control), progress, CancellationToken.None)
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 		}
@@ -673,7 +671,7 @@ public sealed class Repository : IGitRepository
 	/// <param name="control">Type of operation.</param>
 	public void Rebase(RebaseControl control)
 	{
-		Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		using(Monitor.BlockNotifications(
 			RepositoryNotifications.BranchChanged,
@@ -683,7 +681,7 @@ public sealed class Repository : IGitRepository
 		{
 			try
 			{
-				Accessor.Rebase.Invoke(new RebaseParameters(control));
+				Accessor.Rebase.Invoke(new RebaseRequest(control));
 			}
 			finally
 			{
@@ -702,25 +700,23 @@ public sealed class Repository : IGitRepository
 
 	/// <summary>Control rebase process.</summary>
 	/// <param name="control">Type of operation.</param>
+	/// <param name="progress">Progress tracker.</param>
 	public async Task RebaseAsync(RebaseControl control, IProgress<OperationProgress>? progress = default)
 	{
-		Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
-		switch(control)
+		if(progress is not null)
 		{
-			case RebaseControl.Abort:
-				progress?.Report(new(Resources.StrsAbortingRebase.AddEllipsis()));
-				break;
-			case RebaseControl.Continue:
-				progress?.Report(new(Resources.StrsContinuingRebase.AddEllipsis()));
-				break;
-			case RebaseControl.Skip:
-				progress?.Report(new(Resources.StrsSkippingCommit.AddEllipsis()));
-				break;
-			default:
-				throw new ArgumentException(
+			OperationProgress p = control switch
+			{
+				RebaseControl.Abort    => new(Resources.StrsAbortingRebase.AddEllipsis()),
+				RebaseControl.Continue => new(Resources.StrsContinuingRebase.AddEllipsis()),
+				RebaseControl.Skip     => new(Resources.StrsSkippingCommit.AddEllipsis()),
+				_ => throw new ArgumentException(
 					$"Unknown {nameof(RebaseControl)} value: {control}",
-					nameof(control));
+					nameof(control))
+			};
+			progress.Report(p);
 		}
 
 		try
@@ -732,7 +728,7 @@ public sealed class Repository : IGitRepository
 				RepositoryNotifications.IndexUpdated))
 			{
 				await Accessor.Rebase
-					.InvokeAsync(new RebaseParameters(control), progress, CancellationToken.None)
+					.InvokeAsync(new RebaseRequest(control), progress, CancellationToken.None)
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 		}
@@ -744,7 +740,7 @@ public sealed class Repository : IGitRepository
 			await Head
 				.RefreshAsync()
 				.ConfigureAwait(continueOnCapturedContext: false);
-			if(Head.Pointer is Branch branch && !branch.IsRemote)
+			if(Head.Pointer is Branch { IsRemote: false } branch)
 			{
 				await branch
 					.RefreshAsync()
@@ -762,34 +758,34 @@ public sealed class Repository : IGitRepository
 
 	#region gc
 
-	private static GarbageCollectParameters GetGarbageCollectParameters()
+	private static GarbageCollectRequest GetGarbageCollectRequest()
 	{
-		return new GarbageCollectParameters();
+		return new GarbageCollectRequest();
 	}
 
 	/// <summary>Perform garbage collection.</summary>
 	public void GarbageCollect()
 	{
-		Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
-		var parameters = GetGarbageCollectParameters();
+		var request = GetGarbageCollectRequest();
 		using(Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
 		{
-			Accessor.GarbageCollect.Invoke(parameters);
+			Accessor.GarbageCollect.Invoke(request);
 		}
 	}
 
 	/// <summary>Perform garbage collection.</summary>
 	public async Task GarbageCollectAsync(IProgress<OperationProgress>? progress = default)
 	{
-		Verify.State.IsFalse(IsDisposed, "Repository is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		progress?.Report(new OperationProgress(Resources.StrOptimizingRepository.AddEllipsis()));
-		var parameters = GetGarbageCollectParameters();
+		var request = GetGarbageCollectRequest();
 		using(Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
 		{
 			await Accessor.GarbageCollect
-				.InvokeAsync(parameters, progress, CancellationToken.None)
+				.InvokeAsync(request, progress, CancellationToken.None)
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 	}

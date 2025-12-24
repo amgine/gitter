@@ -36,13 +36,13 @@ public abstract class SearchToolBar<TOptions> : ToolStrip
 {
 	#region Data
 
-	private ISearchableView<TOptions> _view;
+	private ISearchableView<TOptions>? _view;
 	private readonly ToolStripTextBox _textBox;
 	private readonly ToolStripButton _btnNext;
 	private readonly ToolStripButton _btnPrev;
 	private readonly ToolStripButton _btnMatchCase;
 	private bool _result;
-	private TOptions _options;
+	private TOptions? _options;
 
 	#endregion
 
@@ -56,8 +56,8 @@ public abstract class SearchToolBar<TOptions> : ToolStrip
 			DisplayStyle = ToolStripItemDisplayStyle.Image,
 		};
 
-		Items.AddRange(new ToolStripItem[]
-			{
+		Items.AddRange(
+			[
 				searchClose,
 				new ToolStripLabel(Resources.StrFind.AddColon(), null),
 				_textBox = new ToolStripTextBox()
@@ -80,7 +80,7 @@ public abstract class SearchToolBar<TOptions> : ToolStrip
 					DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
 					Enabled = true,
 				},
-			});
+			]);
 
 		dpiBindings.BindImage(searchClose, CommonIcons.SearchClose);
 		dpiBindings.BindImage(_btnNext, CommonIcons.SearchNext);
@@ -92,13 +92,13 @@ public abstract class SearchToolBar<TOptions> : ToolStrip
 		_btnMatchCase.CheckedChanged    += OnMatchCaseCheckedChanged;
 	}
 
-	private void OnCloseButtonClick(object sender, EventArgs e)
+	private void OnCloseButtonClick(object? sender, EventArgs e)
 	{
 		if(View is null) return;
 		View.SearchToolBarVisible = false;
 	}
 
-	private void OnSearchTextChanged(object sender, EventArgs e)
+	private void OnSearchTextChanged(object? sender, EventArgs e)
 	{
 		if(View != null)
 		{
@@ -109,7 +109,7 @@ public abstract class SearchToolBar<TOptions> : ToolStrip
 		_btnPrev.Enabled = _textBox.TextLength > 0;
 	}
 
-	private void OnSearchTextBoxPreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnSearchTextBoxPreviewKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
@@ -126,7 +126,7 @@ public abstract class SearchToolBar<TOptions> : ToolStrip
 		}
 	}
 
-	private void OnSearchTextBoxKeyDown(object sender, KeyEventArgs e)
+	private void OnSearchTextBoxKeyDown(object? sender, KeyEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
@@ -153,24 +153,24 @@ public abstract class SearchToolBar<TOptions> : ToolStrip
 		}
 	}
 
-	private void OnNextClick(object sender, EventArgs e)
+	private void OnNextClick(object? sender, EventArgs e)
 	{
 		if(View is null) return;
 		HandleSearchResult(View.Search.Next(Options));
 	}
 
-	private void OnPreviousClick(object sender, EventArgs e)
+	private void OnPreviousClick(object? sender, EventArgs e)
 	{
 		if(View is null) return;
 		HandleSearchResult(View.Search.Previous(Options));
 	}
 
-	private void OnMatchCaseClick(object sender, EventArgs e)
+	private void OnMatchCaseClick(object? sender, EventArgs e)
 	{
 		_btnMatchCase.Checked = !_btnMatchCase.Checked;
 	}
 
-	private void OnMatchCaseCheckedChanged(object sender, EventArgs e)
+	private void OnMatchCaseCheckedChanged(object? sender, EventArgs e)
 	{
 		if(View is null) return;
 		Options = CreateSearchOptions();
@@ -187,7 +187,7 @@ public abstract class SearchToolBar<TOptions> : ToolStrip
 				_options = value;
 				if(value is not null)
 				{
-					SearchText = value.Text;
+					SearchText = value.Text ?? "";
 					MatchCase  = value.MatchCase;
 				}
 			}
@@ -198,39 +198,36 @@ public abstract class SearchToolBar<TOptions> : ToolStrip
 
 	private void HandleSearchResult(bool result)
 	{
-		if(result != _result)
+		if(result == _result) return;
+
+		if(result)
 		{
-			if(result)
-			{
-				_textBox.TextBox.BackColor = GitterApplication.Style.Colors.Window;
-			}
-			else
-			{
-				var color = GitterApplication.Style.Colors.Window;
-				int r = color.R + 50;
-				if(r > 255) r = 255;
-				_textBox.TextBox.BackColor = Color.FromArgb(r, color.G, color.B);
-				try
-				{
-					System.Media.SystemSounds.Beep.Play();
-				}
-				catch(Exception exc) when(!exc.IsCritical())
-				{
-				}
-			}
-			_result = result;
+			_textBox.TextBox.BackColor = GitterApplication.Style.Colors.Window;
 		}
+		else
+		{
+			var color = GitterApplication.Style.Colors.Window;
+			int r = color.R + 50;
+			if(r > 255) r = 255;
+			_textBox.TextBox.BackColor = Color.FromArgb(r, color.G, color.B);
+			try
+			{
+				System.Media.SystemSounds.Beep.Play();
+			}
+			catch(Exception exc) when(!exc.IsCritical)
+			{
+			}
+		}
+		_result = result;
 	}
 
-	public ISearchableView<TOptions> View
+	public ISearchableView<TOptions>? View
 	{
 		get => _view;
 		set
 		{
-			if(_view != value)
-			{
-				_view = value;
-			}
+			if(_view == value) return;
+			_view = value;
 		}
 	}
 

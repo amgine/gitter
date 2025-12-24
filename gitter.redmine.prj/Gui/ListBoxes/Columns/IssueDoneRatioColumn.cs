@@ -21,9 +21,6 @@
 namespace gitter.Redmine.Gui;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using gitter.Framework.Controls;
 
@@ -37,13 +34,8 @@ public sealed class IssueDoneRatioColumn : CustomListBoxColumn
 		Width = 60;
 	}
 
-	public override string IdentificationString
-	{
-		get { return "DoneRatio"; }
-	}
+	public override string IdentificationString => "DoneRatio";
 
 	protected override Comparison<CustomListBoxItem> SortComparison
-	{
-		get { return IssueListItem.CompareByDoneRatio; }
-	}
+		=> IssueListItem.CompareByDoneRatio;
 }

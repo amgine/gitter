@@ -70,7 +70,7 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 
 		Side = side;
 
-		_tabs = new List<ViewHostTab>();
+		_tabs = [];
 		foreach(var view in viewHost.Views)
 		{
 			_tabs.Add(new ViewHostTab(this, view));
@@ -109,19 +109,19 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 		_floatId = -1;
 	}
 
-	private void OnActiveViewChanged(object sender, EventArgs e)
+	private void OnActiveViewChanged(object? sender, EventArgs e)
 	{
 		Invalidate();
 	}
 
-	private void OnAreaHoverChanged(object sender, TrackingEventArgs<object> e)
+	private void OnAreaHoverChanged(object? sender, TrackingEventArgs<object> e)
 	{
 		switch(e.Index)
 		{
 			case 0:
 				if(!e.IsTracked)
 				{
-					LeftButtons.OnMouseLeave();
+					LeftButtons?.OnMouseLeave();
 				}
 				break;
 			case 1:
@@ -133,21 +133,21 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 			case 2:
 				if(!e.IsTracked)
 				{
-					RightButtons.OnMouseLeave();
+					RightButtons?.OnMouseLeave();
 				}
 				break;
 		}
 	}
 
-	private void OnTabHoverChanged(object sender, TrackingEventArgs<ViewHostTab> e)
+	private void OnTabHoverChanged(object? sender, TrackingEventArgs<ViewHostTab> e)
 	{
 		if(e.IsTracked)
 		{
-			e.Item.OnMouseEnter();
+			e.Item?.OnMouseEnter();
 		}
 		else
 		{
-			e.Item.OnMouseLeave();
+			e.Item?.OnMouseLeave();
 		}
 	}
 
@@ -165,9 +165,9 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 
 	public ViewHost ViewHost { get; }
 
-	public ViewButtons LeftButtons { get; }
+	public ViewButtons? LeftButtons { get; }
 
-	public ViewButtons RightButtons { get; }
+	public ViewButtons? RightButtons { get; }
 
 	public int FirstTabIndex { get; private set; }
 
@@ -288,8 +288,11 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 			var dpi = Dpi.FromControl(this);
 			var viewButtonSize = ViewManager.Renderer.ViewButtonSize.GetValue(dpi);
 			var space = Width;
-			space -= LeftButtons.Width + viewButtonSize +
-				2 * ViewConstants.TabHeaderButtonSpacing;
+			if(LeftButtons is not null)
+			{
+				space -= LeftButtons.Width;
+			}
+			space -= + viewButtonSize + 2 * ViewConstants.TabHeaderButtonSpacing;
 			var length = 0;
 			if(FirstTabIndex == 0)
 			{
@@ -324,18 +327,21 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 					}
 				}
 			}
-			if(FirstTabIndex != 0)
+			if(LeftButtons is not null)
 			{
-				if(LeftButtons.Count == 0)
+				if(FirstTabIndex != 0)
 				{
-					LeftButtons.SetAvailableButtons(ViewButtonType.ScrollTabsLeft);
+					if(LeftButtons.Count == 0)
+					{
+						LeftButtons.SetAvailableButtons(ViewButtonType.ScrollTabsLeft);
+					}
 				}
-			}
-			else
-			{
-				if(LeftButtons.Count == 1)
+				else
 				{
-					LeftButtons.SetAvailableButtons(null);
+					if(LeftButtons.Count == 1)
+					{
+						LeftButtons.SetAvailableButtons(null);
+					}
 				}
 			}
 			if(length > space)
@@ -343,7 +349,7 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 				bool needRightScroll = (FirstTabIndex != _tabs.Count - 1);
 				if(needRightScroll)
 				{
-					if(RightButtons.Count == 1)
+					if(RightButtons is { Count: 1 })
 					{
 						RightButtons.SetAvailableButtons(
 							ViewButtonType.ScrollTabsRight,
@@ -352,7 +358,7 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 				}
 				else
 				{
-					if(RightButtons.Count == 2)
+					if(RightButtons is { Count: 2 })
 					{
 						RightButtons.SetAvailableButtons(
 							ViewButtonType.TabsScrollMenu);
@@ -361,7 +367,7 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 			}
 			else
 			{
-				if(RightButtons.Count == 2)
+				if(RightButtons is { Count: 2 })
 				{
 					if(FirstTabIndex == 0)
 					{
@@ -372,7 +378,7 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 						RightButtons.SetAvailableButtons(ViewButtonType.TabsScrollMenu);
 					}
 				}
-				else if(RightButtons.Count == 1)
+				else if(RightButtons is { Count: 1 })
 				{
 					if(FirstTabIndex == 0)
 					{
@@ -654,7 +660,7 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 		return -1;
 	}
 
-	private void OnViewButtonClick(object sender, ViewButtonClickEventArgs e)
+	private void OnViewButtonClick(object? sender, ViewButtonClickEventArgs e)
 	{
 		switch(e.Button)
 		{
@@ -678,14 +684,17 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 			case ViewButtonType.TabsScrollMenu:
 				if(_tabs.Count != 0)
 				{
-					var menu = new ContextMenuStrip();
+					var menu = new ContextMenuStrip
+					{
+						Renderer = GitterApplication.Style.ToolStripRenderer,
+					};
 					var dpiBindings = new DpiBindings(menu);
 					foreach(var tab in _tabs)
 					{
 						var item = new ToolStripMenuItem(tab.Text, null,
 							(item, _) =>
 							{
-								var view = (ViewBase)((ToolStripMenuItem)item).Tag;
+								var view = (ViewBase)((ToolStripMenuItem)item!).Tag!;
 								ViewHost.Activate(view);
 							})
 							{
@@ -723,7 +732,7 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 		switch(_areaMouseDown)
 		{
 			case 0:
-				LeftButtons.OnMouseDown(e.X, e.Y, e.Button);
+				LeftButtons?.OnMouseDown(e.X, e.Y, e.Button);
 				break;
 			case 1:
 				int tabId = HitTestTab(_mdX, _mdY, out bounds);
@@ -750,7 +759,7 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 				}
 				break;
 			case 2:
-				RightButtons.OnMouseDown(e.X - (Width - RightButtons.Width), e.Y, e.Button);
+				RightButtons?.OnMouseDown(e.X - (Width - RightButtons.Width), e.Y, e.Button);
 				break;
 			default:
 				ViewHost.Focus();
@@ -768,17 +777,24 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 				Math.Abs(_mdY - e.Y) >= ViewConstants.ViewFloatDragMargin)
 			{
 				var form = ViewHost.GetRootOwnerForm();
+				var loc = FloatingViewForm.GetLocationFor(ViewHost);
 				_readyToFloat = false;
 				var tab = _tabs[_floatId];
 				ViewHost.RemoveView(tab.View);
-				var host = new ViewHost(ViewHost.Grid, false, false, new[] { tab.View });
-				var floatingForm = host.PrepareFloatingMode();
+				var host = new ViewHost(ViewHost.Grid, false, false, [tab.View]);
+				var floatingForm = host.PrepareFloatingMode(loc);
 				Capture = false;
-				ViewHost.Focus();
+				floatingForm.Shown += (sender, _) =>
+				{
+					var f = (Form)sender!;
+
+					((ViewHost)f.Controls[0]).StartMoving(e.X, e.Y);
+					host.Focus();
+					f.Update();
+				};
 				floatingForm.Show(form);
-				floatingForm.Shown += (sender, args) =>
-					((ViewHost)((Form)sender).Controls[0]).StartMoving(e.X, e.Y);
 				_floatId = -1;
+				form?.Update();
 			}
 		}
 		int areaId = _areaMouseDown;
@@ -828,7 +844,7 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 		switch(areaId)
 		{
 			case 0:
-				LeftButtons.OnMouseMove(e.X, e.Y, e.Button);
+				LeftButtons?.OnMouseMove(e.X, e.Y, e.Button);
 				break;
 			case 1:
 				if(tabId != -1)
@@ -851,7 +867,7 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 				}
 				break;
 			case 2:
-				RightButtons.OnMouseMove(e.X - (Width - RightButtons.Width), e.Y, e.Button);
+				RightButtons?.OnMouseMove(e.X - (Width - RightButtons.Width), e.Y, e.Button);
 				break;
 		}
 		base.OnMouseMove(e);
@@ -863,7 +879,7 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 		switch(_areaMouseDown)
 		{
 			case 0:
-				LeftButtons.OnMouseUp(e.X, e.Y, e.Button);
+				LeftButtons?.OnMouseUp(e.X, e.Y, e.Button);
 				break;
 			case 1:
 				if(_floatId != -1)
@@ -888,7 +904,7 @@ public sealed class ViewHostTabs : Control, IEnumerable<ViewHostTab>
 				_floatId = -1;
 				break;
 			case 2:
-				RightButtons.OnMouseUp(e.X - (Width - RightButtons.Width), e.Y, e.Button);
+				RightButtons?.OnMouseUp(e.X - (Width - RightButtons.Width), e.Y, e.Button);
 				break;
 		}
 		_areaMouseDown = -1;

@@ -31,7 +31,7 @@ using gitter.Framework.Controls;
 
 using Resources = gitter.Redmine.Properties.Resources;
 
-sealed class IssuesListBinding : AsyncDataBinding<LinkedList<Issue>>
+sealed class IssuesListBinding : AsyncDataBinding<List<Issue>>
 {
 	#region .ctor
 
@@ -58,9 +58,9 @@ sealed class IssuesListBinding : AsyncDataBinding<LinkedList<Issue>>
 
 	#region Methods
 
-	protected override Task<LinkedList<Issue>> FetchDataAsync(System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	protected override Task<List<Issue>> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
 	{
-		Verify.State.IsFalse(IsDisposed, "IssuesListBinding is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		IssuesListBox.Cursor = Cursors.WaitCursor;
 
@@ -68,7 +68,7 @@ sealed class IssuesListBinding : AsyncDataBinding<LinkedList<Issue>>
 			progress, cancellationToken);
 	}
 
-	protected override void OnFetchCompleted(LinkedList<Issue> issues)
+	protected override void OnFetchCompleted(List<Issue> issues)
 	{
 		Assert.IsNotNull(issues);
 

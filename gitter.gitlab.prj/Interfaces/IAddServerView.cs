@@ -24,11 +24,11 @@ using gitter.Framework.Mvc;
 
 interface IAddServerView : IView
 {
-	IUserInputSource<string> ServerName { get; }
+	IUserInputSource<string?> ServerName { get; }
 
-	IUserInputSource<string> ServiceUrl { get; }
+	IUserInputSource<string?> ServiceUrl { get; }
 
-	IUserInputSource<string> APIKey { get; }
+	IUserInputSource<string?> APIKey { get; }
 
 	IUserInputErrorNotifier UserInputErrorNotifier { get; }
 }

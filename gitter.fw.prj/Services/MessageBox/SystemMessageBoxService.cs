@@ -73,19 +73,19 @@ public sealed class SystemMessageBoxService : IMessageBoxService
 
 	#region IMessageBoxService Members
 
-	public DialogResult Show(IWin32Window parent, string message)
+	public DialogResult Show(IWin32Window? parent, string message)
 		=> MessageBox.Show(parent, message);
 
-	public DialogResult Show(IWin32Window parent, string message, string caption)
+	public DialogResult Show(IWin32Window? parent, string message, string caption)
 		=> MessageBox.Show(parent, message, caption);
 
-	public DialogResult Show(IWin32Window parent, string message, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
+	public DialogResult Show(IWin32Window? parent, string message, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
 		=> MessageBox.Show(parent, message, caption, buttons, icon);
 
-	public DialogResult Show(IWin32Window parent, string message, string caption, IEnumerable<MessageBoxButton> buttons, MessageBoxIcon icon)
+	public DialogResult Show(IWin32Window? parent, string message, string caption, IReadOnlyList<MessageBoxButton> buttons, MessageBoxIcon icon)
 		=> MessageBox.Show(parent, message, caption, PickButtons(buttons), icon);
 
-	public DialogResult Show(IWin32Window parent, string message, string caption, MessageBoxButton button, MessageBoxIcon icon)
+	public DialogResult Show(IWin32Window? parent, string message, string caption, MessageBoxButton button, MessageBoxIcon icon)
 		=> MessageBox.Show(parent, message, caption, PickButtons(Enumerable.Repeat(button, 1)), icon);
 
 	#endregion

@@ -31,16 +31,12 @@ using gitter.Framework.Configuration;
 [DesignerCategory("")]
 partial class GitViewBase : ViewBase
 {
-	private Repository _repository;
+	private Repository? _repository;
 
-	public event EventHandler RepositoryChanged;
-
-	public GitViewBase()
-	{
-	}
+	public event EventHandler? RepositoryChanged;
 
 	public GitViewBase(Guid guid, GuiProvider guiProvider)
-		: base(guid, guiProvider.Environment)
+		: base(guid, guiProvider.RequireEnvironment())
 	{
 		Verify.Argument.IsNotNull(guiProvider);
 
@@ -53,7 +49,7 @@ partial class GitViewBase : ViewBase
 		WorkingEnvironment.ViewDockService.ShowView(Guids.DiffViewGuid, new DiffViewModel(diffSource, null));
 	}
 
-	protected void ShowContextualDiffView(IDiffSource diffSource)
+	protected void ShowContextualDiffView(IDiffSource? diffSource)
 	{
 		WorkingEnvironment.ViewDockService.ShowView(Guids.ContextualDiffViewGuid, new DiffViewModel(diffSource, null), false);
 	}
@@ -92,17 +88,16 @@ partial class GitViewBase : ViewBase
 		SaveRepositoryConfig(repository.ConfigSection);
 	}
 
-	public Repository Repository
+	public Repository? Repository
 	{
 		get => _repository;
 		set
 		{
-			if(value != _repository)
-			{
-				DetachRepository();
-				AttachRepository(value);
-				RepositoryChanged?.Invoke(this, EventArgs.Empty);
-			}
+			if(value == _repository) return;
+
+			DetachRepository();
+			AttachRepository(value);
+			RepositoryChanged?.Invoke(this, EventArgs.Empty);
 		}
 	}
 
@@ -116,7 +111,7 @@ partial class GitViewBase : ViewBase
 		}
 	}
 
-	private void AttachRepository(Repository repository)
+	private void AttachRepository(Repository? repository)
 	{
 		_repository = repository;
 		if(repository is not null)

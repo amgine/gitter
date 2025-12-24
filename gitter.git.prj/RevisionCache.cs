@@ -23,104 +23,86 @@ namespace gitter.Git;
 using System;
 using System.Collections.Generic;
 
+using gitter.Framework;
 using gitter.Git.AccessLayer;
 
 /// <summary>Contains cached <see cref="Revision"/> objects.</summary>
-public sealed class RevisionCache : GitObject, IEnumerable<Revision>
+/// <param name="repository">Repository.</param>
+public sealed class RevisionCache(Repository repository)
+	: GitObject(repository), IEnumerable<Revision>
 {
-	#region Data
-
-	private readonly Dictionary<Hash, Revision> _revisions = new(Hash.EqualityComparer);
-
-	#endregion
-
-	#region .ctor
-
-	/// <summary>Initializes <see cref="RevisionCache"/>.</summary>
-	/// <param name="repository">Repository.</param>
-	public RevisionCache(Repository repository)
-		: base(repository)
-	{
-	}
-
-	#endregion
+	private readonly Dictionary<Sha1Hash, Revision> _revisions = new(Sha1Hash.EqualityComparer);
 
 	/// <summary>Returns cross-thread synchronization object.</summary>
 	/// <value>Cross-thread synchronization object.</value>
-	public object SyncRoot { get; } = new();
+	public LockType SyncRoot { get; } = new();
 
 	/// <summary>Returns revision with specified SHA1.</summary>
-	/// <param name="sha1">SHA-1 of required revision.</param>
+	/// <param name="hash">SHA-1 of required revision.</param>
 	/// <returns>Revision with specified SHA-1.</returns>
 	/// <exception cref="ArgumentException">Invalid SHA-1 expression.</exception>
 	/// <exception cref="GitException">Revision does not exist.</exception>
 	/// <remarks>If revision is not present in cache, it will be queried from git repo.</remarks>
-	public Revision this[Hash sha1]
+	public Revision this[Sha1Hash hash]
 	{
 		get
 		{
 			lock(SyncRoot)
 			{
-				if(_revisions.TryGetValue(sha1, out var revision))
+				if(_revisions.TryGetValue(hash, out var revision))
 				{
 					if(!revision.IsLoaded)
 					{
 						revision.Load();
 					}
+					return revision;
 				}
-				else
-				{
-					var revisionData = Repository.Accessor.QueryRevision
-						.Invoke(new QueryRevisionParameters(sha1));
-					revision = ObjectFactories.CreateRevision(Repository, revisionData);
-				}
-				return revision;
+				var revisionData = Repository.Accessor.QueryRevision
+					.Invoke(new QueryRevisionRequest(hash));
+				return ObjectFactories.CreateRevision(Repository, revisionData);
 			}
 		}
 	}
 
 	/// <summary>Returns revision with specified SHA1 or <c>null</c> if such revision does not exist.</summary>
-	/// <param name="sha1">SHA-1 of required revision.</param>
+	/// <param name="hash">SHA-1 of required revision.</param>
 	/// <returns>Revision with specified SHA-1 or <c>null</c> if such revision does not exist.</returns>
 	/// <remarks>If revision is not present in cache, it will be queried from git repo.</remarks>
-	public Revision TryGetRevision(Hash sha1)
+	public Revision? TryGetRevision(Sha1Hash hash)
 	{
 		lock(SyncRoot)
 		{
-			if(_revisions.TryGetValue(sha1, out var revision))
+			if(_revisions.TryGetValue(hash, out var revision))
 			{
 				if(!revision.IsLoaded)
 				{
 					revision.Load();
 				}
+				return revision;
 			}
-			else
+			RevisionData? revisionData;
+			try
 			{
-				var revisionData = default(RevisionData);
-				try
-				{
-					revisionData = Repository.Accessor.QueryRevision.Invoke(
-						new QueryRevisionParameters(sha1));
-				}
-				catch(GitException)
-				{
-					return default;
-				}
-				revision = ObjectFactories.CreateRevision(Repository, revisionData);
+				revisionData = Repository.Accessor.QueryRevision.Invoke(
+					new QueryRevisionRequest(hash));
 			}
-			return revision;
+			catch(GitException)
+			{
+				return default;
+			}
+			return ObjectFactories.CreateRevision(Repository, revisionData);
 		}
 	}
 
 	/// <summary>Returns revision with specified SHA1 or <c>null</c> if such revision is not found in cache.</summary>
-	/// <param name="sha1">SHA-1 of required revision.</param>
+	/// <param name="hash">SHA-1 of required revision.</param>
 	/// <returns>Revision with specified SHA-1 or <c>null</c> if such revision is not found in cache.</returns>
 	/// <remarks>Does not query revision from git repository if it is not present in cache.</remarks>
-	public Revision TryGetRevisionFromCacheOnly(Hash sha1)
+	public Revision? TryGetRevisionFromCacheOnly(Sha1Hash hash)
 	{
 		lock(SyncRoot)
 		{
-			if(_revisions.TryGetValue(sha1, out var revision))
+			if(_revisions.TryGetValue(hash, out var revision))
 			{
 				if(!revision.IsLoaded)
 				{
@@ -138,12 +120,11 @@ public sealed class RevisionCache : GitObject, IEnumerable<Revision>
 		get { lock(SyncRoot) return _revisions.Count; }
 	}
 
-	internal Revision GetOrCreateRevision(Hash sha1)
+	internal Revision GetOrCreateRevision(Sha1Hash hash)
 	{
-		if(!_revisions.TryGetValue(sha1, out var revision))
+		if(!_revisions.TryGetValue(hash, out var revision))
 		{
-			revision = new Revision(Repository, sha1);
-			_revisions.Add(sha1, revision);
+			_revisions.Add(hash, revision = new(Repository, hash));
 		}
 		return revision;
 	}
@@ -177,7 +158,7 @@ public sealed class RevisionCache : GitObject, IEnumerable<Revision>
 		Verify.Argument.IsNotNull(data);
 
 		var count = data.Count;
-		if(count == 0) return Array.Empty<Revision>();
+		if(count == 0) return Preallocated<Revision>.EmptyArray;
 		var res = new Revision[count];
 		lock(SyncRoot)
 		{
@@ -200,7 +181,7 @@ public sealed class RevisionCache : GitObject, IEnumerable<Revision>
 		Verify.Argument.IsNotNull(data);
 
 		var count = data.Count;
-		if(count == 0) return Array.Empty<Revision>();
+		if(count == 0) return Preallocated<Revision>.EmptyArray;
 		var res = new Revision[count];
 		lock(SyncRoot)
 		{

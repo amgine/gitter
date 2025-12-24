@@ -39,8 +39,6 @@ public partial class PullDialog : GitDialogBase
 
 		_repository = repository;
 
-		InitializeComponent();
-
 		Text = Resources.StrPull;
 	}
 

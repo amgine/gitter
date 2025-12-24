@@ -33,40 +33,74 @@ public abstract class CustomToolTip : ToolTip
 	protected const int VerticalSpacing = 3;
 	protected const int HorizontalMargin = 5;
 
+	private IGitterStyle? _style;
+
 	protected CustomToolTip()
 	{
 		OwnerDraw = true;
 		Popup += PopupHandler;
-		Draw += DrawHandler;
+		Draw  += DrawHandler;
 	}
 
-	public abstract Size Measure(Control associatedControl);
-
-	private static void PopupHandler(object sender, PopupEventArgs e)
+	public IGitterStyle Style
 	{
-		var toolTip = (CustomToolTip)sender;
+		get => _style ?? GitterApplication.Style;
+		set
+		{
+			var changed = value != Style;
+			_style = value;
+			if(changed) OnStyleChanged();
+		}
+	}
+
+	public abstract Size Measure(Control? associatedControl);
+
+	private static void PopupHandler(object? sender, PopupEventArgs e)
+	{
+		var toolTip = (CustomToolTip)sender!;
 		e.ToolTipSize = toolTip.Measure(e.AssociatedControl);
 		toolTip.OnPopup(e);
 	}
 
-	private static void DrawHandler(object sender, DrawToolTipEventArgs e)
+	private void DrawHandler(object? sender, DrawToolTipEventArgs e)
 	{
-		var toolTip = (CustomToolTip)sender;
+		var toolTip = (CustomToolTip)sender!;
 		var gx = e.Graphics;
-		using(var b = new LinearGradientBrush(e.Bounds,
-			Color.FromArgb(255, 255, 255),
-			Color.FromArgb(228, 229, 240),
-			LinearGradientMode.Vertical))
+
+		switch(Style.Type)
 		{
-			gx.FillRectangle(b, e.Bounds);
+			case GitterStyleType.DarkBackground:
+				using(var b = new SolidBrush(Color.FromArgb(66, 66, 66)))
+				{
+					gx.FillRectangle(b, e.Bounds);
+				}
+				using(var p = new Pen(Color.FromArgb(61, 61, 61)))
+				{
+					gx.DrawRoundedRectangle(p, e.Bounds, 1);
+				}
+				break;
+			default:
+				using(var b = new LinearGradientBrush(e.Bounds,
+					Color.FromArgb(255, 255, 255),
+					Color.FromArgb(228, 229, 240),
+					LinearGradientMode.Vertical))
+				{
+					gx.FillRectangle(b, e.Bounds);
+				}
+				using(var p = new Pen(Color.FromArgb(118, 118, 118)))
+				{
+					gx.DrawRoundedRectangle(p, e.Bounds, 1);
+				}
+				break;
 		}
-		using(var p = new Pen(Color.FromArgb(118, 118, 118)))
-		{
-			gx.DrawRoundedRectangle(p, e.Bounds, 1);
-		}
+
 		gx.TextRenderingHint = GraphicsUtility.TextRenderingHint;
 		gx.TextContrast = GraphicsUtility.TextContrast;
 		toolTip.OnPaint(e);
+	}
+
+	protected virtual void OnStyleChanged()
+	{
 	}
 
 	protected virtual void OnPaint(DrawToolTipEventArgs e)

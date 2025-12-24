@@ -22,32 +22,28 @@ namespace gitter.Framework.Controls;
 
 using System;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
 
 public sealed class ProcessOverlay : IProgress<OperationProgress>, IDisposable
 {
-	private ProcessOverlayRenderer _renderer;
-	private Font _font;
-	private readonly Func<Rectangle> _getOverlayArea;
+	private ProcessOverlayRenderer? _renderer;
+	private Font? _font;
+	private readonly Func<Rectangle>? _getOverlayArea;
 
-	private Timer _timer;
+	private System.Windows.Forms.Timer? _animationTimer;
+	private TaskbarProgressClient? _trackbarProgressClient;
+	private bool _isVisible;
 
-	public event EventHandler RepaintRequired;
+	public event EventHandler? RepaintRequired;
 
-	public ProcessOverlay(Control hostControl, Func<Rectangle> getOverlayArea)
+	public ProcessOverlay(Control? hostControl, Func<Rectangle>? getOverlayArea)
 	{
 		HostControl = hostControl;
 		_getOverlayArea = getOverlayArea;
 		Rounding = 10.0f;
 		InvalidateHost = true;
 		DisableHost = true;
-
-		_timer = new Timer()
-		{
-			Interval = 1000/25,
-			Enabled = false,
-		};
-		_timer.Tick += (_, _) => Repaint();
 	}
 
 	public ProcessOverlay(Control hostControl)
@@ -60,29 +56,176 @@ public sealed class ProcessOverlay : IProgress<OperationProgress>, IDisposable
 	{
 	}
 
-	private void UpdateWin7ProgressBar()
+	sealed class SharedTaskbarProgress
 	{
-		var form = GitterApplication.MainForm;
-		if(form != null && !form.IsDisposed)
+		private int _count;
+
+		public static SharedTaskbarProgress Instance { get; } = new();
+
+		public void Increment()
 		{
-			if(Marquee)
+			if(Interlocked.Increment(ref _count) == 1)
 			{
-				form.SetTaskbarProgressState(TbpFlag.Indeterminate);
+				if(GitterApplication.MainForm is { IsDisposed: false } form)
+				{
+					form.SetTaskbarProgressState(TbpFlag.Indeterminate);
+				}
 			}
-			else
+		}
+
+		public void Decrement(bool reset = true)
+		{
+			if(Interlocked.Decrement(ref _count) == 0)
 			{
-				form.SetTaskbarProgressState(TbpFlag.Normal);
-				form.SetTaskbarProgressValue(
-					(long)(Value - Minimum),
-					(long)(Maximum - Minimum));
+				if(reset && GitterApplication.MainForm is { IsDisposed: false } form)
+				{
+					form.SetTaskbarProgressState(TbpFlag.NoProgress);
+				}
 			}
 		}
 	}
 
-	private static void StopWin7ProgressBar()
+	sealed class TaskbarProgressClient
 	{
-		var form = GitterApplication.MainForm;
-		if(form is { IsDisposed: false }) form.SetTaskbarProgressState(TbpFlag.NoProgress);
+		private enum State
+		{
+			NoProgress,
+			Scheduled,
+			Indeterminate,
+			Set,
+		}
+
+		private readonly SharedTaskbarProgress _progress;
+		private readonly LockType _syncRoot = new();
+		private State _state;
+		private System.Threading.Timer? _timer;
+
+		internal TaskbarProgressClient(SharedTaskbarProgress progress)
+		{
+			_progress = progress;
+		}
+
+		public TaskbarProgressClient() : this(SharedTaskbarProgress.Instance)
+		{
+		}
+
+		public void SetIndeterminate()
+		{
+			lock(_syncRoot)
+			{
+				if(_state != State.NoProgress) return;
+				_state = State.Scheduled;
+				if(_timer is null)
+				{
+					_timer = new(OnTimerTick, null, 100, Timeout.Infinite);
+				}
+				else
+				{
+					_timer.Change(100, Timeout.Infinite);
+				}
+			}
+		}
+
+		public void Set(long current, long total)
+		{
+			lock(_syncRoot)
+			{
+				if(_state != State.NoProgress)
+				{
+					if(_state == State.Scheduled)
+					{
+						_timer?.Change(Timeout.Infinite, Timeout.Infinite);
+					}
+					if(_state == State.Indeterminate)
+					{
+						_progress.Decrement(reset: false);
+					}
+					_state = State.Set;
+				}
+				if(GitterApplication.MainForm is { IsDisposed: false } form)
+				{
+					form.SetTaskbarProgressState(TbpFlag.Normal);
+					form.SetTaskbarProgressValue(current, total);
+				}
+			}
+		}
+
+		private void OnTimerTick(object? state)
+		{
+			lock(_syncRoot)
+			{
+				if(_state != State.Scheduled) return;
+				_progress.Increment();
+				_state = State.Indeterminate;
+			}
+		}
+
+		public void Reset()
+		{
+			lock(_syncRoot)
+			{
+				if(_state == State.NoProgress) return;
+
+				if(_state == State.Scheduled)
+				{
+					_timer?.Change(Timeout.Infinite, Timeout.Infinite);
+				}
+				if(_state == State.Indeterminate)
+				{
+					_progress.Decrement();
+				}
+				if(_state == State.Set)
+				{
+					if(GitterApplication.MainForm is { IsDisposed: false } form)
+					{
+						form.SetTaskbarProgressState(TbpFlag.NoProgress);
+					}
+				}
+				_state = State.NoProgress;
+			}
+		}
+
+		public void Dispose()
+		{
+			lock(_syncRoot)
+			{
+				if(_state == State.Indeterminate)
+				{
+					_progress.Decrement();
+				}
+				else if(_state == State.Set)
+				{
+					if(GitterApplication.MainForm is { IsDisposed: false } form)
+					{
+						form.SetTaskbarProgressState(TbpFlag.NoProgress);
+					}
+				}
+				_state = State.NoProgress;
+				if(_timer is not null)
+				{
+					_timer.Dispose();
+					_timer = null;
+				}
+			}
+		}
+	}
+
+	private void UpdateWin7ProgressBar()
+	{
+		_trackbarProgressClient ??= new();
+		if(Marquee)
+		{
+			_trackbarProgressClient.SetIndeterminate();
+		}
+		else
+		{
+			_trackbarProgressClient.Set((long)(Value - Minimum), (long)(Maximum - Minimum));
+		}
+	}
+
+	private void StopWin7ProgressBar()
+	{
+		_trackbarProgressClient?.Reset();
 	}
 
 	public Font Font
@@ -103,21 +246,39 @@ public sealed class ProcessOverlay : IProgress<OperationProgress>, IDisposable
 
 	public int Value { get; set; }
 
-	public string Title { get; set; }
+	public string? Title { get; set; }
 
-	public string Message { get; set; }
+	public string? Message { get; set; }
 
 	public bool Marquee { get; set; }
 
 	public float Rounding { get; set; }
 
-	public Control HostControl { get; internal set; }
+	public Control? HostControl { get; internal set; }
 
 	public bool InvalidateHost { get; set; }
 
 	public bool DisableHost { get; set; }
 
-	public bool IsVisible { get; private set; }
+	public bool IsVisible
+	{
+		get => _isVisible;
+		set
+		{
+			if(_isVisible == value) return;
+
+			_isVisible = value;
+			if(value)
+			{
+				StartAnimationTimer();
+			}
+			else
+			{
+				StopAnimationTimer();
+				StopWin7ProgressBar();
+			}
+		}
+	}
 
 	public void OnPaint(Graphics graphics, Rectangle bounds)
 	{
@@ -165,17 +326,17 @@ public sealed class ProcessOverlay : IProgress<OperationProgress>, IDisposable
 		}
 	}
 
-	public event EventHandler Canceled;
+	public event EventHandler? Canceled;
 
 	private void InvokeCanceled() => Canceled?.Invoke(this, EventArgs.Empty);
 
-	public event EventHandler Started;
+	public event EventHandler? Started;
 
 	private void InvokeStarted() => Started?.Invoke(this, EventArgs.Empty);
 
-	public IAsyncResult CurrentContext { get; private set; }
+	public IAsyncResult? CurrentContext { get; private set; }
 
-	public string ActionName
+	public string? ActionName
 	{
 		get => Title;
 		set
@@ -189,15 +350,44 @@ public sealed class ProcessOverlay : IProgress<OperationProgress>, IDisposable
 
 	public bool IsCancelRequested => false;
 
+	private void StartAnimationTimer()
+	{
+		if(_animationTimer is null)
+		{
+			_animationTimer = new()
+			{
+				Interval = 1000 / 25,
+			};
+			_animationTimer.Tick += OnAninmationTimerTick;
+		}
+		else
+		{
+			_animationTimer.Enabled = true;
+		}
+	}
+
+	private void StopAnimationTimer()
+	{
+		if(_animationTimer is not null)
+		{
+			_animationTimer.Enabled = false;
+		}
+	}
+
+	private void OnAninmationTimerTick(object? sender, EventArgs e)
+	{
+		Repaint();
+	}
+
 	public void Start(IWin32Window parent, IAsyncResult context, bool blocking)
 	{
 		CurrentContext = context;
-		if(DisableHost)
+		if(DisableHost && HostControl is not null)
 		{
 			HostControl.Enabled = false;
 		}
 		IsVisible = true;
-		_timer.Enabled = true;
+		StartAnimationTimer();
 		UpdateWin7ProgressBar();
 		Repaint();
 		InvokeStarted();
@@ -253,13 +443,13 @@ public sealed class ProcessOverlay : IProgress<OperationProgress>, IDisposable
 	{
 		CurrentContext = null;
 		IsVisible = false;
-		var timer = _timer;
+		var timer = _animationTimer;
 		if(timer is not null)
 		{
 			timer.Enabled = false;
 		}
 		StopWin7ProgressBar();
-		if(DisableHost)
+		if(DisableHost && HostControl is not null)
 		{
 			if(HostControl.Created && !HostControl.IsDisposed)
 			{
@@ -283,7 +473,7 @@ public sealed class ProcessOverlay : IProgress<OperationProgress>, IDisposable
 		{
 			Repaint();
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 		}
 	}
@@ -326,8 +516,8 @@ public sealed class ProcessOverlay : IProgress<OperationProgress>, IDisposable
 		if(!IsVisible)
 		{
 			IsVisible = true;
-			_timer.Enabled = true;
-			if(DisableHost)
+			StartAnimationTimer();
+			if(DisableHost && HostControl is not null)
 			{
 				HostControl.Enabled = false;
 			}
@@ -350,10 +540,15 @@ public sealed class ProcessOverlay : IProgress<OperationProgress>, IDisposable
 
 	public void Dispose()
 	{
-		if(_timer is not null)
+		if(_trackbarProgressClient is not null)
 		{
-			_timer.Dispose();
-			_timer = null;
+			_trackbarProgressClient.Dispose();
+			_trackbarProgressClient = default;
+		}
+		if(_animationTimer is not null)
+		{
+			_animationTimer.Dispose();
+			_animationTimer = null;
 		}
 	}
 

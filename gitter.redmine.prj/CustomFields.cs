@@ -28,7 +28,7 @@ public sealed class CustomFields : IEnumerable<CustomFieldValue>
 {
 	#region Data
 
-	private readonly Dictionary<int, CustomFieldValue> _values = new();
+	private readonly Dictionary<int, CustomFieldValue> _values = [];
 
 	#endregion
 
@@ -71,8 +71,7 @@ public sealed class CustomFields : IEnumerable<CustomFieldValue>
 			{
 				var field = RedmineUtility.LoadNamedObject(childNode, initializer);
 				var value = RedmineUtility.LoadString(childNode["value"]);
-				CustomFieldValue cfv;
-				if(_values.TryGetValue(field.Id, out cfv))
+				if(_values.TryGetValue(field.Id, out var cfv))
 				{
 					cfv.Value = value;
 					hs.Remove(field.Id);
@@ -81,34 +80,24 @@ public sealed class CustomFields : IEnumerable<CustomFieldValue>
 				{
 					cfv = new CustomFieldValue(field, value);
 					_values.Add(field.Id, cfv);
-					var handler = CustomFieldAdded;
-					if(handler != null) handler(this, new CustomFieldEventArgs(field));
+					CustomFieldAdded?.Invoke(this, new CustomFieldEventArgs(field));
 				}
 			}
-			if(hs != null)
+			if(hs is not null)
 			{
-				var handler2 = CustomFieldRemoved;
 				foreach(var id in hs)
 				{
 					var cfv = _values[id];
 					_values.Remove(id);
-					if(handler2 != null)
-					{
-						handler2(this, new CustomFieldEventArgs(cfv.Field));
-					}
+					CustomFieldRemoved?.Invoke(this, new CustomFieldEventArgs(cfv.Field));
 				}
 			}
 		}
 	}
 
-	public string this[int id]
-	{
-		get
-		{
-			if(_values.TryGetValue(id, out var res)) return res.Value;
-			return null;
-		}
-	}
+	public string this[int id] => _values.TryGetValue(id, out var res)
+		? res.Value
+		: default;
 
 	public string this[CustomField field]
 	{

@@ -40,12 +40,9 @@ public static class ProcessStartInfoExtensions
 		{
 			dictionary[variable] = value;
 		}
-		else
+		else if(!dictionary.ContainsKey(variable))
 		{
-			if(!dictionary.ContainsKey(variable))
-			{
-				dictionary.Add(variable, value);
-			}
+			dictionary.Add(variable, value);
 		}
 	}
 }

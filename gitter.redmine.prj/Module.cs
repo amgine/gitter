@@ -20,8 +20,6 @@
 
 namespace gitter.Redmine;
 
-using System;
-
 using Autofac;
 
 using gitter.Framework;

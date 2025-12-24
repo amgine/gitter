@@ -27,7 +27,7 @@ using gitter.Framework.Services;
 
 sealed class HashHyperlinkExtractor : IHyperlinkExtractor
 {
-	const int MinLength = Hash.HexStringLength;
+	const int MinLength = Sha1Hash.HexStringLength;
 
 	static bool IsHashChar(char value)
 		=> (value is >= '0' and <= '9') || (value is >= 'a' and <= 'f');
@@ -44,7 +44,7 @@ sealed class HashHyperlinkExtractor : IHyperlinkExtractor
 			NonHashSeq = false;
 		}
 
-		public List<Hyperlink> Hyperlinks;
+		public List<Hyperlink>? Hyperlinks;
 
 		public int Start;
 
@@ -61,10 +61,10 @@ sealed class HashHyperlinkExtractor : IHyperlinkExtractor
 			if(Start >= 0 && !NonHashSeq)
 			{
 				var len = position - Start;
-				if(len >= MinLength && len <= Hash.HexStringLength)
+				if(len >= MinLength && len <= Sha1Hash.HexStringLength)
 				{
 					var hash = Text.Substring(Start, len);
-					Hyperlinks ??= new();
+					Hyperlinks ??= [];
 					Hyperlinks.Add(new Hyperlink(new Substring(Text, Start, len), "gitter://history/" + hash));
 				}
 			}

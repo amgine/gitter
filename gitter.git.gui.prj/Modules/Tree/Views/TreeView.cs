@@ -29,6 +29,7 @@ using System.Windows.Forms;
 using gitter.Framework;
 using gitter.Framework.Configuration;
 using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Services;
 
 using gitter.Git.Gui.Controls;
@@ -39,12 +40,91 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 partial class TreeView : GitViewBase
 {
+	readonly struct ViewControls
+	{
+		public readonly TreeListBox _treeContent;
+		public readonly TreeListBox _directoryTree;
+		public readonly TreeToolbar _toolBar;
+
+		public ViewControls(IGitterStyle? style, TreeView view)
+		{
+			style ??= GitterApplication.Style;
+
+			_toolBar = new(view);
+			_treeContent = new()
+			{
+				Style         = style,
+				BorderStyle   = BorderStyle.None,
+				HeaderStyle   = HeaderStyle.Hidden,
+				ShowTreeLines = true
+			};
+			_directoryTree = new()
+			{
+				Style         = style,
+				BorderStyle   = BorderStyle.None,
+				HeaderStyle   = HeaderStyle.Hidden,
+				ShowTreeLines = true
+			};
+		}
+
+		public void Localize()
+		{
+			_treeContent.Text = "Tree is empty";
+			_directoryTree.Text = "Tree is empty";
+		}
+
+		public void Layout(Control parent)
+		{
+			Grid grid;
+			Panel grip;
+
+			_ = new ControlLayout(parent)
+			{
+				Content = grid = new(
+					rows:
+					[
+						LayoutConstants.ToolbarHeight,
+						SizeSpec.Nothing(),
+						SizeSpec.Everything(),
+					],
+					columns:
+					[
+						SizeSpec.Absolute(200),
+						LayoutConstants.RowSpacing,
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_toolBar,       marginOverride: LayoutConstants.NoMargin), column: 0, row: 2, columnSpan: 3),
+						new GridContent(new ControlContent(_directoryTree, marginOverride: LayoutConstants.NoMargin), column: 0, row: 2),
+						new GridContent(new ControlContent(grip = new(),   marginOverride: LayoutConstants.NoMargin), column: 1, row: 2),
+						new GridContent(new ControlContent(_treeContent,   marginOverride: LayoutConstants.NoMargin), column: 2, row: 2),
+					]),
+			};
+
+			_toolBar.Parent       = parent;
+			_directoryTree.Parent = parent;
+			grip.Parent           = parent;
+			_treeContent.Parent   = parent;
+
+			var tabIndex = 0;
+			_toolBar.TabIndex       = tabIndex++;
+			_directoryTree.TabIndex = tabIndex++;
+			grip.TabIndex           = tabIndex++;
+			_treeContent.TabIndex   = tabIndex++;
+
+			grip.Cursor = Cursors.SizeWE;
+
+			_ = new HorizontalResizer(grip, grid.Columns[0], 1, minWidth: DpiBoundValue.ScaleX(100));
+		}
+	}
+
 	#region Data
 
-	private ITreeSource _treeSource;
-	private TreeListsBinding _dataSource;
-	private TreeDirectory _currentDirectory;
-	private TreeToolbar _toolBar;
+	private readonly ViewControls _controls;
+	private ITreeSource? _treeSource;
+	private TreeListsBinding? _dataSource;
+	private TreeDirectory? _currentDirectory;
 
 	#endregion
 
@@ -59,7 +139,7 @@ partial class TreeView : GitViewBase
 	}
 
 	protected virtual void OnCurrentDirectoryChanged(EventArgs e)
-		=> ((EventHandler)Events[CurrentDirectoryChangedEvent])?.Invoke(this, e);
+		=> ((EventHandler?)Events[CurrentDirectoryChangedEvent])?.Invoke(this, e);
 
 	#endregion
 
@@ -94,19 +174,24 @@ partial class TreeView : GitViewBase
 	public TreeView(GuiProvider gui)
 		: base(Guids.TreeViewGuid, gui)
 	{
-		InitializeComponent();
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		Name                = nameof(TreeView);
+		_controls = new(GitterApplication.Style, this);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
 
-		_splitContainer.BackColor = GitterApplication.Style.Colors.WorkArea;
-		_splitContainer.Panel1.BackColor = GitterApplication.Style.Colors.Window;
-		_splitContainer.Panel2.BackColor = GitterApplication.Style.Colors.Window;
+		_controls._treeContent.ItemActivated += OnItemActivated;
 
-		_directoryTree.Columns.ShowAll(column => column.Id == (int)ColumnId.Name);
-		_directoryTree.Columns[0].SizeMode = ColumnSizeMode.Auto;
-		_treeContent.Columns.ShowAll(column => column.Id == (int)ColumnId.Name || column.Id == (int)ColumnId.Size);
-		_treeContent.Columns.GetById((int)ColumnId.Name).SizeMode = ColumnSizeMode.Auto;
+		_controls._directoryTree.Columns.ShowAll(static column => column.Id is (int)ColumnId.Name);
+		_controls._directoryTree.Columns[0].SizeMode = ColumnSizeMode.Auto;
+		_controls._treeContent.Columns.ShowAll(static column => column.Id is (int)ColumnId.Name or (int)ColumnId.Size);
+		_controls._treeContent.Columns.GetById((int)ColumnId.Name)!.SizeMode = ColumnSizeMode.Auto;
 
-		_directoryTree.SelectionChanged += OnDirectoryTreeSelectionChanged;
-		_directoryTree.ItemContextMenuRequested +=
+		_controls._directoryTree.SelectionChanged += OnDirectoryTreeSelectionChanged;
+		_controls._directoryTree.ItemContextMenuRequested +=
 			(sender, e) =>
 			{
 				if(ViewModel is TreeViewModel vm && vm.TreeSource is not null)
@@ -117,37 +202,34 @@ partial class TreeView : GitViewBase
 					e.OverrideDefaultMenu = true;
 				}
 			};
-		_directoryTree.PreviewKeyDown += OnKeyDown;
+		_controls._directoryTree.PreviewKeyDown += OnKeyDown;
 
-		_treeContent.ItemContextMenuRequested += OnContextMenuRequested;
-		_treeContent.SelectionChanged += OnTreeContentSelectionChanged;
-		_treeContent.PreviewKeyDown += OnKeyDown;
-
-		AddTopToolStrip(_toolBar = new TreeToolbar(this));
+		_controls._treeContent.ItemContextMenuRequested += OnContextMenuRequested;
+		_controls._treeContent.SelectionChanged += OnTreeContentSelectionChanged;
+		_controls._treeContent.PreviewKeyDown += OnKeyDown;
 	}
 
 	#endregion
 
 	#region Properties
 
-	private TreeListsBinding DataSource
+	private TreeListsBinding? DataSource
 	{
 		get => _dataSource;
 		set
 		{
-			if(_dataSource != value)
+			if(_dataSource == value) return;
+
+			if(_dataSource is not null)
 			{
-				if(_dataSource is not null)
-				{
-					_dataSource.DataChanged -= OnTreeChanged;
-					_dataSource.Dispose();
-				}
-				_dataSource = value;
-				if(_dataSource is not null)
-				{
-					_dataSource.DataChanged += OnTreeChanged;
-					_dataSource.ReloadData();
-				}
+				_dataSource.DataChanged -= OnTreeChanged;
+				_dataSource.Dispose();
+			}
+			_dataSource = value;
+			if(_dataSource is not null)
+			{
+				_dataSource.DataChanged += OnTreeChanged;
+				_dataSource.ReloadData();
 			}
 		}
 	}
@@ -157,21 +239,17 @@ partial class TreeView : GitViewBase
 
 	public override IImageProvider ImageProvider => Icons.FolderTree;
 
-	public TreeDirectory CurrentDirectory
+	public TreeDirectory? CurrentDirectory
 	{
 		get => _currentDirectory;
 		set
 		{
-			Verify.Argument.IsNotNull(value);
+			if(_currentDirectory == value) return;
 
-			if(_currentDirectory != value)
-			{
-				var item = FindDirectoryEntry(value);
-				if(item is null) throw new ArgumentException(nameof(value));
-				item.FocusAndSelect();
-				_currentDirectory = value;
-				OnCurrentDirectoryChanged(EventArgs.Empty);
-			}
+			var item = value is not null ? FindDirectoryEntry(value) : default;
+			item?.FocusAndSelect();
+			_currentDirectory = value;
+			OnCurrentDirectoryChanged(EventArgs.Empty);
 		}
 	}
 
@@ -179,7 +257,7 @@ partial class TreeView : GitViewBase
 
 	#region Methods
 
-	private void OnTreeContentSelectionChanged(object sender, EventArgs e)
+	private void OnTreeContentSelectionChanged(object? sender, EventArgs e)
 	{
 		//var rev = Parameters["tree"] as RevisionTreeSource;
 		//if(rev != null)
@@ -197,34 +275,37 @@ partial class TreeView : GitViewBase
 		//}
 	}
 
-	private ContextMenuStrip GetFileContextMenu(IRevisionPointer revision, TreeFile file)
+	private ContextMenuStrip? GetFileContextMenu(IRevisionPointer revision, TreeFile file)
 	{
 		Assert.IsNotNull(revision);
 		Assert.IsNotNull(file);
 
-		var menu        = new ContextMenuStrip();
+		if(DataSource?.Data is null) return default;
+
+		var menu = new ContextMenuStrip
+		{
+			Renderer = GitterApplication.Style.ToolStripRenderer,
+		};
 		var dpiBindings = new DpiBindings(menu);
 		var factory     = new GuiItemFactory(dpiBindings);
 		menu.Items.AddRange(
-			new ToolStripItem[]
-			{
+			[
 				GuiItemFactory.GetExtractAndOpenFileItem<ToolStripMenuItem>(DataSource.Data, file.RelativePath),
 				GuiItemFactory.GetExtractAndOpenFileWithItem<ToolStripMenuItem>(DataSource.Data, file.RelativePath),
 				GuiItemFactory.GetSaveAsItem<ToolStripMenuItem>(DataSource.Data, file.RelativePath),
 				new ToolStripSeparator(),
 				new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
-					new ToolStripItem[]
-					{
+					[
 						factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, file.Name),
 						factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, file.RelativePath),
 						factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, file.FullPath),
-					}),
+					]),
 				new ToolStripSeparator(),
 				factory.GetBlameItem<ToolStripMenuItem>(revision, file),
 				factory.GetPathHistoryItem<ToolStripMenuItem>(revision, file),
 				new ToolStripSeparator(),
 				factory.GetCheckoutPathItem<ToolStripMenuItem>(revision, file),
-			});
+			]);
 		return menu;
 	}
 
@@ -233,17 +314,19 @@ partial class TreeView : GitViewBase
 		Assert.IsNotNull(revision);
 		Assert.IsNotNull(directory);
 
-		var menu        = new ContextMenuStrip();
+		var menu = new ContextMenuStrip
+		{
+			Renderer = GitterApplication.Style.ToolStripRenderer,
+		};
 		var dpiBindings = new DpiBindings(menu);
 		var factory     = new GuiItemFactory(dpiBindings);
 		menu.Items.AddRange(
-			new ToolStripItem[]
-			{
+			[
 				new ToolStripMenuItem(Resources.StrOpen, null, (_, _) => item.Activate()),
 				factory.GetPathHistoryItem<ToolStripMenuItem>(revision, directory),
 				new ToolStripSeparator(),
 				factory.GetCheckoutPathItem<ToolStripMenuItem>(revision, directory),
-			});
+			]);
 		return menu;
 	}
 
@@ -252,28 +335,29 @@ partial class TreeView : GitViewBase
 		Assert.IsNotNull(revision);
 		Assert.IsNotNull(commit);
 
-		var menu        = new ContextMenuStrip();
+		var menu = new ContextMenuStrip
+		{
+			Renderer = GitterApplication.Style.ToolStripRenderer,
+		};
 		var dpiBindings = new DpiBindings(menu);
 		var factory     = new GuiItemFactory(dpiBindings);
 		menu.Items.AddRange(
-			new ToolStripItem[]
-			{
+			[
 				factory.GetPathHistoryItem<ToolStripMenuItem>(revision, commit),
 				new ToolStripSeparator(),
 				new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
-					new ToolStripItem[]
-					{
+					[
 						factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, commit.Name),
 						factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, commit.RelativePath),
 						factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, commit.FullPath),
-					}),
+					]),
 				new ToolStripSeparator(),
 				factory.GetCheckoutPathItem<ToolStripMenuItem>(revision, commit),
-			});
+			]);
 		return menu;
 	}
 
-	private void OnContextMenuRequested(object sender, ItemContextMenuRequestEventArgs e)
+	private void OnContextMenuRequested(object? sender, ItemContextMenuRequestEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
@@ -287,7 +371,7 @@ partial class TreeView : GitViewBase
 			TreeCommit    commit    => GetCommitContextMenu(rts.Revision, commit),
 			_ => default,
 		};
-		if(menu != null)
+		if(menu is not null)
 		{
 			Utility.MarkDropDownForAutoDispose(menu);
 			e.ContextMenu = menu;
@@ -295,7 +379,7 @@ partial class TreeView : GitViewBase
 		}
 	}
 
-	private void UpdateCurrentDirectory(TreeDirectory directory)
+	private void UpdateCurrentDirectory(TreeDirectory? directory)
 	{
 		if(_currentDirectory != directory)
 		{
@@ -304,15 +388,15 @@ partial class TreeView : GitViewBase
 		}
 	}
 
-	private void OnDirectoryTreeSelectionChanged(object sender, EventArgs e)
+	private void OnDirectoryTreeSelectionChanged(object? sender, EventArgs e)
 	{
-		if(_directoryTree.SelectedItems.Count != 0)
+		if(_controls._directoryTree.SelectedItems.Count != 0)
 		{
-			var treeItem = (TreeDirectoryListItem)_directoryTree.SelectedItems[0];
+			var treeItem = (TreeDirectoryListItem)_controls._directoryTree.SelectedItems[0];
 			if(_currentDirectory != treeItem.DataContext)
 			{
 				_currentDirectory = treeItem.DataContext;
-				_treeContent.SetTree(_currentDirectory, TreeListBoxMode.ShowDirectoryContent);
+				_controls._treeContent.SetTree(_currentDirectory, TreeListBoxMode.ShowDirectoryContent);
 				OnCurrentDirectoryChanged(EventArgs.Empty);
 			}
 		}
@@ -328,7 +412,7 @@ partial class TreeView : GitViewBase
 			if(_treeSource != null)
 			{
 				Text = Resources.StrTree + " " + _treeSource.DisplayName;
-				DataSource = new TreeListsBinding(_treeSource, _directoryTree, _treeContent);
+				DataSource = new TreeListsBinding(_treeSource, _controls._directoryTree, _controls._treeContent);
 			}
 			else
 			{
@@ -350,17 +434,17 @@ partial class TreeView : GitViewBase
 		}
 	}
 
-	private void OnTreeChanged(object sender, EventArgs e)
+	private void OnTreeChanged(object? sender, EventArgs e)
 	{
 		UpdateCurrentDirectory(DataSource?.Data?.Root);
 	}
 
-	private TreeDirectoryListItem FindDirectoryEntry(TreeDirectory folder)
+	private TreeDirectoryListItem? FindDirectoryEntry(TreeDirectory folder)
 	{
-		return FindDirectoryEntry((TreeDirectoryListItem)_directoryTree.Items[0], folder);
+		return FindDirectoryEntry((TreeDirectoryListItem)_controls._directoryTree.Items[0], folder);
 	}
 
-	private static TreeDirectoryListItem FindDirectoryEntry(TreeDirectoryListItem root, TreeDirectory folder)
+	private static TreeDirectoryListItem? FindDirectoryEntry(TreeDirectoryListItem root, TreeDirectory folder)
 	{
 		if(root.DataContext == folder) return root;
 		foreach(TreeDirectoryListItem item in root.Items)
@@ -371,15 +455,15 @@ partial class TreeView : GitViewBase
 		return null;
 	}
 
-	private void OnItemActivated(object sender, ItemEventArgs e)
+	private void OnItemActivated(object? sender, ItemEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
 		switch(e.Item)
 		{
-			case TreeFileListItem fileItem:
-				var fileName = DataSource.Data.ExtractBlobToTemporaryFile(fileItem.DataContext.RelativePath);
-				if(!string.IsNullOrWhiteSpace(fileName))
+			case TreeFileListItem fileItem when DataSource is not null:
+				var fileName = DataSource.Data?.ExtractBlobToTemporaryFile(fileItem.DataContext.RelativePath);
+				if(fileName is { Length: not 0 })
 				{
 					var process = Utility.CreateProcessFor(fileName);
 					process.EnableRaisingEvents = true;
@@ -393,7 +477,7 @@ partial class TreeView : GitViewBase
 				{
 					if(directoryEntry.IsSelected)
 					{
-						_treeContent.SetTree(directoryItem.DataContext, TreeListBoxMode.ShowDirectoryContent);
+						_controls._treeContent.SetTree(directoryItem.DataContext, TreeListBoxMode.ShowDirectoryContent);
 					}
 					else
 					{
@@ -402,7 +486,7 @@ partial class TreeView : GitViewBase
 				}
 				else
 				{
-					_treeContent.SetTree(directoryItem.DataContext, TreeListBoxMode.ShowDirectoryContent);
+					_controls._treeContent.SetTree(directoryItem.DataContext, TreeListBoxMode.ShowDirectoryContent);
 				}
 				_currentDirectory = directoryItem.DataContext;
 				OnCurrentDirectoryChanged(EventArgs.Empty);
@@ -410,15 +494,15 @@ partial class TreeView : GitViewBase
 		}
 	}
 
-	private static void OnFileViewerProcessExited(object sender, EventArgs e)
+	private static void OnFileViewerProcessExited(object? sender, EventArgs e)
 	{
-		var process = (Process)sender;
+		var process = (Process)sender!;
 		var path = process.StartInfo.FileName;
 		try
 		{
 			File.Delete(path);
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			LoggingService.Global.Warning(exc, "Failed to remove temporary file: '{0}'", path);
 		}
@@ -427,8 +511,8 @@ partial class TreeView : GitViewBase
 
 	protected override void DetachFromRepository(Repository repository)
 	{
-		_directoryTree.Clear();
-		_treeContent.Clear();
+		_controls._directoryTree.Clear();
+		_controls._treeContent.Clear();
 	}
 
 	public override void RefreshContent() => DataSource?.ReloadData();
@@ -439,7 +523,7 @@ partial class TreeView : GitViewBase
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
@@ -456,7 +540,7 @@ partial class TreeView : GitViewBase
 	{
 		base.SaveMoreViewTo(section);
 		var listNode = section.GetCreateSection("TreeList");
-		_treeContent.SaveViewTo(listNode);
+		_controls._treeContent.SaveViewTo(listNode);
 	}
 
 	protected override void LoadMoreViewFrom(Section section)
@@ -465,7 +549,7 @@ partial class TreeView : GitViewBase
 		var listNode = section.TryGetSection("TreeList");
 		if(listNode is not null)
 		{
-			_treeContent.LoadViewFrom(listNode);
+			_controls._treeContent.LoadViewFrom(listNode);
 		}
 	}
 

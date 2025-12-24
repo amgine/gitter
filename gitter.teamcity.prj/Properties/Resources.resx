@@ -183,4 +183,61 @@
   <data name="StrStatus" xml:space="preserve">
     <value>Status</value>
   </data>
+  <data name="StrApiKey" xml:space="preserve">
+    <value>Access Token</value>
+  </data>
+  <data name="StrBranchName" xml:space="preserve">
+    <value>Branch Name</value>
+  </data>
+  <data name="StrCopyToClipboard" xml:space="preserve">
+    <value>Copy to Clipboard</value>
+  </data>
+  <data name="StrServers" xml:space="preserve">
+    <value>Servers</value>
+  </data>
+  <data name="StrAdd" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="StrRemove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="ErrAPIKeyCannotBeEmpty" xml:space="preserve">
+    <value>Access token cannot be empty</value>
+  </data>
+  <data name="ErrApiKeyIsInvalid" xml:space="preserve">
+    <value>Invalid access token</value>
+  </data>
+  <data name="ErrDuplicateServiceUri" xml:space="preserve">
+    <value>Duplicate service URL</value>
+  </data>
+  <data name="ErrNoAPIKeySpecified" xml:space="preserve">
+    <value>No access token specified</value>
+  </data>
+  <data name="ErrNoServerNameSpecified" xml:space="preserve">
+    <value>No server name specified</value>
+  </data>
+  <data name="ErrServerNameCannotBeEmpty" xml:space="preserve">
+    <value>Server name cannot be empty</value>
+  </data>
+  <data name="StrSetApiKey" xml:space="preserve">
+    <value>Set Access Token</value>
+  </data>
+  <data name="StrsManageAccessTokens" xml:space="preserve">
+    <value>Manage access tokens</value>
+  </data>
+  <data name="StrAddServer" xml:space="preserve">
+    <value>Add Server</value>
+  </data>
+  <data name="ErrUnableToAuthorize" xml:space="preserve">
+    <value>Unable to authorize with the specified API key</value>
+  </data>
+  <data name="ErrServiceUriIsNotTeamCity" xml:space="preserve">
+    <value>Could not find TeamCity at the specified URL</value>
+  </data>
+  <data name="ErrSpecifiedServiceUriAlreadyExists" xml:space="preserve">
+    <value>Specified service URL was added already</value>
+  </data>
+  <data name="StrServer" xml:space="preserve">
+    <value>Server</value>
+  </data>
 </root>

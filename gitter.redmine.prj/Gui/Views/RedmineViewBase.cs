@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -18,61 +18,53 @@
  */
 #endregion
 
-namespace gitter.Redmine.Gui
+namespace gitter.Redmine.Gui;
+
+#nullable enable
+
+using System;
+
+using gitter.Framework;
+using gitter.Framework.Controls;
+
+public class RedmineViewBase : ViewBase
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Text;
+	private RedmineServiceContext? _serviceContext;
 
-	using gitter.Framework;
-	using gitter.Framework.Controls;
-
-	public class RedmineViewBase : ViewBase
+	/// <summary>Create <see cref="RedmineViewBase"/>.</summary>
+	public RedmineViewBase(Guid guid, IWorkingEnvironment environment)
+		: base(guid, environment)
 	{
-		private RedmineServiceContext _serviceContext;
+	}
 
-		/// <summary>Create <see cref="RedmineViewBase"/>.</summary>
-		public RedmineViewBase()
+	public RedmineServiceContext? ServiceContext
+	{
+		get => _serviceContext;
+		set
 		{
-		}
+			if(_serviceContext == value) return;
 
-		/// <summary>Create <see cref="RedmineViewBase"/>.</summary>
-		public RedmineViewBase(Guid guid, IWorkingEnvironment environment)
-			: base(guid, environment)
-		{
-		}
-
-		public RedmineServiceContext ServiceContext
-		{
-			get { return _serviceContext; }
-			set
+			if(_serviceContext is not null)
 			{
-				if(value != _serviceContext)
-				{
-					if(_serviceContext != null)
-					{
-						OnContextDetached();
-					}
-					_serviceContext = value;
-					if(_serviceContext != null)
-					{
-						OnContextAttached();
-					}
-				}
+				OnContextDetached(_serviceContext);
+			}
+			_serviceContext = value;
+			if(_serviceContext is not null)
+			{
+				OnContextAttached(_serviceContext);
 			}
 		}
+	}
 
-		protected virtual void OnContextAttached()
-		{
-		}
+	protected virtual void OnContextAttached(RedmineServiceContext context)
+	{
+	}
 
-		protected virtual void OnContextDetached()
-		{
-		}
+	protected virtual void OnContextDetached(RedmineServiceContext context)
+	{
+	}
 
-		public virtual void RefreshContent()
-		{
-		}
+	public virtual void RefreshContent()
+	{
 	}
 }

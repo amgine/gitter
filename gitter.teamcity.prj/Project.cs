@@ -21,18 +21,10 @@
 namespace gitter.TeamCity;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Xml;
 
 public sealed class Project : NamedTeamCityObject
 {
-	#region Static
-
-	#endregion
-
-	#region .ctor
-
 	public Project(TeamCityServiceContext context, string id, string name)
 		: base(context, id, name)
 	{
@@ -51,17 +43,7 @@ public sealed class Project : NamedTeamCityObject
 		BuildTypes = new ProjectBuildTypesCollection(this, context.BuildTypes);
 	}
 
-	#endregion
-
-	#region Methods
-
 	public ProjectLocator CreateLocator() => new() { Id = Id };
 
-	#endregion
-
-	#region Properties
-
 	public ProjectBuildTypesCollection BuildTypes { get; }
-
-	#endregion
 }

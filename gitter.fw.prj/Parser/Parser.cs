@@ -29,7 +29,7 @@ public class Parser
 {
 	#region Data
 
-	private Stack<int> _positions;
+	private Stack<int>? _positions;
 	private int _position;
 
 	#endregion
@@ -62,43 +62,32 @@ public class Parser
 	/// <summary>Parsed string.</summary>
 	public string String { get; }
 
+	private int PositionOrLength(int pos)
+		=> pos >= 0 ? pos : Length;
+
+	private int NextPositionOrLength(int pos)
+		=> pos >= 0 ? (pos + 1) : Length;
+
 	/// <summary>Find next <paramref name="value"/>.</summary>
 	/// <param name="value">Character to look for.</param>
 	/// <returns>Character position or string length if it was not found.</returns>
 	public int FindPositionSafe(char value)
-	{
-		int pos = String.IndexOf(value, _position);
-		if(pos == -1) return Length;
-		return pos;
-	}
+		=> PositionOrLength(String.IndexOf(value, _position));
 
 	/// <summary>Find next \0.</summary>
 	/// <returns>Character position or string length if it was not found.</returns>
 	public int FindNullOrEndOfString()
-	{
-		int pos = String.IndexOf('\0', _position);
-		if(pos == -1) return Length;
-		return pos;
-	}
+		=> PositionOrLength(String.IndexOf('\0', _position));
 
 	/// <summary>Find next \0.</summary>
 	/// <returns>Character position or string length if it was not found.</returns>
 	public void FindNullAndSkip()
-	{
-		int pos = String.IndexOf('\0', _position);
-		_position = pos == -1
-			? String.Length
-			: pos + 1;
-	}
+		=> NextPositionOrLength(String.IndexOf('\0', _position));
 
 	/// <summary>Find next \n.</summary>
 	/// <returns>Character position or string length if it was not found.</returns>
 	public int FindNewLineOrEndOfString()
-	{
-		int pos = String.IndexOf('\n', _position);
-		if(pos == -1) return String.Length;
-		return pos;
-	}
+		=> PositionOrLength(String.IndexOf('\n', _position));
 
 	/// <summary>Find next line ending.</summary>
 	/// <param name="ending">Detected line ending.</param>
@@ -110,14 +99,9 @@ public class Parser
 			switch(String[i])
 			{
 				case '\r':
-					if(i != String.Length - 1 && String[i + 1] == '\n')
-					{
-						ending = LineEnding.CrLf;
-					}
-					else
-					{
-						ending = LineEnding.Cr;
-					}
+					ending = i != String.Length - 1 && String[i + 1] == '\n'
+						? LineEnding.CrLf
+						: LineEnding.Cr;
 					return i;
 				case '\n':
 					ending = LineEnding.Lf;
@@ -131,61 +115,56 @@ public class Parser
 	/// <summary>Find next \n line ending.</summary>
 	/// <returns>Character position or string length if it was not found.</returns>
 	public int FindLfLineEnding()
-	{
-		for(int i = _position; i < String.Length; ++i)
-		{
-			if(String[i] == '\n') return i;
-		}
-		return String.Length;
-	}
+		=> PositionOrLength(String.IndexOf('\n', _position));
 
 	/// <summary>Find next space character.</summary>
 	/// <returns>Character position or string length if it was not found.</returns>
-	public int FindSpace()
-	{
-		return String.IndexOf(' ', _position);
-	}
+	public int FindSpace() => String.IndexOf(' ', _position);
 
 	/// <summary>Find next space character.</summary>
 	/// <returns>Character position or string length if it was not found.</returns>
-	public int FindSpace(int limit)
-	{
-		return String.IndexOf(' ', _position, limit);
-	}
+	public int FindSpace(int limit) => String.IndexOf(' ', _position, limit);
+	
+	/// <summary>Find next , character.</summary>
+	/// <returns>Character position or -1 if it was not found.</returns>
+	public int FindComma() => String.IndexOf(',', _position);
 
 	/// <summary>Find next , character.</summary>
 	/// <returns>Character position or -1 if it was not found.</returns>
-	public int FindComma()
-	{
-		return String.IndexOf(',', _position);
-	}
-
-	/// <summary>Find next , character.</summary>
-	/// <returns>Character position or -1 if it was not found.</returns>
-	public int FindComma(int limit)
-	{
-		return String.IndexOf(',', _position, limit);
-	}
+	public int FindComma(int limit) => String.IndexOf(',', _position, limit);
 
 	/// <summary>Find next space character.</summary>
 	public void FindSpaceAndSkip()
-	{
-		int pos = String.IndexOf(' ', _position);
-		if(pos == -1)
-			_position = String.Length;
-		else
-			_position = pos + 1;
-	}
+		=> _position = NextPositionOrLength(String.IndexOf(' ', _position));
 
 	/// <summary>Find next <paramref name="value"/>.</summary>
 	/// <param name="value">String to look for.</param>
 	/// <returns>String position or string length if it was not found.</returns>
 	public int FindPositionSafe(string value)
+		=> PositionOrLength(String.IndexOf(value, _position));
+
+#if NETCOREAPP
+
+	/// <summary>Read line from current position and advance to the next line.</summary>
+	/// <returns>Read line.</returns>
+	public ReadOnlySpan<char> ReadLineSpan()
 	{
-		int pos = String.IndexOf(value, _position);
-		if(pos == -1) return String.Length;
-		return pos;
+		ReadOnlySpan<char> res;
+		int pos = String.IndexOf('\n', _position);
+		if(pos < 0)
+		{
+			res = String.AsSpan(_position);
+			_position = String.Length;
+		}
+		else
+		{
+			res = String.AsSpan(_position, pos - _position);
+			_position = pos + 1;
+		}
+		return res;
 	}
+
+#endif
 
 	/// <summary>Read line from current position and advance to the next line.</summary>
 	/// <returns>Read line.</returns>
@@ -206,6 +185,36 @@ public class Parser
 		return res;
 	}
 
+	/// <summary>Read line from current position and advance to the next line.</summary>
+	/// <param name="ending">Line ending.</param>
+	/// <returns>Read line.</returns>
+	public string ReadLine(out string ending)
+	{
+		string res;
+		int pos = String.IndexOf('\n', _position);
+		if(pos == -1)
+		{
+			res = String.Substring(_position);
+			ending = "";
+			_position = String.Length;
+		}
+		else
+		{
+			if(pos > 0 && String[pos - 1] == '\r')
+			{
+				--pos;
+				ending = LineEnding.CrLf;
+			}
+			else
+			{
+				ending = LineEnding.Lf;
+			}
+			res = String.Substring(_position, pos - _position);
+			_position = pos + ending.Length;
+		}
+		return res;
+	}
+
 	public string ReadLineNoAdvance()
 	{
 		int pos = String.IndexOf('\n', _position);
@@ -214,10 +223,7 @@ public class Parser
 			: String.Substring(_position);
 	}
 
-	public char ReadChar()
-	{
-		return String[_position++];
-	}
+	public char ReadChar() => String[_position++];
 
 	public string ReadString(int length)
 	{
@@ -250,6 +256,17 @@ public class Parser
 		return res;
 	}
 
+#if NETCOREAPP
+
+	public ReadOnlySpan<char> ReadSpanUpTo(int position, int skip)
+	{
+		var res = String.AsSpan(_position, position - _position);
+		_position = position + skip;
+		return res;
+	}
+
+#endif
+
 	public string ReadString(int length, int skip)
 	{
 		var res = String.Substring(_position, length);
@@ -259,25 +276,13 @@ public class Parser
 
 	/// <summary>Skip current line.</summary>
 	public void SkipLine()
-	{
-		int pos = String.IndexOf('\n', _position);
-		if(pos == -1)
-		{
-			_position = String.Length;
-		}
-		else
-		{
-			_position = pos + 1;
-		}
-	}
+		=> _position = NextPositionOrLength(String.IndexOf('\n', _position));
 
 	/// <summary>Check if current character is <paramref name="value"/>.</summary>
 	/// <param name="value">Character to check for.</param>
 	/// <returns>True if current character is <paramref name="value"/>.</returns>
 	public bool CheckValue(char value)
-	{
-		return _position < String.Length && String[_position] == value;
-	}
+		=> _position < String.Length && String[_position] == value;
 
 	/// <summary>Check if <paramref name="value"/> can be found at current position.</summary>
 	/// <param name="value">String to check for.</param>
@@ -289,7 +294,11 @@ public class Parser
 		var vl = value.Length;
 		var sl = String.Length;
 		if(_position + vl > sl) return false;
+#if NETCOREAPP
+		return String.AsSpan(_position, vl).SequenceEqual(value);
+#else
 		return String.IndexOf(value, _position, vl) != -1;
+#endif
 	}
 
 	/// <summary>Check if <paramref name="value"/> can be found at current position and skips value if it is found.</summary>
@@ -302,9 +311,13 @@ public class Parser
 		var vl = value.Length;
 		var sl = String.Length;
 		if(_position + vl > sl) return false;
+#if NETCOREAPP
+		if(String.AsSpan(_position, vl).SequenceEqual(value))
+#else
 		if(String.IndexOf(value, _position, vl) != -1)
+#endif
 		{
-			Skip(value.Length);
+			Skip(vl);
 			return true;
 		}
 		else
@@ -373,7 +386,7 @@ public class Parser
 	/// <summary>Find next <paramref name="value"/> but do not change position.</summary>
 	/// <param name="value">String to look for.</param>
 	/// <returns>Substring.</returns>
-	public Substring FindSubstring(string value)
+	public Substring? FindSubstring(string value)
 	{
 		Verify.Argument.IsNotNull(value);
 
@@ -424,24 +437,16 @@ public class Parser
 	}
 
 	public int FindNoAdvance(string value)
-	{
-		return String.IndexOf(value, _position);
-	}
+		=> String.IndexOf(value, _position);
 
 	public int FindNoAdvance(string value, int limit)
-	{
-		return String.IndexOf(value, _position, limit);
-	}
+		=> String.IndexOf(value, _position, limit);
 
 	public int FindNoAdvance(char value)
-	{
-		return String.IndexOf(value, _position);
-	}
+		=> String.IndexOf(value, _position);
 
 	public int FindNoAdvance(char value, int limit)
-	{
-		return String.IndexOf(value, _position, limit);
-	}
+		=> String.IndexOf(value, _position, limit);
 
 	public int FindSeparatingEmptyLine(int limit, out int part2Start)
 	{
@@ -499,7 +504,7 @@ public class Parser
 	/// <summary>Current parser position.</summary>
 	public int Position
 	{
-		get { return _position; }
+		get => _position;
 		set
 		{
 			Verify.Argument.IsNotNegative(value);
@@ -523,25 +528,18 @@ public class Parser
 
 	public char this[int index] => String[_position + index];
 
-	public void Skip()
-	{
-		++_position;
-	}
+	public void Skip() => ++_position;
 
-	public void Skip(int amount)
-	{
-		_position += amount;
-	}
+	public void Skip(int amount) => _position += amount;
 
 	public int Skip(char value)
 	{
-		int skipped = 0;
+		var position = _position;
 		while(_position < String.Length && String[_position] == value)
 		{
 			++_position;
-			++skipped;
 		}
-		return skipped;
+		return _position - position;
 	}
 
 	public void GoToStart()
@@ -562,8 +560,7 @@ public class Parser
 
 	public void PushPosition(int newPosition)
 	{
-		_positions ??= new Stack<int>();
-		_positions.Push(_position);
+		PushPosition();
 		_position = newPosition;
 	}
 
@@ -571,7 +568,7 @@ public class Parser
 	{
 		Verify.State.IsTrue(_positions is { Count: not 0 });
 
-		_position = _positions.Pop();
+		_position = _positions!.Pop();
 	}
 
 	public unsafe Version ReadVersion()

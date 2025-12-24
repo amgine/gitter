@@ -90,20 +90,20 @@ sealed class WebBrowserViewToolbar : ToolStrip
 		base.OnResize(e);
 	}
 
-	private void OnWebBrowserNavigating(object sender, WebBrowserNavigatingEventArgs e)
+	private void OnWebBrowserNavigating(object? sender, WebBrowserNavigatingEventArgs e)
 	{
 		if(e.TargetFrameName == string.Empty)
 		{
-			_addressBox.Text = e.Url.ToString();
+			_addressBox.Text = e.Url?.ToString();
 		}
 	}
 
-	private void OnWebBrowserCanGoBackChanged(object sender, EventArgs e)
+	private void OnWebBrowserCanGoBackChanged(object? sender, EventArgs e)
 	{
 		_btnGoBack.Enabled = _view.WebBrowser.CanGoBack;
 	}
 
-	private void OnWebBrowserCanGoForwardChanged(object sender, EventArgs e)
+	private void OnWebBrowserCanGoForwardChanged(object? sender, EventArgs e)
 	{
 		_btnGoForward.Enabled = _view.WebBrowser.CanGoForward;
 	}

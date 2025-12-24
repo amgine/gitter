@@ -20,54 +20,26 @@
 
 namespace gitter.Git;
 
-using System;
-
 /// <summary>Represents a commit, referenced by a blame output line.</summary>
-public sealed class BlameCommit
+public sealed class BlameCommit(
+	Sha1Hash      hash,
+	BlameUserInfo author,
+	BlameUserInfo committer,
+	string        summary,
+	bool          isBoundary,
+	string?       previous)
 {
-	public BlameCommit(
-		Hash hash,
-		string author,    string authorEmail,    DateTimeOffset authorDate, string authorTimeZone,
-		string committer, string committerEmail, DateTimeOffset commitDate, string committerTimeZone,
-		string summary, bool isBoundary, string previous)
-	{
-		Hash              = hash;
-		Author            = author;
-		AuthorEmail       = authorEmail;
-		AuthorDate        = authorDate;
-		AuthorTimeZone    = authorTimeZone;
-		Committer         = committer;
-		CommitterEmail    = committerEmail;
-		CommitDate        = commitDate;
-		CommitterTimeZone = committerTimeZone;
-		Summary           = summary;
-		IsBoundary        = isBoundary;
-		Previous          = previous;
-	}
+	public Sha1Hash Hash { get; } = hash;
 
-	public Hash Hash { get; }
+	public string Summary { get; } = summary;
 
-	public string Summary { get; }
+	public BlameUserInfo Author { get; } = author;
 
-	public string Author { get; }
+	public BlameUserInfo Committer { get; } = committer;
 
-	public string AuthorTimeZone { get; }
+	public bool IsBoundary { get; } = isBoundary;
 
-	public DateTimeOffset AuthorDate { get; }
+	public string? Previous { get; } = previous;
 
-	public string AuthorEmail { get; }
-
-	public string Committer { get; }
-
-	public string CommitterTimeZone { get; }
-
-	public string CommitterEmail { get; }
-
-	public DateTimeOffset CommitDate { get; }
-
-	public bool IsBoundary { get; }
-
-	public string Previous { get; }
-
-	public override string ToString() =>Summary;
+	public override string ToString() => Summary;
 }

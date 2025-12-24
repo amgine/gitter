@@ -42,10 +42,10 @@ public sealed class Submodule : GitNamedObjectWithLifetime
 	#region Events
 
 	/// <summary><see cref="M:Path"/> property value changed.</summary>
-	public event EventHandler PathChanged;
+	public event EventHandler? PathChanged;
 
 	/// <summary><see cref="M:Url"/> property value changed.</summary>
-	public event EventHandler UrlChanged;
+	public event EventHandler? UrlChanged;
 
 	private void OnPathChanged()
 		=> PathChanged?.Invoke(this, EventArgs.Empty);
@@ -85,11 +85,10 @@ public sealed class Submodule : GitNamedObjectWithLifetime
 		get => _path;
 		private set
 		{
-			if(_path != value)
-			{
-				_path = value;
-				OnPathChanged();
-			}
+			if(_path == value) return;
+
+			_path = value;
+			OnPathChanged();
 		}
 	}
 
@@ -99,11 +98,10 @@ public sealed class Submodule : GitNamedObjectWithLifetime
 		get => _url;
 		private set
 		{
-			if(_url != value)
-			{
-				_url = value;
-				OnUrlChanged();
-			}
+			if(_url == value) return;
+
+			_url = value;
+			OnUrlChanged();
 		}
 	}
 
@@ -111,7 +109,7 @@ public sealed class Submodule : GitNamedObjectWithLifetime
 
 	#region Methods
 
-	private UpdateSubmoduleParameters GetUpdateParameters()
+	private UpdateSubmoduleRequest GetUpdateRequest()
 		=> new()
 		{
 			Path = _path,
@@ -119,48 +117,48 @@ public sealed class Submodule : GitNamedObjectWithLifetime
 			Init = true,
 		};
 
-	private SyncSubmoduleParameters GetSyncParameters(bool recursive)
+	private SyncSubmoduleRequest GetSyncRequest(bool recursive)
 		=> new()
 		{
 			Recursive  = recursive,
-			Submodules = new[] { _path },
+			Submodules = _path,
 		};
 
 	public void Update()
 	{
 		Verify.State.IsNotDeleted(this);
 
-		var parameters = GetUpdateParameters();
-		Repository.Accessor.UpdateSubmodule.Invoke(parameters);
+		var request = GetUpdateRequest();
+		Repository.Accessor.UpdateSubmodule.Invoke(request);
 	}
 
-	public Task UpdateAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	public Task UpdateAsync(IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.State.IsNotDeleted(this);
 
 		progress?.Report(new OperationProgress(Resources.StrsUpdatingSubmodule.AddEllipsis()));
-		var parameters = GetUpdateParameters();
-		return Repository.Accessor.UpdateSubmodule.InvokeAsync(parameters, progress, cancellationToken);
+		var request = GetUpdateRequest();
+		return Repository.Accessor.UpdateSubmodule.InvokeAsync(request, progress, cancellationToken);
 	}
 
 	public void Sync(bool recursive = true)
 	{
 		Verify.State.IsNotDeleted(this);
 
-		var parameters = GetSyncParameters(recursive);
-		Repository.Accessor.SyncSubmodule.Invoke(parameters);
+		var request = GetSyncRequest(recursive);
+		Repository.Accessor.SyncSubmodule.Invoke(request);
 		Repository.Submodules.Refresh();
 	}
 
 	public async Task SyncAsync(bool recursive = true,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.State.IsNotDeleted(this);
 
 		progress?.Report(new OperationProgress(Resources.StrsSynchronizingSubmodule.AddEllipsis()));
-		var parameters = GetSyncParameters(recursive);
+		var request = GetSyncRequest(recursive);
 		await Repository.Accessor.SyncSubmodule
-			.InvokeAsync(parameters, progress, cancellationToken)
+			.InvokeAsync(request, progress, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 		await Repository.Submodules
 			.RefreshAsync()

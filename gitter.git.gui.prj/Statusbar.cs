@@ -24,6 +24,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
+using System.Threading;
 using System.Windows.Forms;
 
 using gitter.Framework;
@@ -46,7 +47,7 @@ internal sealed class Statusbar : IDisposable
 
 	#region Data
 
-	private Repository _repository;
+	private Repository? _repository;
 
 	private readonly ToolStripStatusLabel _headLabel;
 
@@ -101,11 +102,13 @@ internal sealed class Statusbar : IDisposable
 	{
 		Verify.Argument.IsNotNull(guiProvider);
 
+		SynchronizationContext = SynchronizationContext.Current;
+
 		_guiProvider = guiProvider;
 		var dpiBindings = guiProvider.MainFormDpiBindings;
 
-		_leftAlignedItems = new ToolStripItem[]
-		{
+		_leftAlignedItems =
+		[
 			new ToolStripStatusLabel(Resources.StrHead.AddColon()),
 			_headLabel = new ToolStripStatusLabel(Resources.StrNoBranch),
 			new ToolStripSeparator(),
@@ -150,7 +153,7 @@ internal sealed class Statusbar : IDisposable
 				{ Available = false, ToolTipText = Resources.TipRevertQuit },
 			_revertAbort = new ToolStripButton(Resources.StrAbort, null, OnRevertAbortClick)
 				{ Available = false, ToolTipText = Resources.TipRevertAbort },
-		};
+		];
 
 		dpiBindings.BindImage(_statusClean, Icons.StatusClean);
 		dpiBindings.BindImage(_statusUnmerged,          FileStatusIcons.ImgUnmerged);
@@ -180,11 +183,11 @@ internal sealed class Statusbar : IDisposable
 		_statusUnstagedRemoved.DoubleClick   += OnUnstagedDoubleClick;
 		_statusUnstagedUntracked.DoubleClick += OnUnstagedDoubleClick;
 
-		_rightAlignedItems = new[]
-		{
+		_rightAlignedItems =
+		[
 			_userLabel   = new ToolStripStatusLabel(string.Empty, null),
 			_remoteLabel = new ToolStripStatusLabel(string.Empty, null),
-		};
+		];
 		dpiBindings.BindImage(_remoteLabel, Icons.Remote);
 
 		_userLabel.MouseDown   += OnUserLabelMouseDown;
@@ -216,10 +219,12 @@ internal sealed class Statusbar : IDisposable
 
 	#endregion
 
-	private ISynchronizeInvoke SynchronizeInvoke => _guiProvider.Environment;
+	private SynchronizationContext? SynchronizationContext { get; }
 
 	private static Point GetToolTipPosition(CustomToolTip toolTip, ToolStripItem label)
 	{
+		if(label.Owner is null) return Point.Empty;
+
 		var b = label.Bounds;
 		var s = toolTip.Measure(GitterApplication.MainForm);
 		var x = b.X + (b.Width - s.Width) / 2;
@@ -236,159 +241,180 @@ internal sealed class Statusbar : IDisposable
 
 	private void ShowToolTip(FileListToolTip toolTip, ToolStripItem label, bool staged, FileStatus fileStatus)
 	{
-		if(Repository is not null)
+		if(Repository is not null && label.Owner is not null)
 		{
-			toolTip.Update(_repository.Status, staged, fileStatus);
+			toolTip.Update(Repository.Status, staged, fileStatus);
 			toolTip.Show(label.Owner, GetToolTipPosition(toolTip, label));
 		}
 	}
 
+	private static void HideToolTip(FileListToolTip toolTip, ToolStripItem label)
+	{
+		if(label.Owner is null) return;
+		toolTip.Hide(label.Owner);
+	}
+
 	private void SetToolTip(ToolStripItem item, FileListToolTip toolTip, bool staged, FileStatus fileStatus)
 	{
-		item.MouseEnter += (sender, _) => ShowToolTip(toolTip, (ToolStripItem)sender, staged, fileStatus);
-		item.MouseLeave += (sender, _) => toolTip.Hide(((ToolStripItem)sender).Owner);
+		item.MouseEnter += (sender, _) => ShowToolTip(toolTip, (ToolStripItem)sender!, staged, fileStatus);
+		item.MouseLeave += (sender, _) => HideToolTip(toolTip, (ToolStripItem)sender!);
 	}
 
 	private void SetToolTips()
 	{
 		_statusLabel.MouseEnter += OnStatusLabelMouseEnter;
-		_statusLabel.MouseLeave += OnstatusLabelMouseLeave;
+		_statusLabel.MouseLeave += OnStatusLabelMouseLeave;
 
-		SetToolTip(_statusUnmerged,				_statusUnmergedToolTip,				false,	FileStatus.Unmerged);
+		SetToolTip(_statusUnmerged,          _statusUnmergedToolTip,          false, FileStatus.Unmerged);
 
-		SetToolTip(_statusStagedAdded,			_statusStagedAddedToolTip,			true,	FileStatus.Added);
-		SetToolTip(_statusStagedRemoved,		_statusStagedRemovedToolTip,		true,	FileStatus.Removed);
-		SetToolTip(_statusStagedModified,		_statusStagedModifiedToolTip,		true,	FileStatus.Modified);
+		SetToolTip(_statusStagedAdded,       _statusStagedAddedToolTip,       true,  FileStatus.Added);
+		SetToolTip(_statusStagedRemoved,     _statusStagedRemovedToolTip,     true,  FileStatus.Removed);
+		SetToolTip(_statusStagedModified,    _statusStagedModifiedToolTip,    true,  FileStatus.Modified);
 
-		SetToolTip(_statusUnstagedUntracked,	_statusUnstagedUntrackedToolTip,	false,	FileStatus.Added);
-		SetToolTip(_statusUnstagedRemoved,		_statusUnstagedRemovedToolTip,		false,	FileStatus.Removed);
-		SetToolTip(_statusUnstagedModified,		_statusUnstagedModifiedToolTip,		false,	FileStatus.Modified);
+		SetToolTip(_statusUnstagedUntracked, _statusUnstagedUntrackedToolTip, false, FileStatus.Added);
+		SetToolTip(_statusUnstagedRemoved,   _statusUnstagedRemovedToolTip,   false, FileStatus.Removed);
+		SetToolTip(_statusUnstagedModified,  _statusUnstagedModifiedToolTip,  false, FileStatus.Modified);
 	}
 
-	private void OnStatusLabelMouseEnter(object sender, EventArgs e)
+	private void OnStatusLabelMouseEnter(object? sender, EventArgs e)
 	{
-		if(Repository is not null)
+		if(Repository is not null && _statusLabel.Owner is not null)
 		{
 			_statusToolTip.Update(Repository.Status);
 			_statusToolTip.Show(_statusLabel.Owner, GetToolTipPosition(_statusToolTip, _statusLabel));
 		}
 	}
 
-	private void OnstatusLabelMouseLeave(object sender, EventArgs e)
+	private void OnStatusLabelMouseLeave(object? sender, EventArgs e)
 	{
+		if(_statusLabel.Owner is null) return;
 		_statusToolTip.Hide(_statusLabel.Owner);
 	}
 
-	private void OnUserLabelMouseDown(object sender, MouseEventArgs e)
+	private void OnUserLabelMouseDown(object? sender, MouseEventArgs e)
 	{
 		if(e.Button == MouseButtons.Right)
 		{
 			if(_repository is not null)
 			{
-				var item = (ToolStripItem)sender;
-				var menu = new ContextMenuStrip();
-				menu.Items.Add(new ToolStripMenuItem(
-					Resources.StrChangeIdentity.AddEllipsis(), null,
-					(s, _) => _guiProvider.StartUserIdentificationDialog()));
-				Utility.MarkDropDownForAutoDispose(menu);
+				var item = (ToolStripItem)sender!;
 				var parent = Utility.GetParentControl(item);
-				var x = item.Bounds.X + e.X;
-				var y = item.Bounds.Y + e.Y;
-				menu.Show(parent, x, y);
+				if(parent is not null)
+				{
+					var menu = new ContextMenuStrip();
+					menu.Items.Add(new ToolStripMenuItem(
+						Resources.StrChangeIdentity.AddEllipsis(), null,
+						(s, _) => _guiProvider.StartUserIdentificationDialog()));
+					Utility.MarkDropDownForAutoDispose(menu);
+					var x = item.Bounds.X + e.X;
+					var y = item.Bounds.Y + e.Y;
+					menu.Show(parent, x, y);
+				}
 			}
 		}
 	}
 
-	private static void OnRemoteLabelMouseDown(object sender, MouseEventArgs e)
+	private static void OnRemoteLabelMouseDown(object? sender, MouseEventArgs e)
 	{
 		if(e.Button == MouseButtons.Right)
 		{
-			var item   = (ToolStripItem)sender;
-			var remote = (Remote)item.Tag;
+			var item   = (ToolStripItem)sender!;
+			var remote = (Remote)item.Tag!;
 			if(remote is not null)
 			{
-				var menu = new RemoteMenu(remote);
-				Utility.MarkDropDownForAutoDispose(menu);
 				var parent = Utility.GetParentControl(item);
-				var x = item.Bounds.X + e.X;
-				var y = item.Bounds.Y + e.Y;
-				menu.Show(parent, x, y);
+				if(parent is not null)
+				{
+					var menu = new RemoteMenu(remote);
+					Utility.MarkDropDownForAutoDispose(menu);
+					var x = item.Bounds.X + e.X;
+					var y = item.Bounds.Y + e.Y;
+					menu.Show(parent, x, y);
+				}
 			}
 		}
 	}
 
 	private void InvokeRebaseControl(RebaseControl control)
 	{
-		var parent = _guiProvider.Environment.MainForm;
-
+		if(Repository is null) return;
+		var parent = _guiProvider.Environment?.MainForm;
 		GuiCommands.Rebase(parent, Repository, control);
 	}
 
-	private void OnRebaseContinueClick(object sender, EventArgs e)
+	private void OnRebaseContinueClick(object? sender, EventArgs e)
 	{
 		InvokeRebaseControl(RebaseControl.Continue);
 	}
 
-	private void OnRebaseSkipClick(object sender, EventArgs e)
+	private void OnRebaseSkipClick(object? sender, EventArgs e)
 	{
 		InvokeRebaseControl(RebaseControl.Skip);
 	}
 
-	private void OnRebaseAbortClick(object sender, EventArgs e)
+	private void OnRebaseAbortClick(object? sender, EventArgs e)
 	{
 		InvokeRebaseControl(RebaseControl.Abort);
 	}
 
 	private void InvokeCherryPickControl(CherryPickControl control)
 	{
-		var parent = _guiProvider.Environment.MainForm;
-
+		if(Repository is null) return;
+		var parent = _guiProvider.Environment?.MainForm;
 		GuiCommands.CherryPick(parent, Repository, control);
 	}
 
-	private void OnCherryPickContinueClick(object sender, EventArgs e)
+	private void OnCherryPickContinueClick(object? sender, EventArgs e)
 	{
 		InvokeCherryPickControl(CherryPickControl.Continue);
 	}
 
-	private void OnCherryPickQuitClick(object sender, EventArgs e)
+	private void OnCherryPickQuitClick(object? sender, EventArgs e)
 	{
 		InvokeCherryPickControl(CherryPickControl.Quit);
 	}
 
-	private void OnCherryPickAbortClick(object sender, EventArgs e)
+	private void OnCherryPickAbortClick(object? sender, EventArgs e)
 	{
 		InvokeCherryPickControl(CherryPickControl.Abort);
 	}
 
 	private void InvokeRevertControl(RevertControl control)
 	{
-		var parent = _guiProvider.Environment.MainForm;
-
+		if(Repository is null) return;
+		var parent = _guiProvider.Environment?.MainForm;
 		GuiCommands.Revert(parent, Repository, control);
 	}
 
-	private void OnRevertContinueClick(object sender, EventArgs e)
+	private void OnRevertContinueClick(object? sender, EventArgs e)
 	{
 		InvokeRevertControl(RevertControl.Continue);
 	}
 
-	private void OnRevertQuitClick(object sender, EventArgs e)
+	private void OnRevertQuitClick(object? sender, EventArgs e)
 	{
 		InvokeRevertControl(RevertControl.Quit);
 	}
 
-	private void OnRevertAbortClick(object sender, EventArgs e)
+	private void OnRevertAbortClick(object? sender, EventArgs e)
 	{
 		InvokeRevertControl(RevertControl.Abort);
 	}
 
-	private void OnHeadLabelMouseDown(object sender, MouseEventArgs e)
+	private void OnHeadLabelMouseDown(object? sender, MouseEventArgs e)
 	{
 		if(e.Button == MouseButtons.Right)
 		{
-			var item = (ToolStripItem)sender;
-			var menu = new ContextMenuStrip();
+			if(Repository is null) return;
+
+			var item = (ToolStripItem)sender!;
+			var parent = Utility.GetParentControl(item);
+			if(parent is null) return;
+
+			var menu = new ContextMenuStrip
+			{
+				Renderer = GitterApplication.Style.ToolStripRenderer,
+			};
 
 			var dpiBindings = new DpiBindings(menu);
 			var factory     = new GuiItemFactory(dpiBindings);
@@ -403,14 +429,13 @@ internal sealed class Statusbar : IDisposable
 			menu.Items.Add(factory.GetViewReflogItem<ToolStripMenuItem>(Repository.Head));
 
 			Utility.MarkDropDownForAutoDispose(menu);
-			var parent = Utility.GetParentControl(item);
 			var x = item.Bounds.X + e.X;
 			var y = item.Bounds.Y + e.Y;
 			menu.Show(parent, x, y);
 		}
 	}
 
-	private void OnHeadLabelDoubleClick(object sender, EventArgs e)
+	private void OnHeadLabelDoubleClick(object? sender, EventArgs e)
 	{
 		if(Repository is not null)
 		{
@@ -418,7 +443,7 @@ internal sealed class Statusbar : IDisposable
 		}
 	}
 
-	private void OnUnstagedDoubleClick(object sender, EventArgs e)
+	private void OnUnstagedDoubleClick(object? sender, EventArgs e)
 	{
 		if(Repository is not null)
 		{
@@ -426,7 +451,7 @@ internal sealed class Statusbar : IDisposable
 		}
 	}
 
-	private void OnConflictsDoubleClick(object sender, EventArgs e)
+	private void OnConflictsDoubleClick(object? sender, EventArgs e)
 	{
 		if(Repository is not null)
 		{
@@ -434,7 +459,7 @@ internal sealed class Statusbar : IDisposable
 		}
 	}
 
-	private void OnUserDoubleClick(object sender, EventArgs e)
+	private void OnUserDoubleClick(object? sender, EventArgs e)
 	{
 		if(Repository is not null)
 		{
@@ -442,21 +467,20 @@ internal sealed class Statusbar : IDisposable
 		}
 	}
 
-	public Repository Repository
+	public Repository? Repository
 	{
 		get => _repository;
 		set
 		{
-			if(_repository != value)
+			if(_repository == value) return;
+
+			if(_repository is not null)
 			{
-				if(_repository is not null)
-				{
-					DetachFromRepository(_repository);
-				}
-				if(value is not null)
-				{
-					AttachToRepository(value);
-				}
+				DetachFromRepository(_repository);
+			}
+			if(value is not null)
+			{
+				AttachToRepository(value);
 			}
 		}
 	}
@@ -490,131 +514,48 @@ internal sealed class Statusbar : IDisposable
 		_repository = null;
 	}
 
-	private void OnHeadChanged(object sender, RevisionPointerChangedEventArgs e)
+	private void PostUpdate(SendOrPostCallback callback)
 	{
-		if(SynchronizeInvoke.InvokeRequired)
+		if(SynchronizationContext is not null)
 		{
-			try
-			{
-				SynchronizeInvoke.BeginInvoke(new MethodInvoker(UpdateCurrentBranchLabel), null);
-			}
-			catch(ObjectDisposedException)
-			{
-			}
+			SynchronizationContext.Post(callback, this);
 		}
 		else
 		{
-			UpdateCurrentBranchLabel();
+			callback(this);
 		}
 	}
 
-	private void OnUserIdentityChanged(object sender, EventArgs e)
-	{
-		if(SynchronizeInvoke.InvokeRequired)
-		{
-			try
-			{
-				SynchronizeInvoke.BeginInvoke(new MethodInvoker(UpdateUserIdentityLabel), null);
-			}
-			catch(ObjectDisposedException)
-			{
-			}
-		}
-		else
-		{
-			UpdateUserIdentityLabel();
-		}
-	}
+	private void OnHeadChanged(object? sender, RevisionPointerChangedEventArgs e)
+		=> PostUpdate(static state => ((Statusbar)state!).UpdateCurrentBranchLabel());
 
-	private void OnBranchRenamed(object sender, BranchRenamedEventArgs e)
+	private void OnUserIdentityChanged(object? sender, EventArgs e)
+		=> PostUpdate(static state => ((Statusbar)state!).UpdateUserIdentityLabel());
+
+	private void OnBranchRenamed(object? sender, BranchRenamedEventArgs e)
 	{
 		if(e.Object.IsCurrent)
 		{
-			if(SynchronizeInvoke.InvokeRequired)
-			{
-				try
-				{
-					SynchronizeInvoke.BeginInvoke(new MethodInvoker(UpdateCurrentBranchLabel), null);
-				}
-				catch(ObjectDisposedException)
-				{
-				}
-			}
-			else
-			{
-				UpdateCurrentBranchLabel();
-			}
+			PostUpdate(static state => ((Statusbar)state!).UpdateCurrentBranchLabel());
 		}
 	}
 
-	private void OnStatusChanged(object sender, EventArgs e)
-	{
-		if(SynchronizeInvoke.InvokeRequired)
-		{
-			try
-			{
-				SynchronizeInvoke.BeginInvoke(new MethodInvoker(UpdateStatus), null);
-			}
-			catch(ObjectDisposedException)
-			{
-			}
-		}
-		else
-		{
-			UpdateStatus();
-		}
-	}
+	private void OnStatusChanged(object? sender, EventArgs e)
+		=> PostUpdate(static state => ((Statusbar)state!).UpdateStatus());
 
-	private void OnStateChanged(object sender, EventArgs e)
-	{
-		if(SynchronizeInvoke.InvokeRequired)
-		{
-			SynchronizeInvoke.BeginInvoke(new MethodInvoker(UpdateState), null);
-		}
-		else
-		{
-			UpdateState();
-		}
-	}
+	private void OnStateChanged(object? sender, EventArgs e)
+		=> PostUpdate(static state => ((Statusbar)state!).UpdateState());
 
-	private void OnRemoteAdded(object sender, RemoteEventArgs e)
-	{
-		if(SynchronizeInvoke.InvokeRequired)
-		{
-			try
-			{
-				SynchronizeInvoke.BeginInvoke(new Action<Remote>(OnRemoteAdded), new object[] { e.Object });
-			}
-			catch(ObjectDisposedException)
-			{
-			}
-		}
-		else
-		{
-			OnRemoteAdded(e.Object);
-		}
-	}
+	private void OnRemoteAdded(object? sender, RemoteEventArgs e)
+		=> PostUpdate(state => ((Statusbar)state!).OnRemoteAdded(e.Object));
 
-	private void OnRemoteRemoved(object sender, RemoteEventArgs e)
-	{
-		if(SynchronizeInvoke.InvokeRequired)
-		{
-			try
-			{
-				SynchronizeInvoke.BeginInvoke(new Action<Remote>(OnRemoteRemoved), new object[] { e.Object });
-			}
-			catch(ObjectDisposedException)
-			{
-			}
-		}
-		else
-		{
-			OnRemoteRemoved(e.Object);
-		}
-	}
+	private void OnRemoteRemoved(object? sender, RemoteEventArgs e)
+		=> PostUpdate(state => ((Statusbar)state!).OnRemoteRemoved(e.Object));
 
 	private void OnRemoteAdded(Remote remote)
 	{
+		if(IsDisposed) return;
+
 		if(_remoteLabel.Tag is null)
 		{
 			UpdateRemoteLabel();
@@ -623,6 +564,8 @@ internal sealed class Statusbar : IDisposable
 
 	private void OnRemoteRemoved(Remote remote)
 	{
+		if(IsDisposed) return;
+
 		if(_remoteLabel.Tag == remote)
 		{
 			UpdateRemoteLabel();
@@ -631,6 +574,8 @@ internal sealed class Statusbar : IDisposable
 
 	private void UpdateRemoteLabel()
 	{
+		if(Repository is null) return;
+
 		lock(Repository.Remotes.SyncRoot)
 		{
 			if(Repository.Remotes.Count != 0)
@@ -644,7 +589,7 @@ internal sealed class Statusbar : IDisposable
 						break;
 					}
 				}
-				_remoteLabel.Text = remote.FetchUrl;
+				_remoteLabel.Text = remote!.FetchUrl;
 				_remoteLabel.Tag = remote;
 				_remoteLabel.Available = true;
 			}
@@ -672,6 +617,8 @@ internal sealed class Statusbar : IDisposable
 
 	private void UpdateStatus()
 	{
+		if(Repository is null) return;
+
 		var status = Repository.Status;
 		lock(status.SyncRoot)
 		{
@@ -747,19 +694,20 @@ internal sealed class Statusbar : IDisposable
 		_revertContinue.Available = show;
 	}
 
-	private static string GetHeadString(IRevisionPointer revision)
+	private static string GetHeadString(IRevisionPointer? revision)
 	{
-		if(revision is not null)
-		{
-			return GitUtils.IsValidSHA1(revision.Pointer)
-				? revision.Pointer.Substring(0, 7)
-				: revision.Pointer;
-		}
-		return string.Empty;
+		if(revision is null) return string.Empty;
+
+		return Sha1Hash.IsValidString(revision.Pointer)
+			? revision.Pointer.Substring(0, 7)
+			: revision.Pointer;
 	}
 
 	private void UpdateState()
 	{
+		if(IsDisposed) return;
+		if(_repository is null) return;
+
 		switch(_repository.State)
 		{
 			case RepositoryState.Merging:
@@ -827,6 +775,9 @@ internal sealed class Statusbar : IDisposable
 
 	public void UpdateCurrentBranchLabel()
 	{
+		if(IsDisposed) return;
+		if(_repository is null) return;
+
 		if(_repository.Head.IsEmpty)
 		{
 			_headLabel.Text = _repository.Head.Pointer.Pointer;
@@ -846,6 +797,9 @@ internal sealed class Statusbar : IDisposable
 
 	public void UpdateUserIdentityLabel()
 	{
+		if(IsDisposed) return;
+		if(_repository is null) return;
+
 		var user = _repository.UserIdentity;
 		if(user is null)
 		{

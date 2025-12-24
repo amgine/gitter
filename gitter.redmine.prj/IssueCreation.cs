@@ -21,7 +21,7 @@
 namespace gitter.Redmine;
 
 using System;
-using System.Globalization;
+using System.Threading.Tasks;
 using System.Xml;
 
 public sealed class IssueCreation : RedmineObjectCreation<Issue>
@@ -138,17 +138,14 @@ public sealed class IssueCreation : RedmineObjectCreation<Issue>
 		set { _estimatedHours = value; }
 	}
 
-	public CustomFieldsDefinition CustomFields
-	{
-		get { return _customFields; }
-	}
+	public CustomFieldsDefinition CustomFields => _customFields;
 
 	#endregion
 
 	internal IssueCreation(RedmineServiceContext context)
 		: base(context)
 	{
-		_customFields = new CustomFieldsDefinition(null);
+		_customFields = new(null);
 	}
 
 	protected override void ResetCore()
@@ -173,13 +170,10 @@ public sealed class IssueCreation : RedmineObjectCreation<Issue>
 		_doneRatio		= 0;
 		_estimatedHours	= 0;
 
-		if(_customFields != null)
-		{
-			_customFields.Reset();
-		}
+		_customFields?.Reset();
 	}
 
-	protected override void CommitCore()
+	protected override Task CommitCore()
 	{
 		var xml = new XmlDocument();
 		var root = xml.CreateElement("issue");
@@ -217,6 +211,6 @@ public sealed class IssueCreation : RedmineObjectCreation<Issue>
 		xml.AppendChild(root);
 
 		const string url = "issues.xml";
-		Context.PostXml(url, xml);
+		return Context.PostXmlAsync(url, xml);
 	}
 }

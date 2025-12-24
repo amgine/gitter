@@ -4,7 +4,7 @@
 
 Gitter was originally developed as a standalone repository management tool for Windows with powerful GUI.
 
-It is written completely in C# and targets net48 / netcore6.0.
+It is written completely in C# and targets net48 / net6.0+
 
 Application is mainly tested on Win10/11.
 
@@ -33,7 +33,7 @@ Get .NET FW 4.0 Client-Profile: <http://www.microsoft.com/download/en/details.as
 
 If you don't have MS Visual Studio 2022:
 
-1. Ensure that you have .NET 6.0 SDK installed
+1. Ensure that you have .NET 9.0 SDK installed
 2. Clone gitter repository
 3. Run 'build.cmd'
 4. Binaries can be found in 'output/Release' directory

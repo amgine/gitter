@@ -76,14 +76,15 @@ public sealed class RevisionTreeSource : TreeSourceBase
 	#region Methods
 
 	public override Tree GetTree()
-		=> new Tree(Revision.Repository, Revision.FullName);
+		=> new(Revision.Repository, Revision.FullName);
 
-	public override Task<Tree> GetTreeAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	public override Task<Tree> GetTreeAsync(IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
 		=> Tree.GetAsync(Revision.Repository, Revision.FullName, progress, cancellationToken);
 
 	/// <inheritdoc/>
-	public override bool Equals(object obj)
-		=> obj is RevisionTreeSource other && _revision == other._revision;
+	public override bool Equals(object? obj)
+		=> obj is RevisionTreeSource other
+		&& _revision == other._revision;
 
 	/// <inheritdoc/>
 	public override int GetHashCode() => _revision.GetHashCode();

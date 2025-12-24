@@ -29,13 +29,13 @@ public sealed class TreeDirectoriesBinding : IDisposable
 	#region Data
 
 	private readonly CustomListBoxItemsCollection _itemHost;
-	private TreeDirectoryListItem _rootItem;
+	private TreeDirectoryListItem? _rootItem;
 
 	#endregion
 
 	#region Events
 
-	public event EventHandler<BoundItemActivatedEventArgs<TreeItem>> ItemActivated;
+	public event EventHandler<BoundItemActivatedEventArgs<TreeItem>>? ItemActivated;
 
 	private void InvokeItemActivated(CustomListBoxItem listItem, TreeItem treeItem)
 		=> ItemActivated?.Invoke(this, new BoundItemActivatedEventArgs<TreeItem>(listItem, treeItem));
@@ -93,33 +93,35 @@ public sealed class TreeDirectoriesBinding : IDisposable
 		}
 	}
 
-	private void OnItemActivated(object sender, EventArgs e)
+	private void OnItemActivated(object? sender, EventArgs e)
 	{
 		var handler = ItemActivated;
-		if(handler != null)
+		if(handler is not null)
 		{
-			var listItem = (CustomListBoxItem)(sender);
-			var data = ((ITreeItemListItem)listItem).TreeItem;
+			var listItem = (CustomListBoxItem)(sender!);
+			var data     = ((ITreeItemListItem)listItem).TreeItem;
 			handler(this, new BoundItemActivatedEventArgs<TreeItem>(listItem, data));
 		}
 	}
 
-	private void OnSubItemActivated(object sender, BoundItemActivatedEventArgs<TreeItem> e)
+	private void OnSubItemActivated(object? sender, BoundItemActivatedEventArgs<TreeItem> e)
 	{
 		InvokeItemActivated(e.Item, e.Object);
 	}
 
 	public TreeDirectory Root { get; }
 
-	private void OnNewFolderAdded(object sender, TreeDirectoryEventArgs e)
+	private void OnNewFolderAdded(object? sender, TreeDirectoryEventArgs e)
 	{
 		var item = new TreeDirectoryListItem(e.Folder, TreeDirectoryListItemType.ShowFoldersOnly);
 		_itemHost.AddSafe(item);
 		item.Activated += OnItemActivated;
 	}
 
-	private void OnNewFolderAddedRooted(object sender, TreeDirectoryEventArgs e)
+	private void OnNewFolderAddedRooted(object? sender, TreeDirectoryEventArgs e)
 	{
+		if(_rootItem is null) return;
+
 		var item = new TreeDirectoryListItem(e.Folder, TreeDirectoryListItemType.ShowFoldersOnly);
 		_rootItem.Items.AddSafe(item);
 		item.Activated += OnItemActivated;

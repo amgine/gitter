@@ -21,6 +21,7 @@
 namespace gitter.Framework.CLI;
 
 using System;
+using System.Buffers;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -28,16 +29,14 @@ using System.Threading;
 /// <summary>Used to discard any read data.</summary>
 public sealed class NullReader : IOutputReceiver
 {
-#if NET5_0_OR_GREATER
-	private static readonly byte[] _buffer = GC.AllocateUninitializedArray<byte>(0x400, pinned: true);
-#else
+#if !NETCOREAPP
 	private static readonly byte[] _buffer = new byte[0x400];
 #endif
-	private object _syncRoot = new();
+	private readonly object _syncRoot = new();
 	private bool _canceled;
 	private bool _completed;
 
-	private Stream Stream { get; set; }
+	private Stream? Stream { get; set; }
 
 	/// <inheritdoc/>
 	public bool IsInitialized => Stream is not null;
@@ -65,9 +64,10 @@ public sealed class NullReader : IOutputReceiver
 
 		if(!_canceled && !_completed)
 		{
-			Monitor.Enter(_syncRoot);
+			var lockTaken = false;
 			try
 			{
+				Monitor.Enter(_syncRoot, ref lockTaken);
 				if(!_canceled && !_completed)
 				{
 					_canceled = true;
@@ -76,7 +76,7 @@ public sealed class NullReader : IOutputReceiver
 			}
 			finally
 			{
-				Monitor.Exit(_syncRoot);
+				if(lockTaken) Monitor.Exit(_syncRoot);
 			}
 		}
 	}
@@ -88,9 +88,10 @@ public sealed class NullReader : IOutputReceiver
 
 		if(!_completed)
 		{
-			Monitor.Enter(_syncRoot);
+			var lockTaken = false;
 			try
 			{
+				Monitor.Enter(_syncRoot, ref lockTaken);
 				while(!_completed)
 				{
 					Monitor.Wait(_syncRoot);
@@ -98,7 +99,7 @@ public sealed class NullReader : IOutputReceiver
 			}
 			finally
 			{
-				Monitor.Exit(_syncRoot);
+				if(lockTaken) Monitor.Exit(_syncRoot);
 			}
 		}
 		Stream = null;
@@ -106,9 +107,10 @@ public sealed class NullReader : IOutputReceiver
 
 	private void NotifyCompleted()
 	{
-		Monitor.Enter(_syncRoot);
+		var lockTaken = false;
 		try
 		{
+			Monitor.Enter(_syncRoot, ref lockTaken);
 			if(!_completed)
 			{
 				_completed = true;
@@ -117,7 +119,7 @@ public sealed class NullReader : IOutputReceiver
 		}
 		finally
 		{
-			Monitor.Exit(_syncRoot);
+			if(lockTaken) Monitor.Exit(_syncRoot);
 		}
 	}
 
@@ -126,33 +128,39 @@ public sealed class NullReader : IOutputReceiver
 
 	private async void ReadLoop()
 	{
-		while(true)
+		var buffer = ArrayPool<byte>.Shared.Rent(0x400);
+		try
 		{
-			int bytesCount;
-			try
+			var memory = new Memory<byte>(buffer);
+			while(true)
 			{
-				bytesCount = await Stream
-					.ReadAsync(new Memory<byte>(_buffer))
-					.ConfigureAwait(continueOnCapturedContext: false);
-			}
-			catch(IOException)
-			{
-				bytesCount = 0;
-			}
-			catch(ObjectDisposedException)
-			{
-				bytesCount = 0;
-			}
-			catch(OperationCanceledException)
-			{
-				bytesCount = 0;
-			}
-			if(bytesCount == 0)
-			{
-				NotifyCompleted();
-				break;
+				int bytesCount;
+				try
+				{
+					bytesCount = await Stream!
+						.ReadAsync(memory)
+						.ConfigureAwait(continueOnCapturedContext: false);
+				}
+				catch(IOException)
+				{
+					bytesCount = 0;
+				}
+				catch(ObjectDisposedException)
+				{
+					bytesCount = 0;
+				}
+				catch(OperationCanceledException)
+				{
+					bytesCount = 0;
+				}
+				if(bytesCount == 0) break;
 			}
 		}
+		finally
+		{
+			ArrayPool<byte>.Shared.Return(buffer);
+		}
+		NotifyCompleted();
 	}
 
 #else
@@ -164,7 +172,7 @@ public sealed class NullReader : IOutputReceiver
 		int bytesCount;
 		try
 		{
-			bytesCount = reader.Stream.EndRead(ar);
+			bytesCount = reader.Stream!.EndRead(ar);
 		}
 		catch(IOException)
 		{
@@ -189,7 +197,7 @@ public sealed class NullReader : IOutputReceiver
 		bool isReading;
 		try
 		{
-			Stream.BeginRead(_buffer, 0, _buffer.Length, OnStreamRead, this);
+			Stream!.BeginRead(_buffer, 0, _buffer.Length, OnStreamRead, this);
 			isReading = true;
 		}
 		catch(IOException)

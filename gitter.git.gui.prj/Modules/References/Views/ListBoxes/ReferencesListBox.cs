@@ -22,6 +22,7 @@ namespace gitter.Git.Gui.Controls;
 
 using System;
 
+using gitter.Framework;
 using gitter.Framework.Controls;
 
 /// <summary><see cref="CustomListBox"/> for displaying <see cref="M:Repository.Branches"/> &amp; <see cref="M:Repository.Tags"/>.</summary>
@@ -33,18 +34,18 @@ public sealed class ReferencesListBox : CustomListBox
 	private readonly CustomListBoxColumn _colHash;
 	private readonly CustomListBoxColumn _colTreeHash;
 
-	private ReferenceTreeBinding _refBinding;
+	private ReferenceTreeBinding? _refBinding;
 
 	#endregion
 
 	public ReferencesListBox()
 	{
-		Columns.AddRange(new[]
-			{
+		Columns.AddRange(
+			[
 				_colName = new NameColumn(),
 				_colHash = new HashColumn(),
 				_colTreeHash = new TreeHashColumn(),
-			});
+			]);
 		ShowTreeLines = true;
 	}
 
@@ -82,27 +83,23 @@ public sealed class ReferencesListBox : CustomListBox
 		}
 	}
 
-	public Repository Repository => _refBinding?.Repository;
+	public Repository? Repository => _refBinding?.Repository;
 
-	public void LoadData(Repository repository)
+	public void LoadData(Repository? repository)
 	{
 		LoadData(repository, ReferenceType.Reference, true, true, null);
 	}
 
-	public void LoadData(Repository repository, ReferenceType referenceTypes, bool groupItems, bool groupRemoteBranches)
+	public void LoadData(Repository? repository, ReferenceType referenceTypes, bool groupItems, bool groupRemoteBranches)
 	{
 		LoadData(repository, referenceTypes, groupItems, groupRemoteBranches, null);
 	}
 
-	public void LoadData(Repository repository, ReferenceType referenceTypes, bool groupItems, bool groupRemoteBranches, Predicate<IRevisionPointer> predicate)
+	public void LoadData(Repository? repository, ReferenceType referenceTypes, bool groupItems, bool groupRemoteBranches, Predicate<IRevisionPointer>? predicate)
 	{
-		if(_refBinding != null)
-		{
-			_refBinding.Dispose();
-			_refBinding = null;
-		}
+		DisposableUtility.Dispose(ref _refBinding);
 
-		if(repository == null) return;
+		if(repository is null) return;
 
 		BeginUpdate();
 

@@ -30,6 +30,6 @@ internal class SubmoduleUrlColumn : UrlColumn
 	}
 
 	/// <inheritdoc/>
-	protected override string GetUrl(CustomListBoxItem item)
+	protected override string? GetUrl(CustomListBoxItem item)
 		=> (item as IDataContextProvider<Submodule>)?.DataContext.Url;
 }

@@ -40,19 +40,35 @@ public static class FormExtensions
 	private const int MF_ENABLED = 0x00000000;
 	private const int MF_GRAYED = 0x00000001;
 
-	public static void DisableCloseButton(this Form form)
+	extension(Form form)
 	{
-		Verify.Argument.IsNotNull(form);
+		public void DisableCloseButton()
+		{
+			Verify.Argument.IsNotNull(form);
 
-		var hMenu = User32.GetSystemMenu(form.Handle, false);
-		_ = User32.EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_GRAYED);
-	}
+			var hMenu = User32.GetSystemMenu(form.Handle, false);
+			_ = User32.EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_GRAYED);
+		}
 
-	public static void EnableCloseButton(this Form form)
-	{
-		Verify.Argument.IsNotNull(form);
+		public void EnableCloseButton()
+		{
+			Verify.Argument.IsNotNull(form);
 
-		var hMenu = User32.GetSystemMenu(form.Handle, false);
-		_ = User32.EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
+			var hMenu = User32.GetSystemMenu(form.Handle, false);
+			_ = User32.EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
+		}
+
+		public bool EnableImmersiveDarkModeIfNeeded()
+		{
+			if(Environment.OSVersion.Version.Build >= 22000)
+			{
+				if(GitterApplication.Style.Type == GitterStyleType.DarkBackground)
+				{
+					Utility.UseImmersiveDarkMode(form.Handle);
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 }

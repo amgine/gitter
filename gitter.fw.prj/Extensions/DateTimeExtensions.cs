@@ -44,41 +44,41 @@ public static class DateTimeExtensions
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static unsafe void Write4Digits(char* p, int value)
 	{
-		var d1 = value / 1000;
-		value %= 1000;
-		var d2 = value / 100;
-		value %= 100;
-		var d3 = value / 10;
-		value %= 10;
+		var d1 = Math.DivRem(value, 1000, out value);
+		var d2 = Math.DivRem(value,  100, out value);
+		var d3 = Math.DivRem(value,   10, out var d4);
 
 		p[0] = (char)(d1 + '0');
 		p[1] = (char)(d2 + '0');
 		p[2] = (char)(d3 + '0');
-		p[3] = (char)(value + '0');
+		p[3] = (char)(d4 + '0');
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static unsafe void Write2Digits(char* p, int value)
 	{
-		p[0] = (char)((value / 10) + '0');
-		p[1] = (char)((value % 10) + '0');
+		var d1 = Math.DivRem(value, 10, out var d2);
+		p[0] = (char)(d1 + '0');
+		p[1] = (char)(d2 + '0');
 	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static unsafe void WriteISO8601Offset(char* p, TimeSpan offset)
 	{
-		if(offset.Ticks < 0)
+		var ticks = offset.Ticks;
+		if(ticks < 0)
 		{
 			p[0] = '-';
-			Write2Digits(p + 1, -offset.Hours);
-			Write2Digits(p + 3, -offset.Minutes);
+			ticks = -ticks;
 		}
 		else
 		{
 			p[0] = '+';
-			Write2Digits(p + 1, offset.Hours);
-			Write2Digits(p + 3, offset.Minutes);
 		}
+		var hours   = (int)(ticks / TimeSpan.TicksPerHour);
+		var minutes = (int)(ticks / TimeSpan.TicksPerMinute % 60);
+		Write2Digits(p + 1, hours);
+		Write2Digits(p + 3, minutes);
 	}
 
 	/// <summary>Formats date in ISO8601 format (1989-10-24 15:22:03 +0200).</summary>

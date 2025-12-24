@@ -22,6 +22,7 @@ namespace gitter.Framework.Controls;
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -35,9 +36,9 @@ public class ScrollableControl : Control
 
 	private BorderStyle _borderStyle;
 
-	private IGitterStyle _style;
-	private IScrollBarWidget _vScrollBar;
-	private IScrollBarWidget _hScrollBar;
+	private IGitterStyle? _style;
+	private IScrollBarWidget _vScrollBar = default!;
+	private IScrollBarWidget _hScrollBar = default!;
 	private bool _blockScrollRedraw;
 	private int _vScrollPos;
 	private int _hScrollPos;
@@ -45,7 +46,7 @@ public class ScrollableControl : Control
 	private int _maxHScrollPos;
 	private int _vScrollDirection;
 	private int _hScrollDirection;
-	private Timer _scrollTimer;
+	private Timer? _scrollTimer;
 	private bool _alwaysShowVScrollBar;
 	private bool _alwaysShowHScrollBar;
 	private bool _needVScroll;
@@ -72,7 +73,7 @@ public class ScrollableControl : Control
 	}
 
 	protected new virtual void OnStyleChanged(EventArgs e)
-		=> ((EventHandler)Events[StyleChangedEvent])?.Invoke(this, e);
+		=> ((EventHandler?)Events[StyleChangedEvent])?.Invoke(this, e);
 
 	#endregion
 
@@ -246,7 +247,10 @@ public class ScrollableControl : Control
 
 	#endregion
 
-	private int BorderSize => _borderStyle == BorderStyle.None ? 0 : 1;
+	private static readonly IDpiBoundValue<int> _zero        = DpiBoundValue.Constant(0);
+	private static readonly IDpiBoundValue<int> _oneScalable = DpiBoundValue.ScaleX(1);
+
+	protected IDpiBoundValue<int> BorderThickness => _borderStyle == BorderStyle.None ? _zero : _oneScalable;
 
 	private IScrollBarWidget CreateScrollBar(Orientation orientation)
 		=> LicenseManager.UsageMode == LicenseUsageMode.Runtime
@@ -282,6 +286,10 @@ public class ScrollableControl : Control
 		base.OnDpiChangedAfterParent(e);
 	}
 
+	#if NETCOREAPP
+	[MemberNotNull(nameof(_vScrollBar))]
+	[MemberNotNull(nameof(_hScrollBar))]
+	#endif
 	private void CreateScrollBars()
 	{
 		_hscrollHeight = SystemInformation.GetHorizontalScrollBarHeightForDpi(DeviceDpi);
@@ -398,7 +406,10 @@ public class ScrollableControl : Control
 		int scrollbarOffset = 0;
 		if(_borderStyle != BorderStyle.None)
 		{
-			client.Inflate(-2, -2);
+			var conv = DpiConverter.FromDefaultTo(this);
+			var borderThickness = conv.ConvertX(1);
+			client.Inflate(-borderThickness, -borderThickness);
+			client.Inflate(-1, -1);
 		}
 		else
 		{
@@ -428,7 +439,7 @@ public class ScrollableControl : Control
 
 	protected void RecomputeAreas()
 	{
-		var clientArea = GetClientArea(_alwaysShowVScrollBar, _alwaysShowHScrollBar);
+		var clientArea  = GetClientArea(_alwaysShowVScrollBar, _alwaysShowHScrollBar);
 		var contentArea = GetContentArea(clientArea);
 		var contentSize = MeasureContent(contentArea);
 		if(contentSize.Height > contentArea.Height)
@@ -560,7 +571,7 @@ public class ScrollableControl : Control
 
 	private Rectangle GetVScrollBounds()
 	{
-		int borderSize = BorderSize;
+		int borderSize = BorderThickness.GetValue(Dpi.FromControl(this));
 		var size       = Size;
 		if(_needHScroll || _alwaysShowHScrollBar)
 		{
@@ -573,7 +584,7 @@ public class ScrollableControl : Control
 
 	private Rectangle GetHScrollBounds()
 	{
-		int borderSize = BorderSize;
+		int borderSize = BorderThickness.GetValue(Dpi.FromControl(this));
 		var size       = Size;
 		if(_needVScroll || _alwaysShowVScrollBar)
 		{
@@ -859,7 +870,7 @@ public class ScrollableControl : Control
 	{
 		_vScrollDirection = vDirection;
 		_hScrollDirection = hDirection;
-		if(_scrollTimer == null)
+		if(_scrollTimer is null)
 		{
 			_scrollTimer = new Timer()
 			{
@@ -872,7 +883,7 @@ public class ScrollableControl : Control
 
 	protected void StopScrollTimer()
 	{
-		if(_scrollTimer != null)
+		if(_scrollTimer is not null)
 		{
 			_scrollTimer.Tick -= OnScrollTimerTick;
 			_scrollTimer.Enabled = false;
@@ -883,38 +894,40 @@ public class ScrollableControl : Control
 
 	#region Event Handlers
 
-	private void OnVScrollBarScroll(object sender, ScrollEventArgs e)
+	private void OnVScrollBarScroll(object? sender, ScrollEventArgs e)
 	{
 		DoVScroll(e.NewValue);
 	}
 
-	private void OnVScrollBarValueChanged(object sender, EventArgs e)
+	private void OnVScrollBarValueChanged(object? sender, EventArgs e)
 	{
 		DoVScroll(_vScrollBar.Value);
 	}
 
-	private void OnHScrollBarScroll(object sender, ScrollEventArgs e)
+	private void OnHScrollBarScroll(object? sender, ScrollEventArgs e)
 	{
 		DoHScroll(e.NewValue);
 	}
 
-	private void OnHScrollBarValueChanged(object sender, EventArgs e)
+	private void OnHScrollBarValueChanged(object? sender, EventArgs e)
 	{
 		DoHScroll(_hScrollBar.Value);
 	}
 
-	private void OnScrollBarCaptureChanged(object sender, EventArgs e)
+	private void OnScrollBarCaptureChanged(object? sender, EventArgs e)
 	{
-		var control = (Control)sender;
-		if(control.Capture) Focus();
+		if(sender is Control { Capture: true } control)
+		{
+			control.Focus();
+		}
 	}
 
-	private void OnScrollBarMouseDown(object sender, MouseEventArgs e)
+	private void OnScrollBarMouseDown(object? sender, MouseEventArgs e)
 	{
 		Focus();
 	}
 
-	private void OnScrollTimerTick(object sender, EventArgs e)
+	private void OnScrollTimerTick(object? sender, EventArgs e)
 	{
 		if(_vScrollDirection > 0)
 		{
@@ -983,41 +996,45 @@ public class ScrollableControl : Control
 	{
 	}
 
-	private void PaintNonClient(Gdi gdi, Rectangle clip)
+	private void PaintNonClient(Gdi gdi, Rectangle bounds, Rectangle clip)
 	{
-		int h = Height;
-		int w = Width;
 		if(_borderStyle == BorderStyle.None)
 		{
-			if(clip.X <= 0 || clip.Y <= 0 || clip.Right >= w || clip.Bottom >= h)
+			gdi.Fill(BackColor, clip);
+		}
+		else if(_borderStyle == BorderStyle.FixedSingle || Application.RenderWithVisualStyles)
+		{
+			var borderThickness = BorderThickness.GetValue(Dpi.FromControl(this));
+			var clipContainsBorder
+				 = clip.X < borderThickness
+				|| clip.Y < borderThickness
+				|| clip.Right  > bounds.Right  - borderThickness
+				|| clip.Bottom > bounds.Bottom - borderThickness;
+			if(clipContainsBorder)
 			{
-				gdi.Rectangle(BackColor, new Rectangle(0, 0, w, h));
+				gdi.DrawBorder(bounds, SystemColors.ControlDark, BackColor, borderThickness);
+			}
+			else
+			{
+				gdi.Fill(BackColor, clip);
 			}
 		}
 		else
 		{
-			if((_borderStyle == BorderStyle.FixedSingle) || Application.RenderWithVisualStyles)
+			int h = bounds.Height;
+			int w = bounds.Width;
+			if(clip.X <= 0 || clip.Y <= 0 || clip.Right >= w || clip.Height >= h)
 			{
-				if(clip.X <= 0 || clip.Y <= 0 || clip.Right >= w || clip.Height >= h)
-				{
-					gdi.Rectangle(SystemColors.ControlDark, new Rectangle(0, 0, w, h));
-					gdi.Rectangle(BackColor, new Rectangle(1, 1, w - 2, h - 2));
-				}
-			}
-			else
-			{
-				if(clip.X <= 0 || clip.Y <= 0 || clip.Right >= w || clip.Height >= h)
-				{
-					gdi.Line(SystemColors.ControlDark, 0, 1, 0, h - 2);
-					gdi.Line(SystemColors.ControlDark, 0, 0, w - 2, 0);
-					gdi.Line(SystemColors.ControlDarkDark, 1, 2, 1, h - 3);
-					gdi.Line(SystemColors.ControlDarkDark, 1, 1, w - 3, 1);
+				gdi.Fill(BackColor, clip);
+				gdi.Line(SystemColors.ControlDark, 0, 1, 0, h - 2);
+				gdi.Line(SystemColors.ControlDark, 0, 0, w - 2, 0);
+				gdi.Line(SystemColors.ControlDarkDark, 1, 2, 1, h - 3);
+				gdi.Line(SystemColors.ControlDarkDark, 1, 1, w - 3, 1);
 
-					gdi.Line(SystemColors.ControlLightLight, 0, h - 1, w - 1, h - 1);
-					gdi.Line(SystemColors.ControlLightLight, w - 1, 0, w - 1, h - 1);
-					gdi.Line(SystemColors.ControlLight, 1, h - 2, w - 2, h - 2);
-					gdi.Line(SystemColors.ControlLight, w - 2, 1, w - 2, h - 2);
-				}
+				gdi.Line(SystemColors.ControlLightLight, 0, h - 1, w - 1, h - 1);
+				gdi.Line(SystemColors.ControlLightLight, w - 1, 0, w - 1, h - 1);
+				gdi.Line(SystemColors.ControlLight, 1, h - 2, w - 2, h - 2);
+				gdi.Line(SystemColors.ControlLight, w - 2, 1, w - 2, h - 2);
 			}
 		}
 		if(_vScrollBar.Control.Parent is not null && _hScrollBar.Control.Parent is not null)
@@ -1048,8 +1065,7 @@ public class ScrollableControl : Control
 
 		using(var gdi = e.Graphics.AsGdi())
 		{
-			gdi.Fill(BackColor, e.ClipRectangle);
-			PaintNonClient(gdi, e.ClipRectangle);
+			PaintNonClient(gdi, ClientRectangle, e.ClipRectangle);
 		}
 		OnPaintClientArea(e);
 	}
@@ -1154,8 +1170,8 @@ public class ScrollableControl : Control
 			_vScrollBar.Control.MouseCaptureChanged -= OnScrollBarCaptureChanged;
 			_vScrollBar.Dispose();
 
-			_hScrollBar.ValueChanged -= OnVScrollBarValueChanged;
-			_hScrollBar.Scroll -= OnVScrollBarScroll;
+			_hScrollBar.ValueChanged -= OnHScrollBarValueChanged;
+			_hScrollBar.Scroll -= OnHScrollBarScroll;
 			_hScrollBar.Control.MouseCaptureChanged -= OnScrollBarCaptureChanged;
 			_hScrollBar.Dispose();
 		}

@@ -32,7 +32,7 @@ public class RemotePicker : CustomObjectPicker<RemotesListBox, RemoteListItem, R
 	}
 
 	protected override Remote GetValue(RemoteListItem item)
-		=> item?.DataContext;
+		=> item.DataContext;
 
 	public void LoadData(Repository repository)
 		=> DropDownControl.LoadData(repository);

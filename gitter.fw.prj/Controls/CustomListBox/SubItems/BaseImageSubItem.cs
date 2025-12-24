@@ -34,10 +34,10 @@ public abstract class BaseImageSubItem : CustomListBoxSubItem
 	}
 
 	/// <summary>Subitem image.</summary>
-	public abstract Image Image { get; set; }
+	public abstract Image? Image { get; set; }
 
 	/// <summary>Subitem overlay image.</summary>
-	public virtual Image OverlayImage { get { return null; } set { } }
+	public virtual Image? OverlayImage { get { return null; } set { } }
 
 	/// <summary>Paint event handler.</summary>
 	/// <param name="paintEventArgs">Paint event args.</param>

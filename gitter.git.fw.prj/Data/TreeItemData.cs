@@ -20,42 +20,28 @@
 
 namespace gitter.Git;
 
-using System;
-
 using gitter.Framework;
 
-public abstract class TreeItemData : INamedObject
+public abstract class TreeItemData(string name, FileStatus fileStatus, StagedStatus stagedStatus) : INamedObject
 {
-	private string _shortName;
-
-	protected TreeItemData(string name, FileStatus fileStatus, StagedStatus stagedStatus)
-	{
-		Name         = name;
-		FileStatus   = fileStatus;
-		StagedStatus = stagedStatus;
-	}
+	private string? _shortName;
 
 	public string ShortName
 	{
 		get
 		{
-			if(!string.IsNullOrEmpty(_shortName))
-				return _shortName;
+			if(_shortName is { Length: not 0 }) return _shortName;
 			var pos = Name.LastIndexOf('/');
-			if(pos == -1)
-				_shortName = Name;
-			else
-				_shortName = Name.Substring(pos + 1);
-			return _shortName;
+			return _shortName = pos == -1 ? Name : Name.Substring(pos + 1);
 		}
-		set { _shortName = value; }
+		set => _shortName = value;
 	}
 
-	public FileStatus FileStatus { get; set; }
+	public FileStatus FileStatus { get; set; } = fileStatus;
 
-	public StagedStatus StagedStatus { get; set; }
+	public StagedStatus StagedStatus { get; set; } = stagedStatus;
 
-	public string Name { get; }
+	public string Name { get; } = name;
 
 	public override string ToString() => Name;
 }

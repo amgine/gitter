@@ -34,21 +34,20 @@ using gitter.Framework.Controls;
 [System.ComponentModel.DesignerCategory("")]
 public partial class DialogForm : Form
 {
-	private readonly IButtonWidget _btnOK;
-	private readonly IButtonWidget _btnCancel;
-	private readonly IButtonWidget _btnApply;
+	private readonly IButtonWidget? _btnOK;
+	private readonly IButtonWidget? _btnCancel;
+	private readonly IButtonWidget? _btnApply;
 
 	private readonly DialogBase _dialog;
-	private readonly IExecutableDialog _executable;
-	private readonly IAsyncExecutableDialog _async;
-	private readonly IElevatedExecutableDialog _elevated;
+	private readonly IExecutableDialog? _executable;
+	private readonly IAsyncExecutableDialog? _async;
+	private readonly IElevatedExecutableDialog? _elevated;
 	private bool _isExecuting;
-	private bool _btnHover;
 
 	/// <summary>Create <see cref="DialogForm"/>.</summary>
 	public DialogForm(DialogBase content, DialogButtons buttons = DialogButtons.All)
 	{
-		AutoScaleDimensions = new SizeF(96F, 96F);
+		AutoScaleDimensions = Dpi.Default;
 		AutoScaleMode = AutoScaleMode.Dpi;
 		Font = GitterApplication.FontManager.UIFont;
 		FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -59,47 +58,46 @@ public partial class DialogForm : Form
 		ShowInTaskbar = false;
 		StartPosition = FormStartPosition.CenterParent;
 
-		var noMargin = DpiBoundValue.Constant(Padding.Empty);
-
 		_dialog = content;
 
 		Panel pnlButtons;
 
-		BackColor = Application.RenderWithVisualStyles
-			? SystemColors.Window
-			: SystemColors.Control;
+		var style = GitterApplication.Style;
+		var colors = style.Colors;
+
+		BackColor = colors.Window;
+		ForeColor = colors.WindowText;
+
 		_ = new ControlLayout(this)
 		{
 			Content = new Grid(
-				rows: new[]
-				{
+				rows:
+				[
 					SizeSpec.Everything(),
-					Application.RenderWithVisualStyles ? SizeSpec.Absolute(1) : SizeSpec.Nothing(),
+					SizeSpec.Absolute(1),
 					SizeSpec.Absolute(39),
-				},
-				content: new[]
-				{
+				],
+				content:
+				[
 					new GridContent(new ControlContent(new Panel
 					{
-						BackColor = Application.RenderWithVisualStyles
-							? SystemColors.ControlLight
-							: SystemColors.Control,
+						BackColor = colors.WindowFooterSeparator,
 						Parent    = this,
 					},
-					marginOverride: noMargin,
+					marginOverride: LayoutConstants.NoMargin,
 					horizontalContentAlignment: HorizontalContentAlignment.Stretch,
 					verticalContentAlignment:   VerticalContentAlignment.Stretch),
 					row: 1),
 					new GridContent(new ControlContent(pnlButtons = new Panel
 					{
-						BackColor = SystemColors.Control,
+						BackColor = colors.WindowFooter,
 						Parent    = this,
 					},
-					marginOverride: noMargin,
+					marginOverride: LayoutConstants.NoMargin,
 					horizontalContentAlignment: HorizontalContentAlignment.Stretch,
 					verticalContentAlignment:   VerticalContentAlignment.Stretch),
 					row: 2),
-				}),
+				]),
 		};
 
 		var btnOK     = (buttons & DialogButtons.Ok)     == DialogButtons.Ok;
@@ -128,57 +126,48 @@ public partial class DialogForm : Form
 		}
 		columns[columns.Length - 1] = SizeSpec.Absolute(RightMargin);
 
-		if(btnOK)
-		{
-			_btnOK = new SystemButtonAdapter
-			{
-				Text = Resources.StrOk,
-			};
-			_btnOK.Control.Parent = pnlButtons;
-			_btnOK.Click += _btnOK_Click;
-			AcceptButton = _btnOK.Control as Button;
-		}
-		if(btnCancel)
-		{
-			_btnCancel = new SystemButtonAdapter
-			{
-				Text = Resources.StrCancel,
-			};
-			_btnCancel.Control.Parent = pnlButtons;
-			_btnCancel.Click += _btnCancel_Click;
-			CancelButton = _btnCancel.Control as Button;
-		}
-		if(btnApply)
-		{
-			_btnApply = new SystemButtonAdapter
-			{
-				Text = Resources.StrApply,
-			};
-			_btnApply.Control.Parent = pnlButtons;
-			_btnApply.Click += _btnApply_Click;
-		}
-
-		GridContent WrapButton(IButtonWidget button, int index)
+		static GridContent WrapButton(IButtonWidget button, int index)
 			=> new(new ControlContent(button.Control,
-				marginOverride: noMargin,
+				marginOverride: LayoutConstants.NoMargin,
 				horizontalContentAlignment: HorizontalContentAlignment.Stretch,
 				verticalContentAlignment:   VerticalContentAlignment.Stretch),
 				row: 1, column: index * 2 + firstOffset);
 
+		var buttonFactory  = GitterApplication.Style.ButtonFactory;
 		var buttonsContent = new GridContent[btnCount];
 		var index = 0;
 		if(btnOK)
 		{
+			_btnOK = buttonFactory.Create();
+			_btnOK.Text = Resources.StrOk;
+			_btnOK.Control.Parent = pnlButtons;
+			_btnOK.Click += OnOkClick;
+			_btnOK.TabIndex = index;
+			AcceptButton = _btnOK.Control as IButtonControl ?? _btnOK;
+
 			buttonsContent[index] = WrapButton(_btnOK, index);
 			++index;
 		}
 		if(btnCancel)
 		{
+			_btnCancel = buttonFactory.Create();
+			_btnCancel.Text = Resources.StrCancel;
+			_btnCancel.Control.Parent = pnlButtons;
+			_btnCancel.Click += OnCancelClick;
+			_btnCancel.TabIndex = index;
+			CancelButton = _btnCancel.Control as IButtonControl ?? _btnCancel;
+
 			buttonsContent[index] = WrapButton(_btnCancel, index);
 			++index;
 		}
 		if(btnApply)
 		{
+			_btnApply = buttonFactory.Create();
+			_btnApply.Text = Resources.StrApply;
+			_btnApply.Control.Parent = pnlButtons;
+			_btnApply.Click += OnApplyClick;
+			_btnApply.TabIndex = index;
+
 			buttonsContent[index] = WrapButton(_btnApply, index);
 			++index;
 		}
@@ -186,12 +175,12 @@ public partial class DialogForm : Form
 		_ = new ControlLayout(pnlButtons)
 		{
 			Content = new Grid(
-				rows: new[]
-				{
+				rows:
+				[
 					SizeSpec.Absolute(TopMargin),
 					SizeSpec.Absolute(ButtonHeight),
 					SizeSpec.Everything(),
-				},
+				],
 				columns: columns,
 				content: buttonsContent),
 		};
@@ -254,7 +243,7 @@ public partial class DialogForm : Form
 		UpdateSize();
 	}
 
-	private void OnContentSizeChanged(object sender, EventArgs e)
+	private void OnContentSizeChanged(object? sender, EventArgs e)
 	{
 		UpdateSize();
 	}
@@ -264,6 +253,13 @@ public partial class DialogForm : Form
 	{
 		if(_isExecuting) e.Cancel = true;
 		base.OnFormClosing(e);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnHandleCreated(EventArgs e)
+	{
+		this.EnableImmersiveDarkModeIfNeeded();
+		base.OnHandleCreated(e);
 	}
 
 	/// <inheritdoc/>
@@ -283,13 +279,14 @@ public partial class DialogForm : Form
 	}
 
 	/// <inheritdoc/>
-	protected override void OnClosed(EventArgs e)
+	protected override void OnFormClosed(FormClosedEventArgs e)
 	{
 		if(_dialog is not null)
 		{
 			_dialog.SizeChanged -= OnContentSizeChanged;
 			_dialog.InvokeOnClosed(DialogResult);
 		}
+		base.OnFormClosed(e);
 	}
 
 	private bool Execute()
@@ -299,9 +296,9 @@ public partial class DialogForm : Form
 		bool applyEnabled  = _btnApply  is not null && _btnApply.Control.Enabled;
 		if(_executable is not null || _elevated is not null)
 		{
-			if(okEnabled)     _btnOK.Control.Enabled     = false;
-			if(cancelEnabled) _btnCancel.Control.Enabled = false;
-			if(applyEnabled)  _btnApply.Control.Enabled  = false;
+			if(okEnabled)     _btnOK!.Control.Enabled     = false;
+			if(cancelEnabled) _btnCancel!.Control.Enabled = false;
+			if(applyEnabled)  _btnApply!.Control.Enabled  = false;
 			_isExecuting = true;
 		}
 		try
@@ -312,7 +309,7 @@ public partial class DialogForm : Form
 				{
 					HelperExecutables.ExecuteWithAdministartorRights(actions);
 				}
-				catch(Exception exc) when(!exc.IsCritical())
+				catch(Exception exc) when(!exc.IsCritical)
 				{
 					GitterApplication.MessageBoxService.Show(
 						this,
@@ -331,9 +328,9 @@ public partial class DialogForm : Form
 		{
 			if(_executable is not null || _elevated is not null)
 			{
-				if(okEnabled)     _btnOK.Control.Enabled     = okEnabled;
-				if(cancelEnabled) _btnCancel.Control.Enabled = cancelEnabled;
-				if(applyEnabled)  _btnApply.Control.Enabled  = applyEnabled;
+				if(okEnabled)     _btnOK!.Control.Enabled     = okEnabled;
+				if(cancelEnabled) _btnCancel!.Control.Enabled = cancelEnabled;
+				if(applyEnabled)  _btnApply!.Control.Enabled  = applyEnabled;
 				_isExecuting = false;
 			}
 		}
@@ -342,6 +339,8 @@ public partial class DialogForm : Form
 
 	private async Task<bool> ExecuteAsync()
 	{
+		if(_async is null) throw new InvalidOperationException();
+
 		var task = _async.ExecuteAsync();
 		if(task.IsCompleted)
 		{
@@ -353,9 +352,9 @@ public partial class DialogForm : Form
 		bool applyEnabled  = _btnApply  is not null && _btnApply.Control.Enabled;
 		if(_async is not null)
 		{
-			if(okEnabled)     _btnOK.Control.Enabled     = false;
-			if(cancelEnabled) _btnCancel.Control.Enabled = false;
-			if(applyEnabled)  _btnApply.Control.Enabled  = false;
+			if(okEnabled)     _btnOK!.Control.Enabled     = false;
+			if(cancelEnabled) _btnCancel!.Control.Enabled = false;
+			if(applyEnabled)  _btnApply!.Control.Enabled  = false;
 			_isExecuting = true;
 		}
 		try
@@ -366,17 +365,17 @@ public partial class DialogForm : Form
 		{
 			if(_async is not null)
 			{
-				if(okEnabled)     _btnOK.Control.Enabled     = okEnabled;
-				if(cancelEnabled) _btnCancel.Control.Enabled = cancelEnabled;
-				if(applyEnabled)  _btnApply.Control.Enabled  = applyEnabled;
+				if(okEnabled)     _btnOK!.Control.Enabled     = okEnabled;
+				if(cancelEnabled) _btnCancel!.Control.Enabled = cancelEnabled;
+				if(applyEnabled)  _btnApply!.Control.Enabled  = applyEnabled;
 				_isExecuting = false;
 			}
 		}
 	}
 
-	private void OnRequireElevationExecutionChanged(object sender, EventArgs e)
+	private void OnRequireElevationExecutionChanged(object? sender, EventArgs e)
 	{
-		bool require = _elevated.RequireElevation;
+		bool require = _elevated is { RequireElevation: true };
 		if(require)
 		{
 			if(_btnOK    is not null && _btnOK.Control.Visible)    (_btnOK.Control    as Button)?.ShowUACShield();
@@ -392,82 +391,46 @@ public partial class DialogForm : Form
 	public bool OkButtonEnabled
 	{
 		get => _btnOK is not null && _btnOK.Control.Enabled;
-		set
-		{
-			if(_btnOK is not null)
-			{
-				_btnOK.Control.Enabled = value;
-			}
-		}
+		set => _btnOK?.Control.Enabled = value;
 	}
 
 	public bool CancelButtonEnabled
 	{
 		get => _btnCancel is not null && _btnCancel.Control.Enabled;
-		set
-		{
-			if(_btnCancel is not null)
-			{
-				_btnCancel.Control.Enabled = value;
-			}
-		}
+		set => _btnCancel?.Control.Enabled = value;
 	}
 
 	public bool ApplyButtonEnabled
 	{
 		get => _btnApply is not null && _btnApply.Control.Enabled;
-		set
-		{
-			if(_btnApply is not null)
-			{
-				_btnApply.Control.Enabled = value;
-			}
-		}
+		set => _btnApply?.Control.Enabled = value;
 	}
 
-	public string OKButtonText
+	public string? OKButtonText
 	{
 		get => _btnOK?.Text;
-		set
-		{
-			if(_btnOK is not null)
-			{
-				_btnOK.Text = value;
-			}
-		}
+		set => _btnOK?.Text = value ?? "";
 	}
 
-	public string CancelButtonText
+	public string? CancelButtonText
 	{
 		get => _btnCancel?.Text;
-		set
-		{
-			if(_btnCancel is not null)
-			{
-				_btnCancel.Text = value;
-			}
-		}
+		set => _btnCancel?.Text = value ?? "";
 	}
 
-	public string ApplyButtonText
+	public string? ApplyButtonText
 	{
 		get => _btnApply?.Text;
-		set
-		{
-			if(_btnApply is not null)
-			{
-				_btnApply.Text = value;
-			}
-		}
+		set => _btnApply?.Text = value ?? "";
 	}
 
-	public void ClickOk() => _btnOK_Click(_btnOK, EventArgs.Empty);
+	public void ClickOk() => OnOkClick(_btnOK, EventArgs.Empty);
 
-	public void ClickCancel() => _btnCancel_Click(_btnCancel, EventArgs.Empty);
+	public void ClickCancel() => OnCancelClick(_btnCancel, EventArgs.Empty);
 
-	public void ClickApply() => _btnApply_Click(_btnApply, EventArgs.Empty);
+	public void ClickApply() => OnApplyClick(_btnApply, EventArgs.Empty);
 
-	private async void _btnOK_Click(object sender, EventArgs e)
+	private async void OnOkClick(object? sender, EventArgs e)
 	{
 		if(_async is not null)
 		{
@@ -487,13 +450,13 @@ public partial class DialogForm : Form
 		}
 	}
 
-	private void _btnCancel_Click(object sender, EventArgs e)
+	private void OnCancelClick(object? sender, EventArgs e)
 	{
 		DialogResult = DialogResult.Cancel;
 		Close();
 	}
 
-	private async void _btnApply_Click(object sender, EventArgs e)
+	private async void OnApplyClick(object? sender, EventArgs e)
 	{
 		if(_async is not null)
 		{

@@ -24,12 +24,12 @@ using System;
 
 public static class ViewManager
 {
-	private static ViewRenderer _msvs2010StyleRender;
-	private static ViewRenderer _msvs2012DarkStyleRender;
-	private static ViewRenderer _msvs2012LightStyleRender;
-	private static ViewRenderer _viewRenderer;
+	private static ViewRenderer? _msvs2010StyleRender;
+	private static ViewRenderer? _msvs2012DarkStyleRender;
+	private static ViewRenderer? _msvs2012LightStyleRender;
+	private static ViewRenderer? _viewRenderer;
 
-	public static event EventHandler RendererChanged;
+	public static event EventHandler? RendererChanged;
 
 	private static void OnRendererChanged()
 		=> RendererChanged?.Invoke(null, EventArgs.Empty);

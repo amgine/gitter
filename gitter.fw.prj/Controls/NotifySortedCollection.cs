@@ -30,7 +30,7 @@ public class NotifySortedCollection<T> : NotifyCollection<T>
 {
 	#region Data
 
-	private Comparison<T> _comparison;
+	private Comparison<T>? _comparison;
 	private SortOrder _sortOrder;
 
 	#endregion
@@ -48,25 +48,24 @@ public class NotifySortedCollection<T> : NotifyCollection<T>
 	#region Properties
 
 	/// <summary>Comparison used when sorting items.</summary>
-	public Comparison<T> Comparison
+	public Comparison<T>? Comparison
 	{
 		get => _comparison;
 		set
 		{
-			if(_comparison != value)
+			if(_comparison == value) return;
+
+			_comparison = value;
+			if(_comparison is not null)
 			{
-				_comparison = value;
-				if(_comparison is not null)
+				switch(_sortOrder)
 				{
-					switch(_sortOrder)
-					{
-						case SortOrder.Ascending:
-							Sort(_comparison);
-							break;
-						case SortOrder.Descending:
-							Sort(InvertedComparison);
-							break;
-					}
+					case SortOrder.Ascending:
+						Sort(_comparison);
+						break;
+					case SortOrder.Descending:
+						Sort(InvertedComparison);
+						break;
 				}
 			}
 		}
@@ -114,7 +113,7 @@ public class NotifySortedCollection<T> : NotifyCollection<T>
 	/// <param name="item2">Second compared item.</param>
 	/// <returns>Comparison result.</returns>
 	private int InvertedComparison(T item1, T item2)
-		=> _comparison(item2, item1);
+		=> _comparison!(item2, item1);
 
 	/// <summary>Inverts item order in collection.</summary>
 	private void InvertOrder()
@@ -146,14 +145,14 @@ public class NotifySortedCollection<T> : NotifyCollection<T>
 			case SortOrder.Ascending:
 				for(int i = Items.Count - 1; i >= 0; --i)
 				{
-					if(_comparison(Items[i], item) <= 0)
+					if(_comparison!(Items[i], item) <= 0)
 						return i + 1;
 				}
 				return 0;
 			case SortOrder.Descending:
 				for(int i = 0; i < Items.Count; ++i)
 				{
-					if(_comparison(Items[i], item) <= 0)
+					if(_comparison!(Items[i], item) <= 0)
 						return i;
 				}
 				return Items.Count;
@@ -173,14 +172,12 @@ public class NotifySortedCollection<T> : NotifyCollection<T>
 		if(_comparison is null)
 		{
 			base.AddRange(list);
+			return;
 		}
-		else
+		foreach(var item in list)
 		{
-			foreach(var item in list)
-			{
-				var index = GetNewIndex(Items.Count, item);
-				base.InsertItem(index, item);
-			}
+			var index = GetNewIndex(Items.Count, item);
+			base.InsertItem(index, item);
 		}
 	}
 
@@ -197,15 +194,13 @@ public class NotifySortedCollection<T> : NotifyCollection<T>
 		if(_comparison is null)
 		{
 			base.InsertRange(index, list);
+			return;
 		}
-		else
+		int id = index;
+		foreach(var item in list)
 		{
-			int id = index;
-			foreach(var item in list)
-			{
-				var newIndex = GetNewIndex(id++, item);
-				base.InsertItem(newIndex, item);
-			}
+			var newIndex = GetNewIndex(id++, item);
+			base.InsertItem(newIndex, item);
 		}
 	}
 
@@ -234,19 +229,17 @@ public class NotifySortedCollection<T> : NotifyCollection<T>
 		if(_comparison is null)
 		{
 			base.SetItem(index, item);
+			return;
+		}
+		var index2 = GetNewIndex(index, item);
+		if(index == index2)
+		{
+			base.SetItem(index2, item);
 		}
 		else
 		{
-			var index2 = GetNewIndex(index, item);
-			if(index == index2)
-			{
-				base.SetItem(index2, item);
-			}
-			else
-			{
-				base.RemoveAt(index);
-				base.InsertItem(index2, item);
-			}
+			base.RemoveAt(index);
+			base.InsertItem(index2, item);
 		}
 	}
 

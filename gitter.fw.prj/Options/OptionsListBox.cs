@@ -38,6 +38,15 @@ public sealed class OptionsListBox : CustomListBox
 		ItemActivation = gitter.Framework.Controls.ItemActivation.SingleClick;
 	}
 
+	protected override void OnSelectionChanged()
+	{
+		base.OnSelectionChanged();
+		if(SelectedItems.Count == 1)
+		{
+			OnItemActivated(SelectedItems[0]);
+		}
+	}
+
 	public void Load(IPropertyPageProvider provider)
 	{
 		Items.AddRange(provider.GetListBoxItems());

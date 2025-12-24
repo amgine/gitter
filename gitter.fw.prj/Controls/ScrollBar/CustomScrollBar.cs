@@ -46,7 +46,7 @@ public abstract class CustomScrollBar : Control
 	private CustomScrollBarPart _hoveredPart;
 	private CustomScrollBarPart _pressedPart;
 	private ICustomScrollBarRenderer _renderer;
-	private Timer _timer;
+	private Timer? _timer;
 	private Point _mouseDownPoint;
 	private int _trackValue;
 
@@ -70,10 +70,10 @@ public abstract class CustomScrollBar : Control
 	}
 
 	protected virtual void OnValueChanged()
-		=> ((EventHandler)Events[ValueChangedEvent])?.Invoke(this, EventArgs.Empty);
+		=> ((EventHandler?)Events[ValueChangedEvent])?.Invoke(this, EventArgs.Empty);
 
 	protected virtual void OnScroll(ScrollEventType eventType, int oldValue, int newValue)
-		=> ((EventHandler<ScrollEventArgs>)Events[ScrollEvent])?.Invoke(this, new ScrollEventArgs(eventType, oldValue, newValue, ScrollOrientation));
+		=> ((EventHandler<ScrollEventArgs>?)Events[ScrollEvent])?.Invoke(this, new ScrollEventArgs(eventType, oldValue, newValue, ScrollOrientation));
 
 	#endregion
 
@@ -97,8 +97,6 @@ public abstract class CustomScrollBar : Control
 		_maximum = 100;
 		_smallChange = 1;
 		_largeChange = 10;
-		_timer = new Timer();
-		_timer.Tick += OnTimerTick;
 	}
 
 	#endregion
@@ -243,6 +241,11 @@ public abstract class CustomScrollBar : Control
 					case CustomScrollBarPart.DecreaseTrackBar:
 					case CustomScrollBarPart.IncreaseTrackBar:
 					case CustomScrollBarPart.IncreaseButton:
+						if(_timer is null)
+						{
+							_timer = new Timer();
+							_timer.Tick += OnTimerTick;
+						}
 						OnTimerTick(_timer, EventArgs.Empty);
 						_timer.Interval = 400;
 						_timer.Enabled = true;
@@ -280,7 +283,7 @@ public abstract class CustomScrollBar : Control
 			}
 			else
 			{
-				if(_timer.Enabled)
+				if(_timer is { Enabled: true })
 				{
 					_timer.Enabled = false;
 					OnScroll(ScrollEventType.EndScroll, Value, Value);
@@ -298,9 +301,11 @@ public abstract class CustomScrollBar : Control
 		base.OnDpiChangedAfterParent(e);
 	}
 
-	private void OnTimerTick(object sender, EventArgs e)
+	private void OnTimerTick(object? sender, EventArgs e)
 	{
-		_timer.Interval = 25;
+		if(sender is not Timer timer) return;
+
+		timer.Interval = 25;
 		int newValue;
 		switch(PressedPart)
 		{
@@ -325,7 +330,7 @@ public abstract class CustomScrollBar : Control
 				Value = newValue;
 				break;
 			default:
-				_timer.Enabled = false;
+				timer.Enabled = false;
 				break;
 		}
 	}
@@ -360,12 +365,11 @@ public abstract class CustomScrollBar : Control
 		get => _hoveredPart;
 		set
 		{
-			if(_hoveredPart != value)
-			{
-				InvalidatePart(_hoveredPart);
-				_hoveredPart = value;
-				InvalidatePart(_hoveredPart);
-			}
+			if(_hoveredPart == value) return;
+
+			InvalidatePart(_hoveredPart);
+			_hoveredPart = value;
+			InvalidatePart(_hoveredPart);
 		}
 	}
 
@@ -374,18 +378,17 @@ public abstract class CustomScrollBar : Control
 		get => _pressedPart;
 		set
 		{
-			if(_pressedPart != value)
+			if(_pressedPart == value) return;
+
+			InvalidatePart(_pressedPart);
+			_pressedPart = value;
+			if(_pressedPart == CustomScrollBarPart.None)
+			{
+				InvalidatePart(_hoveredPart);
+			}
+			else
 			{
 				InvalidatePart(_pressedPart);
-				_pressedPart = value;
-				if(_pressedPart == CustomScrollBarPart.None)
-				{
-					InvalidatePart(_hoveredPart);
-				}
-				else
-				{
-					InvalidatePart(_pressedPart);
-				}
 			}
 		}
 	}
@@ -420,14 +423,13 @@ public abstract class CustomScrollBar : Control
 		{
 			Verify.Argument.IsInRange(Minimum, value, Maximum, nameof(value));
 
-			if(_value != value)
-			{
-				_value = value;
-				ArrangeInvalidate();
-				Invalidate();
-				OnValueChanged();
-				Update();
-			}
+			if(_value == value) return;
+
+			_value = value;
+			ArrangeInvalidate();
+			Invalidate();
+			OnValueChanged();
+			Update();
 		}
 	}
 
@@ -437,21 +439,20 @@ public abstract class CustomScrollBar : Control
 		get => _maximum;
 		set
 		{
-			if(_maximum != value)
+			if(_maximum == value) return;
+
+			if(_minimum > value)
 			{
-				if(_minimum > value)
-				{
-					_minimum = value;
-				}
-				if(_value > value)
-				{
-					_value = value;
-					OnValueChanged();
-				}
-				_maximum = value;
-				ArrangeInvalidate();
-				Invalidate();
+				_minimum = value;
 			}
+			if(_value > value)
+			{
+				_value = value;
+				OnValueChanged();
+			}
+			_maximum = value;
+			ArrangeInvalidate();
+			Invalidate();
 		}
 	}
 
@@ -461,21 +462,20 @@ public abstract class CustomScrollBar : Control
 		get => _minimum;
 		set
 		{
-			if(_minimum != value)
+			if(_minimum == value) return;
+
+			if(_maximum < value)
 			{
-				if(_maximum < value)
-				{
-					_maximum = value;
-				}
-				if(_value < value)
-				{
-					_value = value;
-					OnValueChanged();
-				}
-				_minimum = value;
-				ArrangeInvalidate();
-				Invalidate();
+				_maximum = value;
 			}
+			if(_value < value)
+			{
+				_value = value;
+				OnValueChanged();
+			}
+			_minimum = value;
+			ArrangeInvalidate();
+			Invalidate();
 		}
 	}
 
@@ -499,16 +499,15 @@ public abstract class CustomScrollBar : Control
 		{
 			Verify.Argument.IsNotNegative(value);
 
-			if(_largeChange != value)
+			if(_largeChange == value) return;
+
+			if(_smallChange > value)
 			{
-				if(_smallChange > value)
-				{
-					_smallChange = value;
-				}
-				_largeChange = value;
-				ArrangeInvalidate();
-				Invalidate();
+				_smallChange = value;
 			}
+			_largeChange = value;
+			ArrangeInvalidate();
+			Invalidate();
 		}
 	}
 
@@ -517,11 +516,7 @@ public abstract class CustomScrollBar : Control
 	{
 		if(disposing)
 		{
-			if(_timer is not null)
-			{
-				_timer.Dispose();
-				_timer = null;
-			}
+			DisposableUtility.Dispose(ref _timer);
 		}
 		base.Dispose(disposing);
 	}

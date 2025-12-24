@@ -18,8 +18,6 @@
  */
 #endregion
 
-#nullable enable
-
 namespace gitter.Git;
 
 using System;
@@ -35,7 +33,7 @@ public abstract class BaseRemoteReference : IRemoteReference
 	private void InvokeDeleted()
 		=> Deleted?.Invoke(this, EventArgs.Empty);
 
-	internal BaseRemoteReference(RemoteReferencesCollection refs, string name, Hash hash)
+	internal BaseRemoteReference(RemoteReferencesCollection refs, string name, Sha1Hash hash)
 	{
 		Verify.Argument.IsNotNull(refs);
 		Verify.Argument.IsNeitherNullNorWhitespace(name);
@@ -85,7 +83,7 @@ public abstract class BaseRemoteReference : IRemoteReference
 			_ => Name,
 		};
 
-	public Hash Hash { get; }
+	public Sha1Hash Hash { get; }
 
 	public abstract ReferenceType ReferenceType { get; }
 

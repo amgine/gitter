@@ -23,123 +23,139 @@ namespace gitter.Git;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 using gitter.Framework;
 
 public sealed class RevisionReferencesCollection : IEnumerable<Reference>
 {
-	#region Events
+	public struct Enumerator : IEnumerator<Reference>
+	{
+		private SortedDictionary<string, Reference>.ValueCollection.Enumerator _enumerator;
+		private readonly bool _notEmpty;
 
-	public event EventHandler Changed;
+		internal Enumerator(SortedDictionary<string, Reference>? container)
+		{
+			if(container is { Count: not 0 })
+			{
+				_enumerator = container.Values.GetEnumerator();
+				_notEmpty   = true;
+			}
+		}
+
+		public readonly Reference Current => _enumerator.Current;
+
+		public bool MoveNext() => _notEmpty && _enumerator.MoveNext();
+
+		readonly object IEnumerator.Current => _enumerator.Current;
+
+		readonly void IEnumerator.Reset() { }
+
+		public void Dispose()
+		{
+			if(_notEmpty) _enumerator.Dispose();
+		}
+	}
+
+	public event EventHandler? Changed;
 
 	private void OnChanged()
 		=> Changed?.Invoke(this, EventArgs.Empty);
 
-	#endregion
-
-	#region Data
-
-	private readonly SortedDictionary<string, Reference> _container = new();
-
-	#endregion
-
-	#region .ctor
+	private SortedDictionary<string, Reference>? _container;
 
 	internal RevisionReferencesCollection()
 	{
 	}
 
-	#endregion
-
-	#region Properties
-
-	public object SyncRoot => _container;
+	public LockType SyncRoot { get; } = new();
 
 	public int Count
 	{
-		get { lock(SyncRoot) return _container.Count; }
+		get { lock(SyncRoot) return _container is not null ? _container.Count : 0; }
 	}
 
 	public Reference this[string name]
 	{
-		get { lock(SyncRoot) return _container[name]; }
-	}
-
-	#endregion
-
-	#region Public Methods
-
-	public bool Contains(string referenceName)
-	{
-		lock(SyncRoot)
+		get
 		{
-			return _container.ContainsKey(referenceName);
+			lock(SyncRoot)
+			{
+				return _container is not null
+					? _container[name]
+					: throw new ArgumentException($"Reference '{name}' was not found.", nameof(name));
+			}
 		}
 	}
 
-	public bool Contains(Reference reference)
+	public bool Contains([NotNullWhen(returnValue: true)] string? referenceName)
 	{
-		if(reference == null) return false;
+		if(referenceName is null) return false;
 
 		lock(SyncRoot)
 		{
-			return _container.ContainsKey(reference.Name);
+			return _container is not null
+				&& _container.ContainsKey(referenceName);
 		}
 	}
 
-	private IReadOnlyList<T> GetRefs<T>()
+	public bool Contains([NotNullWhen(returnValue: true)] Reference? reference)
+	{
+		if(reference is null) return false;
+
+		lock(SyncRoot)
+		{
+			return _container is not null
+				&& _container.ContainsKey(reference.Name);
+		}
+	}
+
+	private Many<T> GetRefs<T>()
 		where T : Reference
 	{
 		lock(SyncRoot)
 		{
-			if(_container.Count == 0) return Preallocated<T>.EmptyArray;
-			var list = default(List<T>);
+			if(_container is not { Count: not 0 }) return Many<T>.None;
+			var builder = new Many<T>.Builder();
 			foreach(var reference in _container.Values)
 			{
-				if(reference is T typedRef)
-				{
-					list ??= new List<T>(_container.Count);
-					list.Add(typedRef);
-				}
+				if(reference is not T typedRef) continue;
+				builder.Add(typedRef);
 			}
-			return list ?? (IReadOnlyList<T>)Preallocated<T>.EmptyArray;
+			return builder;
 		}
 	}
 
-	public IReadOnlyList<Branch> GetBranches() => GetRefs<Branch>();
+	public Many<Branch> GetBranches() => GetRefs<Branch>();
 
-	public IReadOnlyList<RemoteBranch> GetRemoteBranches() => GetRefs<RemoteBranch>();
+	public Many<RemoteBranch> GetRemoteBranches() => GetRefs<RemoteBranch>();
 
-	public IReadOnlyList<BranchBase> GetAllBranches() => GetRefs<BranchBase>();
+	public Many<BranchBase> GetAllBranches() => GetRefs<BranchBase>();
 
-	public IReadOnlyList<Tag> GetTags() => GetRefs<Tag>();
-
-	#endregion
-
-	#region Internal Methods
+	public Many<Tag> GetTags() => GetRefs<Tag>();
 
 	internal void Remove(string reference)
 	{
 		Assert.IsNotNull(reference);
 
-		bool removed;
 		lock(SyncRoot)
 		{
-			removed = _container.Remove(reference);
+			if(_container is null) return;
+			if(!_container.Remove(reference)) return;
 		}
-		if(removed) OnChanged();
+		OnChanged();
 	}
 
 	internal void Remove(Reference reference)
 	{
 		Assert.IsNotNull(reference);
 
-		bool removed;
 		lock(SyncRoot)
 		{
-			removed = _container.Remove(reference.FullName);
+			if(_container is null) return;
+			if(!_container.Remove(reference.FullName)) return;
 		}
-		if(removed) OnChanged();
+		OnChanged();
 	}
 
 	internal void Rename(string oldName, Reference reference)
@@ -149,7 +165,14 @@ public sealed class RevisionReferencesCollection : IEnumerable<Reference>
 
 		lock(SyncRoot)
 		{
-			_container.Remove(oldName);
+			if(_container is not null)
+			{
+				_container.Remove(oldName);
+			}
+			else
+			{
+				_container = [];
+			}
 			_container.Add(reference.FullName, reference);
 		}
 		OnChanged();
@@ -161,23 +184,20 @@ public sealed class RevisionReferencesCollection : IEnumerable<Reference>
 
 		lock(SyncRoot)
 		{
+			_container ??= [];
 			_container.Add(reference.FullName, reference);
 		}
 		OnChanged();
 	}
 
-	#endregion
+	public Enumerator GetEnumerator()
+		=> new(_container);
 
-	#region IEnumerable<Reference>
-
-	public SortedDictionary<string, Reference>.ValueCollection.Enumerator GetEnumerator()
-		=> _container.Values.GetEnumerator();
-
+	/// <inheritdoc/>
 	IEnumerator<Reference> IEnumerable<Reference>.GetEnumerator()
-		=> _container.Values.GetEnumerator();
+		=> GetEnumerator();
 
+	/// <inheritdoc/>
 	IEnumerator IEnumerable.GetEnumerator()
-		=> _container.Values.GetEnumerator();
-
-	#endregion
+		=> GetEnumerator();
 }

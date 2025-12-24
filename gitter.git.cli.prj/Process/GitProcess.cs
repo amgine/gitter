@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git.AccessLayer.CLI;
@@ -28,8 +28,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using gitter.Framework.CLI;
-
-#nullable enable
 
 internal static class GitProcess
 {
@@ -72,18 +70,17 @@ internal static class GitProcess
 		get => _enableCodepageFallback;
 		set
 		{
-			if(_enableCodepageFallback != value)
+			if(_enableCodepageFallback == value) return;
+
+			_enableCodepageFallback = value;
+			if(value)
 			{
-				_enableCodepageFallback = value;
-				if(value)
-				{
-					DefaultEncoding = (Encoding)Encoding.UTF8.Clone();
-					DefaultEncoding.DecoderFallback = new UTF8DefaultAnsiCodepageFallback();
-				}
-				else
-				{
-					DefaultEncoding = Encoding.UTF8;
-				}
+				DefaultEncoding = (Encoding)Encoding.UTF8.Clone();
+				DefaultEncoding.DecoderFallback = new UTF8DefaultAnsiCodepageFallback();
+			}
+			else
+			{
+				DefaultEncoding = Encoding.UTF8;
 			}
 		}
 	}
@@ -93,25 +90,24 @@ internal static class GitProcess
 		get => _gitExePath;
 		set
 		{
-			if(_gitExePath != value)
+			if(_gitExePath == value) return;
+
+			if(string.IsNullOrWhiteSpace(value))
 			{
-				if(string.IsNullOrWhiteSpace(value))
-				{
-					_gitExePath = string.Empty;
-					_gitInstallationPath = string.Empty;
-					_shExePath = string.Empty;
-					_gitkCmdPath = string.Empty;
-				}
-				else
-				{
-					_gitExePath = value;
-					_gitInstallationPath = Path.GetFullPath(
-						Path.Combine(
-							Path.GetDirectoryName(_gitExePath),
-							".."));
-					_shExePath = Path.Combine(_gitInstallationPath, @"bin\sh.exe");
-					_gitkCmdPath = Path.Combine(_gitInstallationPath, @"cmd\gitk.cmd");
-				}
+				_gitExePath = string.Empty;
+				_gitInstallationPath = string.Empty;
+				_shExePath = string.Empty;
+				_gitkCmdPath = string.Empty;
+			}
+			else
+			{
+				_gitExePath = value;
+				_gitInstallationPath = Path.GetFullPath(
+					Path.Combine(
+						Path.GetDirectoryName(_gitExePath) ?? "",
+						".."));
+				_shExePath = Path.Combine(_gitInstallationPath, @"bin\sh.exe");
+				_gitkCmdPath = Path.Combine(_gitInstallationPath, @"cmd\gitk.cmd");
 			}
 		}
 	}
@@ -157,7 +153,7 @@ internal static class GitProcess
 			{
 				return File.Exists(_shExePath);
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 				return false;
 			}
@@ -191,7 +187,7 @@ internal static class GitProcess
 			{
 				return File.Exists(_gitkCmdPath);
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 				return false;
 			}
@@ -216,13 +212,19 @@ internal static class GitProcess
 		return Process.Start(psi);
 	}
 
+	private static GitProcessExecutor CreateGitProcessExecutor()
+	{
+		var path = GitExePath ?? throw new InvalidOperationException("git executable path is not set.");
+		return new GitProcessExecutor(path);
+	}
+
 	public static GitOutput Execute(GitInput input)
 	{
 		Verify.Argument.IsNotNull(input);
 
 		var stdOutReader = new AsyncTextReader();
 		var stdErrReader = new AsyncTextReader();
-		var executor = new GitProcessExecutor(GitExePath);
+		var executor = CreateGitProcessExecutor();
 		var exitCode = executor.Execute(input, stdOutReader, stdErrReader);
 		return new GitOutput(
 			stdOutReader.GetText(),
@@ -236,7 +238,7 @@ internal static class GitProcess
 
 		var stdOutReader = new AsyncTextReader();
 		var stdErrReader = new AsyncTextReader();
-		var executor = new GitProcessExecutor(GitExePath);
+		var executor = CreateGitProcessExecutor();
 		var exitCode = await executor
 			.ExecuteAsync(input, stdOutReader, stdErrReader, ProcessExecutor.CancellationMethods.KillProcess, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);

@@ -108,4 +108,25 @@ internal static class Gdi32
 
 	[DllImport(DllName, CharSet = CharSet.Auto, SetLastError = true)]
 	public static extern bool DeleteDC([In] IntPtr hDC);
+
+	[DllImport(DllName, EntryPoint = "GetTextExtentPoint32W", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = true)]
+	[return: MarshalAs(UnmanagedType.Bool)]
+	public static unsafe extern bool GetTextExtentPoint32(IntPtr hdc, char* str, int len, out SIZE size);
+
+	[DllImport(DllName, EntryPoint = "TextOutW", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = true)]
+	[return: MarshalAs(UnmanagedType.Bool)]
+	public static unsafe extern bool TextOut(IntPtr hdc, int x, int y, char* str, int len);
+
+	[DllImport(DllName, EntryPoint = "IntersectClipRect", ExactSpelling = true, PreserveSig = true)]
+	public static extern int IntersectClipRect(IntPtr hdc, int left, int top, int right, int bottom);
+
+	[DllImport(DllName, EntryPoint = "SelectClipRgn", ExactSpelling = true, PreserveSig = true)]
+	public static extern int SelectClipRgn(IntPtr hdc, IntPtr hrgn);
+
+	[DllImport(DllName, EntryPoint = "SaveDC", ExactSpelling = true, PreserveSig = true)]
+	public static extern int SaveDC(IntPtr hdc);
+
+	[DllImport(DllName, EntryPoint = "RestoreDC", ExactSpelling = true, PreserveSig = true)]
+	[return: MarshalAs (UnmanagedType.Bool)]
+	public static extern bool RestoreDC(IntPtr hdc, int nSavedDC);
 }

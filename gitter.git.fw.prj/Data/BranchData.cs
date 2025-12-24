@@ -20,40 +20,32 @@
 
 namespace gitter.Git.AccessLayer;
 
-using System;
-
 using gitter.Framework;
 
 /// <summary>Branch description.</summary>
 public sealed class BranchData : INamedObject
 {
-	#region .ctor
-
-	public BranchData(string name, Hash sha1, bool isFake, bool isRemote, bool isCurrent)
+	public BranchData(string name, Sha1Hash sha1, bool isFake, bool isRemote, bool isCurrent)
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(name);
 
 		Name = name;
-		SHA1 = sha1;
+		Hash = sha1;
 		IsFake = isFake;
 		IsRemote = isRemote;
 		IsCurrent = isCurrent;
 	}
 
-	public BranchData(string name, Hash sha1, bool remote, bool current)
+	public BranchData(string name, Sha1Hash sha1, bool remote, bool current)
 		: this(name, sha1, false, remote, current)
 	{
 	}
-
-	#endregion
-
-	#region Properties
 
 	/// <summary>Branch name (short format, excluding refs/heads/ or /refs/%remote%/).</summary>
 	public string Name { get; }
 
 	/// <summary>SHA1 of commit, which is pointed by branch.</summary>
-	public Hash SHA1 { get; }
+	public Sha1Hash Hash { get; }
 
 	/// <summary>It's not actually a branch, just a representation of detached HEAD.</summary>
 	public bool IsFake { get; }
@@ -64,7 +56,6 @@ public sealed class BranchData : INamedObject
 	/// <summary>This branch is current HEAD.</summary>
 	public bool IsCurrent { get; }
 
-	#endregion
-
+	/// <inheritdoc/>
 	public override string ToString() => Name;
 }

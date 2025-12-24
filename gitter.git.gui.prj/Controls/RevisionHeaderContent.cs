@@ -23,14 +23,10 @@ namespace gitter.Git.Gui;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 using gitter.Framework;
-using gitter.Framework.Controls;
 using gitter.Framework.Services;
-
-using gitter.Git.Gui.Controls;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -84,11 +80,9 @@ sealed partial class RevisionHeaderContent
 		Parents,
 	}
 
-	sealed class CursorChangedEventArgs : EventArgs
+	sealed class CursorChangedEventArgs(Cursor cursor) : EventArgs
 	{
-		public CursorChangedEventArgs(Cursor cursor) => Cursor = cursor;
-
-		public Cursor Cursor { get; }
+		public Cursor Cursor { get; } = cursor;
 	}
 
 	/// <summary>Interface for a single data field.</summary>
@@ -103,7 +97,7 @@ sealed partial class RevisionHeaderContent
 
 		bool IsAvailableFor(Revision revision);
 
-		ContextMenuStrip CreateContextMenu(Revision revision, Rectangle rect, int x, int y);
+		ContextMenuStrip? CreateContextMenu(Revision revision, Rectangle rect, int x, int y);
 
 		Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width);
 
@@ -116,11 +110,11 @@ sealed partial class RevisionHeaderContent
 		void MouseDown(Rectangle rect, MouseButtons button, int x, int y);
 	}
 
-	abstract class BaseElement : IRevisionHeaderElement
+	abstract class BaseElement(RevisionHeaderContent owner) : IRevisionHeaderElement
 	{
-		public event EventHandler InvalidateRequired;
+		public event EventHandler? InvalidateRequired;
 
-		public event EventHandler<CursorChangedEventArgs> CursorChangeRequired;
+		public event EventHandler<CursorChangedEventArgs>? CursorChangeRequired;
 
 		protected void OnInvalidateRequired()
 			=> InvalidateRequired?.Invoke(this, EventArgs.Empty);
@@ -130,12 +124,7 @@ sealed partial class RevisionHeaderContent
 
 		private Dpi _lastDpi = Dpi.Default;
 
-		protected BaseElement(RevisionHeaderContent owner)
-		{
-			Owner = owner;
-		}
-
-		public RevisionHeaderContent Owner { get; }
+		public RevisionHeaderContent Owner { get; } = owner;
 
 		public abstract Element Element { get; }
 
@@ -144,10 +133,10 @@ sealed partial class RevisionHeaderContent
 
 		public virtual bool IsAvailableFor(Revision revision) => true;
 
-		public virtual ContextMenuStrip CreateContextMenu(Revision revision)
+		public virtual ContextMenuStrip? CreateContextMenu(Revision revision)
 			=> default;
 
-		public virtual ContextMenuStrip CreateContextMenu(Revision revision, Rectangle rect, int x, int y)
+		public virtual ContextMenuStrip? CreateContextMenu(Revision revision, Rectangle rect, int x, int y)
 			=> CreateContextMenu(revision);
 
 		public virtual Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width)
@@ -163,6 +152,17 @@ sealed partial class RevisionHeaderContent
 			return new Size(w, conv.ConvertY(DefaultElementHeight));
 		}
 
+#if NETCOREAPP
+
+		protected static Size Measure(Graphics graphics, Dpi dpi, Font font, ReadOnlySpan<char> text, int width)
+		{
+			var conv = DpiConverter.FromDefaultTo(dpi);
+			var w = conv.ConvertX(HeaderWidth) + GitterApplication.TextRenderer.MeasureText(graphics, text, font, width, ContentFormat).Width;
+			return new Size(w, conv.ConvertY(DefaultElementHeight));
+		}
+
+#endif
+
 		protected static Size MeasureMultilineContent(Graphics graphics, Dpi dpi, string content, int width)
 		{
 			var font = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi);
@@ -176,6 +176,16 @@ sealed partial class RevisionHeaderContent
 			var min  = conv.ConvertY(DefaultElementHeight);
 			if(s.Height < min) s.Height = min;
 			return new Size(conv.ConvertX(HeaderWidth) + s.Width, s.Height);
+		}
+
+		protected static Size MeasureMultilineContent(Graphics graphics, Dpi dpi, Font font, TextWithHyperlinks text, int width)
+		{
+			var conv = DpiConverter.FromDefaultTo(dpi);
+			var hw   = conv.ConvertX(HeaderWidth);
+			var s    = text.Measure(font, new(0, 0, width - hw, short.MaxValue));
+			var min  = conv.ConvertY(DefaultElementHeight);
+			if(s.Height < min) s.Height = min;
+			return new Size(hw + s.Width, s.Height);
 		}
 
 		protected static int GetYOffset(Dpi dpi, Font font)
@@ -239,6 +249,25 @@ sealed partial class RevisionHeaderContent
 			_lastDpi = conv.To;
 		}
 
+#if NETCOREAPP
+
+		protected void DefaultPaint(Graphics graphics, Dpi dpi, Font font, string header, ReadOnlySpan<char> content, Rectangle rect)
+		{
+			var conv = DpiConverter.FromDefaultTo(dpi);
+			var r1 = new Rectangle(rect.X, rect.Y, conv.ConvertX(HeaderWidth) - conv.ConvertX(4), conv.ConvertY(DefaultElementHeight));
+			var r2 = new Rectangle(rect.X + conv.ConvertX(HeaderWidth), rect.Y, rect.Width - conv.ConvertX(HeaderWidth), rect.Height);
+			var headerFont = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi);
+			r1.Y += GetYOffset(dpi, headerFont);
+			r2.Y += GetYOffset(dpi, font);
+			GitterApplication.TextRenderer.DrawText(
+				graphics, header, headerFont, Owner.Style.Colors.GrayText, r1, HeaderFormat);
+			GitterApplication.TextRenderer.DrawText(
+				graphics, content, font, Owner.Style.Colors.WindowText, r2, ContentFormat);
+			_lastDpi = conv.To;
+		}
+
+#endif
+
 		protected void DefaultPaint(Graphics graphics, Dpi dpi, Font font, string header, TextWithHyperlinks content, Rectangle rect)
 		{
 			var conv = DpiConverter.FromDefaultTo(dpi);
@@ -275,25 +304,25 @@ sealed partial class RevisionHeaderContent
 	private readonly IRevisionHeaderElement[] _elements;
 	private readonly Dictionary<Element, Size> _sizes;
 	private readonly TrackingService _hoverElement;
-	private readonly IEnumerable<IHyperlinkExtractor> _additionalHyperlinkExtractors;
+	private readonly IEnumerable<IHyperlinkExtractor>? _additionalHyperlinkExtractors;
 	private int _measuredWidth;
 	private int _measuredHeight;
-	private Cursor _cursor;
-	private IGitterStyle _style;
+	private Cursor? _cursor;
+	private IGitterStyle? _style;
 
-	private Revision _revision;
+	private Revision? _revision;
 
 	#endregion
 
 	#region Events
 
-	public event EventHandler<ContentInvalidatedEventArgs> Invalidated;
+	public event EventHandler<ContentInvalidatedEventArgs>? Invalidated;
 
-	public event EventHandler<ContentContextMenuEventArgs> ContextMenuRequested;
+	public event EventHandler<ContentContextMenuEventArgs>? ContextMenuRequested;
 
-	public event EventHandler CursorChanged;
+	public event EventHandler? CursorChanged;
 
-	public event EventHandler SizeChanged;
+	public event EventHandler? SizeChanged;
 
 	private void OnInvalidated(Rectangle bounds)
 		=> Invalidated?.Invoke(this, new ContentInvalidatedEventArgs(bounds));
@@ -313,11 +342,11 @@ sealed partial class RevisionHeaderContent
 
 	#endregion
 
-	public RevisionHeaderContent(IEnumerable<IHyperlinkExtractor> additionalHyperlinkExtractors = null)
+	public RevisionHeaderContent(IEnumerable<IHyperlinkExtractor>? additionalHyperlinkExtractors = null)
 	{
 		_additionalHyperlinkExtractors = additionalHyperlinkExtractors;
-		_elements = new IRevisionHeaderElement[]
-		{
+		_elements =
+		[
 			new HashElement(this),
 			new ParentsElement(this),
 			new AuthorElement(this),
@@ -326,7 +355,7 @@ sealed partial class RevisionHeaderContent
 			new SubjectElement(this),
 			new BodyElement(this),
 			new ReferencesElement(this),
-		};
+		];
 		foreach(var e in _elements)
 		{
 			e.InvalidateRequired   += (_, eargs) => OnSizeChanged();
@@ -337,25 +366,24 @@ sealed partial class RevisionHeaderContent
 		_hoverElement = new TrackingService(OnHoverChanged);
 	}
 
-	public Revision Revision
+	public Revision? Revision
 	{
 		get => _revision;
 		set
 		{
-			if(_revision != value)
+			if(_revision == value) return;
+
+			if(_revision is not null)
 			{
-				if(_revision is not null)
-				{
-					_revision.Author.Avatar.Updated -= OnAuthorAvatarUpdated;
-					_revision.References.Changed -= OnReferenceListChanged;
-				}
-				_revision = value;
-				_measuredWidth = 0;
-				if(_revision is not null)
-				{
-					_revision.Author.Avatar.Updated += OnAuthorAvatarUpdated;
-					_revision.References.Changed += OnReferenceListChanged;
-				}
+				_revision.Author.Avatar.Updated -= OnAuthorAvatarUpdated;
+				_revision.References.Changed -= OnReferenceListChanged;
+			}
+			_revision = value;
+			_measuredWidth = 0;
+			if(_revision is not null)
+			{
+				_revision.Author.Avatar.Updated += OnAuthorAvatarUpdated;
+				_revision.References.Changed += OnReferenceListChanged;
 			}
 		}
 	}
@@ -380,16 +408,15 @@ sealed partial class RevisionHeaderContent
 			: new HyperlinkExtractor(extractors);
 	}
 
-	public Cursor Cursor
+	public Cursor? Cursor
 	{
 		get => _cursor;
 		set
 		{
-			if(_cursor != value)
-			{
-				_cursor = value;
-				OnCursorChanged();
-			}
+			if(Equals(_cursor, value)) return;
+
+			_cursor = value;
+			OnCursorChanged();
 		}
 	}
 
@@ -399,13 +426,15 @@ sealed partial class RevisionHeaderContent
 		set => _style = value;
 	}
 
-	private void OnAuthorAvatarUpdated(object sender, EventArgs e)
+	private void OnAuthorAvatarUpdated(object? sender, EventArgs e)
 	{
 		OnInvalidated(new Rectangle(0, 0, _measuredWidth, _measuredHeight));
 	}
 
-	private void OnReferenceListChanged(object sender, EventArgs e)
+	private void OnReferenceListChanged(object? sender, EventArgs e)
 	{
+		if(_revision is null) return;
+
 		_sizes.TryGetValue(Element.References, out var size);
 		bool norefs;
 		lock(_revision.References.SyncRoot)
@@ -436,6 +465,8 @@ sealed partial class RevisionHeaderContent
 
 	private Rectangle GetElementBounds(int index)
 	{
+		if(_revision is null) return Rectangle.Empty;
+
 		int cy = 0;
 		for(int i = 0; i < _elements.Length; ++i)
 		{
@@ -452,6 +483,8 @@ sealed partial class RevisionHeaderContent
 
 	private int HitTest(int x, int y)
 	{
+		if(_revision is null) return -1;
+
 		int cy = 0;
 		for(int i = 0; i < _elements.Length; ++i)
 		{
@@ -472,6 +505,13 @@ sealed partial class RevisionHeaderContent
 
 	private void Measure(Graphics graphics, Dpi dpi, int width)
 	{
+		if(_revision is null)
+		{
+			_measuredWidth  = 0;
+			_measuredHeight = 0;
+			return;
+		}
+
 		int h = 0;
 		for(int i = 0; i < _elements.Length; ++i)
 		{
@@ -499,6 +539,8 @@ sealed partial class RevisionHeaderContent
 
 	public void OnMouseDown(int x, int y, MouseButtons button)
 	{
+		if(_revision is null) return;
+
 		var index = HitTest(x, y);
 		if(index != -1)
 		{
@@ -530,13 +572,84 @@ sealed partial class RevisionHeaderContent
 		return new Size(width, _measuredHeight);
 	}
 
+	private static Rectangle GetAvatarBounds(Rectangle bounds, DpiConverter conv)
+	{
+		var size = conv.Convert(new Size(60, 60));
+		return new(
+			bounds.Right - size.Width - conv.ConvertX(4),
+			bounds.Y + conv.ConvertY(4),
+			size.Width, size.Height);
+	}
+
+	private bool ShouldRenderAvatar(Rectangle bounds, DpiConverter conv)
+		=> _measuredWidth >= conv.ConvertX(MinWidth) + bounds.Width + conv.ConvertX(10);
+
 	private async void UpdateAvatar(IAvatar avatar, DpiConverter conv)
 	{
 		await avatar.UpdateAsync();
-		var size = conv.Convert(new Size(60, 60));
-		if(_measuredWidth >= conv.ConvertX(MinWidth) + size.Width + conv.ConvertX(10))
+		var bounds = GetAvatarBounds(new Rectangle(0, 0, _measuredWidth, _measuredHeight), conv);
+		if(ShouldRenderAvatar(bounds, conv))
 		{
-			OnInvalidated(new Rectangle(_measuredWidth - size.Width - conv.ConvertX(4), conv.ConvertY(4), size.Height, size.Width));
+			OnInvalidated(bounds);
+		}
+	}
+
+	private void PaintAvatar(Graphics graphics, DpiConverter conv, Rectangle bounds, Rectangle clipRectangle, IAvatar? avatar)
+	{
+		if(!GitterApplication.IntegrationFeatures.Gravatar.IsEnabled) return;
+		if(avatar is not { IsAvailable: true }) return;
+
+		var image = avatar.Image;
+		if(image is null)
+		{
+			UpdateAvatar(avatar, conv);
+			return;
+		}
+		var dst = GetAvatarBounds(bounds, conv);
+		if(!ShouldRenderAvatar(dst, conv)) return;
+		if(!dst.IntersectsWith(clipRectangle)) return;
+
+		graphics.DrawImage(image, dst);
+	}
+
+	private void PaintHoveredItemBackground(Graphics graphics, DpiConverter conv, Rectangle elementBounds, Size elementSize, Rectangle clipRectangle)
+	{
+		Color trackColor1, trackColor2;
+		if(Style.Type == GitterStyleType.LightBackground)
+		{
+			trackColor1 = Color.WhiteSmoke;
+			trackColor2 = Color.FromArgb(238, 238, 238);
+		}
+		else
+		{
+			trackColor1 = Color.FromArgb(18, 18, 18);
+			trackColor2 = Color.FromArgb(18, 18, 18);
+		}
+
+		if(trackColor1 == trackColor2)
+		{
+			var rcBackground = Rectangle.Intersect(clipRectangle,
+				new Rectangle(elementBounds.X, elementBounds.Y, elementSize.Width, elementSize.Height));
+			if(rcBackground is { Width: > 0, Height: > 0 })
+			{
+				graphics.GdiFill(trackColor1, rcBackground);
+			}
+		}
+		else
+		{
+			var headerWidth  = conv.ConvertX(HeaderWidth);
+			var rcBackground = Rectangle.Intersect(clipRectangle,
+				new Rectangle(elementBounds.X, elementBounds.Y, headerWidth, elementSize.Height));
+			if(rcBackground is { Width: > 0, Height: > 0 })
+			{
+				graphics.GdiFill(trackColor1, rcBackground);
+			}
+			rcBackground = Rectangle.Intersect(clipRectangle,
+				new Rectangle(elementBounds.X + headerWidth, elementBounds.Y, elementSize.Width - headerWidth, elementSize.Height));
+			if(rcBackground is { Width: > 0, Height: > 0 })
+			{
+				graphics.GdiFill(trackColor2, rcBackground);
+			}
 		}
 	}
 
@@ -546,79 +659,23 @@ sealed partial class RevisionHeaderContent
 		var conv  = DpiConverter.FromDefaultTo(dpi);
 		var width = bounds.Width;
 		if(_measuredWidth != width) Measure(graphics, dpi, width);
-		if(GitterApplication.IntegrationFeatures.Gravatar.IsEnabled)
-		{
-			var avatar = _revision.Author.Avatar;
-			var image = avatar.Image;
-			if(image is null)
-			{
-				UpdateAvatar(avatar, conv);
-			}
-			else
-			{
-				var size = conv.Convert(new Size(60, 60));
-				if(bounds.Width >= conv.ConvertX(MinWidth) + size.Width + conv.ConvertX(10))
-				{
-					graphics.DrawImage(image, new Rectangle(
-						bounds.Right - size.Width - conv.ConvertX(4),
-						bounds.Y + conv.ConvertY(4),
-						size.Width, size.Height));
-				}
-			}
-		}
+		PaintAvatar(graphics, conv, bounds, clipRectangle, _revision.Author.Avatar);
 		var elementBounds = bounds;
-		var headerWidth   = conv.ConvertX(HeaderWidth);
 		for(int i = 0; i < _elements.Length; ++i)
 		{
 			var element = _elements[i];
-			if(!element.IsAvailableFor(Revision)) continue;
+			if(!element.IsAvailableFor(_revision)) continue;
 
 			var size = _sizes[element.Element];
-			if(size.Height > 0)
-			{
-				elementBounds.Height = size.Height;
-				if(i == _hoverElement.Index)
-				{
-					Color trackColor1, trackColor2;
-					if(Style.Type == GitterStyleType.LightBackground)
-					{
-						trackColor1 = Color.WhiteSmoke;
-						trackColor2 = Color.FromArgb(238, 238, 238);
-					}
-					else
-					{
-						trackColor1 = Color.FromArgb(18, 18, 18);
-						trackColor2 = Color.FromArgb(18, 18, 18);
-					}
+			if(size.Height <= 0) continue;
 
-					if(trackColor1 == trackColor2)
-					{
-						var rcBackground = Rectangle.Intersect(clipRectangle,
-							new Rectangle(elementBounds.X, elementBounds.Y, size.Width, size.Height));
-						if(rcBackground is { Width: > 0, Height: > 0 })
-						{
-							graphics.GdiFill(trackColor1, rcBackground);
-						}
-					}
-					else
-					{
-						var rcBackground = Rectangle.Intersect(clipRectangle,
-							new Rectangle(elementBounds.X, elementBounds.Y, headerWidth, size.Height));
-						if(rcBackground is { Width: > 0, Height: > 0 })
-						{
-							graphics.GdiFill(trackColor1, rcBackground);
-						}
-						rcBackground = Rectangle.Intersect(clipRectangle,
-							new Rectangle(elementBounds.X + headerWidth, elementBounds.Y, size.Width - headerWidth, size.Height));
-						if(rcBackground is { Width: > 0, Height: > 0 })
-						{
-							graphics.GdiFill(trackColor2, rcBackground);
-						}
-					}
-				}
-				element.Paint(graphics, dpi, Revision, elementBounds);
-				elementBounds.Y += size.Height;
+			elementBounds.Height = size.Height;
+			if(i == _hoverElement.Index)
+			{
+				PaintHoveredItemBackground(graphics, conv, elementBounds, size, clipRectangle);
 			}
+			element.Paint(graphics, dpi, _revision, elementBounds);
+			elementBounds.Y += size.Height;
 		}
 	}
 }

@@ -1,24 +1,24 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
-#define TRACE_FS_EVENTS
+//#define TRACE_FS_EVENTS
 
 namespace gitter.Git;
 
@@ -26,6 +26,8 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading;
+
+using gitter.Framework;
 
 /// <summary>Watches git repository and notifies about external changes.</summary>
 public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
@@ -40,52 +42,39 @@ public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 	#region Data
 
 	private readonly Repository _repository;
-	private FileSystemWatcher _fswWorkDir;
-	private FileSystemWatcher _fswGitDir;
+	private FileSystemWatcher? _fswWorkDir;
+	private FileSystemWatcher? _fswGitDir;
 
 	private readonly List<NotificationBlock>               _blockedNotifications = new();
 	private readonly Queue<IRepositoryChangedNotification> _pendingNotifications = new();
 	private readonly Queue<IRepositoryChangedNotification> _delayedNotifications = new();
 	private readonly Queue<NotificationDelayedUnblock>     _delayedUnblocks      = new();
 
-	private AutoResetEvent _evGotNotification;
-	private AutoResetEvent _evGotDelayedNotification;
-	private AutoResetEvent _evGotDelayedUnblock;
-	private ManualResetEvent _evExit;
-	private Thread _notificationThread;
-	private Thread _delayedNotificationThread;
-	private Thread _delayedUnblockingThread;
+	private AutoResetEvent? _evGotNotification;
+	private AutoResetEvent? _evGotDelayedNotification;
+	private AutoResetEvent? _evGotDelayedUnblock;
+	private ManualResetEvent? _evExit;
+	private Thread? _notificationThread;
+	private Thread? _delayedNotificationThread;
+	private Thread? _delayedUnblockingThread;
 	private bool _isEnabled;
 
 	#endregion
 
-	private sealed class NotificationBlock
+	private sealed class NotificationBlock(object key, object notificationType)
 	{
-		public NotificationBlock(object key, object notificationType)
-		{
-			Key = key;
-			NotificationType = notificationType;
-		}
+		public object Key { get; } = key;
 
-		public object Key { get; }
-
-		public object NotificationType { get; }
+		public object NotificationType { get; } = notificationType;
 	}
 
-	private sealed class NotificationDelayedUnblock
+	private sealed class NotificationDelayedUnblock(DateTime createdOn, object key, object notificationType)
 	{
-		public NotificationDelayedUnblock(DateTime createdOn, object key, object notificationType)
-		{
-			CreatedOn = createdOn;
-			Key = key;
-			NotificationType = notificationType;
-		}
+		public DateTime CreatedOn { get; } = createdOn;
 
-		public DateTime CreatedOn { get; }
+		public object Key { get; } = key;
 
-		public object Key { get; }
-
-		public object NotificationType { get; }
+		public object NotificationType { get; } = notificationType;
 	}
 
 	private sealed class NotificationsBlockToken : IDisposable
@@ -154,10 +143,10 @@ public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 
 	private void ApplyProc()
 	{
-		var wh = new WaitHandle[] { _evExit, _evGotNotification };
+		var wh = new WaitHandle[] { _evExit!, _evGotNotification! };
 		while(true)
 		{
-			IRepositoryChangedNotification notification = null;
+			var notification = default(IRepositoryChangedNotification);
 			lock(_pendingNotifications)
 			{
 				if(_pendingNotifications.Count != 0)
@@ -182,7 +171,7 @@ public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 
 	private void DelayProc()
 	{
-		var wh = new WaitHandle[] { _evExit, _evGotDelayedNotification };
+		var wh = new WaitHandle[] { _evExit!, _evGotDelayedNotification! };
 		var notifications = new List<IRepositoryChangedNotification>();
 		while(true)
 		{
@@ -239,7 +228,7 @@ public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 
 	private void DelayUnblockProc()
 	{
-		var wh = new WaitHandle[] { _evExit, _evGotDelayedUnblock };
+		var wh = new WaitHandle[] { _evExit!, _evGotDelayedUnblock! };
 		while(true)
 		{
 			var unblock = default(NotificationDelayedUnblock);
@@ -258,13 +247,15 @@ public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 			var now = DateTime.UtcNow;
 			var dt = _unblockDelayTime - (int)(now - unblock.CreatedOn).TotalMilliseconds;
 			if(dt < 0) dt = 0;
-			if(_evExit.WaitOne(dt)) return;
+			if(_evExit is null || _evExit.WaitOne(dt)) return;
 			UnblockNotification(unblock);
 		}
 	}
 
-	private static ChangedPath GetChangedPath(string path)
+	private static ChangedPath GetChangedPath(string? path)
 	{
+		if(path is not { Length: not 0 }) return ChangedPath.None;
+
 		return path == GitConstants.GitDir || path.StartsWith(GitConstants.GitDir + Path.DirectorySeparatorChar)
 			? ChangedPath.GitDir
 			: ChangedPath.WorkDir;
@@ -276,8 +267,10 @@ public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 		return path.IndexOf(test, pos, test.Length) != -1;
 	}
 
-	private GitSubdirectory GetSubdirectory(string path)
+	private GitSubdirectory GetSubdirectory(string? path)
 	{
+		if(path is not { Length: not 0 }) return GitSubdirectory.Unknown;
+
 		if(path.IndexOf(Path.DirectorySeparatorChar) == -1)
 		{
 			return GitSubdirectory.Root;
@@ -311,7 +304,7 @@ public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 		{
 			_pendingNotifications.Enqueue(notification);
 		}
-		_evGotNotification.Set();
+		_evGotNotification?.Set();
 	}
 
 	private void EmitDelayedNotification(IRepositoryChangedNotification notification)
@@ -320,11 +313,13 @@ public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 		{
 			_delayedNotifications.Enqueue(notification);
 		}
-		_evGotDelayedNotification.Set();
+		_evGotDelayedNotification?.Set();
 	}
 
 	private void OnWorkDirCreated(object sender, FileSystemEventArgs e)
 	{
+		if(e.Name is null) return;
+
 		#if TRACE_FS_EVENTS
 		Log.Debug(string.Format("{0} {1}", e.ChangeType, e.Name));
 		#endif
@@ -341,6 +336,8 @@ public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 
 	private void OnWorkDirChanged(object sender, FileSystemEventArgs e)
 	{
+		if(e.Name is null) return;
+
 		switch(GetChangedPath(e.Name))
 		{
 			case ChangedPath.WorkDir:
@@ -361,6 +358,8 @@ public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 
 	private void OnGitDirDeleted(object sender, FileSystemEventArgs e)
 	{
+		if(e.Name is null) return;
+
 		switch(GetSubdirectory(e.Name))
 		{
 			case GitSubdirectory.Refs when e.Name == @"refs\stash" + GitConstants.LockPostfix:
@@ -469,6 +468,8 @@ public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 
 	private void OnWorkDirDeleted(object sender, FileSystemEventArgs e)
 	{
+		if(e.Name is null) return;
+
 		#if TRACE_FS_EVENTS
 		Log.Debug(string.Format("{0} {1}", e.ChangeType, e.Name));
 		#endif
@@ -492,7 +493,7 @@ public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 
 	private void OnGitDirRenamed(object sender, RenamedEventArgs e)
 	{
-		if(e is null || e.OldName is null)
+		if(e is null || e.OldName is null || e.Name is null)
 		{
 			return;
 		}
@@ -557,7 +558,7 @@ public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 
 	private void OnWorkDirRenamed(object sender, RenamedEventArgs e)
 	{
-		if(e is null || e.OldName is null)
+		if(e is null || e.OldName is null || e.Name is null)
 		{
 			return;
 		}
@@ -591,40 +592,44 @@ public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 		get => _isEnabled;
 		set
 		{
-			Verify.State.IsFalse(IsDisposed, "RepositoryMonitor is disposed.");
+			Verify.State.IsNotDisposed(IsDisposed, this);
 
-			if(_isEnabled != value)
-			{
-				if(_isEnabled)
-				{
-					Stop();
-				}
-				_isEnabled = value;
-				if(_isEnabled)
-				{
-					Start();
-				}
-			}
+			if(_isEnabled == value) return;
+
+			if(_isEnabled) Stop();
+			_isEnabled = value;
+			if(_isEnabled) Start();
 		}
 	}
 
 	private void Stop()
 	{
-		_fswGitDir.EnableRaisingEvents = false;
-		_fswWorkDir.EnableRaisingEvents = false;
+		if(_fswGitDir is not null)
+		{
+			_fswGitDir.EnableRaisingEvents = false;
+		}
+		if(_fswWorkDir is not null)
+		{
+			_fswWorkDir.EnableRaisingEvents = false;
+		}
 
-		_evExit.Set();
+		_evExit?.Set();
 
-		_fswGitDir.Deleted -= OnGitDirDeleted;
-		_fswGitDir.Renamed -= OnGitDirRenamed;
+		if(_fswGitDir is not null)
+		{
+			_fswGitDir.Deleted -= OnGitDirDeleted;
+			_fswGitDir.Renamed -= OnGitDirRenamed;
+			_fswGitDir.Dispose();
+		}
 
-		_fswWorkDir.Created -= OnWorkDirCreated;
-		_fswWorkDir.Deleted -= OnWorkDirDeleted;
-		_fswWorkDir.Renamed -= OnWorkDirRenamed;
-		_fswWorkDir.Changed -= OnWorkDirChanged;
-
-		_fswGitDir.Dispose();
-		_fswWorkDir.Dispose();
+		if(_fswWorkDir is not null)
+		{
+			_fswWorkDir.Created -= OnWorkDirCreated;
+			_fswWorkDir.Deleted -= OnWorkDirDeleted;
+			_fswWorkDir.Renamed -= OnWorkDirRenamed;
+			_fswWorkDir.Changed -= OnWorkDirChanged;
+			_fswWorkDir.Dispose();
+		}
 
 		lock(_pendingNotifications)
 		{
@@ -639,22 +644,17 @@ public sealed class RepositoryMonitor : IRepositoryMonitor, IDisposable
 			_delayedUnblocks.Clear();
 		}
 
-		_notificationThread.Join();
-		_delayedNotificationThread.Join();
-		_delayedUnblockingThread.Join();
+		_notificationThread?.Join();
+		_delayedNotificationThread?.Join();
+		_delayedUnblockingThread?.Join();
 
-		_evGotNotification.Dispose();
-		_evGotDelayedNotification.Dispose();
-		_evGotDelayedUnblock.Dispose();
-		_evExit.Dispose();
+		DisposableUtility.Dispose(ref _evGotNotification);
+		DisposableUtility.Dispose(ref _evGotDelayedNotification);
+		DisposableUtility.Dispose(ref _evGotDelayedUnblock);
+		DisposableUtility.Dispose(ref _evExit);
 
 		_fswGitDir = null;
 		_fswWorkDir = null;
-
-		_evGotNotification = null;
-		_evGotDelayedNotification = null;
-		_evGotDelayedUnblock = null;
-		_evExit = null;
 	}
 
 	private void Start()

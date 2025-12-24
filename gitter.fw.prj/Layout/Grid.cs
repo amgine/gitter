@@ -20,8 +20,6 @@
 
 namespace gitter.Framework.Layout;
 
-#nullable enable
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -29,19 +27,13 @@ using System.Windows.Forms;
 
 public sealed class Grid : IContent
 {
-	sealed class ContentLayout
+	sealed class ContentLayout(Grid grid, GridContent content)
 	{
-		private readonly GridContent _content;
+		private readonly GridContent _content = content;
 		private Rectangle _bounds;
 		private Dpi _dpi;
 
-		public ContentLayout(Grid grid, GridContent content)
-		{
-			Grid     = grid;
-			_content = content;
-		}
-
-		public Grid Grid { get; }
+		public Grid Grid { get; } = grid;
 
 		private int GetX()
 		{
@@ -116,13 +108,13 @@ public sealed class Grid : IContent
 	{
 		_rows = rows is { Length: > 0 }
 			? Array.ConvertAll(rows, s => new GridRow(this, s))
-			: new[] { new GridRow(this, SizeSpec.Everything()) };
+			: [new GridRow(this, SizeSpec.Everything())];
 		_columns = columns is { Length: > 0 }
 			? Array.ConvertAll(columns, s => new GridColumn(this, s))
-			: new[] { new GridColumn(this, SizeSpec.Everything()) };
+			: [new GridColumn(this, SizeSpec.Everything())];
 		_content = content is { Length: > 0 }
 			? Array.ConvertAll(content, c => new ContentLayout(this, c))
-			: Array.Empty<ContentLayout>();
+			: Preallocated<ContentLayout>.EmptyArray;
 		_padding = padding;
 
 		foreach(var row in _rows)

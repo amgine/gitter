@@ -27,6 +27,9 @@ public sealed class MSVS2012LightColors : IGitterStyleColors
 {
 	public static readonly Color WORK_AREA = Color.FromArgb(239, 239, 242);
 	public static readonly Color WINDOW = Color.FromArgb(255, 255, 255);
+	public static readonly Color WINDOW_FOOTER = Color.FromArgb(255, 255, 255);
+	public static readonly Color WINDOW_FOOTER_SEPARATOR = Color.FromArgb(255, 255, 255);
+	public static readonly Color ACCENT_FILL = Color.FromArgb(0, 99, 177);
 	public static readonly Color SCROLLBAR_SPACING = Color.FromArgb(232, 232, 236);
 	public static readonly Color SEPARATOR = Color.FromArgb(54, 54, 57);
 	public static readonly Color WINDOW_TEXT = Color.FromArgb(0, 0, 0);
@@ -40,10 +43,13 @@ public sealed class MSVS2012LightColors : IGitterStyleColors
 
 	public Color WorkArea                    => WORK_AREA;
 	public Color Window                      => WINDOW;
+	public Color WindowFooter                => WINDOW_FOOTER;
+	public Color WindowFooterSeparator       => WINDOW_FOOTER_SEPARATOR;
 	public Color ScrollBarSpacing            => SCROLLBAR_SPACING;
 	public Color Separator                   => SEPARATOR;
 	public Color Alternate                   => ALTERNATE;
 	public Color WindowText                  => WINDOW_TEXT;
+	public Color AccentFill                  => ACCENT_FILL;
 	public Color GrayText                    => GRAY_TEXT;
 	public Color HyperlinkText               => HYPERLINK_TEXT;
 	public Color HyperlinkTextHotTrack       => HYPERLINK_TEXT_HOT_TRACK;

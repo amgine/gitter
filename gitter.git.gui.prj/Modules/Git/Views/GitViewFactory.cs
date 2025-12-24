@@ -22,10 +22,5 @@ namespace gitter.Git.Gui.Views;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class GitViewFactory : GitViewFactoryBase<GitView>
-{
-	public GitViewFactory()
-		: base(Guids.GitViewGuid, Resources.StrGit, Icons.Git)
-	{
-	}
-}
+sealed class GitViewFactory() : GitViewFactoryBase<GitView>(
+	Guids.GitViewGuid, Resources.StrGit, Icons.Git);

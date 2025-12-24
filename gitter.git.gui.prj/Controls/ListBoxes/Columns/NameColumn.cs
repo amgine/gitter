@@ -22,7 +22,6 @@ namespace gitter.Git.Gui.Controls;
 
 using System;
 using System.Drawing;
-using System.Windows.Forms;
 
 using gitter.Framework;
 using gitter.Framework.Controls;
@@ -53,7 +52,7 @@ public class NameColumn : CustomListBoxColumn
 	/// <summary>Returns name of the object associated with <paramref name="item"/>.</summary>
 	/// <param name="item">Item.</param>
 	/// <returns>Name of the object associated with <paramref name="item"/>.</returns>
-	protected virtual string GetName(CustomListBoxItem item)
+	protected virtual string? GetName(CustomListBoxItem item)
 		=> (item as IDataContextProvider<INamedObject>)?.DataContext?.Name;
 
 	/// <inheritdoc/>

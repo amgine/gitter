@@ -61,7 +61,7 @@ public sealed class CustomListBoxColumnsCollection : NotifyCollection<CustomList
 	protected override bool VerifyItem(CustomListBoxColumn item)
 		=> item is not null && item.ListBox is null;
 
-	public CustomListBoxColumn GetById(int columnId)
+	public CustomListBoxColumn? GetById(int columnId)
 	{
 		for(int i = 0; i < Items.Count; ++i)
 		{

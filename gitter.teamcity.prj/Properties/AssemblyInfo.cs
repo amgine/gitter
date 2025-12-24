@@ -1,4 +1,4 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
  * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
@@ -27,3 +27,8 @@ using System.Runtime.InteropServices;
 
 [assembly: ComVisible(false)]
 [assembly: Guid("d2e89f22-8301-499d-b6c6-be06e771520a")]
+
+#if NET6_0_OR_GREATER
+[module: System.Runtime.Versioning.SupportedOSPlatform("windows")]
+[module: System.Diagnostics.CodeAnalysis.SuppressMessage("", "WFAC010")]
+#endif

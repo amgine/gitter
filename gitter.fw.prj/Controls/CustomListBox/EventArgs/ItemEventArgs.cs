@@ -23,12 +23,9 @@ namespace gitter.Framework.Controls;
 using System;
 
 /// <summary>Event arguments, providing <see cref="CustomListBoxItem"/>.</summary>
-public sealed class ItemEventArgs : EventArgs
+/// <param name="item">Related <see cref="CustomListBoxItem"/>.</param>
+public sealed class ItemEventArgs(CustomListBoxItem item) : EventArgs
 {
-	/// <summary>Create <see cref="ItemEventArgs"/>.</summary>
-	/// <param name="item">Related <see cref="CustomListBoxItem"/>.</param>
-	public ItemEventArgs(CustomListBoxItem item) => Item = item;
-
 	/// <summary>Related <see cref="CustomListBoxItem"/>.</summary>
-	public CustomListBoxItem Item { get; }
+	public CustomListBoxItem Item { get; } = item;
 }

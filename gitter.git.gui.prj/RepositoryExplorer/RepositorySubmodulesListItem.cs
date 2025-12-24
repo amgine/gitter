@@ -31,24 +31,16 @@ using gitter.Git.Gui.Views;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class RepositorySubmodulesListItem : RepositoryExplorerItemBase
+sealed class RepositorySubmodulesListItem(IWorkingEnvironment environment)
+	: RepositoryExplorerItemBase(Icons.Submodules, Resources.StrSubmodules)
 {
-	private readonly IWorkingEnvironment _environment;
-	private SubmoduleListBinding _binding;
-
-	public RepositorySubmodulesListItem(IWorkingEnvironment environment)
-		: base(Icons.Submodules, Resources.StrSubmodules)
-	{
-		Verify.Argument.IsNotNull(environment);
-
-		_environment = environment;
-	}
+	private SubmoduleListBinding? _binding;
 
 	/// <inheritdoc/>
 	protected override void OnActivate()
 	{
 		base.OnActivate();
-		_environment.ViewDockService.ShowView(Guids.SubmodulesViewGuid);
+		environment.ViewDockService.ShowView(Guids.SubmodulesViewGuid);
 	}
 
 	/// <inheritdoc/>
@@ -57,21 +49,24 @@ sealed class RepositorySubmodulesListItem : RepositoryExplorerItemBase
 	}
 
 	/// <inheritdoc/>
-	protected override void DetachFromRepository()
+	protected override void AttachToRepository(Repository repository)
 	{
-		_binding.Dispose();
-		_binding = null;
+		_binding = new SubmoduleListBinding(Items, repository);
+	}
+
+	/// <inheritdoc/>
+	protected override void DetachFromRepository(Repository repository)
+	{
+		if(_binding is not null)
+		{
+			_binding.Dispose();
+			_binding = null;
+		}
 		Collapse();
 	}
 
 	/// <inheritdoc/>
-	protected override void AttachToRepository()
-	{
-		_binding = new SubmoduleListBinding(Items, Repository);
-	}
-
-	/// <inheritdoc/>
-	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	public override ContextMenuStrip? GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
 		Assert.IsNotNull(requestEventArgs);
 

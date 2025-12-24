@@ -40,7 +40,8 @@ public abstract class ListBoxSearch<T> : SearchBase, ISearch<T>
 
 	private bool Search(int start, T search, int direction)
 	{
-		if(search.Text.Length == 0) return true;
+		if(search.Text is not { Length: not 0 }) return true;
+
 		int count = ListBox.Items.Count;
 		if(count == 0) return false;
 		if(direction == 1)
@@ -85,7 +86,7 @@ public abstract class ListBoxSearch<T> : SearchBase, ISearch<T>
 	{
 		Verify.Argument.IsNotNull(search);
 
-		if(search.Text.Length == 0) return true;
+		if(search.Text is not { Length: not 0 }) return true;
 		if(ListBox.SelectedItems.Count == 0)
 		{
 			return Search(-1, search, 1);
@@ -98,7 +99,7 @@ public abstract class ListBoxSearch<T> : SearchBase, ISearch<T>
 	{
 		Verify.Argument.IsNotNull(search);
 
-		if(search.Text.Length == 0) return true;
+		if(search.Text is not { Length: not 0 }) return true;
 		if(ListBox.SelectedItems.Count == 0)
 		{
 			return Search(-1, search, 1);
@@ -111,7 +112,7 @@ public abstract class ListBoxSearch<T> : SearchBase, ISearch<T>
 	{
 		Verify.Argument.IsNotNull(search);
 
-		if(search.Text.Length == 0) return true;
+		if(search.Text is not { Length: not 0 }) return true;
 		if(ListBox.SelectedItems.Count == 0) return Search(-1, search, 1);
 		var start = ListBox.Items.IndexOf(ListBox.SelectedItems[0]);
 		return Search(start, search, -1);

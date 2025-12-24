@@ -21,7 +21,6 @@
 namespace gitter.Git;
 
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using gitter.Git.AccessLayer;
@@ -31,14 +30,14 @@ using Resources = gitter.Git.Properties.Resources;
 
 static class RemotesUtility
 {
-	public static void FetchOrPull(Repository repository, Remote remote, bool pull)
+	public static void FetchOrPull(Repository repository, Remote? remote, bool pull)
 	{
 		var affectedReferences = ReferenceType.RemoteBranch | ReferenceType.Tag;
 		if(pull)
 		{
 			affectedReferences |= ReferenceType.LocalBranch;
 		}
-		ReferenceChange[] changes;
+		Many<ReferenceChange> changes;
 		var state1 = RefsState.Capture(repository, affectedReferences);
 		using(repository.Monitor.BlockNotifications(
 			RepositoryNotifications.BranchChanged,
@@ -48,21 +47,15 @@ static class RemotesUtility
 			{
 				if(pull)
 				{
-					var p = new PullParameters();
-					if(remote is not null)
-					{
-						p.Repository = remote.Name;
-					}
-					repository.Accessor.Pull.Invoke(p);
+					var request = new PullRequest();
+					request.Repository = remote?.Name;
+					repository.Accessor.Pull.Invoke(request);
 				}
 				else
 				{
-					var p = new FetchParameters();
-					if(remote is not null)
-					{
-						p.Repository = remote.Name;
-					}
-					repository.Accessor.Fetch.Invoke(p);
+					var request = new FetchRequest();
+					request.Repository = remote?.Name;
+					repository.Accessor.Fetch.Invoke(request);
 				}
 			}
 			finally
@@ -70,7 +63,7 @@ static class RemotesUtility
 				repository.Refs.Refresh(affectedReferences);
 				var state2 = RefsState.Capture(repository, affectedReferences);
 				changes = RefsDiff.Calculate(state1, state2);
-				if(changes is { Length: not 0 })
+				if(!changes.IsEmpty)
 				{
 					repository.OnUpdated();
 				}
@@ -86,32 +79,26 @@ static class RemotesUtility
 		}
 	}
 
-	private static Task GetFetchOrPullTask(Repository repository, Remote remote, bool pull,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	private static Task GetFetchOrPullTask(Repository repository, Remote? remote, bool pull,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		if(pull)
 		{
-			var p = new PullParameters();
-			if(remote is not null)
-			{
-				p.Repository = remote.Name;
-			}
-			return repository.Accessor.Pull.InvokeAsync(p, progress, cancellationToken);
+			var request = new PullRequest();
+			request.Repository = remote?.Name;
+			return repository.Accessor.Pull.InvokeAsync(request, progress, cancellationToken);
 		}
 		else
 		{
-			var p = new FetchParameters();
-			if(remote is not null)
-			{
-				p.Repository = remote.Name;
-			}
-			return repository.Accessor.Fetch.InvokeAsync(p, progress, cancellationToken);
+			var request = new FetchRequest();
+			request.Repository = remote?.Name;
+			return repository.Accessor.Fetch.InvokeAsync(request, progress, cancellationToken);
 		}
 	}
 
 	public static async Task FetchOrPullAsync(
-		Repository repository, Remote remote, bool pull,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		Repository repository, Remote? remote, bool pull,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		var affectedReferences = ReferenceType.RemoteBranch | ReferenceType.Tag;
 		if(pull)
@@ -129,7 +116,7 @@ static class RemotesUtility
 		var state2 = RefsState.Capture(repository, affectedReferences);
 		var changes = RefsDiff.Calculate(state1, state2);
 		suppressedNotifications.Dispose();
-		if(changes is { Length: not 0 })
+		if(!changes.IsEmpty)
 		{
 			repository.OnUpdated();
 		}
@@ -144,62 +131,57 @@ static class RemotesUtility
 		}
 	}
 
-	private static PushParameters GetPushParameters(string remoteRepository, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
-	{
-		var names = new List<string>(branches.Count);
-		foreach(var branch in branches)
-		{
-			names.Add(branch.Name);
-		}
-		var parameters = new PushParameters
+	private static PushRequest CreatePushRequest(
+		string       remoteRepository,
+		Many<Branch> branches,
+		bool         forceOverwrite,
+		bool         thinPack,
+		bool         sendTags)
+		=> new()
 		{
 			Repository = remoteRepository,
 			PushMode   = sendTags ? PushMode.Tags : PushMode.Default,
 			Force      = forceOverwrite,
 			ThinPack   = thinPack,
-			Refspecs   = names,
+			Refspecs   = branches.ConvertAll(static b => b.Name),
 		};
-		return parameters;
-	}
 
-	private static async Task PushAsync(Repository repository, PushParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	private static async Task PushAsync(
+		Repository                    repository,
+		PushRequest                   request,
+		IProgress<OperationProgress>? progress,
+		CancellationToken             cancellationToken)
 	{
-		IList<ReferencePushResult> res;
+		Many<ReferencePushResult> res;
 		using(var notificationsBlock = repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
 		{
 			res = await repository
 				.Accessor
 				.Push
-				.InvokeAsync(parameters, progress, cancellationToken)
+				.InvokeAsync(request, progress, cancellationToken)
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 			
-		bool changed = false;
-		for(int i = 0; i < res.Count; ++i)
-		{
-			if(!(res[i].Type is PushResultType.UpToDate or PushResultType.Rejected))
-			{
-				changed = true;
-				break;
-			}
-		}
+		var changed = res.Any(static r
+			=> r.Type != PushResultType.UpToDate
+			&& r.Type != PushResultType.Rejected);
 		if(changed)
 		{
 			repository.Refs.Remotes.Refresh();
 		}
 	}
 
-	public static Task PushAsync(Repository repository, string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	public static Task PushAsync(Repository repository, string url, Many<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
-		var parameters = GetPushParameters(url, branches, forceOverwrite, thinPack, sendTags);
-		return PushAsync(repository, parameters, progress, cancellationToken);
+		var request = CreatePushRequest(url, branches, forceOverwrite, thinPack, sendTags);
+		return PushAsync(repository, request, progress, cancellationToken);
 	}
 
-	public static Task PushAsync(Repository repository, Remote remote, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	public static Task PushAsync(Repository repository, Remote remote, Many<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
-		var parameters = GetPushParameters(remote.Name, branches, forceOverwrite, thinPack, sendTags);
-		return PushAsync(repository, parameters, progress, cancellationToken);
+		var request = CreatePushRequest(remote.Name, branches, forceOverwrite, thinPack, sendTags);
+		return PushAsync(repository, request, progress, cancellationToken);
 	}
 }

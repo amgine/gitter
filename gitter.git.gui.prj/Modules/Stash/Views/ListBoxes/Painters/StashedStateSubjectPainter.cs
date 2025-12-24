@@ -23,15 +23,13 @@ namespace gitter.Git.Gui.Controls;
 using System.Collections.Generic;
 
 /// <summary>Paints <see cref="Revision.Subject"/> for <see cref="StashedStateListItem"/> and <see cref="SubjectColumn"/>.</summary>
-sealed class StashedStateSubjectPainter : RevisionSubjectPainterBase<StashedStateListItem>
+sealed class StashedStateSubjectPainter(IGraphStyle graphStyle)
+	: RevisionSubjectPainterBase<StashedStateListItem>(graphStyle)
 {
-	public StashedStateSubjectPainter(IGraphStyle graphStyle)
-		: base(graphStyle)
-	{
-	}
+	protected override void SetDrawnPointers(StashedStateListItem item, List<PointerBounds> drawnPointers) { }
 
 	/// <inheritdoc/>
-	protected override bool TryGetData(StashedStateListItem item, out Revision revision, out GraphCell[] graph, out List<PointerBounds> drawnPointers)
+	protected override bool TryGetData(StashedStateListItem item, out Revision revision, out GraphCell[]? graph, out List<PointerBounds>? drawnPointers)
 	{
 		Assert.IsNotNull(item);
 

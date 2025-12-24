@@ -26,11 +26,16 @@ using gitter.Framework.Controls;
 
 using gitter.Git.Gui.Controls;
 
-class ReferencesSearch : ListBoxTreeSearch<ReferencesSearchOptions>
+class ReferencesSearch(CustomListBox listBox) : ListBoxTreeSearch<ReferencesSearchOptions>(listBox)
 {
-	public ReferencesSearch(CustomListBox listBox)
-		: base(listBox)
+	static bool TestReferenceHash<T>(T reference, string? text)
+		where T : Reference
 	{
+		if(text is not { Length : not 0 }) return false;
+
+		var revision = reference.Revision;
+		if(revision is null) return false;
+		return revision.HashString.StartsWith(text, StringComparison.OrdinalIgnoreCase);
 	}
 
 	protected static bool TestBranch(Branch branch, ReferencesSearchOptions search)
@@ -39,7 +44,7 @@ class ReferencesSearch : ListBoxTreeSearch<ReferencesSearchOptions>
 		Assert.IsNotNull(search);
 
 		if(TestString(branch.Name, search)) return true;
-		if(branch.Revision.HashString.StartsWith(search.Text, StringComparison.OrdinalIgnoreCase)) return true;
+		if(TestReferenceHash(branch, search.Text)) return true;
 
 		return false;
 	}
@@ -50,7 +55,7 @@ class ReferencesSearch : ListBoxTreeSearch<ReferencesSearchOptions>
 		Assert.IsNotNull(search);
 
 		if(TestString(branch.Name, search)) return true;
-		if(branch.Revision.HashString.StartsWith(search.Text, StringComparison.OrdinalIgnoreCase)) return true;
+		if(TestReferenceHash(branch, search.Text)) return true;
 
 		return false;
 	}
@@ -61,7 +66,7 @@ class ReferencesSearch : ListBoxTreeSearch<ReferencesSearchOptions>
 		Assert.IsNotNull(search);
 
 		if(TestString(tag.Name, search)) return true;
-		if(tag.Revision.HashString.StartsWith(search.Text, StringComparison.OrdinalIgnoreCase)) return true;
+		if(TestReferenceHash(tag, search.Text)) return true;
 
 		return false;
 	}

@@ -25,6 +25,9 @@ using System;
 using Autofac;
 
 using gitter.Framework;
+using gitter.Framework.Options;
+using gitter.TeamCity.Options;
+using gitter.TeamCity.Properties;
 
 public sealed class Module : Autofac.Module
 {
@@ -37,6 +40,27 @@ public sealed class Module : Autofac.Module
 			.RegisterType<TeamCityServiceProvider>()
 			.As<IRepositoryServiceProvider>()
 			.AsSelf()
+			.SingleInstance();
+
+		builder
+			.RegisterTypes(
+			[
+				typeof(ConfigurationPage),
+			])
+			.AsSelf()
+			.ExternallyOwned();
+
+		builder
+			.Register(static c =>
+			{
+				return new PropertyPageFactory<ConfigurationPage>(
+					ConfigurationPage.Guid,
+					Resources.StrTeamCity,
+					null,
+					IntegrationOptionsPage.Guid,
+					c.Resolve<IFactory<ConfigurationPage>>());
+			})
+			.As<IPropertyPageFactory>()
 			.SingleInstance();
 
 		base.Load(builder);

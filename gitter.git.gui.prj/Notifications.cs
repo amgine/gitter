@@ -26,40 +26,31 @@ using gitter.Framework.Controls;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class Notifications : IDisposable
+sealed class Notifications(GuiProvider guiProvider) : IDisposable
 {
-	private readonly GuiProvider _guiProvider;
-	private Repository _repository;
+	private Repository? _repository;
 
-	public Notifications(GuiProvider guiProvider)
-	{
-		Verify.Argument.IsNotNull(guiProvider);
-
-		_guiProvider = guiProvider;
-	}
-
-	public Repository Repository
+	public Repository? Repository
 	{
 		get => _repository;
 		set
 		{
-			if(_repository != value)
+			if(_repository == value) return;
+
+			if(_repository is not null)
 			{
-				if(_repository is not null)
-				{
-					DetachFromRepository(_repository);
-				}
-				_repository = value;
-				if(_repository is not null)
-				{
-					AttachToRepository(_repository);
-				}
+				DetachFromRepository(_repository);
+			}
+			_repository = value;
+			if(_repository is not null)
+			{
+				AttachToRepository(_repository);
 			}
 		}
 	}
 
-	private PopupNotificationsStack PopupsStack
-		=> _guiProvider.Environment.ViewDockService.DockPanel.PopupsStack;
+	private PopupNotificationsStack? PopupsStack
+		=> guiProvider.Environment?.ViewDockService.DockPanel.PopupsStack;
 
 	private void AttachToRepository(Repository repository)
 	{
@@ -83,14 +74,14 @@ sealed class Notifications : IDisposable
 		repository.Status.Committed -= OnCommitted;
 	}
 
-	private void OnFetchCompleted(object sender, FetchCompletedEventArgs e)
+	private void OnFetchCompleted(object? sender, FetchCompletedEventArgs e)
 	{
-		if(_guiProvider.Environment.InvokeRequired)
+		if(guiProvider.Environment is { InvokeRequired: true } environment)
 		{
 			try
 			{
-				_guiProvider.Environment.BeginInvoke(
-					new Action<FetchCompletedEventArgs>(OnFetchCompleted), new object[] { e }); 
+				environment.BeginInvoke(
+					new Action<FetchCompletedEventArgs>(OnFetchCompleted), [e]); 
 			}
 			catch(ObjectDisposedException)
 			{
@@ -102,14 +93,14 @@ sealed class Notifications : IDisposable
 		}
 	}
 
-	private void OnPullCompleted(object sender, PullCompletedEventArgs e)
+	private void OnPullCompleted(object? sender, PullCompletedEventArgs e)
 	{
-		if(_guiProvider.Environment.InvokeRequired)
+		if(guiProvider.Environment is { InvokeRequired: true } environment)
 		{
 			try
 			{
-				_guiProvider.Environment.BeginInvoke(
-					new Action<PullCompletedEventArgs>(OnPullCompleted), new object[] { e }); 
+				environment.BeginInvoke(
+					new Action<PullCompletedEventArgs>(OnPullCompleted), [e]); 
 			}
 			catch(ObjectDisposedException)
 			{
@@ -121,14 +112,14 @@ sealed class Notifications : IDisposable
 		}
 	}
 
-	private void OnPruneCompleted(object sender, PruneCompletedEventArgs e)
+	private void OnPruneCompleted(object? sender, PruneCompletedEventArgs e)
 	{
-		if(_guiProvider.Environment.InvokeRequired)
+		if(guiProvider.Environment is { InvokeRequired: true } environment)
 		{
 			try
 			{
-				_guiProvider.Environment.BeginInvoke(
-					new Action<PruneCompletedEventArgs>(OnPruneCompleted), new object[] { e }); 
+				environment.BeginInvoke(
+					new Action<PruneCompletedEventArgs>(OnPruneCompleted), [e]); 
 			}
 			catch(ObjectDisposedException)
 			{
@@ -140,17 +131,17 @@ sealed class Notifications : IDisposable
 		}
 	}
 
-	private void OnCommitted(object sender, CommitResultEventArgs e)
+	private void OnCommitted(object? sender, CommitResultEventArgs e)
 	{
 		var message = e.CommitResult.Message;
 		if(string.IsNullOrWhiteSpace(message)) return;
 
-		if(_guiProvider.Environment.InvokeRequired)
+		if(guiProvider.Environment is { InvokeRequired: true } environment)
 		{
 			try
 			{
-				_guiProvider.Environment.BeginInvoke(
-					new Action<CommitResultEventArgs>(OnCommitted), new object[] { e });
+				environment.BeginInvoke(
+					new Action<CommitResultEventArgs>(OnCommitted), [e]);
 			}
 			catch(ObjectDisposedException)
 			{
@@ -166,33 +157,39 @@ sealed class Notifications : IDisposable
 	{
 		Assert.IsNotNull(e);
 
+		if(PopupsStack is not { IsDisposed: false } stack) return;
+
 		var notification = new ReferencesChangedNotification(e.Changes)
 		{
 			Text = e.Remote is null ? Resources.StrFetch : Resources.StrFetch + ": " + e.Remote.Name,
 		};
-		PopupsStack.PushNotification(notification);
+		stack.PushNotification(notification);
 	}
 
 	private void OnPullCompleted(PullCompletedEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
+		if(PopupsStack is not { IsDisposed: false } stack) return;
+
 		var notification = new ReferencesChangedNotification(e.Changes)
 		{
 			Text = e.Remote is null ? Resources.StrPull : Resources.StrPull + ": " + e.Remote.Name,
 		};
-		PopupsStack.PushNotification(notification);
+		stack.PushNotification(notification);
 	}
 
 	private void OnPruneCompleted(PruneCompletedEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
+		if(PopupsStack is not { IsDisposed: false } stack) return;
+
 		var notification = new ReferencesChangedNotification(e.Changes)
 		{
 			Text = e.Remote is null ? Resources.StrPrune : Resources.StrPrune + ": " + e.Remote.Name,
 		};
-		PopupsStack.PushNotification(notification);
+		stack.PushNotification(notification);
 	}
 
 	private void OnCommitted(CommitResultEventArgs e)
@@ -202,10 +199,9 @@ sealed class Notifications : IDisposable
 		var message = e.CommitResult.Message;
 		if(!string.IsNullOrWhiteSpace(message))
 		{
-			if(!PopupsStack.IsDisposed)
-			{
-				PopupsStack.PushNotification(new PlainTextNotificationContent(message) { Text = Resources.StrCommit });
-			}
+			if(PopupsStack is not { IsDisposed: false } stack) return;
+
+			stack.PushNotification(new PlainTextNotificationContent(message) { Text = Resources.StrCommit });
 		}
 	}
 

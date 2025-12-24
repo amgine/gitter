@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git;
@@ -32,8 +32,6 @@ using Resources = gitter.Git.Properties.Resources;
 
 sealed class RevisionFileBlameSource : BlameSourceBase
 {
-	#region .ctor
-
 	public RevisionFileBlameSource(IRevisionPointer revision, string fileName)
 	{
 		Verify.Argument.IsNotNull(revision);
@@ -43,51 +41,38 @@ sealed class RevisionFileBlameSource : BlameSourceBase
 		FileName = fileName;
 	}
 
-	#endregion
-
-	#region Properties
-
 	public override Repository Repository => Revision.Repository;
 
 	public string FileName { get; }
 
 	public IRevisionPointer Revision { get; }
 
-	#endregion
-
-	#region Methods
-
-	private QueryBlameParameters GetParameters(BlameOptions options)
-	{
-		Assert.IsNotNull(options);
-
-		var parameters = new QueryBlameParameters()
-			{
-				Revision = Revision.Pointer,
-				FileName = FileName,
-			};
-		return parameters;
-	}
+	private QueryBlameRequest GetRequest(BlameOptions options)
+		=> new()
+		{
+			Revision = Revision.Pointer,
+			FileName = FileName,
+		};
 
 	public override BlameFile GetBlame(BlameOptions options)
 	{
 		Verify.Argument.IsNotNull(options);
 
-		var parameters = GetParameters(options);
-		return Repository.Accessor.QueryBlame.Invoke(parameters);
+		var request = GetRequest(options);
+		return Repository.Accessor.QueryBlame.Invoke(request);
 	}
 
 	public override async Task<BlameFile> GetBlameAsync(BlameOptions options,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(options);
 
 		progress?.Report(new OperationProgress(Resources.StrsFetchingBlame.AddEllipsis()));
-		var parameters = GetParameters(options);
+		var request = GetRequest(options);
 		var result = await Repository
 			.Accessor
 			.QueryBlame
-			.InvokeAsync(parameters, progress, cancellationToken);
+			.InvokeAsync(request, progress, cancellationToken);
 		progress?.Report(OperationProgress.Completed);
 		return result;
 	}
@@ -96,7 +81,7 @@ sealed class RevisionFileBlameSource : BlameSourceBase
 	public override int GetHashCode() => Revision.GetHashCode() ^ FileName.GetHashCode();
 
 	/// <inheritdoc/>
-	public override bool Equals(object obj)
+	public override bool Equals(object? obj)
 	{
 		if(obj is not RevisionFileBlameSource ds) return false;
 		return Revision == ds.Revision && FileName == ds.FileName;
@@ -107,6 +92,4 @@ sealed class RevisionFileBlameSource : BlameSourceBase
 		=> Revision is Revision
 			? FileName + " @ " + Revision.Pointer.Substring(0, 7)
 			: FileName + " @ " + Revision.Pointer;
-
-	#endregion
 }

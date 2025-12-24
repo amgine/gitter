@@ -23,12 +23,43 @@ namespace gitter.Framework.Controls;
 using System;
 using System.Drawing;
 
+/// <summary>Background bounds.</summary>
+/// <param name="dpi">Render DPI.</param>
+/// <param name="bounds">Bounds/</param>
+/// <param name="clip">Clip bounds.</param>
+public readonly struct BackgroundBounds(Dpi dpi, Rectangle bounds, Rectangle clip)
+{
+	/// <summary>Defines background bounds.</summary>
+	/// <param name="dpi">Render DPI.</param>
+	/// <param name="bounds">Bounds/</param>
+	public BackgroundBounds(Dpi dpi, Rectangle bounds) : this(dpi, bounds, bounds) { }
+
+	public Rectangle Bounds { get; } = bounds;
+
+	public Rectangle Clip { get; } = Rectangle.Intersect(clip, bounds);
+
+	public Dpi Dpi { get; } = dpi;
+
+	public int X => Bounds.X;
+
+	public int Y => Bounds.Y;
+
+	public int Width => Bounds.Width;
+
+	public int Height => Bounds.Height;
+
+	public int Right => Bounds.Right;
+
+	public int Bottom => Bounds.Bottom;
+
+	public static implicit operator Rectangle(BackgroundBounds bounds) => bounds.Bounds;
+}
+
 /// <summary>Item background style.</summary>
 public interface IBackgroundStyle
 {
 	/// <summary>Draw item background.</summary>
 	/// <param name="graphics"><see cref="Graphics"/> surface to draw on.</param>
-	/// <param name="dpi">DPI.</param>
-	/// <param name="bounds">Item rectangle.</param>
-	void Draw(Graphics graphics, Dpi dpi, Rectangle bounds);
+	/// <param name="background">Item bounds.</param>
+	void Draw(Graphics graphics, BackgroundBounds background);
 }

@@ -28,15 +28,15 @@ namespace NHunspell;
 public class Hunspell : IDisposable
 {
 	private bool nativeDllIsReferenced;
-	private IntPtr unmanagedHandle;
+	private IntPtr _handle;
 
-	private void HunspellInit(byte[] affixData, byte[] dictionaryData, string key)
+	private void HunspellInit(byte[] affixData, byte[] dictionaryData, string? key)
 	{
-		if(unmanagedHandle != IntPtr.Zero)
+		if(_handle != IntPtr.Zero)
 			throw new InvalidOperationException("Dictionary is already loaded");
 		MarshalHunspellDll.ReferenceNativeHunspellDll();
 		nativeDllIsReferenced = true;
-		unmanagedHandle = MarshalHunspellDll.HunspellInit(
+		_handle = MarshalHunspellDll.HunspellInit(
 			affixData, affixData.Length,
 			dictionaryData, dictionaryData.Length, key);
 	}
@@ -57,6 +57,8 @@ public class Hunspell : IDisposable
 	public Hunspell(byte[] affixFileData, byte[] dictionaryFileData)
 		=> Load(affixFileData, dictionaryFileData);
 
+	~Hunspell() => Dispose(disposing: false);
+
 	public static string NativeDllPath
 	{
 		get => MarshalHunspellDll.NativeDLLPath;
@@ -65,33 +67,56 @@ public class Hunspell : IDisposable
 
 	public bool IsDisposed { get; private set; }
 
+	private IntPtr GetHandle()
+	{
+		var handle = _handle;
+		if(handle == IntPtr.Zero) throw new InvalidOperationException("Dictionary is not loaded");
+		return handle;
+	}
+
 	public bool Add(string word)
 	{
-		if(this.unmanagedHandle == IntPtr.Zero)
-			throw new InvalidOperationException("Dictionary is not loaded");
-		int num = MarshalHunspellDll.HunspellAdd(this.unmanagedHandle, word) ? 1 : 0;
-		return this.Spell(word);
+		_ = MarshalHunspellDll.HunspellAdd(GetHandle(), word);
+		return Spell(word);
 	}
 
 	public bool AddWithAffix(string word, string example)
 	{
-		if(this.unmanagedHandle == IntPtr.Zero)
-			throw new InvalidOperationException("Dictionary is not loaded");
-		int num = MarshalHunspellDll.HunspellAddWithAffix(this.unmanagedHandle, word, example) ? 1 : 0;
-		return this.Spell(word);
+		_ = MarshalHunspellDll.HunspellAddWithAffix(GetHandle(), word, example);
+		return Spell(word);
 	}
 
-	public List<string> Analyze(string word)
+	public bool Remove(string word)
 	{
-		if(this.unmanagedHandle == IntPtr.Zero)
-			throw new InvalidOperationException("Dictionary is not loaded");
-		List<string> stringList = new List<string>();
-		IntPtr ptr1 = MarshalHunspellDll.HunspellAnalyze(this.unmanagedHandle, word);
+		_ = MarshalHunspellDll.HunspellRemove(GetHandle(), word);
+		return !Spell(word);
+	}
+
+	public bool Spell(string word)
+		=> MarshalHunspellDll.HunspellSpell(GetHandle(), word);
+
+	public List<string> Analyze(string word)
+		=> ToStringList(MarshalHunspellDll.HunspellAnalyze(GetHandle(), word));
+
+	public List<string> Generate(string word, string sample)
+		=> ToStringList(MarshalHunspellDll.HunspellGenerate(GetHandle(), word, sample));
+
+	public List<string> Suggest(string word)
+		=> ToStringList(MarshalHunspellDll.HunspellSuggest(GetHandle(), word));
+
+	public List<string> Stem(string word)
+		=> ToStringList(MarshalHunspellDll.HunspellStem(GetHandle(), word));
+
+	private static List<string> ToStringList(IntPtr ptr1)
+	{
+		if(ptr1 == IntPtr.Zero) return [];
+
 		int num = 0;
+		var stringList = new List<string>();
 		for(IntPtr ptr2 = Marshal.ReadIntPtr(ptr1, num * IntPtr.Size); ptr2 != IntPtr.Zero; ptr2 = Marshal.ReadIntPtr(ptr1, num * IntPtr.Size))
 		{
 			++num;
-			stringList.Add(Marshal.PtrToStringUni(ptr2));
+			stringList.Add(Marshal.PtrToStringUni(ptr2) ?? "");
 		}
 		return stringList;
 	}
@@ -106,10 +131,10 @@ public class Hunspell : IDisposable
 
 	protected virtual void Dispose(bool disposing)
 	{
-		if(unmanagedHandle != IntPtr.Zero)
+		if(_handle != IntPtr.Zero)
 		{
-			MarshalHunspellDll.HunspellFree(unmanagedHandle);
-			unmanagedHandle = IntPtr.Zero;
+			MarshalHunspellDll.HunspellFree(_handle);
+			_handle = IntPtr.Zero;
 		}
 		if(nativeDllIsReferenced)
 		{
@@ -118,22 +143,7 @@ public class Hunspell : IDisposable
 		}
 	}
 
-	public List<string> Generate(string word, string sample)
-	{
-		if(this.unmanagedHandle == IntPtr.Zero)
-			throw new InvalidOperationException("Dictionary is not loaded");
-		var stringList = new List<string>();
-		var ptr1 = MarshalHunspellDll.HunspellGenerate(this.unmanagedHandle, word, sample);
-		int num = 0;
-		for(var ptr2 = Marshal.ReadIntPtr(ptr1, num * IntPtr.Size); ptr2 != IntPtr.Zero; ptr2 = Marshal.ReadIntPtr(ptr1, num * IntPtr.Size))
-		{
-			++num;
-			stringList.Add(Marshal.PtrToStringUni(ptr2));
-		}
-		return stringList;
-	}
-
-	public void Load(string affFile, string dictFile, string key = default)
+	public void Load(string affFile, string dictFile, string? key = default)
 	{
 		affFile = Path.GetFullPath(affFile);
 		if(!File.Exists(affFile))  throw new FileNotFoundException("AFF File not found: " + affFile);
@@ -144,51 +154,6 @@ public class Hunspell : IDisposable
 		Load(affixFileData, dictionaryFileData, key);
 	}
 
-	public void Load(byte[] affixFileData, byte[] dictionaryFileData, string key = default)
+	public void Load(byte[] affixFileData, byte[] dictionaryFileData, string? key = default)
 		=> HunspellInit(affixFileData, dictionaryFileData, key);
-
-	public bool Remove(string word)
-	{
-		if(unmanagedHandle == IntPtr.Zero)
-			throw new InvalidOperationException("Dictionary is not loaded");
-		int num = MarshalHunspellDll.HunspellRemove(unmanagedHandle, word) ? 1 : 0;
-		return !Spell(word);
-	}
-
-	public bool Spell(string word)
-	{
-		if(unmanagedHandle == IntPtr.Zero)
-			throw new InvalidOperationException("Dictionary is not loaded");
-		return MarshalHunspellDll.HunspellSpell(this.unmanagedHandle, word);
-	}
-
-	public List<string> Stem(string word)
-	{
-		if(this.unmanagedHandle == IntPtr.Zero)
-			throw new InvalidOperationException("Dictionary is not loaded");
-		var stringList = new List<string>();
-		var ptr1 = MarshalHunspellDll.HunspellStem(this.unmanagedHandle, word);
-		int num = 0;
-		for(IntPtr ptr2 = Marshal.ReadIntPtr(ptr1, num * IntPtr.Size); ptr2 != IntPtr.Zero; ptr2 = Marshal.ReadIntPtr(ptr1, num * IntPtr.Size))
-		{
-			++num;
-			stringList.Add(Marshal.PtrToStringUni(ptr2));
-		}
-		return stringList;
-	}
-
-	public List<string> Suggest(string word)
-	{
-		if(this.unmanagedHandle == IntPtr.Zero)
-			throw new InvalidOperationException("Dictionary is not loaded");
-		var stringList = new List<string>();
-		var ptr1 = MarshalHunspellDll.HunspellSuggest(this.unmanagedHandle, word);
-		int num = 0;
-		for(IntPtr ptr2 = Marshal.ReadIntPtr(ptr1, num * IntPtr.Size); ptr2 != IntPtr.Zero; ptr2 = Marshal.ReadIntPtr(ptr1, num * IntPtr.Size))
-		{
-			++num;
-			stringList.Add(Marshal.PtrToStringUni(ptr2));
-		}
-		return stringList;
-	}
 }

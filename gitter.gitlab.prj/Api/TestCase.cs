@@ -22,11 +22,6 @@ namespace gitter.GitLab.Api;
 
 using System;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
-using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 [DataContract]
 class TestCase
@@ -44,66 +39,34 @@ class TestCase
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Status)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Status)]
-#endif
 	public TestCaseStatus Status { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Name)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Name)]
-#endif
-	public string Name { get; set; }
+	public string Name { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.ClassName)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.ClassName)]
-#endif
-	public string ClassName { get; set; }
+	public string? ClassName { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.File)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.File)]
-#endif
-	public string File { get; set; }
+	public string File { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.ExecutionTime)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.ExecutionTime)]
-#endif
 	public double ExecutionTime { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.SystemOutput)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.SystemOutput)]
-#endif
-	public string SystemOutput { get; set; }
+	public string? SystemOutput { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.StackTrace)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.StackTrace)]
-#endif
-	public string StackTrace { get; set; }
+	public string? StackTrace { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.RecentFailures)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.RecentFailures)]
-#endif
-	public string RecentFailures { get; set; }
+	public string? RecentFailures { get; set; }
 }

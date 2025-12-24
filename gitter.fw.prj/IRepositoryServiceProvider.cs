@@ -21,6 +21,7 @@
 namespace gitter.Framework;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Forms;
 
 using gitter.Framework.Configuration;
@@ -58,5 +59,5 @@ public interface IRepositoryServiceProvider : INamedObject
 	/// <param name="repository">Specifies repository.</param>
 	/// <param name="guiProvider">GUI provider for the service.</param>
 	/// <returns><c>true</c> on success, <c>false</c> if incompatible with <paramref name="repository"/>.</returns>
-	bool TryCreateGuiProvider(IRepository repository, out IGuiProvider guiProvider);
+	bool TryCreateGuiProvider(IRepository repository, [MaybeNullWhen(returnValue: false)] out IGuiProvider guiProvider);
 }

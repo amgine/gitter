@@ -20,9 +20,6 @@
 
 namespace gitter.GitLab.Gui;
 
-using System;
-using System.Linq;
-
 using Autofac;
 
 using gitter.Framework;
@@ -35,7 +32,7 @@ using gitter.Git.Gui.Controls;
 
 sealed class GitLabGuiProvider : IGuiProvider
 {
-	private RepositoryExplorer _repositoryExplorer;
+	private RepositoryExplorer? _repositoryExplorer;
 	private readonly IViewFactory[] _viewFactories;
 
 	private RegexHyperlinkExtractor ShortIssueUrlExtractor { get; }
@@ -84,7 +81,7 @@ sealed class GitLabGuiProvider : IGuiProvider
 
 	public GitLabServiceContext ServiceContext { get; }
 
-	private void OnDiffHeaderPanelsProviderCreatingPanels(object sender, CreatingPanelsEventArgs e)
+	private void OnDiffHeaderPanelsProviderCreatingPanels(object? sender, CreatingPanelsEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
@@ -104,8 +101,12 @@ sealed class GitLabGuiProvider : IGuiProvider
 						}
 					}
 
-					e.Panels.Add(new GitLabRevisionPanel(ServiceContext, revisionSource.Revision.Dereference()) { });
-					e.Panels.Add(new FlowPanelSeparator { SeparatorStyle = FlowPanelSeparatorStyle.Line });
+					var revision = revisionSource.Revision.Dereference();
+					if(revision is not null)
+					{
+						e.Panels.Add(new GitLabRevisionPanel(ServiceContext, revision) { });
+						e.Panels.Add(new FlowPanelSeparator { SeparatorStyle = FlowPanelSeparatorStyle.Line });
+					}
 				}
 				break;
 		}
@@ -136,8 +137,11 @@ sealed class GitLabGuiProvider : IGuiProvider
 		}
 
 		DiffHeaderPanelsProvider.CreatingPanels -= OnDiffHeaderPanelsProviderCreatingPanels;
-		environment.RemoveRepositoryExplorerItem(_repositoryExplorer.RootItem);
-		_repositoryExplorer = null;
+		if(_repositoryExplorer is not null)
+		{
+			environment.RemoveRepositoryExplorerItem(_repositoryExplorer.RootItem);
+			_repositoryExplorer = null;
+		}
 	}
 
 	public void SaveTo(Section section)

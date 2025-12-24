@@ -25,6 +25,8 @@ using System.Drawing;
 using System.Windows.Forms;
 
 using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Services;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
@@ -33,7 +35,70 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 public partial class RemoveRemoteBranchDialog : GitDialogBase
 {
 	private readonly RemoteBranch _branch;
-	private readonly Remote _remote;
+	private readonly Remote? _remote;
+
+	readonly struct DialogControls
+	{
+		public readonly CommandLink  _cmdRemoveLocalOnly;
+		public readonly CommandLink  _cmdRemoveFromRemote;
+		public readonly LabelControl _lblRemoveBranch;
+
+		public DialogControls()
+		{
+			_cmdRemoveLocalOnly  = new();
+			_cmdRemoveFromRemote = new();
+			_lblRemoveBranch     = new();
+		}
+
+		public void Layout(Control parent)
+		{
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					padding: DpiBoundValue.Padding(new(15, 10, 15, 10)),
+					rows:
+					[
+						LayoutConstants.LabelRowHeight,
+						SizeSpec.Absolute(10),
+						LayoutConstants.CommandLinkHeight,
+						SizeSpec.Absolute(16),
+						LayoutConstants.CommandLinkHeight,
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblRemoveBranch,     marginOverride: LayoutConstants.NoMargin), row: 0),
+						new GridContent(new ControlContent(_cmdRemoveLocalOnly,  marginOverride: LayoutConstants.NoMargin), row: 2),
+						new GridContent(new ControlContent(_cmdRemoveFromRemote, marginOverride: LayoutConstants.NoMargin), row: 4),
+					]),
+			};
+
+			var tabIndex = 0;
+			_lblRemoveBranch.TabIndex     = tabIndex++;
+			_cmdRemoveLocalOnly.TabIndex  = tabIndex++;
+			_cmdRemoveFromRemote.TabIndex = tabIndex++;
+
+			_lblRemoveBranch.Parent     = parent;
+			_cmdRemoveLocalOnly.Parent  = parent;
+			_cmdRemoveFromRemote.Parent = parent;
+		}
+
+		public void Localize(RemoteBranch branch)
+		{
+			var remote = branch.Remote;
+
+			_lblRemoveBranch.Text = Resources.StrsRemoveBranchFrom.UseAsFormat(branch.Name).AddColon();
+
+			_cmdRemoveLocalOnly.Text = Resources.StrsRemoveLocalOnly;
+			_cmdRemoveLocalOnly.Description = Resources.StrsRemoveLocalOnlyDescription;
+
+			_cmdRemoveFromRemote.Text = Resources.StrsRemoveFromRemote;
+			_cmdRemoveFromRemote.Description = Resources.StrsRemoveFromRemoteDescription.UseAsFormat(
+				remote is not null ? remote.Name : Resources.StrRemote);
+		}
+	}
+
+	private readonly DialogControls _controls;
 
 	/// <summary>Create <see cref="RemoveRemoteBranchDialog"/>.</summary>
 	/// <param name="branch"><see cref="RemoteBranch"/> to remove.</param>
@@ -43,31 +108,37 @@ public partial class RemoveRemoteBranchDialog : GitDialogBase
 		Verify.Argument.IsFalse(branch.IsDeleted, nameof(branch),
 			Resources.ExcObjectIsDeleted.UseAsFormat(nameof(RemoteBranch)));
 
-		InitializeComponent();
-
 		_branch = branch;
 		_remote = branch.Remote;
 
+		SuspendLayout();
+
+		Name = nameof(RemoveRemoteBranchDialog);
 		Text = Resources.StrRemoveBranch;
+		Size = ScalableSize.GetValue(Dpi.Default);
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode = AutoScaleMode.Dpi;
 
-		_lblRemoveBranch.Text = Resources.StrsRemoveBranchFrom.UseAsFormat(branch.Name).AddColon();
+		_controls = new();
+		_controls.Localize(branch);
+		_controls.Layout(this);
 
-		_cmdRemoveLocalOnly.Text = Resources.StrsRemoveLocalOnly;
-		_cmdRemoveLocalOnly.Description = Resources.StrsRemoveLocalOnlyDescription;
+		_controls._cmdRemoveLocalOnly.Click  += OnRemoveLocalOnlyClick;
+		_controls._cmdRemoveFromRemote.Click += OnRemoveFromRemoteClick;
 
-		_cmdRemoveFromRemote.Text = Resources.StrsRemoveFromRemote;
-		_cmdRemoveFromRemote.Description = Resources.StrsRemoveFromRemoteDescription.UseAsFormat(_remote.Name);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
 	}
 
 	/// <inheritdoc/>
-	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(350, 202));
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(350, 202);
 
 	/// <inheritdoc/>
 	public override DialogButtons OptimalButtons => DialogButtons.Cancel;
 
 	#region Event Handlers
 
-	private void OnRemoveLocalOnlyClick(object sender, EventArgs e)
+	private void OnRemoveLocalOnlyClick(object? sender, EventArgs e)
 	{
 		try
 		{
@@ -88,7 +159,7 @@ public partial class RemoveRemoteBranchDialog : GitDialogBase
 		ClickOk();
 	}
 
-	private void OnRemoveFromRemoteClick(object sender, EventArgs e)
+	private void OnRemoveFromRemoteClick(object? sender, EventArgs e)
 	{
 		try
 		{
@@ -99,11 +170,14 @@ public partial class RemoveRemoteBranchDialog : GitDialogBase
 		}
 		catch(GitException exc)
 		{
-			var branchName = _branch.Name.Substring(_remote.Name.Length + 1);
+			var branchName = _remote is not null
+				? _branch.Name.Substring(_remote.Name.Length + 1)
+				: _branch.Name;
 			GitterApplication.MessageBoxService.Show(
 				this,
 				exc.Message,
-				Resources.ErrFailedToRemoveBranchFrom.UseAsFormat(branchName, _remote.Name),
+				Resources.ErrFailedToRemoveBranchFrom.UseAsFormat(branchName,
+					_remote is not null ? _remote.Name : Resources.StrRemote),
 				MessageBoxButton.Close,
 				MessageBoxIcon.Error);
 		}

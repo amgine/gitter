@@ -116,7 +116,7 @@ partial class ConfigView : GitViewBase, ISearchableView<ConfigSearchOptions>
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 

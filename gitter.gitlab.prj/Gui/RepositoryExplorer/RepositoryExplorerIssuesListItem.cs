@@ -21,21 +21,22 @@
 namespace gitter.GitLab.Gui;
 
 using System;
+using System.Windows.Forms;
 
 using gitter.Framework;
+using gitter.Framework.Controls;
 
 using Resources = gitter.GitLab.Properties.Resources;
 
-sealed class RepositoryExplorerIssuesListItem : RepositoryExplorerItemBase
+sealed class RepositoryExplorerIssuesListItem(IWorkingEnvironment env, GitLabGuiProvider guiProvider)
+	: RepositoryExplorerItemBase(env, guiProvider, @"issues", Resources.StrIssues)
 {
-	public RepositoryExplorerIssuesListItem(IWorkingEnvironment env, GitLabGuiProvider guiProvider)
-		: base(env, guiProvider, @"issues", Resources.StrIssues)
-	{
-	}
-
 	protected override void OnActivate()
 	{
 		base.OnActivate();
 		ShowView(Guids.IssuesViewGuid);
 	}
+
+	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+		=> new Controls.GitLabIssuesContextMenu(GuiProvider.ServiceContext);
 }

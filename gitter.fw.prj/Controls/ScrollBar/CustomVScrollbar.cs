@@ -102,7 +102,7 @@ public class CustomVScrollbar : CustomScrollBar
 
 	#region Event Handlers
 
-	private void OnScrollHereClick(object sender, EventArgs e)
+	private void OnScrollHereClick(object? sender, EventArgs e)
 	{
 		EnsureArranged();
 		var y = _mouseDownLocation.Y - _decreaseButtonBounds.Height;
@@ -110,22 +110,22 @@ public class CustomVScrollbar : CustomScrollBar
 		Value = ClampValue(ThumbPositionToValue(thumbPosition));
 	}
 
-	private void OnTopClick(object sender, EventArgs e)
+	private void OnTopClick(object? sender, EventArgs e)
 		=> Value = ClampValue(Minimum);
 
-	private void OnBottomClick(object sender, EventArgs e)
+	private void OnBottomClick(object? sender, EventArgs e)
 		=> Value = ClampValue(Maximum);
 
-	private void OnScrollUpClick(object sender, EventArgs e)
+	private void OnScrollUpClick(object? sender, EventArgs e)
 		=> Value = ClampValue(Value - SmallChange);
 
-	private void OnScrollDownClick(object sender, EventArgs e)
+	private void OnScrollDownClick(object? sender, EventArgs e)
 		=> Value = ClampValue(Value + SmallChange);
 
-	private void OnPageUpClick(object sender, EventArgs e)
+	private void OnPageUpClick(object? sender, EventArgs e)
 		=> Value = ClampValue(Value - LargeChange);
 
-	private void OnPageDownClick(object sender, EventArgs e)
+	private void OnPageDownClick(object? sender, EventArgs e)
 		=> Value = ClampValue(Value + LargeChange);
 
 	#endregion
@@ -142,7 +142,10 @@ public class CustomVScrollbar : CustomScrollBar
 		switch(e.Button)
 		{
 			case MouseButtons.Right:
-				var menu = new ContextMenuStrip();
+				var menu = new ContextMenuStrip
+				{
+					Renderer = GitterApplication.Style.ToolStripRenderer,
+				};
 				menu.Items.Add(new ToolStripMenuItem(Resources.StrScrollHere, null, OnScrollHereClick));
 				menu.Items.Add(new ToolStripSeparator());
 				menu.Items.Add(new ToolStripMenuItem(Resources.StrTop, null, OnTopClick));

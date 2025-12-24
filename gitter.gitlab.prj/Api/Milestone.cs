@@ -22,11 +22,6 @@ namespace gitter.GitLab.Api;
 
 using System;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
-using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 [DataContract]
 sealed class Milestone : ModifiableObject
@@ -44,66 +39,34 @@ sealed class Milestone : ModifiableObject
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Description)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Description)]
-#endif
-	public string Description { get; set; }
+	public string? Description { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.DueDate)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.DueDate)]
-#endif
-	public string DueDate { get; set; }
+	public string? DueDate { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.StartDate)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.StartDate)]
-#endif
-	public string StartDate { get; set; }
+	public string StartDate { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.ProjectId)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.ProjectId)]
-#endif
 	public int? ProjectId { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.GroupId)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.GroupId)]
-#endif
 	public int? GroupId { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Title)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Title)]
-#endif
-	public string Title { get; set; }
+	public string Title { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.WebUrl)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.WebUrl)]
-#endif
-	public string WebUrl { get; set; }
+	public string WebUrl { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.State)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.State)]
-#endif
 	public MilestoneState State { get; set; }
 }

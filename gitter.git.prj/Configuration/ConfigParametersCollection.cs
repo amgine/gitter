@@ -1,27 +1,28 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 using gitter.Framework;
@@ -35,10 +36,10 @@ public sealed class ConfigParametersCollection : GitObject, IEnumerable<ConfigPa
 	#region Events
 
 	/// <summary>New parameter created/detected.</summary>
-	public event EventHandler<ConfigParameterEventArgs> ParameterCreated;
+	public event EventHandler<ConfigParameterEventArgs>? ParameterCreated;
 
 	/// <summary>Parameter removed/lost.</summary>
-	public event EventHandler<ConfigParameterEventArgs> ParameterDeleted;
+	public event EventHandler<ConfigParameterEventArgs>? ParameterDeleted;
 
 	/// <summary>Invokes <see cref="ParameterCreated"/> event.</summary>
 	/// <param name="parameter">New branch.</param>
@@ -82,14 +83,13 @@ public sealed class ConfigParametersCollection : GitObject, IEnumerable<ConfigPa
 	{
 		get
 		{
-			ConfigParameter res;
 			lock(SyncRoot)
 			{
 				Verify.Argument.IsTrue(
-					_parameters.TryGetValue(name, out res),
+					_parameters.TryGetValue(name, out var res),
 					"name", "Parameter not found.");
+				return res!;
 			}
-			return res;
 		}
 	}
 
@@ -115,15 +115,15 @@ public sealed class ConfigParametersCollection : GitObject, IEnumerable<ConfigPa
 	}
 
 	/// <summary>Object used for cross-thread synchronization.</summary>
-	public object SyncRoot => _parameters;
+	public LockType SyncRoot { get; } = new();
 
 	/// <summary>Gets/sets default merge tool.</summary>
-	public MergeTool MergeTool
+	public MergeTool? MergeTool
 	{
 		get
 		{
 			var toolName = TryGetParameterValue(GitConstants.MergeToolParameter);
-			return toolName != null
+			return toolName is not null
 				? MergeTool.GetCreateByName(toolName)
 				: default;
 		}
@@ -160,7 +160,7 @@ public sealed class ConfigParametersCollection : GitObject, IEnumerable<ConfigPa
 				RepositoryNotifications.ConfigUpdated))
 			{
 				Repository.Accessor.AddConfigValue.Invoke(
-					new AddConfigValueParameters(name, value));
+					new AddConfigValueRequest(name, value));
 			}
 			var parameter = new ConfigParameter(Repository, ConfigFile.Repository, name, value);
 			_parameters.Add(name, parameter);
@@ -201,7 +201,7 @@ public sealed class ConfigParametersCollection : GitObject, IEnumerable<ConfigPa
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.ConfigUpdated))
 			{
-				SetValue(GitConstants.UserNameParameter, userName);
+				SetValue(GitConstants.UserNameParameter,  userName);
 				SetValue(GitConstants.UserEmailParameter, userEmail);
 			}
 		}
@@ -219,12 +219,12 @@ public sealed class ConfigParametersCollection : GitObject, IEnumerable<ConfigPa
 			RepositoryNotifications.ConfigUpdated))
 		{
 			Repository.Accessor.UnsetConfigValue.Invoke(
-				new UnsetConfigValueParameters(parameter.Name));
+				new UnsetConfigValueRequest(parameter.Name));
 			Refresh(parameter);
 		}
 	}
 
-	public bool TryGetParameter(string name, out ConfigParameter parameter)
+	public bool TryGetParameter(string name, [MaybeNullWhen(returnValue: false)] out ConfigParameter parameter)
 	{
 		lock(SyncRoot)
 		{
@@ -232,7 +232,15 @@ public sealed class ConfigParametersCollection : GitObject, IEnumerable<ConfigPa
 		}
 	}
 
-	public bool TryGetParameterValue(string name, out string value)
+	public bool HasParameter(string name)
+	{
+		lock(SyncRoot)
+		{
+			return _parameters.ContainsKey(name);
+		}
+	}
+
+	public bool TryGetParameterValue(string name, [MaybeNullWhen(returnValue: false)] out string value)
 	{
 		lock(SyncRoot)
 		{
@@ -243,13 +251,13 @@ public sealed class ConfigParametersCollection : GitObject, IEnumerable<ConfigPa
 			}
 			else
 			{
-				value = null;
+				value = null!;
 				return false;
 			}
 		}
 	}
 
-	public ConfigParameter TryGetParameter(string name)
+	public ConfigParameter? TryGetParameter(string name)
 	{
 		lock(SyncRoot)
 		{
@@ -261,7 +269,7 @@ public sealed class ConfigParametersCollection : GitObject, IEnumerable<ConfigPa
 		return default;
 	}
 
-	public string TryGetParameterValue(string name)
+	public string? TryGetParameterValue(string name)
 	{
 		lock(SyncRoot)
 		{
@@ -278,7 +286,7 @@ public sealed class ConfigParametersCollection : GitObject, IEnumerable<ConfigPa
 	public void Refresh()
 	{
 		var config = Repository.Accessor.QueryConfig
-			.Invoke(new QueryConfigParameters());
+			.Invoke(new QueryConfigRequest());
 
 		lock(SyncRoot)
 		{
@@ -298,7 +306,7 @@ public sealed class ConfigParametersCollection : GitObject, IEnumerable<ConfigPa
 	public async Task RefreshAsync()
 	{
 		var config = await Repository.Accessor.QueryConfig
-			.InvokeAsync(new QueryConfigParameters())
+			.InvokeAsync(new QueryConfigRequest())
 			.ConfigureAwait(continueOnCapturedContext: false);
 
 		lock(SyncRoot)
@@ -316,11 +324,11 @@ public sealed class ConfigParametersCollection : GitObject, IEnumerable<ConfigPa
 		}
 	}
 
-	private void Refresh(ConfigParameter configParameter, ConfigParameterData configParameterData)
+	private void Refresh(ConfigParameter configParameter, ConfigParameterData? configParameterData)
 	{
 		Assert.IsNotNull(configParameter);
 
-		if(configParameterData == null)
+		if(configParameterData is null)
 		{
 			lock(SyncRoot)
 			{
@@ -343,7 +351,7 @@ public sealed class ConfigParametersCollection : GitObject, IEnumerable<ConfigPa
 		Verify.Argument.IsNotNull(configParameter);
 
 		var configParameterData = Repository.Accessor.QueryConfigParameter
-			.Invoke(new QueryConfigParameterParameters(configParameter.Name));
+			.Invoke(new QueryConfigParameterRequest(configParameter.Name));
 		Refresh(configParameter, configParameterData);
 	}
 
@@ -352,7 +360,7 @@ public sealed class ConfigParametersCollection : GitObject, IEnumerable<ConfigPa
 		Verify.Argument.IsNotNull(configParameter);
 
 		var configParameterData = await Repository.Accessor.QueryConfigParameter
-			.InvokeAsync(new QueryConfigParameterParameters(configParameter.Name))
+			.InvokeAsync(new QueryConfigParameterRequest(configParameter.Name))
 			.ConfigureAwait(continueOnCapturedContext: false);
 		Refresh(configParameter, configParameterData);
 	}

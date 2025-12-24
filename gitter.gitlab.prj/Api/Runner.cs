@@ -22,11 +22,6 @@ namespace gitter.GitLab.Api;
 
 using System;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
-using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 [DataContract]
 sealed class Runner
@@ -45,73 +40,43 @@ sealed class Runner
 		public const string Status      = @"status";
 	}
 
-#if SYSTEM_TEXT_JSON
+	[DataMember]
 	[JsonPropertyName(Names.Id)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Id)]
-#endif
 	public int Id { get; set; }
 
-#if SYSTEM_TEXT_JSON
+	[DataMember]
 	[JsonPropertyName(Names.Description)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Description)]
-#endif
-	public string Description { get; set; }
+	public string? Description { get; set; }
 
-#if SYSTEM_TEXT_JSON
+	[DataMember]
 	[JsonPropertyName(Names.IpAddresses)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.IpAddresses)]
-#endif
-	public string IpAddresses { get; set; }
+	public string IpAddresses { get; set; } = default!;
 
-#if SYSTEM_TEXT_JSON
+	[DataMember]
 	[JsonPropertyName(Names.Active)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Active)]
-#endif
 	public bool Active { get; set; }
 
-#if SYSTEM_TEXT_JSON
+	[DataMember]
 	[JsonPropertyName(Names.Paused)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Paused)]
-#endif
 	public bool Paused { get; set; }
 
-#if SYSTEM_TEXT_JSON
+	[DataMember]
 	[JsonPropertyName(Names.IsShared)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.IsShared)]
-#endif
 	public bool IsShared { get; set; }
 
-#if SYSTEM_TEXT_JSON
+	[DataMember]
 	[JsonPropertyName(Names.Type)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Type)]
-#endif
-	public string Type { get; set; }
+	public string Type { get; set; } = default!;
 
-#if SYSTEM_TEXT_JSON
+	[DataMember]
 	[JsonPropertyName(Names.Name)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Name)]
-#endif
-	public string Name { get; set; }
+	public string Name { get; set; } = default!;
 
-#if SYSTEM_TEXT_JSON
+	[DataMember]
 	[JsonPropertyName(Names.Online)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Online)]
-#endif
 	public bool Online { get; set; }
 
-#if SYSTEM_TEXT_JSON
+	[DataMember]
 	[JsonPropertyName(Names.Status)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Status)]
-#endif
-	public string Status { get; set; }
+	public string Status { get; set; } = default!;
 }

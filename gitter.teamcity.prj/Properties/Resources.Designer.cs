@@ -19,7 +19,7 @@ namespace gitter.TeamCity.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -61,6 +61,33 @@ namespace gitter.TeamCity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Access token cannot be empty.
+        /// </summary>
+        internal static string ErrAPIKeyCannotBeEmpty {
+            get {
+                return ResourceManager.GetString("ErrAPIKeyCannotBeEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid access token.
+        /// </summary>
+        internal static string ErrApiKeyIsInvalid {
+            get {
+                return ResourceManager.GetString("ErrApiKeyIsInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Duplicate service URL.
+        /// </summary>
+        internal static string ErrDuplicateServiceUri {
+            get {
+                return ResourceManager.GetString("ErrDuplicateServiceUri", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Invalid service URL.
         /// </summary>
         internal static string ErrInvalidServiceUri {
@@ -70,11 +97,29 @@ namespace gitter.TeamCity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No access token specified.
+        /// </summary>
+        internal static string ErrNoAPIKeySpecified {
+            get {
+                return ResourceManager.GetString("ErrNoAPIKeySpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No project name specified.
         /// </summary>
         internal static string ErrNoProjectNameSpecified {
             get {
                 return ResourceManager.GetString("ErrNoProjectNameSpecified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No server name specified.
+        /// </summary>
+        internal static string ErrNoServerNameSpecified {
+            get {
+                return ResourceManager.GetString("ErrNoServerNameSpecified", resourceCulture);
             }
         }
         
@@ -106,11 +151,29 @@ namespace gitter.TeamCity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Server name cannot be empty.
+        /// </summary>
+        internal static string ErrServerNameCannotBeEmpty {
+            get {
+                return ResourceManager.GetString("ErrServerNameCannotBeEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Service URL cannot be empty.
         /// </summary>
         internal static string ErrServiceUriCannotBeEmpty {
             get {
                 return ResourceManager.GetString("ErrServiceUriCannotBeEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not find TeamCity at the specified URL.
+        /// </summary>
+        internal static string ErrServiceUriIsNotTeamCity {
+            get {
+                return ResourceManager.GetString("ErrServiceUriIsNotTeamCity", resourceCulture);
             }
         }
         
@@ -124,11 +187,65 @@ namespace gitter.TeamCity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Specified service URL was added already.
+        /// </summary>
+        internal static string ErrSpecifiedServiceUriAlreadyExists {
+            get {
+                return ResourceManager.GetString("ErrSpecifiedServiceUriAlreadyExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to authorize with the specified API key.
+        /// </summary>
+        internal static string ErrUnableToAuthorize {
+            get {
+                return ResourceManager.GetString("ErrUnableToAuthorize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Username cannot be empty.
         /// </summary>
         internal static string ErrUsernameCannotBeEmpty {
             get {
                 return ResourceManager.GetString("ErrUsernameCannotBeEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add.
+        /// </summary>
+        internal static string StrAdd {
+            get {
+                return ResourceManager.GetString("StrAdd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add Server.
+        /// </summary>
+        internal static string StrAddServer {
+            get {
+                return ResourceManager.GetString("StrAddServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Access Token.
+        /// </summary>
+        internal static string StrApiKey {
+            get {
+                return ResourceManager.GetString("StrApiKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Branch Name.
+        /// </summary>
+        internal static string StrBranchName {
+            get {
+                return ResourceManager.GetString("StrBranchName", resourceCulture);
             }
         }
         
@@ -156,6 +273,15 @@ namespace gitter.TeamCity.Properties {
         internal static string StrBuildType {
             get {
                 return ResourceManager.GetString("StrBuildType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copy to Clipboard.
+        /// </summary>
+        internal static string StrCopyToClipboard {
+            get {
+                return ResourceManager.GetString("StrCopyToClipboard", resourceCulture);
             }
         }
         
@@ -205,11 +331,56 @@ namespace gitter.TeamCity.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Remove.
+        /// </summary>
+        internal static string StrRemove {
+            get {
+                return ResourceManager.GetString("StrRemove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server.
+        /// </summary>
+        internal static string StrServer {
+            get {
+                return ResourceManager.GetString("StrServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Servers.
+        /// </summary>
+        internal static string StrServers {
+            get {
+                return ResourceManager.GetString("StrServers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Service URL.
         /// </summary>
         internal static string StrServiceUri {
             get {
                 return ResourceManager.GetString("StrServiceUri", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Set Access Token.
+        /// </summary>
+        internal static string StrSetApiKey {
+            get {
+                return ResourceManager.GetString("StrSetApiKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Manage access tokens.
+        /// </summary>
+        internal static string StrsManageAccessTokens {
+            get {
+                return ResourceManager.GetString("StrsManageAccessTokens", resourceCulture);
             }
         }
         

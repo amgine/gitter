@@ -26,9 +26,9 @@ using System.Drawing;
 using System.Globalization;
 using System.Reflection;
 
-public class CachedScaledImageResources
+public class CachedScaledImageResources(Assembly assembly, string root)
 {
-	readonly struct Key : IEquatable<Key>
+	readonly struct Key(string name, int size) : IEquatable<Key>
 	{
 		sealed class EqualityComparerImpl : IEqualityComparer<Key>
 		{
@@ -39,20 +39,14 @@ public class CachedScaledImageResources
 
 		public static IEqualityComparer<Key> EqualityComparer { get; } = new EqualityComparerImpl();
 
-		public Key(string name, int size)
-		{
-			Name = name;
-			Size = size;
-		}
+		public string Name { get; } = name;
 
-		public string Name { get; }
-
-		public int Size { get; }
+		public int Size { get; } = size;
 
 		public override int GetHashCode()
 			=> Name.GetHashCode() ^ Size;
 
-		public override bool Equals(object obj)
+		public override bool Equals(object? obj)
 			=> obj is Key other && this == other;
 
 		public bool Equals(Key other)
@@ -66,21 +60,11 @@ public class CachedScaledImageResources
 	}
 
 	private static readonly int[] Sizes =
-		{
+		[
 			16, 24, 32, 48, 64, 128, 256
-		};
+		];
 
 	private readonly Dictionary<Key, Bitmap> _cache = new(Key.EqualityComparer);
-
-	public CachedScaledImageResources(Assembly assembly, string root)
-	{
-		Assembly = assembly;
-		Root     = root;
-	}
-
-	private Assembly Assembly { get; }
-
-	private string Root { get; }
 
 	private static Bitmap Rescale(Bitmap original, int size)
 	{
@@ -91,15 +75,15 @@ public class CachedScaledImageResources
 		return rescaled;
 	}
 
-	private Bitmap TryLoadExact(Key key)
+	private Bitmap? TryLoadExact(Key key)
 	{
-		var name = Root + "." + key.Name + "." + key.Size.ToString(CultureInfo.InvariantCulture) + ".png";
-		using var stream = Assembly.GetManifestResourceStream(name);
+		var name = root + "." + key.Name + "." + key.Size.ToString(CultureInfo.InvariantCulture) + ".png";
+		using var stream = assembly.GetManifestResourceStream(name);
 		if(stream is null) return default;
 		return new Bitmap(stream);
 	}
 
-	private Bitmap LoadBitmap(Key key)
+	private Bitmap? LoadBitmap(Key key)
 	{
 		var bitmap = TryLoadExact(key);
 		if(bitmap is not null)
@@ -175,7 +159,7 @@ public class CachedScaledImageResources
 		return default;
 	}
 
-	public Bitmap this[string name, int size]
+	public Bitmap? this[string name, int size]
 	{
 		get
 		{

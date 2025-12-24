@@ -20,11 +20,15 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
 using System.Xml;
+using System.Threading;
+using System.Threading.Tasks;
 
 public sealed class IssueCategoriesCollection : NamedRedmineObjectsCache<IssueCategory>
 {
@@ -34,31 +38,25 @@ public sealed class IssueCategoriesCollection : NamedRedmineObjectsCache<IssueCa
 	}
 
 	protected override IssueCategory Create(int id, string name)
-	{
-		return new IssueCategory(Context, id, name);
-	}
+		=> new(Context, id, name);
 
 	protected override IssueCategory Create(XmlNode node)
-	{
-		return new IssueCategory(Context, node);
-	}
+		=> new(Context, node);
 
-	public LinkedList<IssueCategory> Fetch(Project project)
+	public Task<List<IssueCategory>> FetchAsync(Project project, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(project);
 
-		return Fetch(project.Id);
+		return FetchAsync(project.Id, cancellationToken);
 	}
 
-	public LinkedList<IssueCategory> Fetch(int projectId)
-	{
-		return Fetch(projectId.ToString(CultureInfo.InvariantCulture));
-	}
+	public Task<List<IssueCategory>> FetchAsync(int projectId, CancellationToken cancellationToken = default)
+		=> FetchAsync(projectId.ToString(CultureInfo.InvariantCulture), cancellationToken);
 
-	public LinkedList<IssueCategory> Fetch(string projectId)
+	public Task<List<IssueCategory>> FetchAsync(string projectId, CancellationToken cancellationToken = default)
 	{
 		var url = string.Format(CultureInfo.InvariantCulture,
 			"projects/{0}/issue_categories.xml", projectId);
-		return FetchItemsFromSinglePage(url);
+		return FetchItemsFromSinglePageAsync(url, cancellationToken);
 	}
 }

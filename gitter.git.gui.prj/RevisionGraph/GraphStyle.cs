@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2025  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 namespace gitter.Git.Gui;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
@@ -28,36 +29,45 @@ using gitter.Framework;
 
 public sealed class GraphStyle : IGraphStyle, IDisposable
 {
-	public event EventHandler Changed;
+	public event EventHandler? Changed;
 
 	private void OnChanged(EventArgs e) => Changed?.Invoke(this, e);
 
 	private const float HoverLightAmount = 0.4f;
 
-	const int CornerExtensinon = 1;
-	const int DotMargin        = 1;
+	const int CornerExtension = 1;
+	const int DotMargin       = 1;
 
-	private static readonly Brush TagBrush = new SolidBrush(ColorScheme.TagBackColor);
-	private static readonly Brush LocalBranchBrush = new SolidBrush(ColorScheme.LocalBranchBackColor);
-	private static readonly Brush RemoteBranchBrush = new SolidBrush(ColorScheme.RemoteBranchBackColor);
-	private static readonly Brush StashBrush = new SolidBrush(ColorScheme.StashBackColor);
-
-	private static readonly Brush TagBrushHovered          = new SolidBrush(ColorScheme.TagBackColor.Lighter(HoverLightAmount));
-	private static readonly Brush LocalBranchBrushHovered  = new SolidBrush(ColorScheme.LocalBranchBackColor.Lighter(HoverLightAmount));
-	private static readonly Brush RemoteBranchBrushHovered = new SolidBrush(ColorScheme.RemoteBranchBackColor.Lighter(HoverLightAmount));
-	private static readonly Brush StashBrushHovered        = new SolidBrush(ColorScheme.StashBackColor.Lighter(HoverLightAmount));
+#if !NET9_0_OR_GREATER
+	[ThreadStatic]
+	private static Point []? _polyline;
 
 	[ThreadStatic]
-	private static readonly Point [] TagPoints        = new Point [6];
+	private static Point []? _tagPoints;
 
 	[ThreadStatic]
-	private static readonly PointF[] CurrentIndicator = new PointF[3];
+	private static PointF[]? _currentIndicator;
+#endif
 
 	[ThreadStatic]
-	private static readonly Point [] Polyline         = new Point [4];
+	private static Pen? _pen;
 
-	[ThreadStatic]
-	private static readonly Pen _pen = new(Color.White, 1);
+	#if NETCOREAPP
+	[MemberNotNull(nameof(_pen))]
+	#endif
+	private static Pen GetCachedPen(Color color, float width = 1)
+	{
+		if(_pen is null)
+		{
+			_pen = new Pen(color, width);
+		}
+		else
+		{
+			_pen.Color = color;
+			_pen.Width = width;
+		}
+		return _pen;
+	}
 
 	public GraphStyle(IValueProvider<GraphStyleOptions> optionsProvider)
 	{
@@ -72,379 +82,76 @@ public sealed class GraphStyle : IGraphStyle, IDisposable
 		OptionsProvider.ValueChanged -= OnOptionsProviderValueChanged;
 	}
 
-	private void OnOptionsProviderValueChanged(object sender, EventArgs e)
-	{
-		OnChanged(EventArgs.Empty);
-	}
+	private void OnOptionsProviderValueChanged(object? sender, EventArgs e)
+		=> OnChanged(EventArgs.Empty);
 
 	private IValueProvider<GraphStyleOptions> OptionsProvider { get; }
 
 	private static int GetGraphLineWidth(Dpi dpi, int baseWidth) => Math.Max(1, baseWidth + (dpi.X - 96) / (96 / 2));
 	//private static int GetGraphLineWidth(Dpi dpi, int baseWidth) => Math.Max(1, baseWidth * (dpi.X + 95) / 96);
 
-	static void PaintVerticalLine(Graphics graphics, GraphCell cell, Rectangle cellBounds, Color[] palette, bool useColors)
+	static void SetupLeftTopConer(
+#if NETCOREAPP
+		Span<Point> polyline,
+#else
+		Point[] polyline,
+#endif
+		Rectangle cellBounds)
 	{
-		Assert.IsNotNull(graphics);
-
-		if(useColors) _pen.Color = palette[cell.ColorOf(GraphElementId.VerticalTop)];
-		var x  = cellBounds.X + (cellBounds.Width >> 1);
-		var y0 = cellBounds.Y;
-		var y1 = cellBounds.Y + cellBounds.Height;
-		graphics.DrawLine(_pen, x, y0, x, y1);
+		var hw = cellBounds.Width  >> 1;
+		var hh = cellBounds.Height >> 1;
+		polyline[0] = new(cellBounds.X - CornerExtension, cellBounds.Y + hh);
+		polyline[1] = new(cellBounds.X,                   cellBounds.Y + hh);
+		polyline[2] = new(cellBounds.X + hw,              cellBounds.Y);
+		polyline[3] = new(cellBounds.X + hw,              cellBounds.Y -  CornerExtension);
 	}
 
-	private static void PaintVerticalLines(GraphStyleOptions options, Graphics graphics, Dpi dpi, GraphCell cell, Rectangle cellBounds, Color[] palette, bool useColors)
+	static void SetupRightTopCorner(
+#if NETCOREAPP
+		Span<Point> polyline,
+#else
+		Point[] polyline,
+#endif
+		Rectangle cellBounds)
 	{
-		Assert.IsNotNull(options);
-		Assert.IsNotNull(graphics);
-
-		if(!cell.HasAnyOfElements(GraphElement.Vertical)) return;
-
-		var @break = options.BreakLinesWithDot && cell.HasElement(GraphElement.Dot);
-		var x = cellBounds.X + (cellBounds.Width >> 1);
-		var color0 = cell.ColorOf(GraphElementId.VerticalTop);
-		var color1 = cell.ColorOf(GraphElementId.VerticalBottom);
-		if(!@break && cell.HasElement(GraphElement.Vertical) && (!useColors || (color0 == color1)))
-		{
-			if(useColors) _pen.Color = palette[color0];
-			var y0 = cellBounds.Y;
-			var y1 = cellBounds.Y + cellBounds.Height;
-			graphics.DrawLine(_pen, x, y0, x, y1);
-		}
-		else
-		{
-			if(cell.HasElement(GraphElement.VerticalTop))
-			{
-				if(useColors) _pen.Color = palette[color0];
-				var dy = @break ? (options.NodeRadius * dpi.Y / 96 + DotMargin) : 0;
-				var y0 = cellBounds.Y;
-				var y1 = y0 + (cellBounds.Height >> 1) - dy;
-				graphics.DrawLine(_pen, x, y0, x, y1);
-			}
-			if(cell.HasElement(GraphElement.VerticalBottom))
-			{
-				if(useColors) _pen.Color = palette[color1];
-				var dy = @break ? (options.NodeRadius * dpi.Y / 96 + DotMargin + 1) : 0;
-				var y0 = cellBounds.Y + (cellBounds.Height >> 1) + dy;
-				var y1 = cellBounds.Y +  cellBounds.Height;
-				graphics.DrawLine(_pen, x, y0, x, y1);
-			}
-		}
+		var hw = cellBounds.Width  >> 1;
+		var hh = cellBounds.Height >> 1;
+		polyline[0] = new(cellBounds.X + cellBounds.Width + CornerExtension, cellBounds.Y + hh);
+		polyline[1] = new(cellBounds.X + cellBounds.Width - 1,               cellBounds.Y + hh);
+		polyline[2] = new(cellBounds.X + hw,                                 cellBounds.Y);
+		polyline[3] = new(cellBounds.X + hw,                                 cellBounds.Y -  CornerExtension);
 	}
 
-	static void PaintHorizontalLine(Graphics graphics, GraphCell cell, Rectangle cellBounds, Color[] palette, bool useColors)
+	static void SetupLeftBottomCorner(
+#if NETCOREAPP
+		Span<Point> polyline,
+#else
+		Point[] polyline,
+#endif
+		Rectangle cellBounds)
 	{
-		Assert.IsNotNull(graphics);
-
-		if(useColors) _pen.Color = palette[cell.ColorOf(GraphElementId.HorizontalLeft)];
-
-		var y  = cellBounds.Y + (cellBounds.Height >> 1);
-		var x0 = cellBounds.X;
-		var x1 = x0 + cellBounds.Width;
-		graphics.DrawLine(_pen, x0, y, x1, y);
+		var hw = cellBounds.Width  >> 1;
+		var hh = cellBounds.Height >> 1;
+		polyline[0] = new(cellBounds.X + hw,              cellBounds.Y + cellBounds.Height + CornerExtension);
+		polyline[1] = new(cellBounds.X + hw,              cellBounds.Y + cellBounds.Height - 1);
+		polyline[2] = new(cellBounds.X,                   cellBounds.Y + hh);
+		polyline[3] = new(cellBounds.X - CornerExtension, cellBounds.Y + hh);
 	}
 
-	private static void PaintLeftLine(GraphStyleOptions options, Graphics graphics, Dpi dpi, GraphCell cell, Rectangle cellBounds, Color[] palette, bool useColors)
+	static void SetupRightBottomCorner(
+#if NETCOREAPP
+		Span<Point> polyline,
+#else
+		Point[] polyline,
+#endif
+		Rectangle cellBounds)
 	{
-		Assert.IsNotNull(options);
-		Assert.IsNotNull(graphics);
-
-		var @break = options.BreakLinesWithDot && cell.HasElement(GraphElement.Dot);
-		if(useColors) _pen.Color = palette[cell.ColorOf(GraphElementId.HorizontalLeft)];
-		var dx = @break ? (options.NodeRadius * dpi.X / 96 + DotMargin) : 0;
-		var y  = cellBounds.Y + (cellBounds.Height >> 1);
-		var x0 = cellBounds.X;
-		var x1 = x0 + (cellBounds.Width >> 1) - dx;
-		graphics.DrawLine(_pen, x0, y, x1, y);
-	}
-
-	private static void PaintRightLine(GraphStyleOptions options, Graphics graphics, Dpi dpi, GraphCell cell, Rectangle cellBounds, Color[] palette, bool useColors)
-	{
-		Assert.IsNotNull(options);
-		Assert.IsNotNull(graphics);
-
-		var @break = options.BreakLinesWithDot && cell.HasElement(GraphElement.Dot);
-		if(useColors) _pen.Color = palette[cell.ColorOf(GraphElementId.HorizontalRight)];
-		var y  = cellBounds.Y + (cellBounds.Height >> 1);
-		var dx = @break ? (options.NodeRadius * dpi.X / 96 + DotMargin + 1) : 0;
-		var x0 = cellBounds.X + (cellBounds.Width >> 1) + dx;
-		var x1 = cellBounds.X +  cellBounds.Width;
-		graphics.DrawLine(_pen, x0, y, x1, y);
-	}
-
-	private static void PaintHorizontalLines(GraphStyleOptions options, Graphics graphics, Dpi dpi, GraphCell cell, Rectangle cellBounds, Color[] palette, bool useColors)
-	{
-		Assert.IsNotNull(graphics);
-		Assert.IsNotNull(options);
-
-		if(!cell.HasAnyOfElements(GraphElement.Horizontal)) return;
-
-		var @break = options.BreakLinesWithDot && cell.HasElement(GraphElement.Dot);
-		var y = cellBounds.Y + (cellBounds.Height >> 1);
-		var color0 = cell.ColorOf(GraphElementId.HorizontalLeft);
-		var color1 = cell.ColorOf(GraphElementId.HorizontalRight);
-		if(!@break && cell.HasElement(GraphElement.Horizontal) && (!useColors || (color0 == color1)))
-		{
-			if(useColors) _pen.Color = palette[color0];
-			var x0 = cellBounds.X;
-			var x1 = x0 + cellBounds.Width;
-			graphics.DrawLine(_pen, x0, y, x1, y);
-		}
-		else
-		{
-			if(cell.HasElement(GraphElement.HorizontalLeft))
-			{
-				if(useColors) _pen.Color = palette[color0];
-				var dx = @break ? (options.NodeRadius * dpi.X / 96 + DotMargin) : 0;
-				var x0 = cellBounds.X;
-				var x1 = x0 + (cellBounds.Width >> 1) - dx;
-				graphics.DrawLine(_pen, x0, y, x1, y);
-			}
-			if(cell.HasElement(GraphElement.HorizontalRight))
-			{
-				if(useColors) _pen.Color = palette[color1];
-				var dx = @break ? (options.NodeRadius * dpi.X / 96 + DotMargin + 1) : 0;
-				var x0 = cellBounds.X + (cellBounds.Width >> 1) + dx;
-				var x1 = cellBounds.X +  cellBounds.Width;
-				graphics.DrawLine(_pen, x0, y, x1, y);
-			}
-		}
-	}
-
-	static void SetupLeftTopConer(Rectangle cellBounds)
-	{
-		Polyline[0].X = cellBounds.X -  CornerExtensinon;
-		Polyline[0].Y = cellBounds.Y + (cellBounds.Height >> 1);
-		Polyline[1].X = cellBounds.X;
-		Polyline[1].Y = cellBounds.Y + (cellBounds.Height >> 1);
-		Polyline[2].X = cellBounds.X + (cellBounds.Width  >> 1);
-		Polyline[2].Y = cellBounds.Y;
-		Polyline[3].X = cellBounds.X + (cellBounds.Width  >> 1);
-		Polyline[3].Y = cellBounds.Y -  CornerExtensinon;
-	}
-
-	static void SetupRightTopCorner(Rectangle cellBounds)
-	{
-		Polyline[0].X = cellBounds.X +  cellBounds.Width + CornerExtensinon;
-		Polyline[0].Y = cellBounds.Y + (cellBounds.Height >> 1);
-		Polyline[1].X = cellBounds.X +  cellBounds.Width - 1;
-		Polyline[1].Y = cellBounds.Y + (cellBounds.Height >> 1);
-		Polyline[2].X = cellBounds.X + (cellBounds.Width  >> 1);
-		Polyline[2].Y = cellBounds.Y;
-		Polyline[3].X = cellBounds.X + (cellBounds.Width  >> 1);
-		Polyline[3].Y = cellBounds.Y -  CornerExtensinon;
-	}
-
-	static void SetupLeftBottomCorner(Rectangle cellBounds)
-	{
-		Polyline[0].X = cellBounds.X + (cellBounds.Width  >> 1);
-		Polyline[0].Y = cellBounds.Y +  cellBounds.Height + CornerExtensinon;
-		Polyline[1].X = cellBounds.X + (cellBounds.Width  >> 1);
-		Polyline[1].Y = cellBounds.Y +  cellBounds.Height - 1;
-		Polyline[2].X = cellBounds.X;
-		Polyline[2].Y = cellBounds.Y + (cellBounds.Height >> 1);
-		Polyline[3].X = cellBounds.X -  CornerExtensinon;
-		Polyline[3].Y = cellBounds.Y + (cellBounds.Height >> 1);
-	}
-
-	static void SetupRightBottomCorner(Rectangle cellBounds)
-	{
-		Polyline[0].X = cellBounds.X +  cellBounds.Width + CornerExtensinon;
-		Polyline[0].Y = cellBounds.Y + (cellBounds.Height >> 1);
-		Polyline[1].X = cellBounds.X +  cellBounds.Width - 1;
-		Polyline[1].Y = cellBounds.Y + (cellBounds.Height >> 1);
-		Polyline[2].X = cellBounds.X + (cellBounds.Width  >> 1);
-		Polyline[2].Y = cellBounds.Y +  cellBounds.Height - 1;
-		Polyline[3].X = cellBounds.X + (cellBounds.Width  >> 1);
-		Polyline[3].Y = cellBounds.Y +  cellBounds.Height + CornerExtensinon;
-	}
-
-	private static void PaintTopCornerLines(GraphStyleOptions options, Graphics graphics, GraphCell cell, Rectangle cellBounds, Color[] palette, bool useColors, int lineWidth)
-	{
-		Assert.IsNotNull(options);
-		Assert.IsNotNull(graphics);
-
-		if(cell.HasElement(GraphElement.LeftTopCorner))
-		{
-			if(useColors) _pen.Color = palette[cell.ColorOf(GraphElementId.LeftTopCorner)];
-			if(options.RoundedCorners)
-			{
-				RectangleF b = cellBounds;
-				var delta = 0.5f + ((lineWidth + 1) & 1) * 0.5f;
-				b.X -= b.Width  / 2.0f + delta;
-				b.Y -= b.Height / 2.0f + delta;
-				using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
-				{
-					graphics.DrawArc(_pen, b, -5, 100);
-				}
-			}
-			else
-			{
-				SetupLeftTopConer(cellBounds);
-				graphics.DrawLines(_pen, Polyline);
-			}
-		}
-		if(cell.HasElement(GraphElement.RightTopCorner))
-		{
-			if(useColors) _pen.Color = palette[cell.ColorOf(GraphElementId.RightTopCorner)];
-			if(options.RoundedCorners)
-			{
-				RectangleF b = cellBounds;
-				var delta = 0.5f + ((lineWidth + 1) & 1) * 0.5f;
-				b.X += b.Width  / 2.0f - delta;
-				b.Y -= b.Height / 2.0f + delta;
-				using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
-				{
-					graphics.DrawArc(_pen, b, 80, 100);
-				}
-			}
-			else
-			{
-				SetupRightTopCorner(cellBounds);
-				graphics.DrawLines(_pen, Polyline);
-			}
-		}
-	}
-
-	private static void PaintBottomCornerLines(GraphStyleOptions options, Graphics graphics, GraphCell cell, Rectangle cellBounds, Color[] palette, bool useColors, int lineWidth)
-	{
-		Assert.IsNotNull(options);
-		Assert.IsNotNull(graphics);
-
-		if(cell.HasElement(GraphElement.LeftBottomCorner))
-		{
-			if(useColors) _pen.Color = palette[cell.ColorOf(GraphElementId.LeftBottomCorner)];
-			if(options.RoundedCorners)
-			{
-				RectangleF b = cellBounds;
-				var delta = 0.5f + ((lineWidth + 1) & 1) * 0.5f;
-				b.X -= b.Width  / 2.0f + delta;
-				b.Y += b.Height / 2.0f - delta;
-				using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
-				{
-					graphics.DrawArc(_pen, b, 265, 100);
-				}
-			}
-			else
-			{
-				SetupLeftBottomCorner(cellBounds);
-				graphics.DrawLines(_pen, Polyline);
-			}
-		}
-		if(cell.HasElement(GraphElement.RightBottomCorner))
-		{
-			if(useColors) _pen.Color = palette[cell.ColorOf(GraphElementId.RightBottomCorner)];
-			if(options.RoundedCorners)
-			{
-				RectangleF b = cellBounds;
-				var delta = 0.5f + ((lineWidth + 1) & 1) * 0.5f;
-				b.X += b.Width  / 2.0f - delta;
-				b.Y += b.Height / 2.0f - delta;
-				using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
-				{
-					graphics.DrawArc(_pen, b, 175, 100);
-				}
-			}
-			else
-			{
-				SetupRightBottomCorner(cellBounds);
-				graphics.DrawLines(_pen, Polyline);
-			}
-		}
-	}
-
-	static void PaintDiagonalLines(Graphics graphics, GraphCell cell, Rectangle cellBounds, Color[] palette, bool useColors)
-	{
-		Assert.IsNotNull(graphics);
-
-		if(cell.HasElement(GraphElement.LeftTop))
-		{
-			if(useColors) _pen.Color = palette[cell.ColorOf(GraphElementId.LeftTop)];
-			graphics.DrawLine(_pen,
-				cellBounds.X + (cellBounds.Width >> 1), cellBounds.Y + (cellBounds.Height >> 1),
-				cellBounds.X, cellBounds.Y);
-		}
-		if(cell.HasElement(GraphElement.RightTop))
-		{
-			if(useColors) _pen.Color = palette[cell.ColorOf(GraphElementId.RightTop)];
-			graphics.DrawLine(_pen,
-				cellBounds.X + (cellBounds.Width >> 1), cellBounds.Y + (cellBounds.Height >> 1),
-				cellBounds.X + cellBounds.Width, cellBounds.Y);
-		}
-		if(cell.HasElement(GraphElement.RightBottom))
-		{
-			if(useColors) _pen.Color = palette[cell.ColorOf(GraphElementId.RightBottom)];
-			graphics.DrawLine(_pen,
-				cellBounds.X + cellBounds.Width, cellBounds.Y + cellBounds.Height,
-				cellBounds.X + (cellBounds.Width >> 1), cellBounds.Y + (cellBounds.Height >> 1));
-		}
-		if(cell.HasElement(GraphElement.LeftBottom))
-		{
-			if(useColors) _pen.Color = palette[cell.ColorOf(GraphElementId.LeftBottom)];
-			graphics.DrawLine(_pen,
-				cellBounds.X + (cellBounds.Width >> 1), cellBounds.Y + (cellBounds.Height >> 1),
-				cellBounds.X, cellBounds.Y + cellBounds.Height);
-		}
-	}
-
-	private static void PaintDot(GraphStyleOptions options, Graphics graphics, Dpi dpi, GraphCell cell, RevisionGraphItemType type, Rectangle cellBounds, Color[] palette, int penWidth, bool useColors)
-	{
-		Assert.IsNotNull(options);
-		Assert.IsNotNull(graphics);
-
-		if(!cell.HasElement(GraphElement.Dot)) return;
-
-		var cdw = dpi.X * options.NodeRadius * 2 / 96.0f;
-		var cdh = dpi.Y * options.NodeRadius * 2 / 96.0f;
-		var cx = cellBounds.X + (cellBounds.Width  >> 1) - cdw / 2;
-		var cy = cellBounds.Y + (cellBounds.Height >> 1) - cdh / 2;
-		cx -= 0.5f * ((penWidth + 1) & 1);
-		var lightBackground = GitterApplication.Style.Type == GitterStyleType.LightBackground;
-		using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
-		{
-			switch(type)
-			{
-				case RevisionGraphItemType.Generic:
-					{
-						if(useColors && options.ColorNodes)
-						{
-							var color = cell.ColorOf(GraphElementId.Dot);
-							using var brush = SolidBrushCache.Get(palette[color]);
-							graphics.FillEllipse(brush, cx, cy, cdw, cdh);
-						}
-						else
-						{
-							var brush = lightBackground ? GraphColors.DotBrushForLightBackground : GraphColors.DotBrushForDarkBackground;
-							graphics.FillEllipse(brush, cx, cy, cdw, cdh);
-						}
-					}
-					break;
-				case RevisionGraphItemType.Current:
-					{
-						var brush = Brushes.LightGreen;
-						graphics.FillEllipse(brush, cx, cy, cdw, cdh);
-						var pen = lightBackground ? GraphColors.CirclePenForLightBackground : GraphColors.CirclePenForDarkBackground;
-						graphics.DrawEllipse(pen, cx + .5f, cy + .5f, cdw - 1, cdh - 1);
-					}
-					break;
-				case RevisionGraphItemType.Uncommitted:
-					{
-						var brush = Brushes.Cyan;
-						graphics.FillEllipse(brush, cx, cy, cdw, cdh);
-						var pen = lightBackground ? GraphColors.CirclePenForLightBackground : GraphColors.CirclePenForDarkBackground;
-						graphics.DrawEllipse(pen, cx + .5f, cy + .5f, cdw - 1, cdh - 1);
-					}
-					break;
-				case RevisionGraphItemType.Unstaged:
-					{
-						var brush = Brushes.Red;
-						graphics.FillEllipse(brush, cx, cy, cdw, cdh);
-						var pen = lightBackground ? GraphColors.CirclePenForLightBackground : GraphColors.CirclePenForDarkBackground;
-						graphics.DrawEllipse(pen, cx + .5f, cy + .5f, cdw - 1, cdh - 1);
-					}
-					break;
-			}
-		}
+		var hw = cellBounds.Width  >> 1;
+		var hh = cellBounds.Height >> 1;
+		polyline[0] = new(cellBounds.X + cellBounds.Width + CornerExtension, cellBounds.Y + hh);
+		polyline[1] = new(cellBounds.X + cellBounds.Width - 1,               cellBounds.Y + hh);
+		polyline[2] = new(cellBounds.X + hw,                                 cellBounds.Y + cellBounds.Height - 1);
+		polyline[3] = new(cellBounds.X + hw,                                 cellBounds.Y + cellBounds.Height + CornerExtension);
 	}
 
 	public void DrawBackground(Graphics graphics, Dpi dpi, GraphCell[] graphLine, Rectangle bounds, Rectangle clip, int cellWidth, bool useColors)
@@ -488,7 +195,331 @@ public sealed class GraphStyle : IGraphStyle, IDisposable
 		}
 	}
 
-	public void DrawGraph(Graphics graphics, Dpi dpi, GraphCell[] graphLine, Rectangle bounds, Rectangle clip, int cellWidth, RevisionGraphItemType type, bool useColors)
+	readonly ref struct PaintContext(GraphStyleOptions options, Graphics graphics, Dpi dpi, Rectangle clip, int cellWidth, bool useColors, int penWidth, Color[] palette)
+	{
+		public GraphStyleOptions Options   { get; } = options;
+		public Graphics          Graphics  { get; } = graphics;
+		public Dpi               Dpi       { get; } = dpi;
+		public Rectangle         Clip      { get; } = clip;
+		public int               CellWidth { get; } = cellWidth;
+		public bool              UseColors { get; } = useColors;
+		public int               PenWidth  { get; } = penWidth;
+		public Color[]           Palette   { get; } = palette;
+
+		public Pen GetPenByElementId(in GraphCell cell, int elementId)
+			=> UseColors
+				? GetCachedPen(Palette[cell.ColorOf(elementId)], PenWidth)
+				: GetCachedPen(Palette[0], PenWidth);
+
+		public Pen GetPenByColorIndex(int colorIndex)
+			=> UseColors
+				? GetCachedPen(Palette[colorIndex], PenWidth)
+				: GetCachedPen(Palette[0], PenWidth);
+
+		public void DrawArc(Pen pen, RectangleF bounds, int startAngle, int sweepAngle)
+		{
+			using(Graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
+			{
+				Graphics.DrawArc(pen, bounds, startAngle, sweepAngle);
+			}
+		}
+
+		public void PaintVerticalLine(in GraphCell cell, Rectangle cellBounds)
+		{
+			var x   = cellBounds.X + (cellBounds.Width >> 1);
+			var y0  = cellBounds.Y;
+			var y1  = cellBounds.Y + cellBounds.Height;
+			var pen = GetPenByElementId(in cell, GraphElementId.VerticalTop);
+			Graphics.DrawLine(pen, x, y0, x, y1);
+		}
+
+		public void PaintHorizontalLine(in GraphCell cell, Rectangle cellBounds)
+		{
+			var y   = cellBounds.Y + (cellBounds.Height >> 1);
+			var x0  = cellBounds.X;
+			var x1  = x0 + cellBounds.Width;
+			var pen = GetPenByElementId(cell, GraphElementId.HorizontalLeft);
+			Graphics.DrawLine(pen, x0, y, x1, y);
+		}
+
+		public void PaintVerticalLines(in GraphCell cell, Rectangle cellBounds)
+		{
+			if(!cell.HasAnyOfElements(GraphElement.Vertical)) return;
+
+			var @break = Options.BreakLinesWithDot && cell.HasElement(GraphElement.Dot);
+			var x      = cellBounds.X + (cellBounds.Width >> 1);
+			var color0 = cell.ColorOf(GraphElementId.VerticalTop);
+			var color1 = cell.ColorOf(GraphElementId.VerticalBottom);
+			if(!@break && cell.HasElement(GraphElement.Vertical) && (!UseColors || (color0 == color1)))
+			{
+				var y0  = cellBounds.Y;
+				var y1  = cellBounds.Y + cellBounds.Height;
+				var pen = GetPenByColorIndex(color0);
+				Graphics.DrawLine(pen, x, y0, x, y1);
+				return;
+			}
+			if(cell.HasElement(GraphElement.VerticalTop))
+			{
+				var dy  = @break ? (Options.NodeRadius * Dpi.Y / 96 + DotMargin) : 0;
+				var y0  = cellBounds.Y;
+				var y1  = y0 + (cellBounds.Height >> 1) - dy;
+				var pen = GetPenByColorIndex(color0);
+				Graphics.DrawLine(pen, x, y0, x, y1);
+			}
+			if(cell.HasElement(GraphElement.VerticalBottom))
+			{
+				var dy  = @break ? (Options.NodeRadius * Dpi.Y / 96 + DotMargin + 1) : 0;
+				var y0  = cellBounds.Y + (cellBounds.Height >> 1) + dy;
+				var y1  = cellBounds.Y +  cellBounds.Height;
+				var pen = GetPenByColorIndex(color1);
+				Graphics.DrawLine(pen, x, y0, x, y1);
+			}
+		}
+
+		public void PaintLeftLine(in GraphCell cell, Rectangle cellBounds)
+		{
+			var @break = Options.BreakLinesWithDot && cell.HasElement(GraphElement.Dot);
+			var dx  = @break ? (Options.NodeRadius * Dpi.X / 96 + DotMargin) : 0;
+			var y   = cellBounds.Y + (cellBounds.Height >> 1);
+			var x0  = cellBounds.X;
+			var x1  = x0 + (cellBounds.Width >> 1) - dx;
+			var pen = GetPenByElementId(cell, GraphElementId.HorizontalLeft);
+			Graphics.DrawLine(pen, x0, y, x1, y);
+		}
+
+		public void PaintRightLine(in GraphCell cell, Rectangle cellBounds)
+		{
+			var @break = Options.BreakLinesWithDot && cell.HasElement(GraphElement.Dot);
+			var y   = cellBounds.Y + (cellBounds.Height >> 1);
+			var dx  = @break ? (Options.NodeRadius * Dpi.X / 96 + DotMargin + 1) : 0;
+			var x0  = cellBounds.X + (cellBounds.Width >> 1) + dx;
+			var x1  = cellBounds.X +  cellBounds.Width;
+			var pen = GetPenByElementId(cell, GraphElementId.HorizontalRight);
+			Graphics.DrawLine(pen, x0, y, x1, y);
+		}
+
+		public void PaintHorizontalLines(in GraphCell cell, Rectangle cellBounds)
+		{
+			if(!cell.HasAnyOfElements(GraphElement.Horizontal)) return;
+
+			var @break = Options.BreakLinesWithDot && cell.HasElement(GraphElement.Dot);
+			var y      = cellBounds.Y + (cellBounds.Height >> 1);
+			var color0 = cell.ColorOf(GraphElementId.HorizontalLeft);
+			var color1 = cell.ColorOf(GraphElementId.HorizontalRight);
+			if(!@break && cell.HasElement(GraphElement.Horizontal) && (!UseColors || (color0 == color1)))
+			{
+				var x0 = cellBounds.X;
+				var x1 = x0 + cellBounds.Width;
+				var pen = GetPenByColorIndex(color0);
+				Graphics.DrawLine(pen, x0, y, x1, y);
+				return;
+			}
+			if(cell.HasElement(GraphElement.HorizontalLeft))
+			{
+				var dx = @break ? (Options.NodeRadius * Dpi.X / 96 + DotMargin) : 0;
+				var x0 = cellBounds.X;
+				var x1 = x0 + (cellBounds.Width >> 1) - dx;
+				var pen = GetPenByColorIndex(color0);
+				Graphics.DrawLine(pen, x0, y, x1, y);
+			}
+			if(cell.HasElement(GraphElement.HorizontalRight))
+			{
+				var dx  = @break ? (Options.NodeRadius * Dpi.X / 96 + DotMargin + 1) : 0;
+				var x0  = cellBounds.X + (cellBounds.Width >> 1) + dx;
+				var x1  = cellBounds.X +  cellBounds.Width;
+				var pen = GetPenByColorIndex(color1);
+				Graphics.DrawLine(pen, x0, y, x1, y);
+			}
+		}
+
+		public void PaintBottomCornerLines(in GraphCell cell, Rectangle cellBounds)
+		{
+			if(cell.HasElement(GraphElement.LeftBottomCorner))
+			{
+				var pen = GetPenByElementId(in cell, GraphElementId.LeftBottomCorner);
+				if(Options.RoundedCorners)
+				{
+					RectangleF b = cellBounds;
+					var delta = 0.5f + ((PenWidth + 1) & 1) * 0.5f;
+					b.X -= b.Width  / 2.0f + delta;
+					b.Y += b.Height / 2.0f - delta;
+					DrawArc(pen, b, 265, 100);
+				}
+				else
+				{
+#if NET9_0_OR_GREATER
+					Span<Point> polyline = stackalloc Point[4];
+#else
+					var polyline = _polyline ??= new Point[4];
+#endif
+					SetupLeftBottomCorner(polyline, cellBounds);
+					Graphics.DrawLines(pen, polyline);
+				}
+			}
+			if(cell.HasElement(GraphElement.RightBottomCorner))
+			{
+				var pen = GetPenByElementId(in cell, GraphElementId.RightBottomCorner);
+				if(Options.RoundedCorners)
+				{
+					RectangleF b = cellBounds;
+					var delta = 0.5f + ((PenWidth + 1) & 1) * 0.5f;
+					b.X += b.Width  / 2.0f - delta;
+					b.Y += b.Height / 2.0f - delta;
+					DrawArc(pen, b, 175, 100);
+				}
+				else
+				{
+#if NET9_0_OR_GREATER
+					Span<Point> polyline = stackalloc Point[4];
+#else
+					var polyline = _polyline ??= new Point[4];
+#endif
+					SetupRightBottomCorner(polyline, cellBounds);
+					Graphics.DrawLines(pen, polyline);
+				}
+			}
+		}
+
+		public void PaintTopCornerLines(in GraphCell cell, Rectangle cellBounds)
+		{
+			if(cell.HasElement(GraphElement.LeftTopCorner))
+			{
+				var pen = GetPenByElementId(in cell, GraphElementId.LeftTopCorner);
+				if(Options.RoundedCorners)
+				{
+					RectangleF b = cellBounds;
+					var delta = 0.5f + ((PenWidth + 1) & 1) * 0.5f;
+					b.X -= b.Width  / 2.0f + delta;
+					b.Y -= b.Height / 2.0f + delta;
+					DrawArc(pen, b, -5, 100);
+				}
+				else
+				{
+#if NET9_0_OR_GREATER
+					Span<Point> polyline = stackalloc Point[4];
+#else
+					var polyline = _polyline ??= new Point[4];
+#endif
+					SetupLeftTopConer(polyline, cellBounds);
+					Graphics.DrawLines(pen, polyline);
+				}
+			}
+			if(cell.HasElement(GraphElement.RightTopCorner))
+			{
+				var pen = GetPenByElementId(in cell, GraphElementId.RightTopCorner);
+				if(Options.RoundedCorners)
+				{
+					RectangleF b = cellBounds;
+					var delta = 0.5f + ((PenWidth + 1) & 1) * 0.5f;
+					b.X += b.Width  / 2.0f - delta;
+					b.Y -= b.Height / 2.0f + delta;
+					DrawArc(pen, b, 80, 100);
+				}
+				else
+				{
+#if NET9_0_OR_GREATER
+					Span<Point> polyline = stackalloc Point[4];
+#else
+					var polyline = _polyline ??= new Point[4];
+#endif
+					SetupRightTopCorner(polyline, cellBounds);
+					Graphics.DrawLines(pen, polyline);
+				}
+			}
+		}
+
+		public void PaintDiagonalLines(in GraphCell cell, Rectangle cellBounds)
+		{
+			if(cell.HasElement(GraphElement.LeftTop))
+			{
+				var pen = GetPenByElementId(in cell, GraphElementId.LeftTop);
+				Graphics.DrawLine(pen,
+					cellBounds.X + (cellBounds.Width >> 1), cellBounds.Y + (cellBounds.Height >> 1),
+					cellBounds.X, cellBounds.Y);
+			}
+			if(cell.HasElement(GraphElement.RightTop))
+			{
+				var pen = GetPenByElementId(in cell, GraphElementId.RightTop);
+				Graphics.DrawLine(pen,
+					cellBounds.X + (cellBounds.Width >> 1), cellBounds.Y + (cellBounds.Height >> 1),
+					cellBounds.X + cellBounds.Width, cellBounds.Y);
+			}
+			if(cell.HasElement(GraphElement.RightBottom))
+			{
+				var pen = GetPenByElementId(in cell, GraphElementId.RightBottom);
+				Graphics.DrawLine(pen,
+					cellBounds.X + cellBounds.Width, cellBounds.Y + cellBounds.Height,
+					cellBounds.X + (cellBounds.Width >> 1), cellBounds.Y + (cellBounds.Height >> 1));
+			}
+			if(cell.HasElement(GraphElement.LeftBottom))
+			{
+				var pen = GetPenByElementId(in cell, GraphElementId.LeftBottom);
+				Graphics.DrawLine(pen,
+					cellBounds.X + (cellBounds.Width >> 1), cellBounds.Y + (cellBounds.Height >> 1),
+					cellBounds.X, cellBounds.Y + cellBounds.Height);
+			}
+		}
+
+		public void PaintDot(in GraphCell cell, RevisionGraphItemType type, Rectangle cellBounds)
+		{
+			if(!cell.HasElement(GraphElement.Dot)) return;
+
+			var cdw = Dpi.X * Options.NodeRadius * 2 / 96.0f;
+			var cdh = Dpi.Y * Options.NodeRadius * 2 / 96.0f;
+			var cx  = cellBounds.X + (cellBounds.Width  >> 1) - cdw / 2;
+			var cy  = cellBounds.Y + (cellBounds.Height >> 1) - cdh / 2;
+			cx -= 0.5f * ((PenWidth + 1) & 1);
+			var lightBackground = GitterApplication.Style.Type == GitterStyleType.LightBackground;
+			using(Graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
+			{
+				switch(type)
+				{
+					case RevisionGraphItemType.Generic:
+						{
+							if(UseColors && Options.ColorNodes)
+							{
+								var color = cell.ColorOf(GraphElementId.Dot);
+								using var brush = SolidBrushCache.Get(Palette[color]);
+								Graphics.FillEllipse(brush, cx, cy, cdw, cdh);
+							}
+							else
+							{
+								var brush = lightBackground ? GraphColors.DotBrushForLightBackground : GraphColors.DotBrushForDarkBackground;
+								Graphics.FillEllipse(brush, cx, cy, cdw, cdh);
+							}
+						}
+						break;
+					case RevisionGraphItemType.Current:
+						{
+							var brush = Brushes.LightGreen;
+							Graphics.FillEllipse(brush, cx, cy, cdw, cdh);
+							var pen = lightBackground ? GraphColors.CirclePenForLightBackground : GraphColors.CirclePenForDarkBackground;
+							Graphics.DrawEllipse(pen, cx + .5f, cy + .5f, cdw - 1, cdh - 1);
+						}
+						break;
+					case RevisionGraphItemType.Uncommitted:
+						{
+							var brush = Brushes.Cyan;
+							Graphics.FillEllipse(brush, cx, cy, cdw, cdh);
+							var pen = lightBackground ? GraphColors.CirclePenForLightBackground : GraphColors.CirclePenForDarkBackground;
+							Graphics.DrawEllipse(pen, cx + .5f, cy + .5f, cdw - 1, cdh - 1);
+						}
+						break;
+					case RevisionGraphItemType.Unstaged:
+						{
+							var brush = Brushes.Red;
+							Graphics.FillEllipse(brush, cx, cy, cdw, cdh);
+							var pen = lightBackground ? GraphColors.CirclePenForLightBackground : GraphColors.CirclePenForDarkBackground;
+							Graphics.DrawEllipse(pen, cx + .5f, cy + .5f, cdw - 1, cdh - 1);
+						}
+						break;
+				}
+			}
+		}
+
+	}
+
+	public void DrawGraph(Graphics graphics, Dpi dpi, GraphCell[]? graphLine, Rectangle bounds, Rectangle clip, int cellWidth, RevisionGraphItemType type, bool useColors)
 	{
 		Verify.Argument.IsNotNull(graphics);
 
@@ -497,7 +528,6 @@ public sealed class GraphStyle : IGraphStyle, IDisposable
 		var options = OptionsProvider.Value;
 
 		var penWidth = GetGraphLineWidth(dpi, options.BaseLineWidth);
-		_pen.Width = penWidth;
 
 		var palette = GitterApplication.Style.Type == GitterStyleType.LightBackground
 			? GraphColors.ColorsForLightBackground
@@ -506,12 +536,15 @@ public sealed class GraphStyle : IGraphStyle, IDisposable
 			? (clip.X - bounds.X) / cellWidth
 			: 0;
 
+		var context    = new PaintContext(options, graphics, dpi, clip, cellWidth, useColors, penWidth, palette);
+		var cellBounds = new Rectangle(0, bounds.Y, cellWidth, bounds.Height);
+
 		for(int i = start, x = bounds.X + start * cellWidth, maxX = Math.Min(clip.Right, bounds.Right); (i < graphLine.Length) && (x < maxX); ++i, x += cellWidth)
 		{
-			var cell = graphLine[i];
+			ref GraphCell cell = ref graphLine[i];
 			if(cell.IsEmpty) continue;
 
-			var cellBounds = new Rectangle(x, bounds.Y, cellWidth, bounds.Height);
+			cellBounds.X = x;
 			if(Rectangle.Intersect(clip, cellBounds) is not { Width: > 0, Height: > 0 } cellClip)
 			{
 				continue;
@@ -520,54 +553,49 @@ public sealed class GraphStyle : IGraphStyle, IDisposable
 
 			if(cell.Elements != GraphElement.Dot)
 			{
-				if(!useColors) _pen.Color = palette[0];
-
 				switch(cell.Elements)
 				{
 					case GraphElement.Vertical:
-						PaintVerticalLine  (graphics, cell, cellBounds, palette, useColors);
+						context.PaintVerticalLine  (in cell, cellBounds);
 						continue;
 					case GraphElement.Horizontal:
-						PaintHorizontalLine(graphics, cell, cellBounds, palette, useColors);
+						context.PaintHorizontalLine(in cell, cellBounds);
 						continue;
 				}
 
-				PaintVerticalLines(options, graphics, dpi, cell, cellBounds, palette, useColors);
+				context.PaintVerticalLines(in cell, cellBounds);
 				var left  = cell.HasElement(GraphElement.HorizontalLeft);
 				var right = cell.HasElement(GraphElement.HorizontalRight);
 				if(left && i > 0)
 				{
-					var prev = graphLine[i - 1];
+					ref GraphCell prev = ref graphLine[i - 1];
 					if(!prev.HasElement(GraphElement.HorizontalRight) || prev.ColorOf(GraphElementId.HorizontalRight) != cell.ColorOf(GraphElementId.HorizontalLeft))
 					{
-						PaintLeftLine(options, graphics, dpi, cell, cellBounds, palette, useColors);
+						context.PaintLeftLine(in cell, cellBounds);
 						left = false;
 					}
 				}
 				if(right && i < graphLine.Length - 1)
 				{
-					var next = graphLine[i + 1];
+					ref GraphCell next = ref graphLine[i + 1];
 					if(!next.HasElement(GraphElement.HorizontalLeft) || next.ColorOf(GraphElementId.HorizontalLeft) != cell.ColorOf(GraphElementId.HorizontalRight))
 					{
-						PaintRightLine(options, graphics, dpi, cell, cellBounds, palette, useColors);
+						context.PaintRightLine(in cell, cellBounds);
 						right = false;
 					}
 				}
-				PaintBottomCornerLines(options, graphics, cell, cellBounds, palette, useColors, penWidth);
-				PaintTopCornerLines   (options, graphics, cell, cellBounds, palette, useColors, penWidth);
-				PaintDiagonalLines    (graphics, cell, cellBounds, palette, useColors);
+				context.PaintBottomCornerLines(in cell, cellBounds);
+				context.PaintTopCornerLines   (in cell, cellBounds);
+				context.PaintDiagonalLines    (in cell, cellBounds);
 
 				if(left && right)
 				{
-					PaintHorizontalLines(options, graphics, dpi, cell, cellBounds, palette, useColors);
+					context.PaintHorizontalLines(in cell, cellBounds);
 				}
-				else
-				{
-					if(left)  PaintLeftLine (options, graphics, dpi, cell, cellBounds, palette, useColors);
-					if(right) PaintRightLine(options, graphics, dpi, cell, cellBounds, palette, useColors);
-				}
+				else if(left)  context.PaintLeftLine (in cell, cellBounds);
+				else if(right) context.PaintRightLine(in cell, cellBounds);
 			}
-			PaintDot(options, graphics, dpi, cell, type, cellBounds, palette, penWidth, useColors);
+			context.PaintDot(in cell, type, cellBounds);
 		}
 
 		graphics.SetClip(clip);
@@ -595,8 +623,15 @@ public sealed class GraphStyle : IGraphStyle, IDisposable
 		var ch = conv.ConvertY(5.0f);
 		var penWidth = GetGraphLineWidth(dpi, 1);
 		cx -= 0.5f * ((GetGraphLineWidth(dpi, OptionsProvider.Value.BaseLineWidth) + 1) & 1);
-		_pen.Width = penWidth;
-		_pen.Color = lightBackground ? Color.Black : Color.White;
+		if(_pen is null)
+		{
+			_pen = new(lightBackground ? Color.Black : Color.White, penWidth);
+		}
+		else
+		{
+			_pen.Width = penWidth;
+			_pen.Color = lightBackground ? Color.Black : Color.White;
+		}
 		using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
 		{
 			graphics.DrawEllipse(_pen, cx - cw, cy - ch, cw * 2, ch * 2);
@@ -623,19 +658,25 @@ public sealed class GraphStyle : IGraphStyle, IDisposable
 		DrawReferenceConnectorCore(graphics, dpi, revisionPos, graphX, cellWidth, -1, y, h);
 	}
 
-	private static void SetTagPoints(int x, int y, int w, int h)
+	private static void SetTagPoints(
+#if NETCOREAPP
+		Span<Point> points,
+#else
+		Point[] points,
+#endif
+		int x, int y, int w, int h)
 	{
 		int d = (h + 1) / 2;
 		int vc = y + d;
-		TagPoints[0] = new Point(x, vc + 1);
-		TagPoints[1] = new Point(x, vc - 1);
-		TagPoints[2] = new Point(x + d - 1, y);
-		TagPoints[3] = new Point(x + w, y);
-		TagPoints[4] = new Point(x + w, y + h);
-		TagPoints[5] = new Point(x + d - 1, y + h);
+		points[0] = new Point(x, vc + 1);
+		points[1] = new Point(x, vc - 1);
+		points[2] = new Point(x + d - 1, y);
+		points[3] = new Point(x + w, y);
+		points[4] = new Point(x + w, y + h);
+		points[5] = new Point(x + d - 1, y + h);
 	}
 
-	private static Rectangle DrawInlineTag(Graphics graphics, Dpi dpi, Font font, Brush backBrush, StringFormat format, string text, int x, int y, int right, int h)
+	private static Rectangle DrawInlineTag(Graphics graphics, Dpi dpi, Font font, Brush backBrush, Color textColor, StringFormat format, string text, int x, int y, int right, int h)
 	{
 		Assert.IsNotNull(graphics);
 		Assert.IsNotNull(font);
@@ -655,22 +696,27 @@ public sealed class GraphStyle : IGraphStyle, IDisposable
 		}
 		if(w <= conv.ConvertX(5)) return Rectangle.Empty;
 
-		const int Padding = 2;
+		const int Padding = 1;
 		var padding = conv.ConvertY(Padding);
 		var tagY = y + padding;
 		var tagH = h - (2 * padding + 1);
 
-		SetTagPoints(x, tagY, w + conv.ConvertX(4), tagH);
-		graphics.FillPolygon(backBrush, TagPoints);
+#if NET9_0_OR_GREATER
+		Span<Point> tagPoints = stackalloc Point[6];
+#else
+		var tagPoints = _tagPoints ??= new Point[6];
+#endif
+		SetTagPoints(tagPoints, x, tagY, w + conv.ConvertX(4), tagH);
+		graphics.FillPolygon(backBrush, tagPoints);
 		var lightBackground = GitterApplication.Style.Type == GitterStyleType.LightBackground;
 		var pen = lightBackground ? GraphColors.TagBorderPenForLightBackground : GraphColors.TagBorderPenForDarkBackground;
-		graphics.DrawPolygon(pen, TagPoints);
+		graphics.DrawPolygon(pen, tagPoints);
 		if(w >= conv.ConvertX(7))
 		{
 			int d = (h - texth) / 2;
 			var rc = new Rectangle(x + conv.ConvertX(4 + 3), y + d, w - conv.ConvertX(6), h - d);
 			GitterApplication.TextRenderer.DrawText(
-				graphics, text, font, SystemBrushes.WindowText, rc, format);
+				graphics, text, font, textColor, rc, format);
 		}
 		return new(x, tagY, w + spacing, tagH + 1);
 	}
@@ -682,7 +728,14 @@ public sealed class GraphStyle : IGraphStyle, IDisposable
 		Verify.Argument.IsNotNull(format);
 		Verify.Argument.IsNotNull(tag);
 
-		var bounds = DrawInlineTag(graphics, dpi, font, hovered?TagBrushHovered:TagBrush, format, tag.Name, x, y, right, h);
+		Rectangle bounds;
+		var colors = GraphColorScheme.Current;
+		var color = colors.TagBackColor;
+		if(hovered) color = color.Lighter(HoverLightAmount);
+		using(var brush = SolidBrushCache.Get(color))
+		{
+			bounds = DrawInlineTag(graphics, dpi, font, brush, colors.TextColor, format, tag.Name, x, y, right, h);
+		}
 		if(tag.TagType == TagType.Annotated)
 		{
 			var lightBackground = GitterApplication.Style.Type == GitterStyleType.LightBackground;
@@ -701,15 +754,25 @@ public sealed class GraphStyle : IGraphStyle, IDisposable
 		Verify.Argument.IsNotNull(format);
 		Verify.Argument.IsNotNull(branch);
 
+		Rectangle bounds;
+		var colors = GraphColorScheme.Current;
 		if(branch.IsRemote)
 		{
-			var brush = hovered ? RemoteBranchBrushHovered : RemoteBranchBrush;
-			return DrawInlineTag(graphics, dpi, font, brush, format, branch.Name, x, y, right, h);
+			var color = colors.RemoteBranchBackColor;
+			if(hovered) color = color.Lighter(HoverLightAmount);
+			using(var brush = SolidBrushCache.Get(color))
+			{
+				bounds = DrawInlineTag(graphics, dpi, font, brush, colors.TextColor, format, branch.Name, x, y, right, h);
+			}
 		}
 		else
 		{
-			var brush = hovered ? LocalBranchBrushHovered : LocalBranchBrush;
-			var size = DrawInlineTag(graphics, dpi, font, brush, format, branch.Name, x, y, right, h);
+			var color = colors.LocalBranchBackColor;
+			if(hovered) color = color.Lighter(HoverLightAmount);
+			using(var brush = SolidBrushCache.Get(color))
+			{
+				bounds = DrawInlineTag(graphics, dpi, font, brush, colors.TextColor, format, branch.Name, x, y, right, h);
+			}
 			if(branch.IsCurrent)
 			{
 				const int ArrowSize = 4;
@@ -721,16 +784,21 @@ public sealed class GraphStyle : IGraphStyle, IDisposable
 				var y2 = y0 + dy + .5f;
 				var x0 =  x + conv.ConvertX(1) + .5f;
 				var x1 = x0 + conv.ConvertX(ArrowSize);
-				CurrentIndicator[0].X = x0;
-				CurrentIndicator[0].Y = y0;
-				CurrentIndicator[1].X = x1;
-				CurrentIndicator[1].Y = y1;
-				CurrentIndicator[2].X = x1;
-				CurrentIndicator[2].Y = y2;
-				graphics.FillPolygon(SystemBrushes.InfoText, CurrentIndicator);
+#if NET9_0_OR_GREATER
+				Span<PointF> points = stackalloc PointF[3];
+#else
+				var points = _currentIndicator ??= new PointF[3];
+#endif
+				points[0] = new(x0, y0);
+				points[1] = new(x1, y1);
+				points[2] = new(x1, y2);
+				using(var brush = SolidBrushCache.Get(colors.TextColor))
+				{
+					graphics.FillPolygon(brush, points);
+				}
 			}
-			return size;
 		}
+		return bounds;
 	}
 
 	public Rectangle DrawStash(Graphics graphics, Dpi dpi, Font font, StringFormat format, int x, int y, int right, int h, bool hovered, StashedState stash)
@@ -740,7 +808,13 @@ public sealed class GraphStyle : IGraphStyle, IDisposable
 		Verify.Argument.IsNotNull(format);
 		Verify.Argument.IsNotNull(stash);
 
-		return DrawInlineTag(graphics, dpi, font, hovered?StashBrushHovered:StashBrush, format, GitConstants.StashName, x, y, right, h);
+		var colors = GraphColorScheme.Current;
+		var color = colors.StashBackColor;
+		if(hovered) color = color.Lighter(HoverLightAmount);
+		using(var brush = SolidBrushCache.Get(color))
+		{
+			return DrawInlineTag(graphics, dpi, font, brush, colors.TextColor, format, GitConstants.StashName, x, y, right, h);
+		}
 	}
 
 	public bool HitTestReference(Rectangle bounds, int x, int y)

@@ -25,70 +25,62 @@ namespace NHunspell;
 
 public class SpellEngine : IDisposable
 {
-	private readonly object dictionaryLock;
-	private Dictionary<string, SpellFactory> languages;
-	private int processors;
-
-	public SpellEngine()
-	{
-		processors     = Environment.ProcessorCount;
-		languages      = new Dictionary<string, SpellFactory>();
-		dictionaryLock = new object();
-	}
+	private readonly object _dictionaryLock = new();
+	private Dictionary<string, SpellFactory> _languages = [];
+	private int _processors = Environment.ProcessorCount;
 
 	public bool IsDisposed
 	{
 		get
 		{
-			lock(dictionaryLock)
+			lock(_dictionaryLock)
 			{
-				return languages is null;
+				return _languages is null;
 			}
 		}
 	}
 
 	public int Processors
 	{
-		get => processors;
-		set => processors = value >= 1 ? value : throw new ArgumentOutOfRangeException(nameof(Processors), "Processors must be greater than 0");
+		get => _processors;
+		set => _processors = value >= 1 ? value : throw new ArgumentOutOfRangeException(nameof(Processors), "Processors must be greater than 0");
 	}
 
 	public SpellFactory this[string language]
 	{
 		get
 		{
-			lock(dictionaryLock)
+			lock(_dictionaryLock)
 			{
-				return languages[language.ToLower()];
+				return _languages[language.ToLower()];
 			}
 		}
 	}
 
 	public void AddLanguage(LanguageConfig config)
 	{
-		var lower = config.LanguageCode.ToLower();
+		var lower = config.LanguageCode?.ToLower() ?? "";
 		if(config.Processors < 1)
 		{
 			config.Processors = Processors;
 		}
 		var spellFactory = new SpellFactory(config);
-		lock(dictionaryLock)
+		lock(_dictionaryLock)
 		{
-			languages.Add(lower, spellFactory);
+			_languages.Add(lower, spellFactory);
 		}
 	}
 
 	public void Dispose()
 	{
-		if(IsDisposed) return;
-
-		lock(dictionaryLock)
+		lock(_dictionaryLock)
 		{
-			foreach(var spellFactory in languages.Values)
+			if(_languages is null) return;
+			foreach(var spellFactory in _languages.Values)
 			{
 				spellFactory.Dispose();
 			}
-			languages = default;
+			_languages = default!;
 		}
 	}
 }

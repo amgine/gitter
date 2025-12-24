@@ -24,27 +24,23 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>Represents a hyperlink in text.</summary>
-public sealed class Hyperlink
+/// <param name="text">Link text.</param>
+/// <param name="url">Link URL.</param>
+public sealed class Hyperlink(Substring text, string url)
 {
-	private static readonly List<NavigationHandler> _handlers = new();
+	private static readonly List<NavigationHandler> _handlers = [];
+	private static readonly LockType _handlersSync = new();
 
-	private sealed class NavigationHandler : IDisposable
+	private sealed class NavigationHandler(Func<string, bool> handler) : IDisposable
 	{
-		private readonly Func<string, bool> _handler;
-
-		public NavigationHandler(Func<string, bool> handler)
-		{
-			_handler = handler;
-		}
-
-		public bool Navigate(string url) => _handler(url);
+		public bool Navigate(string url) => handler(url);
 
 		public bool IsDisposed { get; private set; }
 
 		public void Dispose()
 		{
 			if(IsDisposed) return;
-			lock(_handlers)
+			lock(_handlersSync)
 			{
 				if(IsDisposed) return;
 				_handlers.Remove(this);
@@ -58,7 +54,7 @@ public sealed class Hyperlink
 		Verify.Argument.IsNotNull(onNavigate);
 
 		var handler = new NavigationHandler(onNavigate);
-		lock(_handlers)
+		lock(_handlersSync)
 		{
 			_handlers.Add(handler);
 		}
@@ -67,7 +63,7 @@ public sealed class Hyperlink
 
 	private static void NavigateInternal(string url)
 	{
-		lock(_handlers)
+		lock(_handlersSync)
 		{
 			foreach(var handler in _handlers)
 			{
@@ -76,20 +72,11 @@ public sealed class Hyperlink
 		}
 	}
 
-	/// <summary>Create <see cref="Hyperlink"/>.</summary>
-	/// <param name="text">Link text.</param>
-	/// <param name="url">Link URL.</param>
-	public Hyperlink(Substring text, string url)
-	{
-		Text = text;
-		Url = url;
-	}
-
 	/// <summary>Link text.</summary>
-	public Substring Text { get; }
+	public Substring Text { get; } = text;
 
 	/// <summary>Link URL.</summary>
-	public string Url { get; }
+	public string Url { get; } = url;
 
 	/// <summary>Navigate the hyperlink.</summary>
 	public void Navigate()
@@ -104,7 +91,6 @@ public sealed class Hyperlink
 		}
 	}
 
-	/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="Hyperlink"/>.</summary>
-	/// <returns><see cref="T:System.String"/> representation of this <see cref="Hyperlink"/>.</returns>
+	/// <inheritdoc/>
 	public override string ToString() => Url;
 }

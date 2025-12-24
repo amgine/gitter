@@ -25,22 +25,27 @@ using System.Collections.Generic;
 public sealed class AbsoluteUrlHyperlinkExtractor : IHyperlinkExtractor
 {
 	private static readonly string[] _protocols =
-		{
+		[
 			@"http://",
 			@"https://",
 			@"ftp://",
 			@"mailto://",
-		};
+		];
 
-	private static bool ShouldTrm(char c)
+	private static bool ShouldTrim(char c)
 		=> c is ',' or '.' or '(' or ')' or '[' or ']' or '{' or '}' or '<' or '>';
 
 	private static void TrimEnd(string text, int start, ref int end)
 	{
-		while(end > start && ShouldTrm(text[end]))
-		{
-			--end;
-		}
+		while(end > start && ShouldTrim(text[end])) --end;
+	}
+
+	private static void AddHyperlink(ref List<Hyperlink>? hyperlinks, string text, int start, int end)
+	{
+		TrimEnd(text, start, ref end);
+		var href = new Substring(text, start, end - start + 1);
+		hyperlinks ??= [];
+		hyperlinks.Add(new Hyperlink(href, href));
 	}
 
 	public IReadOnlyList<Hyperlink> ExtractHyperlinks(string text)
@@ -54,31 +59,24 @@ public sealed class AbsoluteUrlHyperlinkExtractor : IHyperlinkExtractor
 			if(start == -1)
 			{
 				bool isLinkStart = false;
-				for(int i = 0; i < _protocols.Length; ++i)
+				foreach(var protocol in _protocols)
 				{
-					if(parser.CheckValue(_protocols[i]))
-					{
-						isLinkStart = true;
-						start = parser.Position;
-						parser.Skip(_protocols[i].Length);
-						break;
-					}
+					if(!parser.CheckValue(protocol)) continue;
+
+					isLinkStart = true;
+					start = parser.Position;
+					parser.Skip(protocol.Length);
+					break;
 				}
 				if(!isLinkStart) parser.Skip();
 			}
 			else
 			{
-				if(start != -1)
+				if(start != -1 && char.IsWhiteSpace(parser.CurrentChar))
 				{
-					if(char.IsWhiteSpace(parser.CurrentChar))
-					{
-						var end = parser.Position - 1;
-						TrimEnd(text, start, ref end);
-						var href = new Substring(text, start, end - start + 1);
-						hyperlinks ??= new();
-						hyperlinks.Add(new Hyperlink(href, href));
-						start = -1;
-					}
+					var end = parser.Position - 1;
+					AddHyperlink(ref hyperlinks, text, start, end);
+					start = -1;
 				}
 				parser.Skip();
 			}
@@ -86,10 +84,7 @@ public sealed class AbsoluteUrlHyperlinkExtractor : IHyperlinkExtractor
 		if(start != -1)
 		{
 			var end = text.Length - 1;
-			var href = new Substring(text, start, end - start + 1);
-			TrimEnd(text, start, ref end);
-			hyperlinks ??= new();
-			hyperlinks.Add(new Hyperlink(href, href));
+			AddHyperlink(ref hyperlinks, text, start, end);
 		}
 		return hyperlinks is not null
 			? hyperlinks

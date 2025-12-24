@@ -28,7 +28,10 @@ using gitter.Native;
 /// <summary>Extension methods for <see cref="System.Windows.Forms.Control"/>.</summary>
 public static class ControlExtensions
 {
-	public ref struct CursorChangeToken
+	public readonly ref struct CursorChangeToken
+#if NET9_0_OR_GREATER
+		: IDisposable
+#endif
 	{
 		private readonly Control _control;
 		private readonly Cursor _cursor;
@@ -48,52 +51,49 @@ public static class ControlExtensions
 		}
 	}
 
-	/// <summary>Disables control redrawing.</summary>
-	/// <param name="control">Control to disable redraw for.</param>
-	public static void DisableRedraw(this Control control)
+	extension(Control control)
 	{
-		Verify.Argument.IsNotNull(control);
-
-		_ = User32.SendMessage(control.Handle, WM.SETREDRAW, (IntPtr)0, IntPtr.Zero);
-	}
-
-	/// <summary>Enables control redrawing.</summary>
-	/// <param name="control">Control to disable redraw for.</param>
-	public static void EnableRedraw(this Control control)
-	{
-		Verify.Argument.IsNotNull(control);
-
-		_ = User32.SendMessage(control.Handle, WM.SETREDRAW, (IntPtr)1, IntPtr.Zero);
-	}
-
-	/// <summary>Forces control redraw.</summary>
-	/// <param name="control">Control to force-redraw.</param>
-	public static void RedrawWindow(this Control control)
-	{
-		Verify.Argument.IsNotNull(control);
-
-		_ = User32.RedrawWindow(control.Handle, IntPtr.Zero, IntPtr.Zero,
-			RedrawWindowFlags.Erase |
-			RedrawWindowFlags.Frame |
-			RedrawWindowFlags.Invalidate |
-			RedrawWindowFlags.AllChildren);
-	}
-
-	/// <summary>Temporary changes control cursor.</summary>
-	/// <param name="control">Control.</param>
-	/// <param name="cursor">New cursor.</param>
-	/// <returns>Cursor token, disposing which cursor is restored.</returns>
-	public static CursorChangeToken ChangeCursor(this Control control, Cursor cursor)
-	{
-		if(control is not null)
+		/// <summary>Disables control redrawing.</summary>
+		public void DisableRedraw()
 		{
+			Verify.Argument.IsNotNull(control);
+
+			_ = User32.SendMessage(control.Handle, WM.SETREDRAW, (IntPtr)0, IntPtr.Zero);
+		}
+
+		/// <summary>Enables control redrawing.</summary>
+		public void EnableRedraw()
+		{
+			Verify.Argument.IsNotNull(control);
+
+			_ = User32.SendMessage(control.Handle, WM.SETREDRAW, (IntPtr)1, IntPtr.Zero);
+		}
+
+		/// <summary>Forces control redraw.</summary>
+		public void RedrawWindow()
+		{
+			Verify.Argument.IsNotNull(control);
+
+			_ = User32.RedrawWindow(control.Handle, IntPtr.Zero, IntPtr.Zero,
+				RedrawWindowFlags.Erase |
+				RedrawWindowFlags.Frame |
+				RedrawWindowFlags.Invalidate |
+				RedrawWindowFlags.AllChildren);
+		}
+	}
+
+	extension(Control? control)
+	{
+		/// <summary>Temporary changes control cursor.</summary>
+		/// <param name="cursor">New cursor.</param>
+		/// <returns>Cursor token, disposing which cursor is restored.</returns>
+		public CursorChangeToken ChangeCursor(Cursor cursor)
+		{
+			if(control is null) return new();
+
 			var oldCursor = control.Cursor;
 			control.Cursor = cursor;
 			return new CursorChangeToken(control, oldCursor);
-		}
-		else
-		{
-			return new CursorChangeToken();
 		}
 	}
 }

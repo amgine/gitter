@@ -29,7 +29,7 @@ using gitter.Framework.Controls;
 /// <summary>Extension methods for <see cref="System.Drawing.Graphics"/>.</summary>
 public static class GraphicsExtensions
 {
-	public ref struct SmoothingModeSwitch
+	public readonly ref struct SmoothingModeSwitch
 	{
 		private readonly Graphics _graphics;
 		private readonly SmoothingMode _smoothingMode;

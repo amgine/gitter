@@ -53,10 +53,10 @@ public sealed class DiffStats : ICloneable
 		Verify.Argument.IsNotNegative(contextLinesCount);
 		Verify.Argument.IsNotNegative(headerLinesCount);
 
-		_addedLinesCount = addedLinesCount;
+		_addedLinesCount   = addedLinesCount;
 		_removedLinesCount = removedLinesCount;
 		_contextLinesCount = contextLinesCount;
-		_headerLinesCount = headerLinesCount;
+		_headerLinesCount  = headerLinesCount;
 	}
 
 	#endregion
@@ -66,7 +66,7 @@ public sealed class DiffStats : ICloneable
 	/// <summary>Number of added lines.</summary>
 	public int AddedLinesCount
 	{
-		get { return _addedLinesCount; }
+		get => _addedLinesCount;
 		set
 		{
 			Verify.Argument.IsNotNegative(value);
@@ -78,7 +78,7 @@ public sealed class DiffStats : ICloneable
 	/// <summary>Number of removed lines.</summary>
 	public int RemovedLinesCount
 	{
-		get { return _removedLinesCount; }
+		get => _removedLinesCount;
 		set
 		{
 			Verify.Argument.IsNotNegative(value);
@@ -90,13 +90,13 @@ public sealed class DiffStats : ICloneable
 	/// <summary>Number of changed (added/removed) lines.</summary>
 	public int ChangedLinesCount
 	{
-		get { return _addedLinesCount + _removedLinesCount; }
+		get => _addedLinesCount + _removedLinesCount;
 	}
 
 	/// <summary>Number of context lines.</summary>
 	public int ContextLinesCount
 	{
-		get { return _contextLinesCount; }
+		get => _contextLinesCount;
 		set
 		{
 			Verify.Argument.IsNotNegative(value);
@@ -108,7 +108,7 @@ public sealed class DiffStats : ICloneable
 	/// <summary>Total line count.</summary>
 	public int TotalLinesCount
 	{
-		get { return _addedLinesCount + _removedLinesCount + _contextLinesCount + _headerLinesCount; }
+		get => _addedLinesCount + _removedLinesCount + _contextLinesCount + _headerLinesCount;
 	}
 
 	#endregion
@@ -119,66 +119,45 @@ public sealed class DiffStats : ICloneable
 	{
 		Verify.Argument.IsNotNull(stats);
 
-		_addedLinesCount += stats._addedLinesCount;
+		_addedLinesCount   += stats._addedLinesCount;
 		_removedLinesCount += stats._removedLinesCount;
 		_contextLinesCount += stats._contextLinesCount;
-		_headerLinesCount += stats._headerLinesCount;
+		_headerLinesCount  += stats._headerLinesCount;
 	}
 
 	public void Subtract(DiffStats stats)
 	{
 		Verify.Argument.IsNotNull(stats);
 
-		_addedLinesCount -= stats._addedLinesCount;
+		_addedLinesCount   -= stats._addedLinesCount;
 		_removedLinesCount -= stats._removedLinesCount;
 		_contextLinesCount -= stats._contextLinesCount;
-		_headerLinesCount -= stats._headerLinesCount;
+		_headerLinesCount  -= stats._headerLinesCount;
+	}
+
+	private void Add(DiffLineState state, int value)
+	{
+		switch(state)
+		{
+			case DiffLineState.Added :  _addedLinesCount   += value; break;
+			case DiffLineState.Removed: _removedLinesCount += value; break;
+			case DiffLineState.Context: _contextLinesCount += value; break;
+			default:                    _headerLinesCount  += value; break;
+		}
 	}
 
 	public void Increment(DiffLineState state)
-	{
-		switch(state)
-		{
-			case DiffLineState.Added:
-				++_addedLinesCount;
-				break;
-			case DiffLineState.Removed:
-				++_removedLinesCount;
-				break;
-			case DiffLineState.Context:
-				++_contextLinesCount;
-				break;
-			default:
-				++_headerLinesCount;
-				break;
-		}
-	}
+		=> Add(state, 1);
 
 	public void Decrement(DiffLineState state)
-	{
-		switch(state)
-		{
-			case DiffLineState.Added:
-				--_addedLinesCount;
-				break;
-			case DiffLineState.Removed:
-				--_removedLinesCount;
-				break;
-			case DiffLineState.Context:
-				--_contextLinesCount;
-				break;
-			default:
-				--_headerLinesCount;
-				break;
-		}
-	}
+		=> Add(state, -1);
 
 	public void Reset()
 	{
-		_addedLinesCount = 0;
+		_addedLinesCount   = 0;
 		_removedLinesCount = 0;
 		_contextLinesCount = 0;
-		_headerLinesCount = 0;
+		_headerLinesCount  = 0;
 	}
 
 	public void Reset(int addedLinesCount, int removedLinesCount, int contextLinesCount, int headerLinesCount)
@@ -198,14 +177,11 @@ public sealed class DiffStats : ICloneable
 
 	#region ICloneable
 
-	public DiffStats Clone()
-	{
-		return new DiffStats(
-			_addedLinesCount,
-			_removedLinesCount,
-			_contextLinesCount,
-			_headerLinesCount);
-	}
+	public DiffStats Clone() => new(
+		_addedLinesCount,
+		_removedLinesCount,
+		_contextLinesCount,
+		_headerLinesCount);
 
 	object ICloneable.Clone() => Clone();
 

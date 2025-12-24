@@ -59,7 +59,7 @@ sealed class TreeListsBinding : AsyncDataBinding<Tree>
 
 	#region Methods
 
-	protected override Task<Tree> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	protected override Task<Tree> FetchDataAsync(IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
 	{
 		DirectoryContentListBox.Text = string.Empty;
 

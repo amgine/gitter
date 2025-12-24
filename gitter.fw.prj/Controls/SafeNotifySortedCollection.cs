@@ -40,7 +40,7 @@ public abstract class SafeNotifySortedCollection<T> : NotifySortedCollection<T>
 	#region Properties
 
 	/// <summary>Object which is used to synchronize all *Safe() calls.</summary>
-	protected abstract ISynchronizeInvoke SynchronizeInvoke { get; }
+	protected abstract ISynchronizeInvoke? SynchronizeInvoke { get; }
 
 	#endregion
 
@@ -56,7 +56,7 @@ public abstract class SafeNotifySortedCollection<T> : NotifySortedCollection<T>
 		{
 			try
 			{
-				sync.BeginInvoke(new Action<T>(Add), new object[] { item });
+				sync.BeginInvoke(new Action<T>(Add), [item]);
 			}
 			catch(ObjectDisposedException)
 			{
@@ -74,7 +74,7 @@ public abstract class SafeNotifySortedCollection<T> : NotifySortedCollection<T>
 		{
 			try
 			{
-				sync.BeginInvoke(new Action<IEnumerable<T>>(AddRange), new object[] { list });
+				sync.BeginInvoke(new Action<IEnumerable<T>>(AddRange), [list]);
 			}
 			catch(ObjectDisposedException)
 			{
@@ -92,7 +92,7 @@ public abstract class SafeNotifySortedCollection<T> : NotifySortedCollection<T>
 		{
 			try
 			{
-				sync.BeginInvoke(new Action<int, T>(SetSafe), new object[] { index, item });
+				sync.BeginInvoke(new Action<int, T>(SetSafe), [index, item]);
 			}
 			catch(ObjectDisposedException)
 			{
@@ -110,7 +110,7 @@ public abstract class SafeNotifySortedCollection<T> : NotifySortedCollection<T>
 		{
 			try
 			{
-				sync.BeginInvoke(new Action<int, T>(Insert), new object[] { index, item });
+				sync.BeginInvoke(new Action<int, T>(Insert), [index, item]);
 			}
 			catch(ObjectDisposedException)
 			{
@@ -128,7 +128,7 @@ public abstract class SafeNotifySortedCollection<T> : NotifySortedCollection<T>
 		{
 			try
 			{
-				sync.BeginInvoke(new Func<T, bool>(Remove), new object[] { item });
+				sync.BeginInvoke(new Func<T, bool>(Remove), [item]);
 			}
 			catch(ObjectDisposedException)
 			{
@@ -146,7 +146,7 @@ public abstract class SafeNotifySortedCollection<T> : NotifySortedCollection<T>
 		{
 			try
 			{
-				sync.BeginInvoke(new Action<int>(RemoveAt), new object[] { index });
+				sync.BeginInvoke(new Action<int>(RemoveAt), [index]);
 			}
 			catch(ObjectDisposedException)
 			{
@@ -164,7 +164,7 @@ public abstract class SafeNotifySortedCollection<T> : NotifySortedCollection<T>
 		{
 			try
 			{
-				sync.BeginInvoke(new Action<int, int>(RemoveRange), new object[] { index, count});
+				sync.BeginInvoke(new Action<int, int>(RemoveRange), [index, count]);
 			}
 			catch(ObjectDisposedException)
 			{
@@ -202,7 +202,7 @@ public abstract class SafeNotifySortedCollection<T> : NotifySortedCollection<T>
 			{
 				sync.BeginInvoke(
 					new Func<T, Func<T, T, int>, int>(InsertSortedFromTop),
-					new object[] { item, comparer });
+					[item, comparer]);
 			}
 			catch(ObjectDisposedException)
 			{
@@ -222,7 +222,7 @@ public abstract class SafeNotifySortedCollection<T> : NotifySortedCollection<T>
 			{
 				sync.BeginInvoke(
 					new Func<T, Func<T, T, int>, int>(InsertSortedFromBottom),
-					new object[] { item, comparer });
+					[item, comparer]);
 			}
 			catch(ObjectDisposedException)
 			{

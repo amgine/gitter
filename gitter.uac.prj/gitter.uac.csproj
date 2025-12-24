@@ -5,6 +5,7 @@
     <RootNamespace>gitter.UAC</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <OutputType>WinExe</OutputType>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

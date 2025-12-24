@@ -21,9 +21,6 @@
 namespace gitter.Redmine.Gui;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using gitter.Framework.Controls;
 
@@ -37,13 +34,8 @@ public class IssueStartDateColumn : DateColumn
 		Width = 55;
 	}
 
-	public override string IdentificationString
-	{
-		get { return "StartDate"; }
-	}
+	public override string IdentificationString => "StartDate";
 
 	protected override Comparison<CustomListBoxItem> SortComparison
-	{
-		get { return IssueListItem.CompareByStartDate; }
-	}
+		=> IssueListItem.CompareByStartDate;
 }

@@ -24,60 +24,43 @@ using System;
 using System.Drawing;
 
 /// <summary>Item paint event args.</summary>
-public class ItemPaintEventArgs : EventArgs
+/// <param name="graphics">Graphics surface to draw the item on.</param>
+/// <param name="dpi">DPI.</param>
+/// <param name="clipRectangle">Clipping rectangle.</param>
+/// <param name="bounds">Rectangle that represents the bounds of the item that is being drawn.</param>
+/// <param name="index">Index value of the item that is being drawn.</param>
+/// <param name="state">State of the item being drawn.</param>
+/// <param name="hoveredPart">Hovered part of the item.</param>
+/// <param name="hostControlFocused">Host control is focused.</param>
+public class ItemPaintEventArgs(
+	Graphics graphics, Dpi dpi, Rectangle clipRectangle, Rectangle bounds, int index,
+	ItemState state, int hoveredPart, bool hostControlFocused) : EventArgs
 {
-	#region .ctor
-
-	/// <summary>Create <see cref="ItemPaintEventArgs"/>.</summary>
-	/// <param name="graphics">Graphics surface to draw the item on.</param>
-	/// <param name="dpi">DPI.</param>
-	/// <param name="clipRectangle">Clipping rectangle.</param>
-	/// <param name="bounds">Rectangle that represents the bounds of the item that is being drawn.</param>
-	/// <param name="index">Index value of the item that is being drawn.</param>
-	/// <param name="state">State of the item being drawn.</param>
-	/// <param name="hoveredPart">Hovered part of the item.</param>
-	/// <param name="hostControlFocused">Host control is focused.</param>
-	public ItemPaintEventArgs(
-		Graphics graphics, Dpi dpi, Rectangle clipRectangle, Rectangle bounds, int index,
-		ItemState state, int hoveredPart, bool hostControlFocused)
-	{
-		Graphics             = graphics;
-		Dpi                  = dpi;
-		ClipRectangle        = clipRectangle;
-		Bounds               = bounds;
-		Index                = index;
-		State                = state;
-		HoveredPart          = hoveredPart;
-		IsHostControlFocused = hostControlFocused;
-	}
-
-	#endregion
-
 	#region Properties
 
 	/// <summary>Gets the graphics surface to draw the item on.</summary>
-	public Graphics Graphics { get; }
+	public Graphics Graphics { get; } = graphics;
 
 	/// <summary>DPI.</summary>
-	public Dpi Dpi { get; }
+	public Dpi Dpi { get; } = dpi;
 
 	/// <summary>Clipping rectangle.</summary>
-	public Rectangle ClipRectangle { get; }
+	public Rectangle ClipRectangle { get; } = clipRectangle;
 
 	/// <summary>Gets the rectangle that represents the bounds of the item that is being drawn.</summary>
-	public Rectangle Bounds { get; }
+	public Rectangle Bounds { get; } = bounds;
 
 	/// <summary>Gets the index value of the item that is being drawn.</summary>
-	public int Index { get; }
+	public int Index { get; } = index;
 
 	/// <summary>Gets the state of the item being drawn.</summary>
-	public ItemState State { get; }
+	public ItemState State { get; } = state;
 
 	/// <summary>Hovered part of the item.</summary>
-	public int HoveredPart { get; }
+	public int HoveredPart { get; } = hoveredPart;
 
 	/// <summary>Host control is focused.</summary>
-	public bool IsHostControlFocused { get; }
+	public bool IsHostControlFocused { get; } = hostControlFocused;
 
 	#endregion
 

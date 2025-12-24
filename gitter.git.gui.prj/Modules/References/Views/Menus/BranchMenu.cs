@@ -34,7 +34,9 @@ public sealed class BranchMenu : ContextMenuStrip
 {
 	public BranchMenu(BranchBase branch)
 	{
-		Verify.Argument.IsValidGitObject(branch, nameof(branch));
+		Verify.Argument.IsValidGitObject(branch);
+
+		Renderer = GitterApplication.Style.ToolStripRenderer;
 
 		var dpiBindings = new DpiBindings(this);
 		var factory     = new GuiItemFactory(dpiBindings);
@@ -105,7 +107,10 @@ public sealed class BranchMenu : ContextMenuStrip
 		var copyItems = item.DropDownItems;
 		copyItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrName, Branch.Name));
 		copyItems.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullName, Branch.FullName));
-		copyItems.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, Branch.Revision.HashString));
+		if(Branch.Revision is not null)
+		{
+			copyItems.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrPosition, Branch.Revision.HashString));
+		}
 		Items.Add(item);
 	}
 

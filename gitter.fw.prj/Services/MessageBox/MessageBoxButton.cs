@@ -26,7 +26,7 @@ using System.Windows.Forms;
 
 using Resources = gitter.Framework.Properties.Resources;
 
-public sealed class MessageBoxButton
+public sealed class MessageBoxButton(DialogResult dialogResult, int resultOption, string displayLabel, bool isDefault)
 {
 	public static MessageBoxButton Yes    { get; } = new(DialogResult.Yes,    0, Resources.StrYes,    true);
 	public static MessageBoxButton No     { get; } = new(DialogResult.No,     0, Resources.StrNo,     false);
@@ -37,28 +37,22 @@ public sealed class MessageBoxButton
 	public static MessageBoxButton Retry  { get; } = new(DialogResult.Retry,  0, Resources.StrRetry,  true);
 	public static MessageBoxButton Ignore { get; } = new(DialogResult.Ignore, 0, Resources.StrIgnore, false);
 
-	public static IReadOnlyList<MessageBoxButton> RetryCancel      { get; } = new[] { Retry, Cancel };
-	public static IReadOnlyList<MessageBoxButton> AbortRetryIgnore { get; } = new[] { Abort, Retry, Ignore };
-	public static IReadOnlyList<MessageBoxButton> YesNo            { get; } = new[] { Yes, No };
-	public static IReadOnlyList<MessageBoxButton> YesNoCancel      { get; } = new[] { Yes, No, Cancel };
-	public static IReadOnlyList<MessageBoxButton> OkCancel         { get; } = new[] { Ok, Cancel };
+	public static IReadOnlyList<MessageBoxButton> RetryCancel      { get; } = [Retry, Cancel];
+	public static IReadOnlyList<MessageBoxButton> AbortRetryIgnore { get; } = [Abort, Retry, Ignore];
+	public static IReadOnlyList<MessageBoxButton> YesNo            { get; } = [Yes, No];
+	public static IReadOnlyList<MessageBoxButton> YesNoCancel      { get; } = [Yes, No, Cancel];
+	public static IReadOnlyList<MessageBoxButton> OkCancel         { get; } = [Ok, Cancel];
 
-	public static MessageBoxButton GetOk(string label)
-		=> GetOk(label, 0);
-
-	public static MessageBoxButton GetOk(string label, int resultOption)
+	public static MessageBoxButton GetOk(string label, int resultOption = 0)
 		=> new(DialogResult.OK, resultOption, label, isDefault: true);
 
-	public static MessageBoxButton GetYes(string label)
-		=> GetYes(label, 0);
-
-	public static MessageBoxButton GetYes(string label, int resultOption)
+	public static MessageBoxButton GetYes(string label, int resultOption = 0)
 		=> new(DialogResult.Yes, resultOption, label, isDefault: true);
 
 	public static IReadOnlyList<MessageBoxButton> GetButtons(MessageBoxButtons buttons)
 		=> buttons switch
 		{
-			MessageBoxButtons.OK               => new[] { Ok },
+			MessageBoxButtons.OK               => [Ok],
 			MessageBoxButtons.OKCancel         => OkCancel,
 			MessageBoxButtons.YesNo            => YesNo,
 			MessageBoxButtons.YesNoCancel      => YesNoCancel,
@@ -67,19 +61,11 @@ public sealed class MessageBoxButton
 			_ => throw new ArgumentException($"Unknown MessageBoxButtons value: {buttons}", nameof(buttons)),
 		};
 
-	public MessageBoxButton(DialogResult dialogResult, int resultOption, string displayLabel, bool isDefault)
-	{
-		DialogResult = dialogResult;
-		ResultOption = resultOption;
-		DisplayLabel = displayLabel;
-		IsDefault    = isDefault;
-	}
+	public string DisplayLabel { get; } = displayLabel;
 
-	public string DisplayLabel { get; }
+	public int ResultOption { get; } = resultOption;
 
-	public int ResultOption { get; }
+	public DialogResult DialogResult { get; } = dialogResult;
 
-	public DialogResult DialogResult { get; }
-
-	public bool IsDefault { get; }
+	public bool IsDefault { get; } = isDefault;
 }

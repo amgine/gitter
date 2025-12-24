@@ -29,7 +29,7 @@ using gitter.Framework;
 /// <summary>Represents a branch on remote repository (not a remote tracking branch).</summary>
 public sealed class RemoteRepositoryBranch : BaseRemoteReference
 {
-	internal RemoteRepositoryBranch(RemoteReferencesCollection refs, string name, Hash hash)
+	internal RemoteRepositoryBranch(RemoteReferencesCollection refs, string name, Sha1Hash hash)
 		: base(refs, name, hash)
 	{
 	}
@@ -39,6 +39,6 @@ public sealed class RemoteRepositoryBranch : BaseRemoteReference
 	protected override void DeleteCore()
 		=> References.RemoveBranch(this);
 
-	protected override Task DeleteCoreAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	protected override Task DeleteCoreAsync(IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
 		=> References.RemoveBranchAsync(this, progress, cancellationToken);
 }

@@ -24,19 +24,11 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-public sealed class SystemCheckBoxAdapter : ICheckBoxWidget
+public sealed class SystemCheckBoxAdapter : WidgetAdapter<CheckBox>, ICheckBoxWidget
 {
-	#region Data
+	public event EventHandler? IsCheckedChanged;
 
-	private readonly CheckBox _checkBox;
-
-	#endregion
-
-	#region Events
-
-	public event EventHandler IsCheckedChanged;
-
-	public event EventHandler CheckStateChanged;
+	public event EventHandler? CheckStateChanged;
 
 	private void OnIsCheckedChanged(EventArgs e)
 		=> IsCheckedChanged?.Invoke(this, e);
@@ -44,92 +36,56 @@ public sealed class SystemCheckBoxAdapter : ICheckBoxWidget
 	private void OnCheckStateChanged(EventArgs e)
 		=> CheckStateChanged?.Invoke(this, e);
 
-	#endregion
-
-	#region .ctor
-
-	public SystemCheckBoxAdapter()
+	public SystemCheckBoxAdapter() : base(new())
 	{
-		_checkBox = new CheckBox()
-		{
-			FlatStyle = FlatStyle.System,
-		};
-		_checkBox.CheckedChanged += OnCheckBoxCheckedChanged;
-		_checkBox.CheckStateChanged += OnCheckBoxCheckStateChanged;
+		_control.FlatStyle = FlatStyle.System;
+		_control.CheckedChanged    += OnCheckBoxCheckedChanged;
+		_control.CheckStateChanged += OnCheckBoxCheckStateChanged;
 	}
 
-	#endregion
-
-	#region Event Handlers
-
-	private void OnCheckBoxCheckedChanged(object sender, EventArgs e)
+	private void OnCheckBoxCheckedChanged(object? sender, EventArgs e)
 		=> OnIsCheckedChanged(e);
 
-	private void OnCheckBoxCheckStateChanged(object sender, EventArgs e)
+	private void OnCheckBoxCheckStateChanged(object? sender, EventArgs e)
 		=> OnCheckStateChanged(e);
 
-	#endregion
-
-	#region Properties
-
-	public Control Control => _checkBox;
-
-	public Image Image
+	public Image? Image
 	{
-		get => _checkBox.Image;
+		get => _control.Image;
 		set
 		{
-			if(value != _checkBox.Image)
+			if(value != _control.Image)
 			{
-				_checkBox.Image = value;
+				_control.Image = value;
 				if(value is null)
 				{
-					_checkBox.FlatStyle = FlatStyle.System;
+					_control.FlatStyle = FlatStyle.System;
 				}
 				else
 				{
-					_checkBox.FlatStyle = FlatStyle.Standard;
-					_checkBox.TextImageRelation = TextImageRelation.ImageBeforeText;
-					_checkBox.ImageAlign = ContentAlignment.MiddleLeft;
+					_control.FlatStyle = FlatStyle.Standard;
+					_control.TextImageRelation = TextImageRelation.ImageBeforeText;
+					_control.ImageAlign = ContentAlignment.MiddleLeft;
 				}
 			}
 		}
 	}
 
-	public string Text
-	{
-		get => _checkBox.Text;
-		set => _checkBox.Text = value;
-	}
-
 	public bool IsChecked
 	{
-		get => _checkBox.Checked;
-		set => _checkBox.Checked = value;
+		get => _control.Checked;
+		set => _control.Checked = value;
 	}
 
 	public CheckState CheckState
 	{
-		get => _checkBox.CheckState;
-		set => _checkBox.CheckState = value;
+		get => _control.CheckState;
+		set => _control.CheckState = value;
 	}
 
 	public bool ThreeState
 	{
-		get => _checkBox.ThreeState;
-		set => _checkBox.ThreeState = value;
+		get => _control.ThreeState;
+		set => _control.ThreeState = value;
 	}
-
-	#endregion
-
-	#region IDisposable
-
-	public void Dispose()
-	{
-		_checkBox.CheckedChanged -= OnCheckBoxCheckedChanged;
-		_checkBox.CheckStateChanged -= OnCheckBoxCheckStateChanged;
-		_checkBox.Dispose();
-	}
-
-	#endregion
 }

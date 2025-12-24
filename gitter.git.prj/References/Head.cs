@@ -1,24 +1,22 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
-
-#nullable enable
 
 namespace gitter.Git;
 
@@ -27,6 +25,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
+using gitter.Framework;
 using gitter.Git.AccessLayer;
 
 using Resources = gitter.Git.Properties.Resources;
@@ -91,19 +90,19 @@ public sealed class Head : Reference
 		Assert.IsNotNull(repository);
 
 		var head = repository.Accessor.QuerySymbolicReference.Invoke(
-			new QuerySymbolicReferenceParameters(GitConstants.HEAD));
+			new QuerySymbolicReferenceRequest(GitConstants.HEAD));
 
 		switch(head.TargetType)
 		{
 			case ReferenceType.LocalBranch:
-				Branch branch;
+				Branch? branch;
 				lock(repository.Refs.Heads.SyncRoot)
 				{
 					branch = repository.Refs.Heads.TryGetItem(head.TargetObject);
 					if(branch is null)
 					{
 						var info = repository.Accessor.QueryBranch.Invoke(
-							new QueryBranchParameters(head.TargetObject, false));
+							new QueryBranchRequest(head.TargetObject, false));
 						if(info is not null)
 						{
 							branch = repository.Refs.Heads.NotifyCreated(info);
@@ -114,7 +113,7 @@ public sealed class Head : Reference
 			case ReferenceType.Revision:
 				lock(repository.Revisions.SyncRoot)
 				{
-					return repository.Revisions.GetOrCreateRevision(new Hash(head.TargetObject));
+					return repository.Revisions.GetOrCreateRevision(Sha1Hash.Parse(head.TargetObject));
 				}
 			default:
 				return new NowherePointer(repository, head.TargetObject);
@@ -129,13 +128,13 @@ public sealed class Head : Reference
 		Assert.IsNotNull(repository);
 
 		var head = await repository.Accessor.QuerySymbolicReference
-			.InvokeAsync(new QuerySymbolicReferenceParameters(GitConstants.HEAD))
+			.InvokeAsync(new QuerySymbolicReferenceRequest(GitConstants.HEAD))
 			.ConfigureAwait(continueOnCapturedContext: false);
 
 		switch(head.TargetType)
 		{
 			case ReferenceType.LocalBranch:
-				Branch branch;
+				Branch? branch;
 				lock(repository.Refs.Heads.SyncRoot)
 				{
 					branch = repository.Refs.Heads.TryGetItem(head.TargetObject);
@@ -143,7 +142,7 @@ public sealed class Head : Reference
 				if(branch is null)
 				{
 					var info = await repository.Accessor.QueryBranch
-						.InvokeAsync(new QueryBranchParameters(head.TargetObject, false))
+						.InvokeAsync(new QueryBranchRequest(head.TargetObject, false))
 						.ConfigureAwait(continueOnCapturedContext: false);
 					if(info is not null)
 					{
@@ -157,7 +156,7 @@ public sealed class Head : Reference
 			case ReferenceType.Revision:
 				lock(repository.Revisions.SyncRoot)
 				{
-					return repository.Revisions.GetOrCreateRevision(new Hash(head.TargetObject));
+					return repository.Revisions.GetOrCreateRevision(Sha1Hash.Parse(head.TargetObject));
 				}
 			default:
 				return new NowherePointer(repository, head.TargetObject);
@@ -174,7 +173,7 @@ public sealed class Head : Reference
 		return pointer.Type switch
 		{
 			ReferenceType.None or ReferenceType.LocalBranch => pointer,
-			_ => pointer.Dereference(),
+			_ => pointer.Dereference() ?? pointer,
 		};
 	}
 
@@ -233,8 +232,8 @@ public sealed class Head : Reference
 	{
 		Assert.IsNotNull(e);
 
-		LeaveRevision(e.OldValue);
-		EnterRevision(e.NewValue);
+		if(e.OldValue is not null) LeaveRevision(e.OldValue);
+		if(e.NewValue is not null) EnterRevision(e.NewValue);
 		InvokePositionChanged(e.OldValue, e.NewValue);
 	}
 
@@ -253,7 +252,8 @@ public sealed class Head : Reference
 		Verify.Argument.IsValidRevisionPointer(pointer, Repository);
 
 		var pos = Pointer.Dereference();
-		var rev = pointer.Dereference();
+		var rev = pointer.Dereference()
+			?? throw new ArgumentException($"Unable to dereference '{pointer.Pointer}'", nameof(pointer));
 
 		var currentBranch = Pointer as Branch;
 
@@ -265,7 +265,7 @@ public sealed class Head : Reference
 			RepositoryNotifications.SubmodulesChanged))
 		{
 			Repository.Accessor.Reset
-				.Invoke(new ResetParameters(rev.Hash.ToString(), mode));
+				.Invoke(new ResetRequest(rev.Hash.ToString(), mode));
 		}
 
 		if(currentBranch is not null)
@@ -309,6 +309,11 @@ public sealed class Head : Reference
 			.DereferenceAsync()
 			.ConfigureAwait(continueOnCapturedContext: false);
 
+		if(rev is null)
+		{
+			throw new ArgumentException($"Unable to dereference '{pointer.Pointer}'", nameof(pointer));
+		}
+
 		var currentBranch = Pointer as Branch;
 
 		using(Repository.Monitor.BlockNotifications(
@@ -319,7 +324,7 @@ public sealed class Head : Reference
 			RepositoryNotifications.SubmodulesChanged))
 		{
 			await Repository.Accessor.Reset
-				.InvokeAsync(new ResetParameters(rev.Hash.ToString(), mode))
+				.InvokeAsync(new ResetRequest(rev.Hash.ToString(), mode))
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 
@@ -362,10 +367,10 @@ public sealed class Head : Reference
 			Resources.ExcCantDoOnEmptyRepository.UseAsFormat("format merge message"));
 
 		return Repository.Accessor.FormatMergeMessage.Invoke(
-			new FormatMergeMessageParameters(revision.Pointer, Pointer.Pointer));
+			new FormatMergeMessageRequest(revision.Pointer, Pointer.Pointer));
 	}
 
-	public string FormatMergeMessage(ICollection<IRevisionPointer> revisions)
+	public string FormatMergeMessage(Many<IRevisionPointer> revisions)
 	{
 		Verify.Argument.IsValidRevisionPointerSequence(revisions, Repository);
 		Verify.Argument.IsTrue(revisions.Count != 0, nameof(revisions),
@@ -373,13 +378,9 @@ public sealed class Head : Reference
 		Verify.State.IsFalse(IsEmpty,
 			Resources.ExcCantDoOnEmptyRepository.UseAsFormat("format merge message"));
 
-		var names = new List<string>(revisions.Count);
-		foreach(var branch in revisions)
-		{
-			names.Add(branch.Pointer);
-		}
+		var names = revisions.ConvertAll(static rev => rev.Pointer);
 		return Repository.Accessor.FormatMergeMessage.Invoke(
-			new FormatMergeMessageParameters(names, Pointer.Pointer));
+			new FormatMergeMessageRequest(names, Pointer.Pointer));
 	}
 
 	private string SaveMessageForMerge(string message)
@@ -397,12 +398,12 @@ public sealed class Head : Reference
 		{
 			File.Delete(fileName);
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 		}
 	}
 
-	private Revision MergeCore(IReadOnlyList<string> revisions,
+	private Revision MergeCore(Many<string> revisions,
 		bool    noCommit,
 		bool    noFastForward,
 		bool    squash,
@@ -419,21 +420,22 @@ public sealed class Head : Reference
 			var fileName = message is not null
 				? SaveMessageForMerge(message)
 				: default;
+			var messageSpec = fileName is not null
+				? MessageSpecification.FromFile(fileName)
+				: default;
 
-			MergeParameters parameters;
-
-			parameters = new MergeParameters()
+			var request = new MergeRequest()
 			{
-				Revisions       = revisions,
-				NoCommit        = noCommit,
-				NoFastForward   = noFastForward,
-				Squash          = squash,
-				MessageFileName = fileName,
+				Revisions     = revisions,
+				NoCommit      = noCommit,
+				NoFastForward = noFastForward,
+				Squash        = squash,
+				Message       = messageSpec,
 			};
 
 			try
 			{
-				Repository.Accessor.Merge.Invoke(parameters);
+				Repository.Accessor.Merge.Invoke(request);
 			}
 			catch(AutomaticMergeFailedException)
 			{
@@ -457,7 +459,7 @@ public sealed class Head : Reference
 			Refresh();
 		}
 
-		return Revision;
+		return Revision!;
 	}
 
 	public Revision Merge(IRevisionPointer branch,
@@ -472,7 +474,7 @@ public sealed class Head : Reference
 
 		var oldRev = branch.Dereference();
 		
-		var headRev = MergeCore(new[] { branch.FullName }, noCommit, noFastForward, squash, message); ;
+		var headRev = MergeCore(branch.FullName, noCommit, noFastForward, squash, message); ;
 
 		if(noCommit)
 		{
@@ -490,7 +492,7 @@ public sealed class Head : Reference
 		return headRev;
 	}
 
-	public Revision Merge(ICollection<IRevisionPointer> branches,
+	public Revision Merge(IReadOnlyList<IRevisionPointer> branches,
 		bool    noCommit      = false,
 		bool    noFastForward = false,
 		bool    squash        = false,
@@ -504,17 +506,15 @@ public sealed class Head : Reference
 
 		if(branches.Count == 1)
 		{
-			foreach(var branch in branches)
-			{
-				return Merge(branch, noCommit, noFastForward, squash, message);
-			}
+			return Merge(branches[0], noCommit, noFastForward, squash, message);
 		}
-		var oldRevs = new List<Revision>(branches.Count);
-		var branchNames = new List<string>(branches.Count);
+		var oldRevs = new List<Revision?>(branches.Count);
+		var branchNames = new string[branches.Count];
+		var index = 0;
 		foreach(var branch in branches)
 		{
 			oldRevs.Add(branch.Dereference());
-			branchNames.Add(branch.FullName);
+			branchNames[index++] = branch.FullName;
 		}
 
 		var headRev = MergeCore(branchNames, noCommit, noFastForward, squash, message);

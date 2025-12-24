@@ -1,8 +1,8 @@
 <Project>
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0-windows;net48</TargetFrameworks>
-    <LangVersion>12</LangVersion>
+    <TargetFrameworks Condition="$(TargetFrameworks) == ''">net10.0-windows;net6.0-windows;net48</TargetFrameworks>
+    <LangVersion>14</LangVersion>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
@@ -18,6 +18,14 @@
     <DefineConstants>$(DefineConstants);CS_12</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$([MSBuild]::VersionEquals('$(LangVersion)', '13'))">
+    <DefineConstants>$(DefineConstants);CS_13</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::VersionEquals('$(LangVersion)', '14'))">
+    <DefineConstants>$(DefineConstants);CS_14</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(LangVersion)', '10'))">
     <DefineConstants>$(DefineConstants);CS_10_OR_GREATER</DefineConstants>
   </PropertyGroup>
@@ -30,23 +38,26 @@
     <DefineConstants>$(DefineConstants);CS_12_OR_GREATER</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(LangVersion)', '13'))">
+    <DefineConstants>$(DefineConstants);CS_13_OR_GREATER</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(LangVersion)', '14'))">
+    <DefineConstants>$(DefineConstants);CS_14_OR_GREATER</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup>
     <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>$(SolutionDir)\common\key.snk</AssemblyOriginatorKeyFile>
-    <DelaySign>false</DelaySign>
-  </PropertyGroup>
-
-  <ItemGroup>
+  <ItemGroup Condition="$(DoNotIncludeShared) == ''">
     <Compile Include="$(SolutionDir)\common\CommonAssemblyInfo.cs" Link="Properties\CommonAssemblyInfo.cs" />
     <Compile Include="$(SolutionDir)\shared\Attributes.cs" Link="Shared\Attributes.cs" />
     <Compile Include="$(SolutionDir)\shared\Debug.cs" Link="Shared\Debug.cs" />
     <Compile Include="$(SolutionDir)\shared\Verify.cs" Link="Shared\Verify.cs" />
+    <Compile Include="$(SolutionDir)\shared\GlobalUsings.cs" Link="Shared\GlobalUsings.cs" />
   </ItemGroup>
 
 </Project>

@@ -21,5 +21,5 @@
 namespace gitter.Git.Gui.Views;
 
 public record class DiffViewModel(
-	IDiffSource DiffSource,
-	DiffOptions DiffOptions);
+	IDiffSource? DiffSource,
+	DiffOptions? DiffOptions);

@@ -20,15 +20,29 @@
 
 namespace gitter.TeamCity;
 
+using System.Text;
+
 public sealed class BuildTypeLocator : ObjectLocator
 {
 	public BuildTypeLocator()
 	{
 	}
 
-	public string Id { get; set; }
+	public string? Id { get; set; }
 
-	public string Name { get; set; }
+	public string? Name { get; set; }
+
+	public override void ToString(StringBuilder sb)
+	{
+		if(!string.IsNullOrWhiteSpace(Id))
+		{
+			sb.Append("id:").Append(Id);
+		}
+		if(!string.IsNullOrWhiteSpace(Name))
+		{
+			sb.Append("name:").Append(Id);
+		}
+	}
 
 	public override string ToString()
 	{

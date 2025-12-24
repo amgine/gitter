@@ -1,7 +1,7 @@
 ﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2025  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,18 +30,17 @@ using gitter.Framework.Controls;
 [System.ComponentModel.DesignerCategory("")]
 sealed class RevisionToolTip : CustomToolTip
 {
-	private RevisionHeaderContent _content;
+	private readonly RevisionHeaderContent _content = new();
 
-	public RevisionToolTip()
-	{
-		_content = new RevisionHeaderContent();
-		_content.Style = GitterApplication.DefaultStyle;
-	}
-
-	public Revision Revision
+	public Revision? Revision
 	{
 		get => _content.Revision;
 		set => _content.Revision = value;
+	}
+
+	protected override void OnStyleChanged()
+	{
+		_content.Style = Style;
 	}
 
 	protected override void OnPaint(DrawToolTipEventArgs e)
@@ -52,7 +51,7 @@ sealed class RevisionToolTip : CustomToolTip
 			e.Bounds, e.Bounds);
 	}
 
-	public override Size Measure(Control associatedControl)
+	public override Size Measure(Control? associatedControl)
 	{
 		const int HPadding     = 3;
 		const int DefaultWidth = 450;

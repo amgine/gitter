@@ -40,7 +40,10 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 				
 			_document = document;
 			_node = new Stack<XmlNode>();
-			_node.Push(_document.DocumentElement);
+			if(_document.DocumentElement is not null)
+			{
+				_node.Push(_document.DocumentElement);
+			}
 		}
 
 		public XmlNode Node => _node.Peek();
@@ -57,15 +60,14 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 
 		public XmlNode Push(string name)
 		{
-			var node = Node[name];
-			Verify.Argument.IsTrue(node != null, nameof(name), "Node not found.");
+			var node = Node[name] ?? throw new ArgumentException($"Node '{name}' was not found.", nameof(name));
 			_node.Push(node);
 			return node;
 		}
 
 		public XmlNode Push()
 		{
-			var node = Node.ChildNodes[0];
+			var node = Node.ChildNodes[0] ?? throw new InvalidOperationException("No child nodes.");
 			_node.Push(node);
 			return node;
 		}
@@ -74,39 +76,29 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 		{
 			var node = _node.Pop();
 			node = node.NextSibling;
-			if(node == null) return false;
+			if(node is null) return false;
 			_node.Push(node);
 			return true;
 		}
 
 		public XmlNode Pop()
-		{
-			return _node.Pop();
-		}
+			=> _node.Pop();
 
 		public bool HasAttribute(string name)
-		{
-			return Node.Attributes[name] != null;
-		}
+			=> Node.Attributes?[name] is not null;
 
-		public string LoadFromAttribute(string name)
+		public string LoadFromAttribute(string name = "Value")
 		{
-			var attr = Node.Attributes[XmlConvert.EncodeName(name)];
-			if(attr == null) return string.Empty;
-			return attr.Value;
-		}
-
-		public string LoadFromAttribute()
-		{
-			return LoadFromAttribute("Value");
+			var attr = Node.Attributes?[XmlConvert.EncodeName(name)];
+			return attr is not null ? attr.Value : string.Empty;
 		}
 
 		public string LoadFromChildNode(string name)
 		{
 			var node = Node[XmlConvert.EncodeName(name)];
-			if(node == null) return string.Empty;
+			if(node is null) return string.Empty;
 			var attr = node.Attributes["Value"];
-			if(attr == null) return string.Empty;
+			if(attr is null) return string.Empty;
 			return attr.Value;
 		}
 	}
@@ -146,7 +138,7 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 		public void StoreAttribute(string name)
 		{
 			var attr = _document.CreateAttribute(XmlConvert.EncodeName(name));
-			Node.Attributes.Append(attr);
+			Node.Attributes!.Append(attr);
 		}
 
 		public void StoreInAttribute(string value)
@@ -158,7 +150,7 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 		{
 			var attr = _document.CreateAttribute(XmlConvert.EncodeName(name));
 			attr.Value = value;
-			Node.Attributes.Append(attr);
+			Node.Attributes!.Append(attr);
 		}
 
 		public void StoreInChild(string name, string value)
@@ -173,9 +165,8 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 
 	private static string EncodeTypeName(Type type)
 	{
-		string shortName;
 		var aqn = type.AssemblyQualifiedName;
-		if(ReverseLookupTable.TryGetValue(aqn, out shortName))
+		if(aqn is not null && ReverseLookupTable.TryGetValue(aqn, out var shortName))
 		{
 			return shortName;
 		}
@@ -188,14 +179,16 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 			{
 				aqn = type.FullName + ", " + assembly.GetName().Name;
 			}
+#if !NETCOREAPP
+			aqn ??= type.FullName;
+#endif
 			return aqn;
 		}
 	}
 
-	private static Type DecodeTypeName(string name)
+	private static Type? DecodeTypeName(string name)
 	{
-		string fullName;
-		if(TypeLookupTable.TryGetValue(name, out fullName))
+		if(TypeLookupTable.TryGetValue(name, out var fullName))
 		{
 			name = fullName;
 		}
@@ -208,14 +201,14 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 
 		void Store(XmlWriterContext context, Parameter parameter);
 
-		object LoadValue(XmlReaderContext context);
+		object? LoadValue(XmlReaderContext context);
 	}
 
 	private abstract class XmlPersister<T> : IXmlPersister
 	{
-		protected abstract void StoreCore(XmlWriterContext context, T value);
+		protected abstract void StoreCore(XmlWriterContext context, T? value);
 
-		protected abstract T LoadCore(XmlReaderContext context);
+		protected abstract T? LoadCore(XmlReaderContext context);
 
 		public Type Type => typeof(T);
 
@@ -225,7 +218,7 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 			context.StoreInAttribute("Type", EncodeTypeName(parameter.Type));
 			try
 			{
-				StoreCore(context, (T)parameter.Value);
+				StoreCore(context, (T?)parameter.Value);
 			}
 			finally
 			{
@@ -233,7 +226,7 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 			}
 		}
 
-		public object LoadValue(XmlReaderContext context)
+		public object? LoadValue(XmlReaderContext context)
 		{
 			return LoadCore(context);
 		}
@@ -394,8 +387,8 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 
 	private sealed class StringPersister : XmlPersister<string>
 	{
-		protected override void StoreCore(XmlWriterContext context, string value)
-			=> context.StoreInAttribute(value);
+		protected override void StoreCore(XmlWriterContext context, string? value)
+			=> context.StoreInAttribute(value ?? "");
 
 		protected override string LoadCore(XmlReaderContext context)
 			=> context.LoadFromAttribute();
@@ -515,7 +508,7 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 			context.StoreInAttribute("Type", EncodeTypeName(parameter.Type));
 			try
 			{
-				context.StoreInAttribute(parameter.Value.ToString());
+				context.StoreInAttribute(parameter.Value?.ToString() ?? "");
 			}
 			finally
 			{
@@ -525,7 +518,8 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 
 		public object LoadValue(XmlReaderContext context)
 		{
-			var type = DecodeTypeName(context.LoadFromAttribute("Type"));
+			var type = DecodeTypeName(context.LoadFromAttribute("Type"))
+				?? throw new NotSupportedException();
 			var value = context.LoadFromAttribute();
 			return Enum.Parse(type, value);
 		}
@@ -537,11 +531,12 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 
 		public void Store(XmlWriterContext context, Parameter parameter)
 		{
-			var arr = (Array)parameter.Value;
-			int rank = arr.Rank;
-			int[] values = new int[rank];
-			int[] ubounds = new int[rank];
-			int[] lbounds = new int[rank];
+			if(parameter.Value is not Array arr) return;
+
+			int rank    = arr.Rank;
+			var values  = new int[rank];
+			var ubounds = new int[rank];
+			var lbounds = new int[rank];
 			var sb = new StringBuilder();
 			bool empty = true;
 			for(int i = 0; i < rank; ++i)
@@ -561,7 +556,7 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 			{
 				if(!empty)
 				{
-					var etype = parameter.Type.GetElementType();
+					var etype = parameter.Type.GetElementType() ?? throw new NotSupportedException();
 					bool inc = true;
 					while(inc)
 					{
@@ -580,8 +575,10 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 
 		public object LoadValue(XmlReaderContext context)
 		{
-			var type = DecodeTypeName(context.LoadFromAttribute("Type"));
-			var etype = type.GetElementType();
+			var type = DecodeTypeName(context.LoadFromAttribute("Type"))
+				?? throw new NotSupportedException();
+			var etype = type.GetElementType()
+				?? throw new NotSupportedException();
 			var sranks = context.LoadFromAttribute("Array").Split(';');
 			var lengths = new int[sranks.Length];
 			bool empty = true;
@@ -622,7 +619,7 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 		}
 	}
 
-	private static readonly Dictionary<Type, IXmlPersister> Persisters = new Dictionary<Type, IXmlPersister>()
+	private static readonly Dictionary<Type, IXmlPersister> Persisters = new()
 	{
 		{ typeof(Boolean),			new BooleanPersister() },
 		{ typeof(Char),				new CharPersister() },
@@ -664,35 +661,35 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 	{
 		TypeLookupTable = new Dictionary<string, string>()
 		{
-			{ "Boolean", typeof(Boolean).AssemblyQualifiedName },
-			{ "Char", typeof(Char).AssemblyQualifiedName },
-			{ "Byte", typeof(Byte).AssemblyQualifiedName },
-			{ "SByte", typeof(SByte).AssemblyQualifiedName },
-			{ "Int16", typeof(Int16).AssemblyQualifiedName },
-			{ "UInt16", typeof(UInt16).AssemblyQualifiedName },
-			{ "Int32", typeof(Int32).AssemblyQualifiedName },
-			{ "UInt32", typeof(UInt32).AssemblyQualifiedName },
-			{ "Int64", typeof(Int64).AssemblyQualifiedName },
-			{ "UInt64", typeof(UInt64).AssemblyQualifiedName },
-			{ "Single", typeof(Single).AssemblyQualifiedName },
-			{ "Double", typeof(Double).AssemblyQualifiedName },
-			{ "Decimal", typeof(Decimal).AssemblyQualifiedName },
+			{ "Boolean", typeof(Boolean).AssemblyQualifiedName! },
+			{ "Char", typeof(Char).AssemblyQualifiedName! },
+			{ "Byte", typeof(Byte).AssemblyQualifiedName! },
+			{ "SByte", typeof(SByte).AssemblyQualifiedName! },
+			{ "Int16", typeof(Int16).AssemblyQualifiedName! },
+			{ "UInt16", typeof(UInt16).AssemblyQualifiedName! },
+			{ "Int32", typeof(Int32).AssemblyQualifiedName! },
+			{ "UInt32", typeof(UInt32).AssemblyQualifiedName! },
+			{ "Int64", typeof(Int64).AssemblyQualifiedName! },
+			{ "UInt64", typeof(UInt64).AssemblyQualifiedName! },
+			{ "Single", typeof(Single).AssemblyQualifiedName! },
+			{ "Double", typeof(Double).AssemblyQualifiedName! },
+			{ "Decimal", typeof(Decimal).AssemblyQualifiedName! },
 
-			{ "DateTime", typeof(DateTime).AssemblyQualifiedName },
-			{ "DateTimeOffset", typeof(DateTimeOffset).AssemblyQualifiedName },
-			{ "TimeSpan", typeof(TimeSpan).AssemblyQualifiedName },
+			{ "DateTime", typeof(DateTime).AssemblyQualifiedName! },
+			{ "DateTimeOffset", typeof(DateTimeOffset).AssemblyQualifiedName! },
+			{ "TimeSpan", typeof(TimeSpan).AssemblyQualifiedName! },
 	
-			{ "Guid", typeof(Guid).AssemblyQualifiedName },
-			{ "String", typeof(String).AssemblyQualifiedName },
+			{ "Guid", typeof(Guid).AssemblyQualifiedName! },
+			{ "String", typeof(String).AssemblyQualifiedName! },
 
-			{ "Point", typeof(Point).AssemblyQualifiedName },
-			{ "Size", typeof(Size).AssemblyQualifiedName },
-			{ "Rectangle", typeof(Rectangle).AssemblyQualifiedName },
-			{ "PointF", typeof(PointF).AssemblyQualifiedName },
-			{ "SizeF", typeof(SizeF).AssemblyQualifiedName },
-			{ "RectangleF", typeof(RectangleF).AssemblyQualifiedName },
-			{ "FormWindowState", typeof(System.Windows.Forms.FormWindowState).AssemblyQualifiedName },
-			{ "Orientation", typeof(System.Windows.Forms.Orientation).AssemblyQualifiedName },
+			{ "Point", typeof(Point).AssemblyQualifiedName! },
+			{ "Size", typeof(Size).AssemblyQualifiedName! },
+			{ "Rectangle", typeof(Rectangle).AssemblyQualifiedName! },
+			{ "PointF", typeof(PointF).AssemblyQualifiedName! },
+			{ "SizeF", typeof(SizeF).AssemblyQualifiedName! },
+			{ "RectangleF", typeof(RectangleF).AssemblyQualifiedName! },
+			{ "FormWindowState", typeof(System.Windows.Forms.FormWindowState).AssemblyQualifiedName! },
+			{ "Orientation", typeof(System.Windows.Forms.Orientation).AssemblyQualifiedName! },
 		};
 
 		ReverseLookupTable = new Dictionary<string,string>(TypeLookupTable.Count);
@@ -740,33 +737,9 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 
 	private static class ParameterPersister
 	{
-		public static void Store(XmlWriterContext context, Parameter parameter)
+		static IXmlPersister? GetXmlPersister(Type type)
 		{
-			IXmlPersister persister = null;
-			if(parameter.Type.IsEnum)
-			{
-				Persisters.TryGetValue(typeof(Enum), out persister);
-			}
-			else if(parameter.Type.IsArray)
-			{
-				Persisters.TryGetValue(typeof(Array), out persister);
-			}
-			else
-			{
-				Persisters.TryGetValue(parameter.Type, out persister);
-			}
-			if(persister != null)
-			{
-				persister.Store(context, parameter);
-			}
-		}
-
-		public static Parameter Load(XmlReaderContext context)
-		{
-			var type = DecodeTypeName(context.LoadFromAttribute("Type"))
-				?? throw new NotSupportedException();
-			var name = context.CurrentName;
-			IXmlPersister persister;
+			IXmlPersister? persister;
 			if(type.IsEnum)
 			{
 				Persisters.TryGetValue(typeof(Enum), out persister);
@@ -779,6 +752,18 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 			{
 				Persisters.TryGetValue(type, out persister);
 			}
+			return persister;
+		}
+
+		public static void Store(XmlWriterContext context, Parameter parameter)
+			=> GetXmlPersister(parameter.Type)?.Store(context, parameter);
+
+		public static Parameter Load(XmlReaderContext context)
+		{
+			var type = DecodeTypeName(context.LoadFromAttribute("Type"))
+				?? throw new NotSupportedException();
+			var name = context.CurrentName;
+			var persister = GetXmlPersister(type);
 			return persister is not null
 				? new Parameter(name, type, persister.LoadValue(context))
 				: new Parameter(name, type, null);
@@ -894,7 +879,7 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 						{
 							res.AddParameter(ParameterPersister.Load(context));
 						}
-						catch(Exception exc) when(!exc.IsCritical())
+						catch(Exception exc) when(!exc.IsCritical)
 						{
 						}
 						finally
@@ -932,7 +917,7 @@ public sealed class XmlAdapter : IDataAdapter, IDisposable
 		using(var writer = XmlWriter.Create(_stream, new XmlWriterSettings()
 			{
 				CloseOutput = false,
-				Encoding = System.Text.Encoding.UTF8,
+				Encoding = Encoding.UTF8,
 				Indent = true,
 				IndentChars = "\t",
 			}))

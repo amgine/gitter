@@ -63,6 +63,9 @@ static class ViewConstants
 
 	public const double SplitterOpacity = 0.70;
 
+	public const double ActiveBorderOpacity = 0.5;
+	public const double InactiveBorderOpacity = 0.3;
+
 	public const double DockPositionMarkerOpacity = 0.50;
 
 	public const int PopupWidth = 300;

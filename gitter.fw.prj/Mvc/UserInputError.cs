@@ -20,15 +20,9 @@
 
 namespace gitter.Framework.Mvc;
 
-public sealed class UserInputError
+public sealed class UserInputError(string title, string? message)
 {
-	public UserInputError(string title, string message)
-	{
-		Title   = title;
-		Message = message;
-	}
+	public string Title { get; } = title;
 
-	public string Title { get; }
-
-	public string Message { get; }
+	public string? Message { get; } = message;
 }

@@ -34,7 +34,7 @@ static class RepositoryLoader
 	const int MaxProgress = 8;
 
 	private static readonly ILoadStep[] _loadSteps =
-	{
+	[
 		new ConfigurationLoadStep(),
 		new ReferencesLoadStep(),
 		new StashLoadStep(),
@@ -45,10 +45,10 @@ static class RepositoryLoader
 		new ContributorsLoadStep(),
 		new StatusLoadStep(),
 		new FinalizeLoadStep(),
-	};
+	];
 
 	public static void Load(Repository repository,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(repository);
 
@@ -60,7 +60,7 @@ static class RepositoryLoader
 	}
 
 	public static async Task LoadAsync(Repository repository,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(repository);
 
@@ -80,15 +80,9 @@ static class RepositoryLoader
 		Task ExecuteAsync(RepositoryLoadContext context);
 	}
 
-	class LoadStep : ILoadStep
+	class LoadStep(int index, string action) : ILoadStep
 	{
-		public LoadStep(int index, string action)
-		{
-			Index  = index;
-			Action = action;
-		}
-
-		private void ReportLoadProgress(IProgress<OperationProgress> progress)
+		private void ReportLoadProgress(IProgress<OperationProgress>? progress)
 		{
 			if(progress is null) return;
 
@@ -101,9 +95,9 @@ static class RepositoryLoader
 			progress.Report(status);
 		}
 
-		public int Index { get; }
+		public int Index { get; } = index;
 
-		public string Action { get; }
+		public string Action { get; } = action;
 
 		protected virtual bool SkipExecute(RepositoryLoadContext repository) => false;
 
@@ -137,13 +131,8 @@ static class RepositoryLoader
 		}
 	}
 
-	sealed class ConfigurationLoadStep : LoadStep
+	sealed class ConfigurationLoadStep() : LoadStep(0, Resources.StrLoadingConfiguration.AddEllipsis())
 	{
-		public ConfigurationLoadStep()
-			: base(0, Resources.StrLoadingConfiguration.AddEllipsis())
-		{
-		}
-
 		protected override void ExecuteCore(RepositoryLoadContext context)
 			=> context.Repository.Configuration.Refresh();
 
@@ -151,14 +140,9 @@ static class RepositoryLoader
 			=> context.Repository.Configuration.RefreshAsync();
 	}
 
-	sealed class ReferencesLoadStep : LoadStep
+	sealed class ReferencesLoadStep() : LoadStep(1, Resources.StrLoadingReferences.AddEllipsis())
 	{
-		public ReferencesLoadStep()
-			: base(1, Resources.StrLoadingReferences.AddEllipsis())
-		{
-		}
-
-		private static QueryReferencesParameters GetQueryReferencesParameters()
+		private static QueryReferencesRequest GetQueryReferencesParameters()
 			=> new(ReferenceType.Branch | ReferenceType.Tag | ReferenceType.Stash);
 
 		protected override void ExecuteCore(RepositoryLoadContext context)
@@ -183,13 +167,8 @@ static class RepositoryLoader
 		}
 	}
 
-	sealed class StashLoadStep : LoadStep
+	sealed class StashLoadStep() : LoadStep(2, Resources.StrLoadingStash.AddEllipsis())
 	{
-		public StashLoadStep()
-			: base(2, Resources.StrLoadingStash.AddEllipsis())
-		{
-		}
-
 		protected override bool SkipExecute(RepositoryLoadContext context)
 		{
 			Assert.IsNotNull(context);
@@ -205,13 +184,8 @@ static class RepositoryLoader
 			=> context.Repository.Stash.RefreshAsync();
 	}
 
-	sealed class NotesLoadStep : LoadStep
+	sealed class NotesLoadStep() : LoadStep(2, Resources.StrLoadingNotes.AddEllipsis())
 	{
-		public NotesLoadStep()
-			: base(2, Resources.StrLoadingNotes.AddEllipsis())
-		{
-		}
-
 		protected override void ExecuteCore(RepositoryLoadContext context)
 			=> context.Repository.Notes.Refresh();
 
@@ -219,13 +193,8 @@ static class RepositoryLoader
 			=> context.Repository.Notes.RefreshAsync();
 	}
 
-	sealed class HeadLoadStep : LoadStep
+	sealed class HeadLoadStep() : LoadStep(3, Resources.StrLoadingHEAD.AddEllipsis())
 	{
-		public HeadLoadStep()
-			: base(3, Resources.StrLoadingHEAD.AddEllipsis())
-		{
-		}
-
 		protected override void ExecuteCore(RepositoryLoadContext context)
 			=> context.Repository.Head.Refresh();
 
@@ -233,13 +202,8 @@ static class RepositoryLoader
 			=> context.Repository.Head.RefreshAsync();
 	}
 
-	sealed class RemotesLoadStep : LoadStep
+	sealed class RemotesLoadStep() : LoadStep(4, Resources.StrLoadingRemotes.AddEllipsis())
 	{
-		public RemotesLoadStep()
-			: base(4, Resources.StrLoadingRemotes.AddEllipsis())
-		{
-		}
-
 		protected override void ExecuteCore(RepositoryLoadContext context)
 			=> context.Repository.Remotes.Refresh();
 
@@ -247,13 +211,8 @@ static class RepositoryLoader
 			=> context.Repository.Remotes.RefreshAsync();
 	}
 
-	sealed class SubmoduilesLoadStep : LoadStep
+	sealed class SubmoduilesLoadStep() : LoadStep(5, Resources.StrLoadingSubmodules.AddEllipsis())
 	{
-		public SubmoduilesLoadStep()
-			: base(5, Resources.StrLoadingSubmodules.AddEllipsis())
-		{
-		}
-
 		protected override void ExecuteCore(RepositoryLoadContext context)
 			=> context.Repository.Submodules.Refresh();
 
@@ -261,13 +220,8 @@ static class RepositoryLoader
 			=> context.Repository.Submodules.RefreshAsync();
 	}
 
-	sealed class ContributorsLoadStep : LoadStep
+	sealed class ContributorsLoadStep() : LoadStep(6, Resources.StrLoadingContributors.AddEllipsis())
 	{
-		public ContributorsLoadStep()
-			: base(6, Resources.StrLoadingContributors.AddEllipsis())
-		{
-		}
-
 		protected override bool SkipExecute(RepositoryLoadContext context) => context.Repository.Head.IsEmpty;
 
 		protected override void ExecuteCore(RepositoryLoadContext context)
@@ -277,13 +231,8 @@ static class RepositoryLoader
 			=> context.Repository.Users.RefreshAsync();
 	}
 
-	sealed class StatusLoadStep : LoadStep
+	sealed class StatusLoadStep() : LoadStep(7, Resources.StrLoadingStatus.AddEllipsis())
 	{
-		public StatusLoadStep()
-			: base(7, Resources.StrLoadingStatus.AddEllipsis())
-		{
-		}
-
 		protected override void ExecuteCore(RepositoryLoadContext context)
 			=> context.Repository.Status.Refresh();
 
@@ -293,10 +242,6 @@ static class RepositoryLoader
 
 	sealed class FinalizeLoadStep : ILoadStep
 	{
-		public FinalizeLoadStep()
-		{
-		}
-
 		public void Execute(RepositoryLoadContext context)
 		{
 			Assert.IsNotNull(context);
@@ -330,23 +275,16 @@ static class RepositoryLoader
 		}
 	}
 
-	sealed class RepositoryLoadContext
+	sealed class RepositoryLoadContext(Repository repository,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
-		public RepositoryLoadContext(Repository repository,
-			IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
-		{
-			Repository        = repository;
-			Progress          = progress;
-			CancellationToken = cancellationToken;
-		}
+		public Repository Repository { get; } = repository;
 
-		public Repository Repository { get; }
+		public IProgress<OperationProgress>? Progress { get; } = progress;
 
-		public IProgress<OperationProgress> Progress { get; }
+		public CancellationToken CancellationToken { get; } = cancellationToken;
 
-		public CancellationToken CancellationToken { get; }
-
-		public ReferencesData ReferencesData { get; set; }
+		public ReferencesData? ReferencesData { get; set; }
 
 		public void ThrowIfCancellationRequested() => CancellationToken.ThrowIfCancellationRequested();
 	}

@@ -19,6 +19,7 @@
 #endregion
 
 namespace gitter.Git;
+
 using System.Threading;
 using System.Threading.Tasks;
 

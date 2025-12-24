@@ -32,9 +32,11 @@ public sealed class HeadMenu : ContextMenuStrip
 {
 	public HeadMenu(Head head)
 	{
-		Verify.Argument.IsValidGitObject(head, nameof(head));
+		Verify.Argument.IsValidGitObject(head);
 
-		Head = head;
+        Renderer = GitterApplication.Style.ToolStripRenderer;
+
+        Head = head;
 
 		var dpiBindings = new DpiBindings(this);
 		var factory     = new GuiItemFactory(dpiBindings);

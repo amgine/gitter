@@ -86,7 +86,7 @@ public sealed class RepositoryManagerService
 		}
 	}
 
-	private static RepositoryGroup TryLoadGroupFrom(Section section)
+	private static RepositoryGroup? TryLoadGroupFrom(Section section)
 	{
 		Assert.IsNotNull(section);
 
@@ -95,7 +95,7 @@ public sealed class RepositoryManagerService
 		{
 			return null;
 		}
-		var group = new RepositoryGroup(name.Trim());
+		var group = new RepositoryGroup(name!.Trim());
 		LoadGroupContent(group, section);
 		return group;
 	}

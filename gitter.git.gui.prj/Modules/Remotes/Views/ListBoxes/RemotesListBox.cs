@@ -27,8 +27,8 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 /// <summary><see cref="CustomListBox"/> for displaying <see cref="Repository.Remotes"/> content.</summary>
 public sealed class RemotesListBox : CustomListBox
 {
-	private Repository _repository;
-	private RemoteListBinding _binding;
+	private Repository? _repository;
+	private RemoteListBinding? _binding;
 
 	/// <summary>Initializes a new instance of the <see cref="RemotesListBox"/> class.</summary>
 	public RemotesListBox()
@@ -36,10 +36,10 @@ public sealed class RemotesListBox : CustomListBox
 		Text = Resources.StrsNoRemotes;
 	}
 
-	private void AttachToRepository()
+	private void AttachToRepository(Repository repository)
 	{
 		BeginUpdate();
-		_binding = new RemoteListBinding(Items, _repository);
+		_binding = new RemoteListBinding(Items, repository);
 		EndUpdate();
 	}
 
@@ -52,7 +52,7 @@ public sealed class RemotesListBox : CustomListBox
 		}
 	}
 
-	public void LoadData(Repository repository)
+	public void LoadData(Repository? repository)
 	{
 		if(_repository is not null)
 		{
@@ -61,7 +61,7 @@ public sealed class RemotesListBox : CustomListBox
 		_repository = repository;
 		if(_repository is not null)
 		{
-			AttachToRepository();
+			AttachToRepository(_repository);
 		}
 	}
 
@@ -70,7 +70,7 @@ public sealed class RemotesListBox : CustomListBox
 	{
 		if(disposing)
 		{
-			if(_repository != null)
+			if(_repository is not null)
 			{
 				DetachFromRepository();
 				_repository = null;

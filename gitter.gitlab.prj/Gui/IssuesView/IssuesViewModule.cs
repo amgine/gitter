@@ -20,8 +20,6 @@
 
 namespace gitter.GitLab.Gui;
 
-using System;
-
 using Autofac;
 
 using gitter.Framework.Controls;

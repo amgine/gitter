@@ -37,6 +37,8 @@ public sealed class IssueMenu : ContextMenuStrip
 	{
 		Verify.Argument.IsNotNull(issue);
 
+		Renderer = GitterApplication.Style.ToolStripRenderer;
+
 		Issue = issue;
 
 		var dpiBindings = new DpiBindings(this);

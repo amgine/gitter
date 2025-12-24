@@ -41,6 +41,6 @@ public class FetchUrlColumn : UrlColumn
 	public override string IdentificationString => "FetchUrl";
 
 	/// <inheritdoc/>
-	protected override string GetUrl(CustomListBoxItem item)
+	protected override string? GetUrl(CustomListBoxItem item)
 		=> (item as IDataContextProvider<Remote>)?.DataContext.FetchUrl;
 }

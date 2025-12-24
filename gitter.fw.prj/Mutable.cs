@@ -28,21 +28,21 @@ public sealed class Mutable<T>
 	{
 	}
 
-	public Mutable(T value)
+	public Mutable(T? value)
 	{
 		Value = value;
 	}
 
-	public T Value { get; set; }
+	public T? Value { get; set; }
 
 	public static implicit operator Mutable<T>(T value)
 	{
 		return new Mutable<T>(value);
 	}
 
-	public static implicit operator T(Mutable<T> mutable)
+	public static implicit operator T?(Mutable<T> mutable)
 	{
-		if(mutable == null) return default;
+		if(mutable is null) return default;
 		return mutable.Value;
 	}
 }

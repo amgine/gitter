@@ -25,8 +25,8 @@ public enum MergeStrategy
 {
 	/// <summary>Default strategy.</summary>
 	/// <remarks>
-	/// <see cref="MergeStrategy.Recursive"/> if merging single branch,
-	/// <see cref="MergeStrategy.Octopus"/> if merging multiple branches.
+	/// <see cref="Recursive"/> if merging single branch,<br/>
+	/// <see cref="Octopus"/> if merging multiple branches.
 	/// </remarks>
 	Default,
 

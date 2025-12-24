@@ -21,7 +21,7 @@
 namespace gitter.Redmine;
 
 using System;
-using System.Drawing;
+using System.Net.Http;
 using System.Windows.Forms;
 
 using gitter.Framework;
@@ -31,7 +31,7 @@ using gitter.Redmine.Gui;
 
 using Resources = gitter.Redmine.Properties.Resources;
 
-public sealed class RedmineServiceProvider : IRepositoryServiceProvider
+public sealed class RedmineServiceProvider(HttpMessageInvoker httpMessageInvoker) : IRepositoryServiceProvider
 {
 	public static IWorkingEnvironment Environment { get; private set; }
 
@@ -101,7 +101,7 @@ public sealed class RedmineServiceProvider : IRepositoryServiceProvider
 		var uri = section.GetValue<string>("ServiceUri");
 		var key = section.GetValue<string>("ApiKey");
 		var pid = section.GetValue<string>("ProjectId");
-		var svc = new RedmineServiceContext(new Uri(uri), key);
+		var svc = new RedmineServiceContext(httpMessageInvoker, new Uri(uri), key);
 		svc.DefaultProjectId = pid;
 
 		guiProvider = new RedmineGuiProvider(repository, svc);

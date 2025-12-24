@@ -21,143 +21,57 @@
 namespace gitter.Framework;
 
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 
 using gitter.Framework.Controls;
 
-sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
+sealed class MSVS2012CustomListBoxRenderer(MSVS2012CustomListBoxRenderer.ColorTable colorTable) : CustomListBoxRenderer
 {
-	#region Static Data
-
-	private static readonly Dictionary<CheckedState, IImageProvider> ImgCheckedState =
-		new()
-		{
-			[CheckedState.Checked]       = CommonIcons.CheckBox.Checked,
-			[CheckedState.Unchecked]     = CommonIcons.CheckBox.Unchecked,
-			[CheckedState.Indeterminate] = CommonIcons.CheckBox.Indeterminate,
-		};
-
-	private static readonly Dictionary<CheckedState, IImageProvider> ImgCheckedStateHovered =
-		new()
-		{
-			[CheckedState.Checked]       = CommonIcons.CheckBox.CheckedHover,
-			[CheckedState.Unchecked]     = CommonIcons.CheckBox.UncheckedHover,
-			[CheckedState.Indeterminate] = CommonIcons.CheckBox.IndeterminateHover,
-		};
-
 	private static readonly PointF[] _triangle = new PointF[3];
 
-	#endregion
-
-	#region Color Tables
-
-	public static readonly IColorTable DarkColors  = new DarkColorTable();
-	public static readonly IColorTable LightColors = new LightColorTable();
-
-	public interface IColorTable
+	public record class ColorTable(
+		Color Background,
+		Color Text,
+		Color SelectionBackground,
+		Color FocusBorder,
+		Color SelectionBackgroundNoFocus,
+		Color HoverBackground,
+		Color ExtenderForeground,
+		Color HoverExtenderForeground,
+		Color PlusMinusForeground,
+		Color AccentPlusMinusForeground)
 	{
-		Color Background { get; }
-		Color Text { get; }
-		Color SelectionBackground { get; }
-		Color FocusBorder { get; }
-		Color SelectionBackgroundNoFocus { get; }
-		Color HoverBackground { get; }
-		Color ExtenderForeground { get; }
-		Color HoverExtenderForeground { get; }
-		Color PlusMinusForeground { get; }
-		Color AccentPlusMinusForeground { get; }
+		public static ColorTable Dark { get; } = new(
+			Background:                 MSVS2012DarkColors.WORK_AREA,
+			Text:                       MSVS2012DarkColors.WINDOW_TEXT,
+			SelectionBackground:        MSVS2012DarkColors.ACCENT_FILL,
+			FocusBorder:                MSVS2012DarkColors.HIGHLIGHT,
+			SelectionBackgroundNoFocus: MSVS2012DarkColors.HIDDEN_HIGHLIGHT,
+			HoverBackground:            MSVS2012DarkColors.HOT_TRACK,
+			ExtenderForeground:         MSVS2012DarkColors.WINDOW_TEXT,
+			HoverExtenderForeground:    Color.FromArgb( 28, 151, 234),
+			PlusMinusForeground:        Color.FromArgb(255, 255, 255),
+			AccentPlusMinusForeground:  Color.FromArgb(  0, 122, 204));
+
+		public static ColorTable Light { get; } = new(
+			Background:                 MSVS2012LightColors.WORK_AREA,
+			Text:                       MSVS2012LightColors.WINDOW_TEXT,
+			SelectionBackground:        MSVS2012LightColors.ACCENT_FILL,
+			FocusBorder:                MSVS2012LightColors.HIGHLIGHT,
+			SelectionBackgroundNoFocus: MSVS2012LightColors.HIDDEN_HIGHLIGHT,
+			HoverBackground:            MSVS2012LightColors.HOT_TRACK,
+			ExtenderForeground:         MSVS2012LightColors.WINDOW_TEXT,
+			HoverExtenderForeground:    Color.FromArgb( 28, 151, 234),
+			PlusMinusForeground:        Color.FromArgb(255, 255, 255),
+			AccentPlusMinusForeground:  Color.FromArgb(  0, 122, 204));
 	}
 
-	private sealed class DarkColorTable : IColorTable
-	{
-		private static readonly Color TEXT							= MSVS2012DarkColors.WINDOW_TEXT;
-		private static readonly Color BACKGROUND					= MSVS2012DarkColors.WINDOW;
-		private static readonly Color SELECTION_BACKGROUND			= MSVS2012DarkColors.HIGHLIGHT;
-		private static readonly Color FOCUS_BORDER					= MSVS2012DarkColors.HIGHLIGHT;
-		private static readonly Color SELECTION_BACKGROUND_NO_FOCUS	= MSVS2012DarkColors.HIDDEN_HIGHLIGHT;
-		private static readonly Color HOVER_BACKGROUND				= MSVS2012DarkColors.HOT_TRACK;
-		private static readonly Color EXTENDER_FOREGROUND			= MSVS2012DarkColors.WINDOW_TEXT;
-		private static readonly Color HOVER_EXTENDER_FOREGROUND		= Color.FromArgb(28, 151, 234);
-		private static readonly Color PLUS_MINUS_FOREGROUND			= Color.FromArgb(255, 255, 255);
-		private static readonly Color ACCENT_PLUS_MINUS_FOREGROUND	= Color.FromArgb(0, 122, 204);
+	public override Color BackColor => colorTable.Background;
 
-		public Color Background => BACKGROUND;
+	public override Color ForeColor => colorTable.Text;
 
-		public Color Text => TEXT;
-
-		public Color SelectionBackground => SELECTION_BACKGROUND;
-
-		public Color FocusBorder => FOCUS_BORDER;
-
-		public Color SelectionBackgroundNoFocus => SELECTION_BACKGROUND_NO_FOCUS;
-
-		public Color HoverBackground => HOVER_BACKGROUND;
-
-		public Color ExtenderForeground => EXTENDER_FOREGROUND;
-
-		public Color HoverExtenderForeground => HOVER_EXTENDER_FOREGROUND;
-
-		public Color PlusMinusForeground => PLUS_MINUS_FOREGROUND;
-
-		public Color AccentPlusMinusForeground => ACCENT_PLUS_MINUS_FOREGROUND;
-	}
-
-	private sealed class LightColorTable : IColorTable
-	{
-		private static readonly Color BACKGROUND					= MSVS2012LightColors.WINDOW;
-		private static readonly Color TEXT							= MSVS2012LightColors.WINDOW_TEXT;
-		private static readonly Color SELECTION_BACKGROUND			= MSVS2012LightColors.HIGHLIGHT;
-		private static readonly Color FOCUS_BORDER					= MSVS2012LightColors.HIGHLIGHT;
-		private static readonly Color SELECTION_BACKGROUND_NO_FOCUS	= MSVS2012LightColors.HIDDEN_HIGHLIGHT;
-		private static readonly Color HOVER_BACKGROUND				= MSVS2012LightColors.HOT_TRACK;
-		private static readonly Color EXTENDER_FOREGROUND			= MSVS2012LightColors.WINDOW_TEXT;
-		private static readonly Color HOVER_EXTENDER_FOREGROUND		= Color.FromArgb(28, 151, 234);
-		private static readonly Color PLUS_MINUS_FOREGROUND			= Color.FromArgb(255, 255, 255);
-		private static readonly Color ACCENT_PLUS_MINUS_FOREGROUND	= Color.FromArgb(0, 122, 204);
-
-		public Color Background => BACKGROUND;
-
-		public Color Text => TEXT;
-
-		public Color SelectionBackground => SELECTION_BACKGROUND;
-
-		public Color FocusBorder => FOCUS_BORDER;
-
-		public Color SelectionBackgroundNoFocus => SELECTION_BACKGROUND_NO_FOCUS;
-
-		public Color HoverBackground => HOVER_BACKGROUND;
-
-		public Color ExtenderForeground => EXTENDER_FOREGROUND;
-
-		public Color HoverExtenderForeground => HOVER_EXTENDER_FOREGROUND;
-
-		public Color PlusMinusForeground => PLUS_MINUS_FOREGROUND;
-
-		public Color AccentPlusMinusForeground => ACCENT_PLUS_MINUS_FOREGROUND;
-	}
-
-	#endregion
-
-	#region .ctor
-
-	public MSVS2012CustomListBoxRenderer(IColorTable colorTable)
-	{
-		Verify.Argument.IsNotNull(colorTable);
-
-		ColorTable = colorTable;
-	}
-
-	#endregion
-
-	private IColorTable ColorTable { get; }
-
-	public override Color BackColor => ColorTable.Background;
-
-	public override Color ForeColor => ColorTable.Text;
-
-	public override Color ColumnHeaderForeColor => ColorTable.Text;
+	public override Color ColumnHeaderForeColor => colorTable.Text;
 
 	public override void OnPaintColumnBackground(CustomListBoxColumn column, ItemPaintEventArgs paintEventArgs)
 	{
@@ -182,7 +96,7 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 		if(column.Extender is not null && bounds.Width > w)
 		{
 			var graphics = paintEventArgs.Graphics;
-			using(var brush = SolidBrushCache.Get(ColorTable.Background))
+			using(var brush = SolidBrushCache.Get(colorTable.Background))
 			{
 				graphics.FillRectangle(brush,
 					bounds.Right - w - 0.5f, bounds.Y,
@@ -199,7 +113,7 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 			_triangle[1] = p2;
 			_triangle[2] = p3;
 			var foregroundColor = paintEventArgs.HoveredPart == ColumnHitTestResults.Extender ?
-				ColorTable.HoverExtenderForeground : ColorTable.ExtenderForeground;
+				colorTable.HoverExtenderForeground : colorTable.ExtenderForeground;
 			using(var brush = SolidBrushCache.Get(foregroundColor))
 			{
 				graphics.FillPolygon(brush, _triangle);
@@ -282,9 +196,9 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 
 		if(state == ItemState.None) return;
 
-		bool isHovered	= (state & ItemState.Hovered) == ItemState.Hovered;
+		bool isHovered	= (state & ItemState.Hovered)  == ItemState.Hovered;
 		bool isSelected	= (state & ItemState.Selected) == ItemState.Selected;
-		bool isFocused	= (state & ItemState.Focused) == ItemState.Focused;
+		bool isFocused	= (state & ItemState.Focused)  == ItemState.Focused;
 
 		var backColor = Color.Transparent;
 		var pen = default(Pen);
@@ -292,18 +206,18 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 		if(isSelected)
 		{
 			backColor = paintEventArgs.IsHostControlFocused
-				? ColorTable.SelectionBackground
-				: ColorTable.SelectionBackgroundNoFocus;
+				? colorTable.SelectionBackground
+				: colorTable.SelectionBackgroundNoFocus;
 		}
 		else
 		{
 			if(isHovered)
 			{
-				backColor = ColorTable.HoverBackground;
+				backColor = colorTable.HoverBackground;
 			}
 			if(isFocused && paintEventArgs.IsHostControlFocused)
 			{
-				pen = new Pen(ColorTable.FocusBorder);
+				pen = new Pen(colorTable.FocusBorder);
 			}
 		}
 		if(backColor != Color.Transparent)
@@ -373,12 +287,12 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 					if(isHostControlFocused && isSelected)
 					{
 						CacheMinusTrianglePolygon1(x, y, dpi);
-						using(var brush = SolidBrushCache.Get(ColorTable.PlusMinusForeground))
+						using(var brush = SolidBrushCache.Get(colorTable.PlusMinusForeground))
 						{
 							graphics.FillPolygon(brush, _triangle);
 						}
 						CacheMinusTrianglePolygon2(x, y, dpi);
-						using(var brush = SolidBrushCache.Get(ColorTable.SelectionBackground))
+						using(var brush = SolidBrushCache.Get(colorTable.SelectionBackground))
 						{
 							graphics.FillPolygon(brush, _triangle);
 						}
@@ -386,14 +300,14 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 					else
 					{
 						CacheMinusTrianglePolygon1(x, y, dpi);
-						using var brush = SolidBrushCache.Get(ColorTable.AccentPlusMinusForeground);
+						using var brush = SolidBrushCache.Get(colorTable.AccentPlusMinusForeground);
 						graphics.FillPolygon(brush, _triangle);
 					}
 				}
 				else
 				{
 					CacheMinusTrianglePolygon1(x, y, dpi);
-					using var brush = SolidBrushCache.Get(ColorTable.PlusMinusForeground);
+					using var brush = SolidBrushCache.Get(colorTable.PlusMinusForeground);
 					graphics.FillPolygon(brush, _triangle);
 				}
 			}
@@ -404,13 +318,13 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 					if(isHostControlFocused && isSelected)
 					{
 						CachePlusTrianglePolygon1(x, y, dpi);
-						using var brush = SolidBrushCache.Get(ColorTable.PlusMinusForeground);
+						using var brush = SolidBrushCache.Get(colorTable.PlusMinusForeground);
 						graphics.FillPolygon(brush, _triangle);
 					}
 					else
 					{
 						CachePlusTrianglePolygon1(x, y, dpi);
-						using(var brush = SolidBrushCache.Get(ColorTable.AccentPlusMinusForeground))
+						using(var brush = SolidBrushCache.Get(colorTable.AccentPlusMinusForeground))
 						{
 							graphics.FillPolygon(brush, _triangle);
 						}
@@ -419,18 +333,18 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 						{
 							if(isHostControlFocused)
 							{
-								using var brush = SolidBrushCache.Get(ColorTable.SelectionBackground);
+								using var brush = SolidBrushCache.Get(colorTable.SelectionBackground);
 								graphics.FillPolygon(brush, _triangle);
 							}
 							else
 							{
-								using var brush = SolidBrushCache.Get(ColorTable.SelectionBackgroundNoFocus);
+								using var brush = SolidBrushCache.Get(colorTable.SelectionBackgroundNoFocus);
 								graphics.FillPolygon(brush, _triangle);
 							}
 						}
 						else
 						{
-							using var brush = SolidBrushCache.Get(ColorTable.Background);
+							using var brush = SolidBrushCache.Get(colorTable.Background);
 							graphics.FillPolygon(brush, _triangle);
 						}
 					}
@@ -438,7 +352,7 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 				else
 				{
 					CachePlusTrianglePolygon1(x, y, dpi);
-					using(var brush = SolidBrushCache.Get(ColorTable.PlusMinusForeground))
+					using(var brush = SolidBrushCache.Get(colorTable.PlusMinusForeground))
 					{
 						graphics.FillPolygon(brush, _triangle);
 					}
@@ -447,18 +361,18 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 					{
 						if(isHostControlFocused)
 						{
-							using var brush = SolidBrushCache.Get(ColorTable.SelectionBackground);
+							using var brush = SolidBrushCache.Get(colorTable.SelectionBackground);
 							graphics.FillPolygon(brush, _triangle);
 						}
 						else
 						{
-							using var brush = SolidBrushCache.Get(ColorTable.SelectionBackgroundNoFocus);
+							using var brush = SolidBrushCache.Get(colorTable.SelectionBackgroundNoFocus);
 							graphics.FillPolygon(brush, _triangle);
 						}
 					}
 					else
 					{
-						using var brush = SolidBrushCache.Get(ColorTable.Background);
+						using var brush = SolidBrushCache.Get(colorTable.Background);
 						graphics.FillPolygon(brush, _triangle);
 					}
 				}
@@ -474,14 +388,14 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 		var listBox = item.ListBox;
 		var level   = item.Level;
 
-		if(!listBox.ShowRootTreeLines && level != 0)
+		if(listBox is { ShowRootTreeLines: false } && level != 0)
 		{
 			var levelMargin = ListBoxConstants.LevelMargin.GetValue(paintEventArgs.Dpi);
 			offset -= levelMargin;
 			w2     += levelMargin;
 		}
 
-		if(level != 0 || listBox.ShowRootTreeLines)
+		if(level != 0 || listBox is { ShowRootTreeLines: true })
 		{
 			var spaceBefore = ListBoxConstants.SpaceBeforePlusMinus.GetValue(paintEventArgs.Dpi);
 			var imageSize   = ListBoxConstants.PlusMinusImageSize.GetValue(paintEventArgs.Dpi);
@@ -512,50 +426,28 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 		Assert.IsNotNull(item);
 		Assert.IsNotNull(paintEventArgs);
 
-		var lookup = paintEventArgs.HoveredPart == ItemHitTestResults.CheckBox
-			? ImgCheckedStateHovered
-			: ImgCheckedState;
-		var image = lookup.TryGetValue(item.CheckedState, out var imageProvider)
-			? imageProvider.GetImage(16 * paintEventArgs.Dpi.X / 96)
-			: default;
+		Assert.IsNotNull(item);
+		Assert.IsNotNull(paintEventArgs);
 
 		var spaceBefore = ListBoxConstants.SpaceBeforeCheckbox.GetValue(paintEventArgs.Dpi);
+		var spaceAfter  = ListBoxConstants.SpaceAfterCheckbox.GetValue(paintEventArgs.Dpi);
 		var imageSize   = ListBoxConstants.CheckboxImageSize.GetValue(paintEventArgs.Dpi);
 
-		if(image is not null && w2 > spaceBefore)
+		var colorTable = CheckRenderer.GetColorTable(item.ListBox!.Style.Type);
+		var colors = paintEventArgs.HoveredPart == ItemHitTestResults.CheckBox
+			? colorTable.Hover
+			: colorTable.Normal;
+		var bounds = paintEventArgs.Bounds;
+		bounds.X  = x + offset + spaceBefore;
+		bounds.Y += (bounds.Height - imageSize.Height) / 2;
+		bounds.Width  = imageSize.Width;
+		bounds.Height = imageSize.Height;
+		using(paintEventArgs.Graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
 		{
-			var bounds = paintEventArgs.Bounds;
-			Rectangle destRect, srcRect;
-			if(w2 < imageSize.Width + spaceBefore)
-			{
-				destRect = new Rectangle(
-					x + offset + spaceBefore,
-					bounds.Y + (bounds.Height - imageSize.Height) / 2,
-					w2 - spaceBefore,
-					imageSize.Height);
-				srcRect = new Rectangle(
-					0, 0,
-					imageSize.Width * (w2 - spaceBefore) / imageSize.Width,
-					imageSize.Height);
-			}
-			else
-			{
-				destRect = new Rectangle(
-					x + offset + spaceBefore,
-					bounds.Y + (bounds.Height - imageSize.Height) / 2,
-					imageSize.Width,
-					imageSize.Height);
-				srcRect = new Rectangle(
-					0, 0,
-					imageSize.Width,
-					imageSize.Height);
-			}
-			paintEventArgs.Graphics.DrawImage(image, destRect, srcRect, GraphicsUnit.Pixel);
+			CheckRenderer.Render(colors, paintEventArgs.Graphics, paintEventArgs.Dpi, bounds, item.CheckedState);
 		}
 
-		var spaceAfter = ListBoxConstants.SpaceAfterCheckbox.GetValue(paintEventArgs.Dpi);
-		var dx = spaceBefore + spaceAfter + imageSize.Width;
-
+		var dx  = spaceBefore + spaceAfter + imageSize.Width;
 		offset += dx;
 		w2     -= dx;
 	}
@@ -570,7 +462,7 @@ sealed class MSVS2012CustomListBoxRenderer : CustomListBoxRenderer
 		var clip = paintEventArgs.ClipRectangle;
 		var clipX1 = clip.X;
 		var clipX2 = clip.Right;
-		var columns = item.ListBox.Columns;
+		var columns = item.ListBox!.Columns;
 		int columnsCount = columns.Count;
 		int x = rect.X;
 

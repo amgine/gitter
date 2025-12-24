@@ -33,7 +33,8 @@ internal static class GraphColors
 	public static readonly Brush DotBrushForDarkBackground  = Brushes.White;
 
 	public static readonly Pen TagBorderPenForLightBackground = Pens.Black;
-	public static readonly Pen TagBorderPenForDarkBackground  = Pens.White;
+	public static readonly Pen TagBorderPenForDarkBackground  = new Pen(Color.FromArgb(180, 180, 180));
+	//public static readonly Pen TagBorderPenForDarkBackground  = new Pen(Color.FromArgb(29, 29, 29));
 
 	public static readonly Pen CirclePenForLightBackground = new(Color.Black, 1.5f);
 	public static readonly Pen CirclePenForDarkBackground  = new(Color.White, 1.5f);

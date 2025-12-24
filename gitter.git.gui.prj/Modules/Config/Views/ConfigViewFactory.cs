@@ -22,10 +22,5 @@ namespace gitter.Git.Gui.Views;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class ConfigViewFactory : GitViewFactoryBase<ConfigView>
-{
-	public ConfigViewFactory()
-		: base(Guids.ConfigViewGuid, Resources.StrConfig, Icons.Configuration)
-	{
-	}
-}
+sealed class ConfigViewFactory() : GitViewFactoryBase<ConfigView>(
+	Guids.ConfigViewGuid, Resources.StrConfig, Icons.Configuration);

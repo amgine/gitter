@@ -51,7 +51,7 @@ abstract class RepositoryExplorerItemBase : CustomListBoxItem
 		}
 	}
 
-	private Bitmap GetIcon(Dpi dpi)
+	private Bitmap? GetIcon(Dpi dpi)
 		=> CachedResources.ScaledBitmaps[_image, DpiConverter.FromDefaultTo(dpi).ConvertX(16)];
 
 	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)

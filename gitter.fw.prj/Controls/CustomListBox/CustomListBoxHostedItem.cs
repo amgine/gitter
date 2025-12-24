@@ -21,6 +21,7 @@
 namespace gitter.Framework.Controls;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
 /// <summary>Content item which can be directly hosted by <see cref="CustomListBox"/>.</summary>
@@ -29,7 +30,7 @@ using System.Drawing;
 public abstract class CustomListBoxHostedItem
 {
 	/// <summary>Listbox which is currently hosting this item.</summary>
-	private CustomListBox _listBox;
+	private CustomListBox? _listBox;
 
 	/// <summary>Create <see cref="CustomListBoxHostedItem"/>.</summary>
 	internal CustomListBoxHostedItem()
@@ -37,11 +38,14 @@ public abstract class CustomListBoxHostedItem
 	}
 
 	/// <summary>Returns if this item is attached to a listbox.</summary>
+	#if NET6_0_OR_GREATER
+	[MemberNotNullWhen(returnValue: true, nameof(ListBox))]
+	#endif
 	public bool IsAttachedToListBox => _listBox is not null;
 
 	/// <summary>Returns listbox which is currently hosting this item.</summary>
 	/// <value>Listbox which is currently hosting this item.</value>
-	public CustomListBox ListBox
+	public CustomListBox? ListBox
 	{
 		get => _listBox;
 		internal set
@@ -50,26 +54,22 @@ public abstract class CustomListBoxHostedItem
 			{
 				if(_listBox is not null)
 				{
-					OnListBoxDetached();
+					OnListBoxDetached(_listBox);
 				}
 				_listBox = value;
 				if(_listBox is not null)
 				{
-					OnListBoxAttached();
+					OnListBoxAttached(_listBox);
 				}
 			}
 		}
 	}
 
 	/// <summary>Called when item is attached to listbox.</summary>
-	protected virtual void OnListBoxAttached()
-	{
-	}
+	protected virtual void OnListBoxAttached(CustomListBox listBox) { }
 
 	/// <summary>Called when item is detached from listbox.</summary>
-	protected virtual void OnListBoxDetached()
-	{
-	}
+	protected virtual void OnListBoxDetached(CustomListBox listBox) { }
 
 	/// <summary>Paints item background.</summary>
 	/// <param name="paintEventArgs">Painting options.</param>

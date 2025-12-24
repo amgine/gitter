@@ -23,11 +23,9 @@ namespace gitter.Git.Gui.Controls;
 using System;
 using System.Windows.Forms;
 
-public sealed class UntrackedFileContextMenuRequestedEventArgs : EventArgs
+public sealed class UntrackedFileContextMenuRequestedEventArgs(TreeFile file) : EventArgs
 {
-	public UntrackedFileContextMenuRequestedEventArgs(TreeFile file) => File = file;
+	public TreeFile File { get; } = file;
 
-	public TreeFile File { get; }
-
-	public ContextMenuStrip ContextMenu { get; set; }
+	public ContextMenuStrip? ContextMenu { get; set; }
 }

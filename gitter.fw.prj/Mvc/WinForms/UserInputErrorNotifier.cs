@@ -39,7 +39,7 @@ public class UserInputErrorNotifier : IUserInputErrorNotifier
 		_inputSources = inputSources;
 	}
 
-	private Control GetControlFromInputSource(IUserInputSource userInputSource)
+	private Control? GetControlFromInputSource(IUserInputSource userInputSource)
 	{
 		if(userInputSource is null) return null;
 
@@ -50,7 +50,7 @@ public class UserInputErrorNotifier : IUserInputErrorNotifier
 				return (inputSource as IWin32ControlInputSource)?.Control;
 			}
 		}
-		return null;
+		return default;
 	}
 
 	public void NotifyError(IUserInputSource userInputSource, UserInputError userInputError)

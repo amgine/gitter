@@ -21,6 +21,7 @@
 namespace gitter.GitLab.Gui;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using gitter.Framework.Controls;
 
@@ -38,15 +39,13 @@ sealed class IssueAssigneeColumn : CustomListBoxColumn
 
 	protected override Comparison<CustomListBoxItem> SortComparison => IssueListItem.CompareByAssignee;
 
-	private static bool TryGetContent(CustomListBoxItem item, out string value)
+	private static bool TryGetContent(CustomListBoxItem item,
+		[MaybeNullWhen(returnValue: false)] out string value)
 	{
-		if(item is IssueListItem issue)
+		if(item is IssueListItem { DataContext.Assignees: { Length: not 0 } assignees })
 		{
-			if(issue.DataContext.Assignees != null && issue.DataContext.Assignees.Length > 0)
-			{
-				value = issue.DataContext.Assignees[0].Name;
-				return true;
-			}
+			value = assignees[0].Name;
+			return value is not null;
 		}
 		value = default;
 		return false;

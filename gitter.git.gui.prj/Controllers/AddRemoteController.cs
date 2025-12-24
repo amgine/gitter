@@ -32,32 +32,42 @@ using gitter.Git.Gui.Interfaces;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class AddRemoteController : ViewControllerBase<IAddRemoteView>, IAddRemoteController
+sealed class AddRemoteController(Repository repository)
+	: ViewControllerBase<IAddRemoteView>, IAddRemoteController
 {
-	public AddRemoteController(Repository repository)
+	readonly record struct UserInput(
+		string       Name,
+		string       Url,
+		bool         Fetch,
+		bool         Mirror,
+		TagFetchMode TagFetchMode);
+
+	private bool TryCollectUserInput(out UserInput input)
 	{
-		Verify.Argument.IsNotNull(repository);
+		var view = RequireView();
+		var name = view.RemoteName.Value?.Trim();
+		var url  = view.Url.Value?.Trim();
 
-		Repository = repository;
-	}
-
-	private Repository Repository { get; }
-
-	private bool ValidateInput(out string name, out string url)
-	{
-		name = View.RemoteName.Value.Trim();
-		url  = View.Url.Value.Trim();
-
-		if(!GitControllerUtility.ValidateNewRemoteName(name, Repository, View.RemoteName, View.ErrorNotifier))
+		if(!GitControllerUtility.ValidateNewRemoteName(name, repository, view.RemoteName, view.ErrorNotifier))
 		{
-			return false;
+			goto fail;
 		}
-		if(!GitControllerUtility.ValidateUrl(url, View.Url, View.ErrorNotifier))
+		if(!GitControllerUtility.ValidateUrl(url, view.Url, view.ErrorNotifier))
 		{
-			return false;
+			goto fail;
 		}
 
+		input = new(
+			Name:         name!,
+			Url:          url!,
+			Fetch:        view.Fetch.Value,
+			Mirror:       view.Mirror.Value,
+			TagFetchMode: view.TagFetchMode.Value);
 		return true;
+
+	fail:
+		input = default;
+		return false;
 	}
 
 	private void OnAddFailed(Exception exc)
@@ -70,19 +80,14 @@ sealed class AddRemoteController : ViewControllerBase<IAddRemoteView>, IAddRemot
 
 	public bool TryAddRemote()
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+		if(!TryCollectUserInput(out var input)) return false;
 
-		if(!ValidateInput(out var name, out var url)) return false;
-
-		var fetch        = View.Fetch.Value;
-		var mirror       = View.Mirror.Value;
-		var tagFetchMode = View.TagFetchMode.Value;
-
+		var view = RequireView();
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				Repository.Remotes.Add(name, url, fetch, mirror, tagFetchMode);
+				repository.Remotes.Add(input.Name, input.Url, input.Fetch, input.Mirror, input.TagFetchMode);
 			}
 		}
 		catch(GitException exc)
@@ -95,19 +100,14 @@ sealed class AddRemoteController : ViewControllerBase<IAddRemoteView>, IAddRemot
 
 	public async Task<bool> TryAddRemoteAsync()
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+		if(!TryCollectUserInput(out var input)) return false;
 
-		if(!ValidateInput(out var name, out var url)) return false;
-
-		var fetch        = View.Fetch.Value;
-		var mirror       = View.Mirror.Value;
-		var tagFetchMode = View.TagFetchMode.Value;
-
+		var view = RequireView();
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				await Repository.Remotes.AddAsync(name, url, fetch, mirror, tagFetchMode);
+				await repository.Remotes.AddAsync(input.Name, input.Url, input.Fetch, input.Mirror, input.TagFetchMode);
 			}
 		}
 		catch(GitException exc)

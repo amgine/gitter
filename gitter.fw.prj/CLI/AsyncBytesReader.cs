@@ -39,7 +39,7 @@ public class AsyncBytesReader : OutputReceiverBase, IOutputReceiver
 
 	private readonly LinkedList<byte[]> _bufferChain;
 	private readonly int _bufferSize;
-	private Stream _stream;
+	private Stream? _stream;
 	private int _offset;
 	private int _length;
 
@@ -119,7 +119,7 @@ public class AsyncBytesReader : OutputReceiverBase, IOutputReceiver
 		int bytesCount;
 		try
 		{
-			bytesCount = _stream.EndRead(ar);
+			bytesCount = _stream!.EndRead(ar);
 		}
 		catch(IOException)
 		{
@@ -152,16 +152,16 @@ public class AsyncBytesReader : OutputReceiverBase, IOutputReceiver
 	private void BeginReadAsync()
 	{
 		bool isReading;
-		var buffer = _bufferChain.Last.Value;
+		var buffer = _bufferChain.Last!.Value;
 		try
 		{
 			if(IsCanceled)
 			{
-				_stream.BeginRead(buffer, 0, buffer.Length, OnStreamRead, this);
+				_stream!.BeginRead(buffer, 0, buffer.Length, OnStreamRead, this);
 			}
 			else
 			{
-				_stream.BeginRead(buffer, _offset, buffer.Length - _offset, OnStreamRead, this);
+				_stream!.BeginRead(buffer, _offset, buffer.Length - _offset, OnStreamRead, this);
 			}
 			isReading = true;
 		}

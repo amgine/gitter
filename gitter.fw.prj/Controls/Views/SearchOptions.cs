@@ -24,7 +24,7 @@ namespace gitter.Framework.Controls;
 public class SearchOptions
 {
 	/// <summary>Search request text.</summary>
-	public string Text { get; set; }
+	public string? Text { get; set; }
 
 	/// <summary>Gets or sets flag to match case when searching.</summary>
 	public bool MatchCase { get; set; }

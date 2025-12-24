@@ -21,10 +21,11 @@
 namespace gitter.Framework;
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.Windows.Forms;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows.Forms;
 
 using Autofac;
 
@@ -32,19 +33,18 @@ using gitter.Framework.Options;
 using gitter.Framework.Services;
 using gitter.Framework.Controls;
 using gitter.Native;
-using System.Runtime.InteropServices;
 
 /// <summary>gitter application class.</summary>
 public static class GitterApplication
 {
-	private static FormEx _mainForm;
-	private static IWorkingEnvironment _environment;
+	private static FormEx _mainForm = default!;
+	private static IWorkingEnvironment _environment = default!;
 
-	private static ITextRenderer _textRenderer;
+	private static ITextRenderer _textRenderer = default!;
 
-	private static IGitterStyle _defaultStyle;
-	private static IGitterStyle _style;
-	private static IGitterStyle _styleOnNextStartup;
+	private static IGitterStyle _defaultStyle = default!;
+	private static IGitterStyle _style = default!;
+	private static IGitterStyle _styleOnNextStartup = default!;
 
 	/// <summary>Returns the selected text renderer for application.</summary>
 	public static ITextRenderer TextRenderer
@@ -59,36 +59,27 @@ public static class GitterApplication
 	}
 
 	public static IEnumerable<IGitterStyle> Styles { get; } =
-		new IGitterStyle[]
-		{
+		[
 			_defaultStyle = new MSVS2010Style(),
 			//new MSVS2012LightStyle(),
 			new MSVS2012DarkStyle(),
-		};
+		];
 
 	public static IGitterStyle DefaultStyle => _defaultStyle;
 
 	public static IGitterStyle Style
 	{
-		get
-		{
-			if(System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime)
-			{
-				return _defaultStyle;
-			}
-			return _style;
-		}
+		get => _style;
 		private set
 		{
 			Verify.Argument.IsNotNull(value);
 
-			if(_style != value)
-			{
-				ToolStripManager.Renderer     = value.ToolStripRenderer;
-				ViewManager.Renderer          = value.ViewRenderer;
-				CustomListBoxManager.Renderer = value.ListBoxRenderer;
-				_style = value;
-			}
+			if(_style == value) return;
+
+			ToolStripManager.Renderer     = value.ToolStripRenderer;
+			ViewManager.Renderer          = value.ViewRenderer;
+			CustomListBoxManager.Renderer = value.ListBoxRenderer;
+			_style = value;
 		}
 	}
 
@@ -105,17 +96,15 @@ public static class GitterApplication
 
 	public static ITextRenderer GdiTextRenderer { get; } = new GdiTextRenderer();
 
-	public static ITextRenderer GdiPlusTextRenderer { get; } = new GdiPlusTextRenderer();
-
 	public static IMessageBoxService MessageBoxService { get; } = new CustomMessageBoxService();
 
 	public static IWorkingEnvironment WorkingEnvironment => _environment;
 
 	public static FormEx MainForm => _mainForm;
 
-	public static SelectableFontManager FontManager { get; private set; }
+	public static SelectableFontManager FontManager { get; private set; } = default!;
 
-	public static IntegrationFeatures IntegrationFeatures { get; private set; }
+	public static IntegrationFeatures IntegrationFeatures { get; private set; } = default!;
 
 	private static void SetupDefaultExceptionHandling()
 	{
@@ -133,8 +122,8 @@ public static class GitterApplication
 			LoggingService.Global.Error(exc, "Application error");
 			try
 			{
-				using var dlg = new ExceptionDialog(exc);
-				dlg.Run(null);
+				using var dialog = new ExceptionDialog(exc);
+				dialog.Run(null);
 			}
 			catch
 			{
@@ -153,8 +142,8 @@ public static class GitterApplication
 		LoggingService.Global.Error(exception, "Application error");
 		try
 		{
-			using var dlg = new ExceptionDialog(exception);
-			dlg.Run(null);
+			using var dialog = new ExceptionDialog(exception);
+			dialog.Run(null);
 		}
 		catch
 		{
@@ -194,7 +183,7 @@ public static class GitterApplication
 
 	public static void Run(Action<ContainerBuilder> configuration)
 	{
-		_textRenderer = GdiPlusTextRenderer;
+		_textRenderer = GdiTextRenderer;
 
 		using var container = CreateContainer(configuration);
 
@@ -243,7 +232,7 @@ public static class GitterApplication
 
 				Application.Run(_mainForm);
 
-				_environment = null;
+				_environment = null!;
 			}
 		}
 		finally
@@ -252,7 +241,7 @@ public static class GitterApplication
 			{
 				Utility.DisableWin7TaskbarSupport();
 			}
-			_mainForm = null;
+			_mainForm = null!;
 		}
 
 		GlobalOptions.SaveTo(configurationService.GlobalSection);

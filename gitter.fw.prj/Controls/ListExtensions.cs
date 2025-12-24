@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 public static class ListExtensions
 {
-	public static T FindPrevious<T>(this IReadOnlyList<T> items, int currentIndex, Predicate<T> filter)
+	public static T? FindPrevious<T>(this IReadOnlyList<T> items, int currentIndex, Predicate<T> filter)
 	{
 		Verify.Argument.IsNotNull(items);
 		Verify.Argument.IsNotNull(filter);
@@ -41,7 +41,7 @@ public static class ListExtensions
 		return default;
 	}
 
-	public static T FindNext<T>(this IReadOnlyList<T> items, int currentIndex, Predicate<T> filter)
+	public static T? FindNext<T>(this IReadOnlyList<T> items, int currentIndex, Predicate<T> filter)
 	{
 		Verify.Argument.IsNotNull(items);
 		Verify.Argument.IsNotNull(filter);

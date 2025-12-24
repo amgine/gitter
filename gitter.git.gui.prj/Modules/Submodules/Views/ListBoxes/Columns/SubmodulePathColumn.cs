@@ -30,6 +30,6 @@ sealed class SubmodulePathColumn : PathColumn
 	}
 
 	/// <inheritdoc/>
-	protected override string GetPath(CustomListBoxItem item)
+	protected override string? GetPath(CustomListBoxItem item)
 		=> (item as IDataContextProvider<Submodule>)?.DataContext.Path;
 }

@@ -26,23 +26,14 @@ using gitter.Git.Gui.Views;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class RepositoryHistoryListItem : RepositoryExplorerItemBase
+sealed class RepositoryHistoryListItem(IWorkingEnvironment environment)
+	: RepositoryExplorerItemBase(Icons.History, Resources.StrHistory)
 {
-	private readonly IWorkingEnvironment _environment;
-
-	public RepositoryHistoryListItem(IWorkingEnvironment environment)
-		: base(Icons.History, Resources.StrHistory)
-	{
-		Verify.Argument.IsNotNull(environment);
-
-		_environment = environment;
-	}
-
 	/// <inheritdoc/>
 	protected override void OnActivate()
 	{
 		base.OnActivate();
-		_environment.ViewDockService.ShowView(Guids.HistoryViewGuid);
+		environment.ViewDockService.ShowView(Guids.HistoryViewGuid);
 	}
 
 	/// <inheritdoc/>

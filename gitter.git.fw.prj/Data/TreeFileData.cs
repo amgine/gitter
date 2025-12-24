@@ -20,15 +20,8 @@
 
 namespace gitter.Git;
 
-using System;
-
-public sealed class TreeFileData : TreeItemData
+public sealed class TreeFileData(string name, FileStatus fileStatus, ConflictType conflictType, StagedStatus stagedStatus)
+	: TreeItemData(name, fileStatus, stagedStatus)
 {
-	public TreeFileData(string name, FileStatus fileStatus, ConflictType conflictType, StagedStatus stagedStatus)
-		: base(name, fileStatus, stagedStatus)
-	{
-		ConflictType = conflictType;
-	}
-
-	public ConflictType ConflictType { get; set; }
+	public ConflictType ConflictType { get; set; } = conflictType;
 }

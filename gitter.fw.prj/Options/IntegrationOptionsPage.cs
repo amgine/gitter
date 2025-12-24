@@ -22,10 +22,11 @@ namespace gitter.Framework.Options;
 
 using System;
 using System.Drawing;
+using System.Windows.Forms;
 
 using gitter.Framework;
-using gitter.Framework.Options;
 using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 
 using Resources = gitter.Framework.Properties.Resources;
 
@@ -61,20 +62,76 @@ public partial class IntegrationOptionsPage : PropertyPage, IExecutableDialog, I
 		}
 	}
 
+	readonly struct DialogControls
+	{
+		public readonly CustomListBox _lstFeatures;
+		public readonly LabelControl _lblIntegrationFeatures;
+
+		public DialogControls(IGitterStyle style)
+		{
+			style ??= GitterApplication.Style;
+			_lstFeatures = new CustomListBox
+			{
+				Style = style,
+				ShowCheckBoxes = true,
+				HeaderStyle = HeaderStyle.Hidden,
+			};
+			_lblIntegrationFeatures = new();
+		}
+
+		public void Localize()
+		{
+			_lblIntegrationFeatures.Text = Resources.StrsIntegrationFeatures.AddColon();
+		}
+
+		public void Layout(Control parent)
+		{
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					rows:
+					[
+						LayoutConstants.LabelRowHeight,
+						LayoutConstants.LabelRowSpacing,
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblIntegrationFeatures, marginOverride: LayoutConstants.NoMargin), row: 0),
+						new GridContent(new ControlContent(_lstFeatures, marginOverride: LayoutConstants.NoMargin), row: 2),
+					]),
+			};
+
+			var tabIndex = 0;
+			_lblIntegrationFeatures.TabIndex = tabIndex++;
+			_lstFeatures.TabIndex = tabIndex++;
+
+			_lblIntegrationFeatures.Parent = parent;
+			_lstFeatures.Parent = parent;
+		}
+	}
+
+	private readonly DialogControls _controls;
 	private int _adminFeaturesChanged;
 
 	public IntegrationOptionsPage()
 		: base(Guid)
 	{
-		InitializeComponent();
-
+		Name = nameof(IntegrationOptionsPage);
 		Text = Resources.StrIntegration;
 
-		_lblIntegrationFeatures.Text = Resources.StrsIntegrationFeatures.AddColon();
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		Size                = ScalableSize.GetValue(Dpi.Default);
+		_controls = new(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(false);
+		PerformLayout();
 
-		_lstFeatures.BeginUpdate();
-		_lstFeatures.Style = GitterApplication.DefaultStyle;
-		_lstFeatures.Columns.Add(new CustomListBoxColumn(0, Resources.StrName) { SizeMode = ColumnSizeMode.Fill });
+		_controls._lstFeatures.BeginUpdate();
+		_controls._lstFeatures.Columns.Add(new CustomListBoxColumn(0, Resources.StrName) { SizeMode = ColumnSizeMode.Fill });
 		foreach(var feature in GitterApplication.IntegrationFeatures)
 		{
 			var item = new FeatureItem(feature);
@@ -82,16 +139,18 @@ public partial class IntegrationOptionsPage : PropertyPage, IExecutableDialog, I
 			{
 				item.CheckedStateChanged += OnItemCheckedStateChanged;
 			}
-			_lstFeatures.Items.Add(item);
+			_controls._lstFeatures.Items.Add(item);
 		}
-		_lstFeatures.EndUpdate();
+		_controls._lstFeatures.EndUpdate();
 	}
+
+	protected override bool ScaleChildren => false;
 
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(447, 354));
 
-	private void OnItemCheckedStateChanged(object sender, EventArgs e)
+	private void OnItemCheckedStateChanged(object? sender, EventArgs e)
 	{
-		var item = (FeatureItem)sender;
+		var item = (FeatureItem)sender!;
 		if(item.IsChecked != item.DataContext.IsEnabled)
 		{
 			++_adminFeaturesChanged;
@@ -114,7 +173,7 @@ public partial class IntegrationOptionsPage : PropertyPage, IExecutableDialog, I
 
 	public bool Execute()
 	{
-		foreach(FeatureItem item in _lstFeatures.Items)
+		foreach(FeatureItem item in _controls._lstFeatures.Items)
 		{
 			var feature = item.DataContext;
 			if(feature.AdministratorRightsRequired)
@@ -140,7 +199,7 @@ public partial class IntegrationOptionsPage : PropertyPage, IExecutableDialog, I
 
 	#region IElevatedExecutableDialog Members
 
-	public event EventHandler RequireElevationChanged;
+	public event EventHandler? RequireElevationChanged;
 
 	private void OnRequireElevationChanged()
 		=> RequireElevationChanged?.Invoke(this, EventArgs.Empty);
@@ -150,7 +209,7 @@ public partial class IntegrationOptionsPage : PropertyPage, IExecutableDialog, I
 		get => _adminFeaturesChanged != 0;
 	}
 
-	public string[] ElevatedExecutionActions
+	public string[]? ElevatedExecutionActions
 	{
 		get
 		{
@@ -158,11 +217,11 @@ public partial class IntegrationOptionsPage : PropertyPage, IExecutableDialog, I
 			{
 				var d = new string[_adminFeaturesChanged];
 				int i = 0;
-				foreach(FeatureItem item in _lstFeatures.Items)
+				foreach(FeatureItem item in _controls._lstFeatures.Items)
 				{
 					if(item.DataContext.AdministratorRightsRequired && item.IsChecked != item.DataContext.IsEnabled)
 					{
-						d[i++] = item.DataContext.GetEnableAction(item.IsChecked);
+						d[i++] = item.DataContext.GetEnableAction(item.IsChecked) ?? "";
 					}
 				}
 				return d;

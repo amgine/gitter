@@ -24,7 +24,6 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Security.Permissions;
 using System.Runtime.InteropServices;
 using System.Windows.Forms.VisualStyles;
 
@@ -37,7 +36,7 @@ public partial class Popup : ToolStripDropDown
 {
 	#region Data
 
-	private VisualStyleRenderer _sizeGripRenderer;
+	private VisualStyleRenderer? _sizeGripRenderer;
 	private PopupAnimations _popupAnimation;
 	private PopupAnimations _closeAnimation;
 	private int _animationDuration;
@@ -45,9 +44,9 @@ public partial class Popup : ToolStripDropDown
 	private bool _acceptAlt = true;
 
 	private ToolStripControlHost _host;
-	private Control _ownerControl;
-	private Popup _ownerPopup;
-	private Popup _childPopup;
+	private Control? _ownerControl;
+	private Popup? _ownerPopup;
+	private Popup? _childPopup;
 	private bool _resizableTop;
 	private bool _resizableLeft;
 
@@ -172,7 +171,7 @@ public partial class Popup : ToolStripDropDown
 			_host.Size = size;
 			content.DpiChangedAfterParent += (sender, _) =>
 			{
-				var c = (ExtenderBase)sender;
+				var c = (ExtenderBase)sender!;
 				Size = c.ScalableSize.GetValue(Dpi.FromControl(c));
 			};
 		}
@@ -196,10 +195,10 @@ public partial class Popup : ToolStripDropDown
 	{
 		if(disposing)
 		{
-			if(Content is not null)
+			var c = Content;
+			if(c is not null)
 			{
-				var c = Content;
-				Content = null;
+				Content = null!;
 				c.Dispose();
 			}
 		}
@@ -280,9 +279,6 @@ public partial class Popup : ToolStripDropDown
 	}
 
 	/// <inheritdoc/>
-	#if !NETCOREAPP
-	[UIPermission(SecurityAction.LinkDemand, Window = UIPermissionWindow.AllWindows)]
-	#endif
 	protected override bool ProcessDialogKey(Keys keyData)
 	{
 		if(_acceptAlt && ((keyData & Keys.Alt) == Keys.Alt))
@@ -307,7 +303,7 @@ public partial class Popup : ToolStripDropDown
 
 	protected void UpdateRegion()
 	{
-		return;
+		/*
 		if(this.Region != null)
 		{
 			this.Region.Dispose();
@@ -317,6 +313,7 @@ public partial class Popup : ToolStripDropDown
 		{
 			this.Region = Content.Region.Clone();
 		}
+		*/
 	}
 
 	public void Show(Control control)
@@ -477,7 +474,7 @@ public partial class Popup : ToolStripDropDown
 
 	private bool OnGetMinMaxInfo(ref Message m)
 	{
-		var minmax = (MINMAXINFO)Marshal.PtrToStructure(m.LParam, typeof(MINMAXINFO));
+		var minmax = Marshal.PtrToStructure<MINMAXINFO>(m.LParam);
 		if(!_maximumSize.IsEmpty)
 		{
 			minmax.maxTrackSize = _maximumSize;

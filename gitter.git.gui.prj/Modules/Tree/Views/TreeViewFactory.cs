@@ -22,10 +22,5 @@ namespace gitter.Git.Gui.Views;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class TreeViewFactory : GitViewFactoryBase<TreeView>
-{
-	public TreeViewFactory()
-		: base(Guids.TreeViewGuid, Resources.StrWorkingTree, Icons.Folder)
-	{
-	}
-}
+sealed class TreeViewFactory() : GitViewFactoryBase<TreeView>(
+	Guids.TreeViewGuid, Resources.StrWorkingTree, Icons.Folder);

@@ -28,17 +28,8 @@ using gitter.Framework;
 
 using gitter.Git.AccessLayer;
 
-sealed class AccessLayerOptionsPageFactory : IAccessLayerOptionsPageFactory
+sealed class AccessLayerOptionsPageFactory(IComponentContext componentContext) : IAccessLayerOptionsPageFactory
 {
-	public AccessLayerOptionsPageFactory(IComponentContext componentContext)
-	{
-		Verify.Argument.IsNotNull(componentContext);
-
-		ComponentContext = componentContext;
-	}
-
-	private IComponentContext ComponentContext { get; }
-
-	public DialogBase Create(Type accessLayerType, IGitAccessor gitAccessor)
-		=> ComponentContext.ResolveOptionalKeyed<DialogBase>(accessLayerType, new TypedParameter(typeof(IGitAccessor), gitAccessor));
+	public DialogBase? Create(Type accessLayerType, IGitAccessor gitAccessor)
+		=> componentContext.ResolveOptionalKeyed<DialogBase>(accessLayerType, new TypedParameter(typeof(IGitAccessor), gitAccessor));
 }

@@ -20,8 +20,6 @@
 
 namespace gitter;
 
-using System;
-
 using gitter.Framework;
 using gitter.Framework.Controls;
 

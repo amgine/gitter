@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git.AccessLayer.CLI;
@@ -27,7 +27,8 @@ using System.Collections.Generic;
 using gitter.Framework;
 
 /// <summary>Parser to use with git diffs.</summary>
-internal sealed class DiffParser : GitParser
+/// <param name="string">Diff to parse.</param>
+internal sealed class DiffParser(string @string) : GitParser(@string)
 {
 	#region Constants
 
@@ -62,34 +63,19 @@ internal sealed class DiffParser : GitParser
 
 	#region Headers
 
-	private struct DiffFileHeader
+	private struct DiffFileHeader(FileStatus status)
 	{
-		public FileStatus Status;
-		public string OldIndex;
-		public string NewIndex;
-		public int OldMode;
-		public int NewMode;
-		public string CopyTo;
-		public string CopyFrom;
-		public string RenameTo;
-		public string RenameFrom;
-		public int SimilarityIndex;
-		public int DissimilarityIndex;
-
-		public DiffFileHeader(FileStatus status)
-		{
-			Status = status;
-			OldIndex = string.Empty;
-			NewIndex = string.Empty;
-			OldMode = 0;
-			NewMode = 0;
-			CopyTo = string.Empty;
-			CopyFrom = string.Empty;
-			RenameFrom = string.Empty;
-			RenameTo = string.Empty;
-			SimilarityIndex = -1;
-			DissimilarityIndex = -1;
-		}
+		public FileStatus Status             = status;
+		public string     OldIndex           = string.Empty;
+		public string     NewIndex           = string.Empty;
+		public int        OldMode            = 0;
+		public int        NewMode            = 0;
+		public string     CopyTo             = string.Empty;
+		public string     CopyFrom           = string.Empty;
+		public string     RenameTo           = string.Empty;
+		public string     RenameFrom         = string.Empty;
+		public int        SimilarityIndex    = -1;
+		public int        DissimilarityIndex = -1;
 	}
 
 	private enum Header
@@ -111,7 +97,7 @@ internal sealed class DiffParser : GitParser
 	}
 
 	private static readonly string[] DiffHeaders =
-	{
+	[
 		OldModeHeader,
 		NewModeHeader,
 		ModeHeader,
@@ -124,7 +110,7 @@ internal sealed class DiffParser : GitParser
 		SimilarityIndexHeader,
 		DissimilarityIndexHeader,
 		IndexHeader,
-	};
+	];
 
 	#endregion
 
@@ -132,7 +118,7 @@ internal sealed class DiffParser : GitParser
 
 	private DiffLine ReadDiffLine(int[] nums)
 	{
-		int[] lineNums = (int[])nums.Clone();
+		var lineNums = (int[])nums.Clone();
 		int nc = nums.Length;
 		var states = new DiffLineState[nc];
 		if(CheckValue(NoNewlineHeader) || CheckValue(HunkHeader))
@@ -141,7 +127,8 @@ internal sealed class DiffParser : GitParser
 			{
 				states[i] = DiffLineState.Header;
 			}
-			return new DiffLine(DiffLineState.Header, states, lineNums, ReadLine());
+			var text = ReadLine(out var e);
+			return new DiffLine(DiffLineState.Header, states, lineNums, text, e);
 		}
 		var state = DiffLineState.Context;
 		for(int i = 0; i < nc - 1; ++i)
@@ -198,18 +185,7 @@ internal sealed class DiffParser : GitParser
 				states[nc - 1] = DiffLineState.Removed;
 				break;
 		}
-		int eol = FindLfLineEnding();
-		string ending;
-		if(String[eol - 1] == '\r')
-		{
-			--eol;
-			ending = LineEnding.CrLf;
-		}
-		else
-		{
-			ending = LineEnding.Lf;
-		}
-		var line = ReadStringUpTo(eol, ending.Length);
+		var line = ReadLine(out var ending);
 		return new DiffLine(state, states, lineNums, line, ending);
 	}
 
@@ -240,23 +216,40 @@ internal sealed class DiffParser : GitParser
 			int comma = FindComma(space - Position);
 			if(comma != -1)
 			{
+#if NETCOREAPP
 				var lineNumber = int.Parse(
-					ReadStringUpTo(comma, 1),
+					ReadSpanUpTo(comma, skip: 1),
 					NumberStyles.Integer,
 					CultureInfo.InvariantCulture);
 				var lineCount = int.Parse(
-					ReadStringUpTo(space, 1),
+					ReadSpanUpTo(space, skip: 1),
 					NumberStyles.Integer,
 					CultureInfo.InvariantCulture);
+#else
+				var lineNumber = int.Parse(
+					ReadStringUpTo(comma, skip: 1),
+					NumberStyles.Integer,
+					CultureInfo.InvariantCulture);
+				var lineCount = int.Parse(
+					ReadStringUpTo(space, skip: 1),
+					NumberStyles.Integer,
+					CultureInfo.InvariantCulture);
+#endif
 				headers[i] = new DiffColumnHeader(action, lineNumber, lineCount);
 			}
 			else
 			{
-				var lineNumberStr = ReadStringUpTo(space, 1);
+#if NETCOREAPP
 				var lineNumber = int.Parse(
-					lineNumberStr,
+					ReadSpanUpTo(space, skip: 1),
 					NumberStyles.Integer,
 					CultureInfo.InvariantCulture);
+#else
+				var lineNumber = int.Parse(
+					ReadStringUpTo(space, skip: 1),
+					NumberStyles.Integer,
+					CultureInfo.InvariantCulture);
+#endif
 				headers[i] = new DiffColumnHeader(action, lineNumber, 1);
 			}
 		}
@@ -286,21 +279,20 @@ internal sealed class DiffParser : GitParser
 				break;
 			}
 		}
-		return new DiffHunk(headers, lines, stats, false);
+		return new DiffHunk(headers, lines, stats, isBinary: false);
 	}
 
 	private DiffHunk ReadBinaryFilesDifferHunk()
 	{
 		return new DiffHunk(
 			Preallocated<DiffColumnHeader>.EmptyArray,
-			new DiffLine[]
-			{
+			[
 				new DiffLine(
 					DiffLineState.Header,
 					Preallocated<DiffLineState>.EmptyArray,
 					Preallocated<int>.EmptyArray,
 					ReadLine())
-			},
+			],
 			new DiffStats(0, 0, 0, 1),
 			true);
 	}
@@ -372,7 +364,11 @@ internal sealed class DiffParser : GitParser
 	{
 		var fileHeader = new DiffFileHeader(FileStatus.Modified);
 
+#if NETCOREAPP
+		Span<bool> headerPresent = stackalloc bool[DiffHeaders.Length];
+#else
 		var headerPresent = new bool[DiffHeaders.Length];
+#endif
 
 		if(combinedDiff)
 		{
@@ -447,14 +443,14 @@ internal sealed class DiffParser : GitParser
 					// old mode <mode>
 					if(dataPresent)
 					{
-						fileHeader.OldMode = int.Parse(ReadLine(), NumberStyles.None, CultureInfo.InvariantCulture);
+						fileHeader.OldMode = ReadLineAsInt32();
 					}
 					break;
 				case Header.NewMode:
 					// new mode <mode>
 					if(dataPresent)
 					{
-						fileHeader.NewMode = int.Parse(ReadLine(), NumberStyles.None, CultureInfo.InvariantCulture);
+						fileHeader.NewMode = ReadLineAsInt32();
 					}
 					break;
 				case Header.Mode:
@@ -469,7 +465,7 @@ internal sealed class DiffParser : GitParser
 					fileHeader.Status = FileStatus.Added;
 					if(dataPresent)
 					{
-						fileHeader.NewMode = int.Parse(ReadLine(), NumberStyles.None, CultureInfo.InvariantCulture);
+						fileHeader.NewMode = ReadLineAsInt32();
 					}
 					break;
 				case Header.DeletedFileMode:
@@ -484,7 +480,7 @@ internal sealed class DiffParser : GitParser
 						else
 						{
 							// deleted file mode <mode>
-							fileHeader.OldMode = int.Parse(ReadLine(), NumberStyles.None, CultureInfo.InvariantCulture);
+							fileHeader.OldMode = ReadLineAsInt32();
 						}
 					}
 					break;
@@ -568,29 +564,27 @@ internal sealed class DiffParser : GitParser
 
 	private void ReadDiffFileHeader3(ref string source, ref string target)
 	{
-		if(CheckValue("---"))
+		if(!CheckValue("---")) return;
+
+		Skip(4);
+		source = DecodeEscapedString(FindNewLineOrEndOfString(), 1).Trim();
+		if(source.StartsWith(DefaultPrefixA))
 		{
-			Skip(4);
-			source = DecodeEscapedString(FindNewLineOrEndOfString(), 1).Trim();
-			if(source.StartsWith(DefaultPrefixA))
-			{
-				source = source.Substring(2);
-			}
-			Skip(4);
-			target = DecodeEscapedString(FindNewLineOrEndOfString(), 1).Trim();
-			if(target.StartsWith(DefaultPrefixB))
-			{
-				target = target.Substring(2);
-			}
+			source = source.Substring(2);
+		}
+		Skip(4);
+		target = DecodeEscapedString(FindNewLineOrEndOfString(), 1).Trim();
+		if(target.StartsWith(DefaultPrefixB))
+		{
+			target = target.Substring(2);
 		}
 	}
 
 	private DiffFile ReadDiffFile()
 	{
-		bool isCombined = ReadDiffFileHeader1(out var source, out var target);
-		var header = ReadDiffFileHeader2(isCombined);
-
-		ReadDiffFileHeader3(ref source, ref target);
+		var isCombined = ReadDiffFileHeader1(out var source, out var target);
+		var header     = ReadDiffFileHeader2(isCombined);
+		                 ReadDiffFileHeader3(ref source, ref target);
 
 		bool isBinary = false;
 		var stats = new DiffStats();
@@ -661,12 +655,5 @@ internal sealed class DiffParser : GitParser
 			files.Add(ReadDiffFile());
 		}
 		return new Diff(type, files);
-	}
-
-	/// <summary>Create <see cref="DiffParser"/>.</summary>
-	/// <param name="string">Diff to parse.</param>
-	public DiffParser(string @string)
-		: base(@string)
-	{
 	}
 }

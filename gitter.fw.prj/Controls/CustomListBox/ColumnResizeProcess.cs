@@ -27,16 +27,10 @@ using System.Drawing;
 /// <summary><see cref="CustomListBoxColumn"/> resize process.</summary>
 class ColumnResizeProcess
 {
-	#region Data
-
 	private readonly Point _mouseDownLocation;
 
-	#endregion
-
-	#region Static
-
 	/// <summary>Create resize process from column list, active (hovered) column and side (left or right) of resize.</summary>
-	public static ColumnResizeProcess FromActiveColumn(IReadOnlyList<CustomListBoxColumn> columns, int activeIndex, ColumnResizeSide side, Point mouseDownLocation)
+	public static ColumnResizeProcess? FromActiveColumn(IReadOnlyList<CustomListBoxColumn> columns, int activeIndex, ColumnResizeSide side, Point mouseDownLocation)
 	{
 		Assert.IsNotNull(columns);
 
@@ -90,10 +84,6 @@ class ColumnResizeProcess
 		}
 	}
 
-	#endregion
-
-	#region .ctor
-
 	private ColumnResizeProcess(CustomListBoxColumn resizingColumn, int deltaSign, Point mouseDownLocation)
 	{
 		Assert.IsNotNull(resizingColumn);
@@ -104,10 +94,6 @@ class ColumnResizeProcess
 		DeltaSign         = deltaSign;
 	}
 
-	#endregion
-
-	#region Properties
-
 	/// <summary> Column actually resizing. May differ from active column. </summary>
 	public CustomListBoxColumn ResizingColumn { get; }
 
@@ -116,10 +102,6 @@ class ColumnResizeProcess
 
 	/// <summary>Initial column width.</summary>
 	public ValueWithDpi<int> InitialWidth { get; }
-
-	#endregion
-
-	#region Methods
 
 	/// <summary>Cancels column resize.</summary>
 	public void Cancel()
@@ -131,7 +113,7 @@ class ColumnResizeProcess
 	/// <param name="mouseLocation">Current mouse pointer location.</param>
 	public void Update(Point mouseLocation)
 	{
-		var dpi = Dpi.FromControl(ResizingColumn.ListBox);
+		var dpi = Dpi.FromControlOrDefault(ResizingColumn.ListBox);
 		int dx = (mouseLocation.X - _mouseDownLocation.X) * DeltaSign;
 		int w;
 		if(InitialWidth.Dpi.X == 0)
@@ -148,6 +130,4 @@ class ColumnResizeProcess
 		}
 		ResizingColumn.Width = new(w, dpi);
 	}
-
-	#endregion
 }

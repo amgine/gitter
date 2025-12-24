@@ -22,308 +22,142 @@ namespace gitter.Git;
 
 using System;
 
+using gitter.Framework;
+
 /// <summary><see cref="EventArgs"/> identifying some object of type <typeparamref name="T"/>.</summary>
 /// <typeparam name="T">Type of associated object.</typeparam>
-public class ObjectEventArgs<T> : EventArgs
+/// <param name="object">Object, associated with event.</param>
+public class ObjectEventArgs<T>(T @object) : EventArgs
 {
-	/// <summary>Create <see cref="ObjectEventArgs&lt;T&gt;"/>.</summary>
-	/// <param name="object">Object, associated with event.</param>
-	public ObjectEventArgs(T @object)
-	{
-		Object = @object;
-	}
-
 	/// <summary>Object, associated with event.</summary>
-	public T Object { get; }
+	public T Object { get; } = @object;
 }
 
 /// <summary><see cref="EventArgs"/> specifying changed value of type <typeparamref name="T"/>.</summary>
 /// <typeparam name="T">Type of associated object.</typeparam>
-public class ObjectChangedEventArgs<T> : EventArgs
+/// <param name="oldValue">Old value.</param>
+/// <param name="newValue">New value.</param>
+public class ObjectChangedEventArgs<T>(T? oldValue, T? newValue) : EventArgs
 {
-	/// <summary>Create <see cref="ObjectChangedEventArgs&lt;T&gt;"/>.</summary>
-	/// <param name="oldValue">Old value.</param>
-	/// <param name="newValue">New value.</param>
-	public ObjectChangedEventArgs(T oldValue, T newValue)
-	{
-		OldValue = oldValue;
-		NewValue = newValue;
-	}
-
 	/// <summary>Old value.</summary>
-	public T OldValue { get; }
+	public T? OldValue { get; } = oldValue;
 
 	/// <summary>New value.</summary>
-	public T NewValue { get; }
+	public T? NewValue { get; } = newValue;
 }
 
 /// <summary><see cref="EventArgs"/> identifying <see cref="Branch"/>.</summary>
-public class BranchEventArgs : ObjectEventArgs<Branch>
-{
-	/// <summary>Create <see cref="BranchEventArgs"/>.</summary>
-	/// <param name="branch"><see cref="Branch"/> which is related to event.</param>
-	public BranchEventArgs(Branch branch)
-		: base(branch)
-	{
-	}
-}
+/// <param name="branch"><see cref="Branch"/> which is related to event.</param>
+public class BranchEventArgs(Branch branch) : ObjectEventArgs<Branch>(branch);
 
 /// <summary>Arguments for branch renamed event.</summary>
-public class BranchRenamedEventArgs : BranchEventArgs
+/// <param name="branch"><see cref="Branch"/> which is related to event.</param>
+/// <param name="oldName">Old branch name.</param>
+public class BranchRenamedEventArgs(Branch branch, string oldName) : BranchEventArgs(branch)
 {
-	/// <summary>Create <see cref="BranchRenamedEventArgs"/>.</summary>
-	/// <param name="branch"><see cref="Branch"/> which is related to event.</param>
-	/// <param name="oldName">Old branch name.</param>
-	public BranchRenamedEventArgs(Branch branch, string oldName)
-		: base(branch)
-	{
-		OldName = oldName;
-	}
-
 	/// <summary>Returns old branch name.</summary>
 	/// <value>Old branch name.</value>
-	public string OldName { get; }
+	public string OldName { get; } = oldName;
 }
 
 /// <summary><see cref="EventArgs"/> identifying <see cref="RemoteBranch"/>.</summary>
-public class RemoteBranchEventArgs : ObjectEventArgs<RemoteBranch>
-{
-	/// <summary>Create <see cref="RemoteBranchEventArgs"/>.</summary>
-	/// <param name="branch"><see cref="RemoteBranch"/> which is related to event.</param>
-	public RemoteBranchEventArgs(RemoteBranch branch)
-		: base(branch)
-	{
-	}
-}
+/// <param name="branch"><see cref="RemoteBranch"/> which is related to event.</param>
+public class RemoteBranchEventArgs(RemoteBranch branch) : ObjectEventArgs<RemoteBranch>(branch);
 
 /// <summary><see cref="EventArgs"/> identifying <see cref="Tag"/>.</summary>
-public class TagEventArgs : ObjectEventArgs<Tag>
-{
-	/// <summary>Create <see cref="TagEventArgs"/>.</summary>
-	/// <param name="tag"><see cref="Tag"/> which is related to event.</param>
-	public TagEventArgs(Tag tag)
-		: base(tag)
-	{
-	}
-}
+/// <param name="tag"><see cref="Tag"/> which is related to event.</param>
+public class TagEventArgs(Tag tag) : ObjectEventArgs<Tag>(tag);
 
 /// <summary><see cref="EventArgs"/> identifying <see cref="ReflogRecord"/>.</summary>
-public class ReflogRecordEventArgs : ObjectEventArgs<ReflogRecord>
-{
-	/// <summary>Create <see cref="ReflogRecordEventArgs"/>.</summary>
-	/// <param name="reflogRecord"><see cref="ReflogRecord"/> which is related to event.</param>
-	public ReflogRecordEventArgs(ReflogRecord reflogRecord)
-		: base(reflogRecord)
-	{
-	}
-}
+/// <param name="reflogRecord"><see cref="ReflogRecord"/> which is related to event.</param>
+public class ReflogRecordEventArgs(ReflogRecord reflogRecord) : ObjectEventArgs<ReflogRecord>(reflogRecord);
 
 /// <summary><see cref="EventArgs"/> identifying <see cref="IRevisionPointer"/>.</summary>
-public class RevisionPointerEventArgs : ObjectEventArgs<IRevisionPointer>
-{
-	/// <summary>Create <see cref="RevisionPointerEventArgs"/>.</summary>
-	/// <param name="revision"><see cref="IRevisionPointer"/> which is related to event.</param>
-	public RevisionPointerEventArgs(IRevisionPointer revision)
-		: base(revision)
-	{
-	}
-}
+/// <param name="revision"><see cref="IRevisionPointer"/> which is related to event.</param>
+public class RevisionPointerEventArgs(IRevisionPointer revision) : ObjectEventArgs<IRevisionPointer>(revision);
 
 /// <summary><see cref="EventArgs"/> identifying <see cref="Revision"/>.</summary>
-public class RevisionEventArgs : ObjectEventArgs<Revision>
-{
-	/// <summary>Create <see cref="RevisionEventArgs"/>.</summary>
-	/// <param name="revision"><see cref="Revision"/> which is related to event.</param>
-	public RevisionEventArgs(Revision revision)
-		: base(revision)
-	{
-	}
-}
+/// <param name="revision"><see cref="Revision"/> which is related to event.</param>
+public class RevisionEventArgs(Revision revision) : ObjectEventArgs<Revision>(revision);
 
 /// <summary><see cref="EventArgs"/> identifying change of <see cref="Revision"/>.</summary>
-public class RevisionChangedEventArgs : ObjectChangedEventArgs<Revision>
-{
-	/// <summary>Create <see cref="RevisionChangedEventArgs"/>.</summary>
-	/// <param name="oldRevision">Old revision.</param>
-	/// <param name="newRevision">New revision.</param>
-	public RevisionChangedEventArgs(Revision oldRevision, Revision newRevision)
-		: base(oldRevision, newRevision)
-	{
-	}
-}
+/// <param name="oldRevision">Old revision.</param>
+/// <param name="newRevision">New revision.</param>
+public class RevisionChangedEventArgs(Revision? oldRevision, Revision? newRevision) : ObjectChangedEventArgs<Revision>(oldRevision, newRevision);
 
 /// <summary><see cref="EventArgs"/> identifying change of <see cref="IRevisionPointer"/>.</summary>
-public class RevisionPointerChangedEventArgs : ObjectChangedEventArgs<IRevisionPointer>
-{
-	/// <summary>Create <see cref="RevisionPointerChangedEventArgs"/>.</summary>
-	/// <param name="oldRevision">Old revision.</param>
-	/// <param name="newRevision">New revision.</param>
-	public RevisionPointerChangedEventArgs(IRevisionPointer oldRevision, IRevisionPointer newRevision)
-		: base(oldRevision, newRevision)
-	{
-	}
-}
+/// <param name="oldRevision">Old revision.</param>
+/// <param name="newRevision">New revision.</param>
+public class RevisionPointerChangedEventArgs(IRevisionPointer oldRevision, IRevisionPointer newRevision)
+	: ObjectChangedEventArgs<IRevisionPointer>(oldRevision, newRevision);
 
 /// <summary><see cref="EventArgs"/> identifying <see cref="Remote"/>.</summary>
-public class RemoteEventArgs : ObjectEventArgs<Remote>
+/// <param name="remote"><see cref="Remote"/> which is related to event.</param>
+public class RemoteEventArgs(Remote remote) : ObjectEventArgs<Remote>(remote);
+
+public abstract class RemoteOperationCompletedEventArgs(Remote? remote, Many<ReferenceChange> changes) : EventArgs
 {
-	/// <summary>Create <see cref="RemoteEventArgs"/>.</summary>
-	/// <param name="remote"><see cref="Remote"/> which is related to event.</param>
-	public RemoteEventArgs(Remote remote)
-		: base(remote)
-	{
-	}
+	public Remote? Remote { get; } = remote;
+
+	public Many<ReferenceChange> Changes { get; } = changes;
 }
 
-public abstract class RemoteOperationCompletedEventArgs : EventArgs
-{
-	#region .ctor
+public class FetchCompletedEventArgs(Remote? remote, Many<ReferenceChange> changes)
+	: RemoteOperationCompletedEventArgs(remote, changes);
 
-	protected RemoteOperationCompletedEventArgs(Remote remote, ReferenceChange[] changes)
-	{
-		Remote  = remote;
-		Changes = changes;
-	}
+public class PullCompletedEventArgs(Remote? remote, Many<ReferenceChange> changes)
+	: RemoteOperationCompletedEventArgs(remote, changes);
 
-	#endregion
-
-	#region Properties
-
-	public Remote Remote { get; }
-
-	public ReferenceChange[] Changes { get; }
-
-	#endregion
-}
-
-public class FetchCompletedEventArgs : RemoteOperationCompletedEventArgs
-{
-	public FetchCompletedEventArgs(Remote remote, ReferenceChange[] changes)
-		: base(remote, changes)
-	{
-	}
-}
-
-public class PullCompletedEventArgs : RemoteOperationCompletedEventArgs
-{
-	public PullCompletedEventArgs(Remote remote, ReferenceChange[] changes)
-		: base(remote, changes)
-	{
-	}
-}
-
-public class PruneCompletedEventArgs : RemoteOperationCompletedEventArgs
-{
-	public PruneCompletedEventArgs(Remote remote, ReferenceChange[] changes)
-		: base(remote, changes)
-	{
-	}
-}
+public class PruneCompletedEventArgs(Remote? remote, Many<ReferenceChange> changes)
+	: RemoteOperationCompletedEventArgs(remote, changes);
 
 /// <summary><see cref="EventArgs"/> identifying <see cref="StashedState"/>.</summary>
-public class StashedStateEventArgs : ObjectEventArgs<StashedState>
-{
-	/// <summary>Create <see cref="StashedStateEventArgs"/>.</summary>
-	/// <param name="stashedState"><see cref="StashedState"/> which is related to event.</param>
-	public StashedStateEventArgs(StashedState stashedState)
-		: base(stashedState)
-	{
-	}
-}
+/// <param name="stashedState"><see cref="StashedState"/> which is related to event.</param>
+public class StashedStateEventArgs(StashedState stashedState) : ObjectEventArgs<StashedState>(stashedState);
 
 /// <summary><see cref="EventArgs"/> identifying <see cref="ConfigParameter"/>.</summary>
-public class ConfigParameterEventArgs : ObjectEventArgs<ConfigParameter>
-{
-	/// <summary>Create <see cref="ConfigParameterEventArgs"/>.</summary>
-	/// <param name="configParameter"><see cref="ConfigParameter"/> which is related to event.</param>
-	public ConfigParameterEventArgs(ConfigParameter configParameter)
-		: base(configParameter)
-	{
-	}
-}
+/// <param name="configParameter"><see cref="ConfigParameter"/> which is related to event.</param>
+public class ConfigParameterEventArgs(ConfigParameter configParameter) : ObjectEventArgs<ConfigParameter>(configParameter);
 
 /// <summary><see cref="EventArgs"/> identifying <see cref="Submodule"/>.</summary>
-public class SubmoduleEventArgs : ObjectEventArgs<Submodule>
-{
-	/// <summary>Create <see cref="SubmoduleEventArgs"/>.</summary>
-	/// <param name="submodule"><see cref="Submodule"/> which is related to event.</param>
-	public SubmoduleEventArgs(Submodule submodule)
-		: base(submodule)
-	{
-	}
-}
+/// <param name="submodule"><see cref="Submodule"/> which is related to event.</param>
+public class SubmoduleEventArgs(Submodule submodule) : ObjectEventArgs<Submodule>(submodule);
 
 /// <summary><see cref="EventArgs"/> identifying <see cref="User"/>.</summary>
-public class UserEventArgs : ObjectEventArgs<User>
-{
-	/// <summary>Create <see cref="UserEventArgs"/>.</summary>
-	/// <param name="user"><see cref="User"/> which is related to event.</param>
-	public UserEventArgs(User user)
-		: base(user)
-	{
-	}
-}
+/// <param name="user"><see cref="User"/> which is related to event.</param>
+public class UserEventArgs(User user) : ObjectEventArgs<User>(user);
 
 /// <summary><see cref="EventArgs"/>for renaming events.</summary>
-public class NameChangeEventArgs : EventArgs
+/// <param name="oldName">Old object's name.</param>
+/// <param name="newName">New object's name</param>
+public class NameChangeEventArgs(string oldName, string newName) : EventArgs
 {
-	/// <summary>Create <see cref="NameChangeEventArgs"/>.</summary>
-	/// <param name="oldName">Old object's name.</param>
-	/// <param name="newName">New object's name</param>
-	public NameChangeEventArgs(string oldName, string newName)
-	{
-		OldName = oldName;
-		NewName = newName;
-	}
-
 	/// <summary>New object's name.</summary>
-	public string NewName { get; }
+	public string NewName { get; } = newName;
 
 	/// <summary>Old object's name.</summary>
-	public string OldName { get; }
+	public string OldName { get; } = oldName;
 }
 
 /// <summary><see cref="EventArgs"/> identifying <see cref="TreeFile"/>.</summary>
-public class TreeFileEventArgs : EventArgs
+public class TreeFileEventArgs(TreeFile file) : EventArgs
 {
-	public TreeFileEventArgs(TreeFile file)
-	{
-		File = file;
-	}
-
-	public TreeFile File { get; }
+	public TreeFile File { get; } = file;
 }
 
 /// <summary><see cref="EventArgs"/> identifying <see cref="TreeCommit"/>.</summary>
-public class TreeCommitEventArgs : ObjectEventArgs<TreeCommit>
-{
-	public TreeCommitEventArgs(TreeCommit commit)
-		: base(commit)
-	{
-	}
-}
+public class TreeCommitEventArgs(TreeCommit commit) : ObjectEventArgs<TreeCommit>(commit);
 
 /// <summary><see cref="EventArgs"/> identifying <see cref="TreeDirectory"/>.</summary>
-public class TreeDirectoryEventArgs : EventArgs
+public class TreeDirectoryEventArgs(TreeDirectory folder) : EventArgs
 {
-	public TreeDirectoryEventArgs(TreeDirectory folder)
-	{
-		Folder = folder;
-	}
-
-	public TreeDirectory Folder { get; }
+	public TreeDirectory Folder { get; } = folder;
 }
 
 /// <summary><see cref="EventArgs"/> identifying <see cref="Note"/>.</summary>
-public class NoteEventArgs : EventArgs
+/// <param name="note"><see cref="Note"/> which is related to event.</param>
+public class NoteEventArgs(Note note) : EventArgs
 {
-	/// <summary>Create <see cref="NoteEventArgs"/>.</summary>
-	/// <param name="note"><see cref="Note"/> which is related to event.</param>
-	public NoteEventArgs(Note note)
-	{
-		Note = note;
-	}
-
 	/// <summary><see cref="Note"/> which is related to event.</summary>
-	public Note Note { get; }
+	public Note Note { get; } = note;
 }

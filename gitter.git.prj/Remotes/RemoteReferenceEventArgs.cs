@@ -22,12 +22,7 @@ namespace gitter.Git;
 
 using System;
 
-public sealed class RemoteReferenceEventArgs : EventArgs
+public sealed class RemoteReferenceEventArgs(IRemoteReference reference) : EventArgs
 {
-	public RemoteReferenceEventArgs(IRemoteReference reference)
-	{
-		Reference = reference;
-	}
-
-	public IRemoteReference Reference { get; }
+	public IRemoteReference Reference { get; } = reference;
 }

@@ -22,7 +22,6 @@ namespace gitter.Redmine.Gui;
 
 using System;
 using System.Drawing;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows.Forms;
 
@@ -142,10 +141,7 @@ internal abstract class SearchToolBar<TView, TOptions> : ToolStrip
 		}
 	}
 
-	public TView View
-	{
-		get { return _view; }
-	}
+	public TView View => _view;
 
 	public void FocusSearchTextBox()
 	{
@@ -155,17 +151,11 @@ internal abstract class SearchToolBar<TView, TOptions> : ToolStrip
 
 	public string SearchText
 	{
-		get { return _textBox.Text; }
-		set { _textBox.Text = value; }
+		get => _textBox.Text;
+		set => _textBox.Text = value;
 	}
 
-	public ToolStripButton NextButton
-	{
-		get { return _btnNext; }
-	}
+	public ToolStripButton NextButton => _btnNext;
 
-	public ToolStripButton PrevButton
-	{
-		get { return _btnNext; }
-	}
+	public ToolStripButton PrevButton => _btnPrev;
 }

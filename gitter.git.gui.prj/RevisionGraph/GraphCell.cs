@@ -20,20 +20,17 @@
 
 namespace gitter.Git.Gui;
 
-using System;
-
 /// <summary>Graph cell. Contains <see cref="GraphElement"/>s &amp; their indexed colors.</summary>
-public struct GraphCell
+public unsafe struct GraphCell
 {
 	public GraphElement Elements;
-	private int[] ElementColors;
+	private fixed short ElementColors[13];
 
-	public void Paint(GraphElement element, int color)
+	public void Paint(GraphElement element, short color)
 	{
 		Elements |= element;
 		if(element != GraphElement.Space)
 		{
-			ElementColors ??= new int[13];
 			int pos = (int)element;
 			int offset = 0;
 			while(pos != 0)
@@ -45,27 +42,21 @@ public struct GraphCell
 		}
 	}
 
-	public int ColorOf(int elementId)
-		=> ElementColors is not null ? ElementColors[elementId] : default;
+	public readonly bool IsEmpty
+		=> Elements == GraphElement.Space;
 
-	public bool IsEmpty => Elements == GraphElement.Space;
+	public readonly short ColorOf(int elementId)
+		=> ElementColors[elementId];
 
-	public bool HasAnyOfElements(GraphElement elements)
+	public readonly bool HasAnyOfElements(GraphElement elements)
 		=> (Elements & elements) != GraphElement.Space;
 
-	public bool HasElement(GraphElement element)
+	public readonly bool HasElement(GraphElement element)
 		=> (Elements & element) == element;
 
 	public void Erase(GraphElement element)
-	{
-		Elements &= ~element;
-		if(Elements == GraphElement.Space)
-			ElementColors = null;
-	}
+		=> Elements &= ~element;
 
 	public void Erase()
-	{
-		Elements = GraphElement.Space;
-		ElementColors = null;
-	}
+		=> Elements = GraphElement.Space;
 }

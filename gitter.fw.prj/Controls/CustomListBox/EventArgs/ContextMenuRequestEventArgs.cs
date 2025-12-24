@@ -24,29 +24,21 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-public class ContextMenuRequestEventArgs : EventArgs
+public class ContextMenuRequestEventArgs(CustomListBoxColumn? column, int columnIndex, int x, int y) : EventArgs
 {
-	public ContextMenuRequestEventArgs(CustomListBoxColumn column, int columnIndex, int x, int y)
-	{
-		Column      = column;
-		ColumnIndex = columnIndex;
-		X           = x;
-		Y           = y;
-	}
+	public CustomListBoxColumn? Column { get; } = column;
 
-	public CustomListBoxColumn Column { get; }
+	public int ColumnIndex { get; } = columnIndex;
 
-	public int ColumnIndex { get; }
-
-	public int SubItemId => Column.Id;
+	public int SubItemId => Column is not null ? Column.Id : int.MinValue;
 
 	public Point Location => new(X, Y);
 
-	public int X { get; }
+	public int X { get; } = x;
 
-	public int Y { get; }
+	public int Y { get; } = y;
 
-	public ContextMenuStrip ContextMenu { get; set; }
+	public ContextMenuStrip? ContextMenu { get; set; }
 
 	public bool OverrideDefaultMenu { get; set; }
 }

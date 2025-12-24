@@ -26,13 +26,13 @@ using System.Windows.Forms;
 
 sealed class DockPanelDockMarker : DockMarker
 {
-	private static readonly IDpiBoundValue<Point[]> Border = new ScalablePoints(new Point[]
-	{
+	private static readonly IDpiBoundValue<Point[]> Border = new ScalablePoints(
+	[
 		new( 0,  0),
 		new(39,  0),
 		new(39, 39),
 		new( 0, 39),
-	});
+	]);
 
 	private static Rectangle GetPositionBounds(DockPanel dockPanel, AnchorStyles side)
 	{

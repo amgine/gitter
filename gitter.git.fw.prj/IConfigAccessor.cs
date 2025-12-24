@@ -26,23 +26,23 @@ using System.Collections.Generic;
 public interface IConfigAccessor
 {
 	/// <summary>Query configuration parameter list.</summary>
-	IGitFunction<QueryConfigParameters, IList<ConfigParameterData>> QueryConfig { get; }
+	IGitFunction<QueryConfigRequest, IList<ConfigParameterData>> QueryConfig { get; }
 
 	/// <summary>Query config parameter.</summary>
-	IGitFunction<QueryConfigParameterParameters, ConfigParameterData> QueryConfigParameter { get; }
+	IGitFunction<QueryConfigParameterRequest, ConfigParameterData?> QueryConfigParameter { get; }
 
 	/// <summary>Add config value.</summary>
-	IGitAction<AddConfigValueParameters> AddConfigValue { get; }
+	IGitAction<AddConfigValueRequest> AddConfigValue { get; }
 
 	/// <summary>Set config value.</summary>
-	IGitAction<SetConfigValueParameters> SetConfigValue { get; }
+	IGitAction<SetConfigValueRequest> SetConfigValue { get; }
 
 	/// <summary>Unset config parameter value.</summary>
-	IGitAction<UnsetConfigValueParameters> UnsetConfigValue { get; }
+	IGitAction<UnsetConfigValueRequest> UnsetConfigValue { get; }
 
 	/// <summary>Rename configuration section.</summary>
-	IGitAction<RenameConfigSectionParameters> RenameConfigSection { get; }
+	IGitAction<RenameConfigSectionRequest> RenameConfigSection { get; }
 
 	/// <summary>Delete configuration section.</summary>
-	IGitAction<DeleteConfigSectionParameters> DeleteConfigSection { get; }
+	IGitAction<DeleteConfigSectionRequest> DeleteConfigSection { get; }
 }

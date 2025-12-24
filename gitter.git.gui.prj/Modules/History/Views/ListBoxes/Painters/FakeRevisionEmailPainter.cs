@@ -20,6 +20,7 @@
 
 namespace gitter.Git.Gui.Controls;
 
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
 using gitter.Framework.Controls;
@@ -27,10 +28,12 @@ using gitter.Framework.Controls;
 sealed class FakeRevisionEmailPainter : EmailPainterBase<FakeRevisionListItem>
 {
 	/// <inheritdoc/>
-	protected override string GetEmail(FakeRevisionListItem item)
-		=> item.Repository.UserIdentity.Email;
+	protected override string? GetEmail(FakeRevisionListItem item)
+		=> item.Repository.UserIdentity?.Email;
 
 	/// <inheritdoc/>
-	protected override bool TryGetTextBrush(SubItemPaintEventArgs paintEventArgs, out Brush textBrush, out bool disposeBrush)
+	protected override bool TryGetTextBrush(SubItemPaintEventArgs paintEventArgs,
+		[MaybeNullWhen(returnValue: false)] out Brush textBrush,
+		[MaybeNullWhen(returnValue: false)] out bool disposeBrush)
 		=> FakeRevisionPainterHelper.TryGetTextBrush(paintEventArgs, out textBrush, out disposeBrush);
 }

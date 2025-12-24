@@ -31,39 +31,30 @@ using gitter.Git.Gui.Interfaces;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class StashToBranchController : ViewControllerBase<IStashToBranchView>, IStashToBranchController
+sealed class StashToBranchController(StashedState stashedState)
+	: ViewControllerBase<IStashToBranchView>, IStashToBranchController
 {
-	public StashToBranchController(StashedState stashedState)
-	{
-		Verify.Argument.IsNotNull(stashedState);
-
-		StashedState = stashedState;
-	}
-
-	private StashedState StashedState { get; }
-
 	public bool TryCreateBranch()
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+		var view = RequireView();
+		var branchName = view.BranchName.Value?.Trim();
 
-		var branchName = View.BranchName.Value.Trim();
-
-		if(!GitControllerUtility.ValidateNewBranchName(branchName, StashedState.Repository, View.BranchName, View.ErrorNotifier))
+		if(!GitControllerUtility.ValidateNewBranchName(branchName, stashedState.Repository, view.BranchName, view.ErrorNotifier))
 		{
 			return false;
 		}
 
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				StashedState.ToBranch(branchName);
+				stashedState.ToBranch(branchName!);
 			}
 		}
 		catch(GitException exc)
 		{
 			GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
+				view as IWin32Window,
 				exc.Message,
 				string.Format(Resources.ErrFailedToCreateBranch, branchName),
 				MessageBoxButton.Close,

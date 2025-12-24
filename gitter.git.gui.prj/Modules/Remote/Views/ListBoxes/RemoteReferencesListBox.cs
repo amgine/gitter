@@ -40,7 +40,7 @@ public class RemoteReferencesListBox : CustomListBox
 
 		private IImageProvider Icon { get; }
 
-		private Image GetIcon(Dpi dpi)
+		private Image? GetIcon(Dpi dpi)
 			=> Icon.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 
 		protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
@@ -63,7 +63,7 @@ public class RemoteReferencesListBox : CustomListBox
 
 	#region Data
 
-	private RemoteReferencesCollection _remoteReferences;
+	private RemoteReferencesCollection? _remoteReferences;
 	private readonly GroupItem _grpBranches;
 	private readonly GroupItem _grpTags;
 
@@ -83,54 +83,47 @@ public class RemoteReferencesListBox : CustomListBox
 
 	#region Properties
 
-	public RemoteReferencesCollection RemoteReferences
+	public RemoteReferencesCollection? RemoteReferences
 	{
 		get => _remoteReferences;
 		set
 		{
-			if(_remoteReferences != value)
+			if(_remoteReferences == value) return;
+
+			if(_remoteReferences is not null)
 			{
-				if(_remoteReferences != null)
+				lock(_remoteReferences.SyncRoot)
 				{
-					lock(_remoteReferences.SyncRoot)
-					{
-						_remoteReferences.BranchCreated -= OnBranchCreated;
-						_remoteReferences.TagCreated -= OnTagCreated;
-						if(_grpBranches != null)
-						{
-							_grpBranches.Items.ClearSafe();
-						}
-						if(_grpTags != null)
-						{
-							_grpTags.Items.ClearSafe();
-						}
-						Items.ClearSafe();
-					}
+					_remoteReferences.BranchCreated -= OnBranchCreated;
+					_remoteReferences.TagCreated -= OnTagCreated;
+					_grpBranches.Items.ClearSafe();
+					_grpTags.Items.ClearSafe();
+					Items.ClearSafe();
 				}
-				_remoteReferences = value;
-				if(_remoteReferences != null)
+			}
+			_remoteReferences = value;
+			if(_remoteReferences is not null)
+			{
+				lock(_remoteReferences.SyncRoot)
 				{
-					lock(_remoteReferences.SyncRoot)
+					foreach(var branch in _remoteReferences.Branches)
 					{
-						foreach(var branch in _remoteReferences.Branches)
-						{
-							_grpBranches.Items.AddSafe(new RemoteReferenceListItem(branch));
-						}
-						foreach(var tag in _remoteReferences.Tags)
-						{
-							_grpTags.Items.AddSafe(new RemoteReferenceListItem(tag));
-						}
-						if(_grpBranches.ListBox == null)
-						{
-							Items.AddSafe(_grpBranches);
-						}
-						if(_grpTags.ListBox == null)
-						{
-							Items.AddSafe(_grpTags);
-						}
-						_remoteReferences.BranchCreated += OnBranchCreated;
-						_remoteReferences.TagCreated += OnTagCreated;
+						_grpBranches.Items.AddSafe(new RemoteReferenceListItem(branch));
 					}
+					foreach(var tag in _remoteReferences.Tags)
+					{
+						_grpTags.Items.AddSafe(new RemoteReferenceListItem(tag));
+					}
+					if(_grpBranches.ListBox is null)
+					{
+						Items.AddSafe(_grpBranches);
+					}
+					if(_grpTags.ListBox is null)
+					{
+						Items.AddSafe(_grpTags);
+					}
+					_remoteReferences.BranchCreated += OnBranchCreated;
+					_remoteReferences.TagCreated += OnTagCreated;
 				}
 			}
 		}
@@ -140,12 +133,12 @@ public class RemoteReferencesListBox : CustomListBox
 
 	#region Methods
 
-	private void OnBranchCreated(object sender, RemoteReferenceEventArgs e)
+	private void OnBranchCreated(object? sender, RemoteReferenceEventArgs e)
 	{
 		_grpBranches.Items.AddSafe(new RemoteReferenceListItem(e.Reference));
 	}
 
-	private void OnTagCreated(object sender, RemoteReferenceEventArgs e)
+	private void OnTagCreated(object? sender, RemoteReferenceEventArgs e)
 	{
 		_grpTags.Items.AddSafe(new RemoteReferenceListItem(e.Reference));
 	}

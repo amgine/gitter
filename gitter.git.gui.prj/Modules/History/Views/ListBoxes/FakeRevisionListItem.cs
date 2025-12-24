@@ -30,7 +30,7 @@ using gitter.Framework.Controls;
 using Resources = gitter.Git.Gui.Properties.Resources;
 
 /// <summary>Item used to represent uncommitted or unstaged changes to the working tree.</summary>
-public class FakeRevisionListItem : CustomListBoxItem<Revision>, IRevisionGraphListItem
+public class FakeRevisionListItem : CustomListBoxItem<Revision?>, IRevisionGraphListItem
 {
 	#region Helpers
 
@@ -65,23 +65,23 @@ public class FakeRevisionListItem : CustomListBoxItem<Revision>, IRevisionGraphL
 			case FakeRevisionItemType.StagedChanges:
 				lock(repository.Status.SyncRoot)
 				{
-					_iconEntries = new FileStatusIconEntry[]
-					{
+					_iconEntries =
+					[
 						new FileStatusIconEntry { Image = FileStatusIcons.ImgStagedAdded,
 							Count = repository.Status.StagedAddedCount },
 						new FileStatusIconEntry { Image = FileStatusIcons.ImgStagedRemoved,
 							Count = repository.Status.StagedRemovedCount },
 						new FileStatusIconEntry { Image = FileStatusIcons.ImgStagedModified,
 							Count = repository.Status.StagedModifiedCount },
-					};
+					];
 				}
 				break;
 			case FakeRevisionItemType.UnstagedChanges:
 				lock(repository.Status.SyncRoot)
 				{
 					SubType = GetSubType(repository.Status);
-					_iconEntries = new FileStatusIconEntry[]
-					{
+					_iconEntries =
+					[
 						new FileStatusIconEntry { Image = FileStatusIcons.ImgUnmerged,
 							Count = repository.Status.UnmergedCount },
 						new FileStatusIconEntry { Image = FileStatusIcons.ImgUnstagedUntracked,
@@ -90,7 +90,7 @@ public class FakeRevisionListItem : CustomListBoxItem<Revision>, IRevisionGraphL
 							Count = repository.Status.UnstagedRemovedCount },
 						new FileStatusIconEntry { Image = FileStatusIcons.ImgUnstagedModified,
 							Count = repository.Status.UnstagedModifiedCount },
-					};
+					];
 				}
 				break;
 			default:
@@ -108,11 +108,11 @@ public class FakeRevisionListItem : CustomListBoxItem<Revision>, IRevisionGraphL
 
 	public UnstagedRevisionItemSubtype SubType { get; private set; }
 
-	public GraphCell[] Graph { get; set; }
+	public GraphCell[]? Graph { get; set; }
 
 	public FileStatusIconEntry[] Icons => _iconEntries;
 
-	public string SubjectText
+	public string? SubjectText
 		=> Type switch
 		{
 			FakeRevisionItemType.StagedChanges   => Resources.StrUncommittedLocalChanges,
@@ -154,9 +154,9 @@ public class FakeRevisionListItem : CustomListBoxItem<Revision>, IRevisionGraphL
 		return UnstagedRevisionItemSubtype.None;
 	}
 
-	private void OnStatusUpdated(object sender, EventArgs e)
+	private void OnStatusUpdated(object? sender, EventArgs e)
 	{
-		var status = (Status)sender;
+		var status = (Status)sender!;
 		switch(Type)
 		{
 			case FakeRevisionItemType.StagedChanges:
@@ -196,16 +196,16 @@ public class FakeRevisionListItem : CustomListBoxItem<Revision>, IRevisionGraphL
 	#region Overrides
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		Repository.Status.Changed += OnStatusUpdated;
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 		Repository.Status.Changed -= OnStatusUpdated;
 	}
 
@@ -244,11 +244,11 @@ public class FakeRevisionListItem : CustomListBoxItem<Revision>, IRevisionGraphL
 	}
 
 	/// <inheritdoc/>
-	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	public override ContextMenuStrip? GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
 		Verify.Argument.IsNotNull(requestEventArgs);
 
-		ContextMenuStrip menu = Type switch
+		ContextMenuStrip? menu = Type switch
 		{
 			FakeRevisionItemType.UnstagedChanges => new UnstagedChangesMenu(Repository),
 			FakeRevisionItemType.StagedChanges   => new StagedChangesMenu(Repository),

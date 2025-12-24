@@ -27,8 +27,8 @@ public sealed class Query : NamedRedmineObject
 {
 	#region Static
 
-	public static readonly RedmineObjectProperty<bool> IsPublicProperty  = new("is_public",  "IsPublic");
-	public static readonly RedmineObjectProperty<int>  ProjectIdProperty = new("project_id", "ProjectId");
+	public static readonly RedmineObjectProperty<bool> IsPublicProperty  = new("is_public",  nameof(IsPublic));
+	public static readonly RedmineObjectProperty<int>  ProjectIdProperty = new("project_id", nameof(ProjectId));
 
 	#endregion
 
@@ -49,8 +49,8 @@ public sealed class Query : NamedRedmineObject
 	internal Query(RedmineServiceContext context, XmlNode node)
 		: base(context, node)
 	{
-		_projectId	= RedmineUtility.LoadInt(node[ProjectIdProperty.XmlNodeName]);
-		_isPublic	= RedmineUtility.LoadBoolean(node[IsPublicProperty.XmlNodeName]);
+		_projectId = RedmineUtility.LoadInt(node[ProjectIdProperty.XmlNodeName]);
+		_isPublic  = RedmineUtility.LoadBoolean(node[IsPublicProperty.XmlNodeName]);
 	}
 
 	#endregion
@@ -61,8 +61,8 @@ public sealed class Query : NamedRedmineObject
 	{
 		base.Update(node);
 
-		ProjectId	= RedmineUtility.LoadInt(node[ProjectIdProperty.XmlNodeName]);
-		IsPublic	= RedmineUtility.LoadBoolean(node[IsPublicProperty.XmlNodeName]);
+		ProjectId = RedmineUtility.LoadInt(node[ProjectIdProperty.XmlNodeName]);
+		IsPublic  = RedmineUtility.LoadBoolean(node[IsPublicProperty.XmlNodeName]);
 	}
 
 	#endregion
@@ -71,14 +71,14 @@ public sealed class Query : NamedRedmineObject
 
 	public int ProjectId
 	{
-		get { return _projectId; }
-		private set { UpdatePropertyValue(ref _projectId, value, ProjectIdProperty); }
+		get => _projectId;
+		private set => UpdatePropertyValue(ref _projectId, value, ProjectIdProperty);
 	}
 
 	public bool IsPublic
 	{
-		get { return _isPublic; }
-		private set { UpdatePropertyValue(ref _isPublic, value, IsPublicProperty); }
+		get => _isPublic;
+		private set => UpdatePropertyValue(ref _isPublic, value, IsPublicProperty);
 	}
 
 	#endregion

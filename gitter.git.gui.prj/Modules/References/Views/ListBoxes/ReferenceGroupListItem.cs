@@ -43,7 +43,7 @@ public class ReferenceGroupListItem : CustomListBoxItem<ReferenceType>
 
 	public Repository Repository { get; }
 
-	private Image GetIcon(Dpi dpi)
+	private Image? GetIcon(Dpi dpi)
 	{
 		var icon = DataContext switch
 		{
@@ -55,7 +55,7 @@ public class ReferenceGroupListItem : CustomListBoxItem<ReferenceType>
 		return icon?.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 	}
 
-	private string GetText()
+	private string? GetText()
 		=> DataContext switch
 		{
 			ReferenceType.LocalBranch  => Resources.StrHeads,
@@ -90,14 +90,17 @@ public class ReferenceGroupListItem : CustomListBoxItem<ReferenceType>
 	}
 
 	/// <inheritdoc/>
-	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	public override ContextMenuStrip? GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
 		Assert.IsNotNull(requestEventArgs);
 
 		var menu = default(ContextMenuStrip);
 		if(Repository is not null)
 		{
-			menu = new ContextMenuStrip();
+			menu = new ContextMenuStrip
+			{
+				Renderer = GitterApplication.Style.ToolStripRenderer,
+			};
 
 			var dpiBindings = new DpiBindings(menu);
 			var factory     = new GuiItemFactory(dpiBindings);

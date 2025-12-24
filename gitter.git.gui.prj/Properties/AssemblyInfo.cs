@@ -27,3 +27,8 @@ using System.Runtime.InteropServices;
 
 [assembly: ComVisible(false)]
 [assembly: Guid("6c298b18-08e2-453e-83ff-11c69ca16282")]
+
+#if NET6_0_OR_GREATER
+[module: System.Runtime.Versioning.SupportedOSPlatform("windows")]
+[module: System.Diagnostics.CodeAnalysis.SuppressMessage("", "WFAC010")]
+#endif

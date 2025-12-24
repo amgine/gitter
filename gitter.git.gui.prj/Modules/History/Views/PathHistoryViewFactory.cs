@@ -20,14 +20,7 @@
 
 namespace gitter.Git.Gui.Views;
 
-using gitter.Framework;
-
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class PathHistoryViewFactory : GitViewFactoryBase<PathHistoryView>
-{
-	public PathHistoryViewFactory(IFactory<PathHistoryView> viewFactory)
-		: base(Guids.PathHistoryViewGuid, Resources.StrHistory, Icons.FileHistory)
-	{
-	}
-}
+sealed class PathHistoryViewFactory() : GitViewFactoryBase<PathHistoryView>(
+	Guids.PathHistoryViewGuid, Resources.StrHistory, Icons.FileHistory);

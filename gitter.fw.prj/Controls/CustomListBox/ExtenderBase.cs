@@ -30,25 +30,6 @@ using System.Windows.Forms;
 [DesignerCategory("")]
 public abstract class ExtenderBase : UserControl
 {
-	/// <summary>Create <see cref="ExtenderBase"/>.</summary>
-	public ExtenderBase()
-	{
-		AutoScaleDimensions	= new SizeF(96F, 96F);
-		AutoScaleMode		= AutoScaleMode.Dpi;
-		BorderStyle			= BorderStyle.FixedSingle;
-		if(LicenseManager.UsageMode == LicenseUsageMode.Designtime)
-		{
-			Font      = SystemFonts.MessageBoxFont;
-			BackColor = SystemColors.Window;
-		}
-		else
-		{
-			Font      = GitterApplication.FontManager.UIFont;
-			BackColor = GitterApplication.Style.Colors.Window;
-			ForeColor = GitterApplication.Style.Colors.WindowText;
-		}
-	}
-
 	protected ExtenderBase(CustomListBoxColumn column)
 	{
 		Verify.Argument.IsNotNull(column);
@@ -79,7 +60,7 @@ public abstract class ExtenderBase : UserControl
 
 	public CustomListBoxColumn Column { get; }
 
-	private void OnColumnStyleChanged(object sender, EventArgs e)
+	private void OnColumnStyleChanged(object? sender, EventArgs e)
 	{
 		OnStyleChanged();
 	}

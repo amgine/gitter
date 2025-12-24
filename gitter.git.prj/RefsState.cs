@@ -18,8 +18,6 @@
 */
 #endregion
 
-#nullable enable
-
 namespace gitter.Git;
 
 using System;
@@ -38,30 +36,32 @@ sealed class RefsState
 		ReferenceType ReferenceType,
 		string        FullName,
 		string        Name,
-		Hash          Hash)
+		Sha1Hash      Hash)
 	{
+		static Sha1Hash GetHash(Reference reference)
+		{
+			var pointer = reference.Pointer;
+			if(pointer is null) return default;
+			var revision = pointer.Dereference();
+			if(revision is null) return default;
+			return revision.Hash;
+		}
+
 		public static ReferenceState FromReference(Reference reference) => new(
 			ReferenceType: reference.Type,
 			FullName:      reference.FullName,
 			Name:          reference.Name,
-			Hash:          reference.Pointer.Dereference().Hash);
+			Hash:          GetHash(reference));
 	}
 
-	private readonly Dictionary<string, ReferenceState> _states = new();
+	private readonly Dictionary<string, ReferenceState> _states = [];
 
 	public IEnumerable<ReferenceState> States => _states.Values;
 
 	public ReferenceState? GetState(string fullName, ReferenceType type)
-	{
-		if(_states.TryGetValue(fullName, out var state))
-		{
-			if(state.ReferenceType != type)
-			{
-				state = null;
-			}
-		}
-		return state;
-	}
+		=> _states.TryGetValue(fullName, out var state) && state.ReferenceType == type
+			? state
+			: default;
 
 	private RefsState(Repository repository, ReferenceType referenceTypes)
 	{
@@ -69,53 +69,27 @@ sealed class RefsState
 
 		if((referenceTypes & ReferenceType.LocalBranch) == ReferenceType.LocalBranch)
 		{
-			CaptureHeads(repository);
+			CaptureReferences(repository.Refs.Heads);
 		}
 		if((referenceTypes & ReferenceType.RemoteBranch) == ReferenceType.RemoteBranch)
 		{
-			CaptureRemotes(repository);
+			CaptureReferences(repository.Refs.Remotes);
 		}
 		if((referenceTypes & ReferenceType.Tag) == ReferenceType.Tag)
 		{
-			CaptureTags(repository);
+			CaptureReferences(repository.Refs.Tags);
 		}
 	}
 
-	private void CaptureHeads(Repository repository)
+	private void CaptureReferences<T, K>(GitObjectsCollection<T, K> collection)
+		where T : Reference
+		where K : ObjectEventArgs<T>
 	{
-		Assert.IsNotNull(repository);
-
-		lock(repository.Refs.Heads.SyncRoot)
+		lock(collection.SyncRoot)
 		{
-			foreach(var head in repository.Refs.Heads)
+			foreach(var reference in collection)
 			{
-				CaptureRefState(head);
-			}
-		}
-	}
-
-	private void CaptureRemotes(Repository repository)
-	{
-		Assert.IsNotNull(repository);
-
-		lock(repository.Refs.Remotes.SyncRoot)
-		{
-			foreach(var remoteHead in repository.Refs.Remotes)
-			{
-				CaptureRefState(remoteHead);
-			}
-		}
-	}
-
-	private void CaptureTags(Repository repository)
-	{
-		Assert.IsNotNull(repository);
-
-		lock(repository.Refs.Tags.SyncRoot)
-		{
-			foreach(var tag in repository.Refs.Tags)
-			{
-				CaptureRefState(tag);
+				CaptureRefState(reference);
 			}
 		}
 	}

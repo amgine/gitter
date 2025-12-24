@@ -23,11 +23,8 @@ namespace gitter.Framework.Layout;
 using System;
 using System.Windows.Forms;
 
-#nullable enable
-
 public class ControlLayout
 {
-	private IContent? _content;
 	private int _dpiChanging;
 
 	public ControlLayout(Control control)
@@ -53,14 +50,13 @@ public class ControlLayout
 
 	public IContent? Content
 	{
-		get => _content;
+		get;
 		set
 		{
-			if(_content != value)
-			{
-				_content = value;
-				UpdateLayout();
-			}
+			if(field == value) return;
+
+			field = value;
+			UpdateLayout();
 		}
 	}
 

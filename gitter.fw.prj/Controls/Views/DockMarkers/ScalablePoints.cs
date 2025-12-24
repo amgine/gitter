@@ -25,7 +25,7 @@ using System.Drawing;
 
 sealed class ScalablePoints : IDpiBoundValue<Point[]>
 {
-	private readonly Dictionary<Dpi, Point[]> _cache = new();
+	private readonly Dictionary<Dpi, Point[]> _cache = [];
 	private readonly Point[] _original;
 
 	public ScalablePoints(Point[] points)

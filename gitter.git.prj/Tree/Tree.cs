@@ -37,14 +37,14 @@ public sealed class Tree : GitObject
 	private readonly string _treeHash;
 
 	public static async Task<Tree> GetAsync(Repository repository, string treeHash,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(repository);
 
 		progress?.Report(new OperationProgress(Resources.StrsFetchingTree.AddEllipsis()));
-		var parameters = new QueryTreeContentParameters(treeHash, recurse: true, onlyTrees: false);
+		var request = new QueryTreeContentRequest(treeHash, recurse: true, onlyTrees: false);
 		var treeData = await repository.Accessor.QueryTreeContent
-			.InvokeAsync(parameters, progress, cancellationToken)
+			.InvokeAsync(request, progress, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 		var tree = new Tree(repository, treeHash, load: false);
 		tree.SetContent(treeData);
@@ -85,50 +85,90 @@ public sealed class Tree : GitObject
 
 	public TreeDirectory Root => _root;
 
-	private void SetContent(IList<TreeContentData> tree)
+	private TreeDirectory GetDirectory(string path, Dictionary<string, TreeDirectory> cache)
 	{
-		Assert.IsNotNull(tree);
+		var sindex = path.LastIndexOf('/');
+		TreeDirectory? dir, parent;
+		string name;
+		if(sindex < 0)
+		{
+			name = path;
+			parent = Root;
+		}
+		else
+		{
+			name = path.Substring(sindex + 1);
+			#if NET9_0_OR_GREATER
+			var lookup = cache.GetAlternateLookup<ReadOnlySpan<char>>();
+			if(!lookup.TryGetValue(path.AsSpan(0, sindex), out parent))
+			{
+				var parentPath = path.Substring(0, sindex);
+				parent = GetDirectory(parentPath, cache);
+			}
+			#else
+			var parentPath = path.Substring(0, sindex);
+			if(!cache.TryGetValue(parentPath, out parent))
+			{
+				parent = GetDirectory(parentPath, cache);
+			}
+			#endif
+		}
+		dir = new(Repository, path, parent, name);
+		cache.Add(dir.Name, dir);
+		parent.AddDirectory(dir);
+		return dir;
+	}
 
+	private void SetContent(IList<TreeContentData>? tree)
+	{
 		Root.Clear();
-		var trees = new Dictionary<string, TreeDirectory>();
+		if(tree is not { Count: not 0 }) return;
+
+		var cache = new Dictionary<string, TreeDirectory>();
+		#if NET9_0_OR_GREATER
+		var lookup = cache.GetAlternateLookup<ReadOnlySpan<char>>();
+		#endif
 		foreach(var item in tree)
 		{
-			int slashPos = item.Name.IndexOf('/');
-			string name = (slashPos == -1)?(item.Name):GetName(item.Name);
-			var parent = _root;
-			while(slashPos != -1)
+			var sindex = item.Name.LastIndexOf('/');
+			TreeDirectory? parent;
+			string name;
+			if(sindex < 0)
 			{
-				string parentPath = item.Name.Substring(0, slashPos);
-				TreeDirectory p;
-				if(!trees.TryGetValue(parentPath, out p))
+				name = item.Name;
+				parent = _root;
+			}
+			else
+			{
+				name = item.Name.Substring(sindex + 1);
+				#if NET9_0_OR_GREATER
+				if(!lookup.TryGetValue(item.Name.AsSpan(0, sindex), out parent))
 				{
-					p = new TreeDirectory(Repository, parentPath, parent, GetName(parentPath));
-					parent.AddDirectory(p);
-					trees.Add(parentPath, p);
+					var path = item.Name.Substring(0, sindex);
+					parent = GetDirectory(path, cache);
 				}
-				parent = p;
-				slashPos = item.Name.IndexOf('/', slashPos + 1);
+				#else
+				var path = item.Name.Substring(0, sindex);
+				if(!cache.TryGetValue(path, out parent))
+				{
+					parent = GetDirectory(path, cache);
+				}
+				#endif
 			}
 			switch(item.Type)
 			{
 				case TreeContentType.Tree:
-					{
-						var dir = new TreeDirectory(Repository, item.Name, parent, name);
-						trees.Add(item.Name, dir);
-						parent.AddDirectory(dir);
-					}
+					var dir = new TreeDirectory(Repository, item.Name, parent, name);
+					cache.Add(item.Name, dir);
+					parent.AddDirectory(dir);
 					break;
 				case TreeContentType.Blob:
-					{
-						var blob = new TreeFile(Repository, item.Name, parent, FileStatus.Cached, name, ((BlobData)item).Size);
-						parent.AddFile(blob);
-					}
+					var blob = new TreeFile(Repository, item.Name, parent, FileStatus.Cached, name, ((BlobData)item).Size);
+					parent.AddFile(blob);
 					break;
 				case TreeContentType.Commit:
-					{
-						var commit = new TreeCommit(Repository, item.Name, parent, FileStatus.Cached, name);
-						parent.AddCommit(commit);
-					}
+					var commit = new TreeCommit(Repository, item.Name, parent, FileStatus.Cached, name);
+					parent.AddCommit(commit);
 					break;
 			}
 		}
@@ -138,14 +178,8 @@ public sealed class Tree : GitObject
 	{
 		if(Repository.IsEmpty) return;
 		var tree = Repository.Accessor.QueryTreeContent.Invoke(
-			new QueryTreeContentParameters(_treeHash, true, false));
+			new QueryTreeContentRequest(_treeHash, true, false));
 		SetContent(tree);
-	}
-
-	private static string GetName(string path)
-	{
-		var index = path.LastIndexOf('/');
-		return (index == -1)?path:path.Substring(index + 1);
 	}
 
 	public byte[] GetBlobContent(string blobPath)
@@ -153,7 +187,7 @@ public sealed class Tree : GitObject
 		Verify.Argument.IsNeitherNullNorWhitespace(blobPath);
 
 		return Repository.Accessor.QueryBlobBytes.Invoke(
-			new QueryBlobBytesParameters()
+			new QueryBlobBytesRequest()
 			{
 				Treeish    = TreeHash,
 				ObjectName = blobPath,
@@ -161,13 +195,13 @@ public sealed class Tree : GitObject
 	}
 
 	public Task<byte[]> GetBlobContentAsync(string blobPath,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(blobPath);
 
 		progress?.Report(new OperationProgress(Resources.StrsFetchingBlob.AddEllipsis()));
 		return Repository.Accessor.QueryBlobBytes.InvokeAsync(
-			new QueryBlobBytesParameters()
+			new QueryBlobBytesRequest()
 			{
 				Treeish    = TreeHash,
 				ObjectName = blobPath,

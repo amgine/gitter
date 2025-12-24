@@ -26,14 +26,10 @@ using System.Drawing;
 using gitter.Framework;
 using gitter.Framework.Controls;
 
-public sealed class RepositoryProviderListItem : CustomListBoxItem<IRepositoryProvider>
+public sealed class RepositoryProviderListItem(IRepositoryProvider data)
+	: CustomListBoxItem<IRepositoryProvider>(data)
 {
-	public RepositoryProviderListItem(IRepositoryProvider data)
-		: base(data)
-	{
-	}
-
-	private Image GetIcon(Dpi dpi, int size = 16)
+	private Image? GetIcon(Dpi dpi, int size = 16)
 		=> DataContext.Icon?.GetImage(dpi.X * 16 / 96);
 
 	/// <inheritdoc/>

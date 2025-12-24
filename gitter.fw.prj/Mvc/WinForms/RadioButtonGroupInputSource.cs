@@ -23,7 +23,7 @@ namespace gitter.Framework.Mvc.WinForms;
 using System;
 using System.Windows.Forms;
 
-public class RadioButtonGroupInputSource<T> : IUserInputSource<T>
+public class RadioButtonGroupInputSource<T> : IUserInputSource<T?>
 {
 	private readonly Tuple<RadioButton, T>[] _valueMappings;
 	private bool _isReadonly;
@@ -35,7 +35,7 @@ public class RadioButtonGroupInputSource<T> : IUserInputSource<T>
 		_valueMappings = valueMappings;
 	}
 
-	public T Value
+	public T? Value
 	{
 		get
 		{
@@ -50,7 +50,7 @@ public class RadioButtonGroupInputSource<T> : IUserInputSource<T>
 		}
 		set
 		{
-			var val = (object)value;
+			var val = (object?)value;
 			for(int i = 0; i < _valueMappings.Length; ++i)
 			{
 				if(object.Equals(val, _valueMappings[i].Item2))

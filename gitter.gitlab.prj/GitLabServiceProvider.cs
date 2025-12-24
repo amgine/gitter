@@ -21,18 +21,16 @@
 namespace gitter.GitLab;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
-using System.Drawing;
 using System.Net.Http;
 using System.Windows.Forms;
 
 using Autofac;
-using Autofac.Core;
 
 using gitter.Framework;
 using gitter.Framework.Configuration;
 using gitter.Framework.Controls;
-using gitter.Framework.Options;
 
 using gitter.GitLab.Gui;
 
@@ -40,7 +38,7 @@ using Resources = gitter.GitLab.Properties.Resources;
 
 sealed class GitLabServiceProvider : IRepositoryServiceProvider
 {
-	public static IWorkingEnvironment Environment { get; private set; }
+	public static IWorkingEnvironment? Environment { get; private set; }
 
 	public string Name => "gitlab";
 
@@ -48,7 +46,7 @@ sealed class GitLabServiceProvider : IRepositoryServiceProvider
 
 	public bool CanBeAddedManually => false;
 
-	public NotifyCollection<ServerInfo> Servers { get; } = new();
+	public NotifyCollection<ServerInfo> Servers { get; } = [];
 
 	public GitLabServiceProvider(IComponentContext componentContext, HttpMessageInvoker httpMessageInvoker)
 	{
@@ -131,23 +129,26 @@ sealed class GitLabServiceProvider : IRepositoryServiceProvider
 		return Encoding.UTF8.GetString(Convert.FromBase64String(str));
 	}
 
-	private static bool Match(Uri serverUrl, string remoteFetchUrl, out string projectId)
+	private static bool Match(Uri serverUrl, string remoteFetchUrl,
+		[MaybeNullWhen(returnValue: false)] out string projectId)
 	{
 		if(string.IsNullOrWhiteSpace(remoteFetchUrl))
 		{
 			projectId = default;
 			return false;
 		}
-		if(remoteFetchUrl.StartsWith("git@"))
+		const string GitPrefix = "git@";
+		if(remoteFetchUrl.StartsWith(GitPrefix))
 		{
 			int sep = remoteFetchUrl.IndexOf(':');
 			if(sep > 0 & sep < remoteFetchUrl.Length - 1)
 			{
-				var host = remoteFetchUrl.Substring("git@".Length, sep - "git@".Length);
+				var host = remoteFetchUrl.Substring(GitPrefix.Length, sep - GitPrefix.Length);
 				if(serverUrl.Host == host)
 				{
-					projectId = remoteFetchUrl.EndsWith(".git")
-						? remoteFetchUrl.Substring(sep + 1, remoteFetchUrl.Length - sep - ".git".Length - 1)
+					const string DotGit = ".git";
+					projectId = remoteFetchUrl.EndsWith(DotGit)
+						? remoteFetchUrl.Substring(sep + 1, remoteFetchUrl.Length - sep - DotGit.Length - 1)
 						: remoteFetchUrl.Substring(sep + 1);
 					return true;
 				}
@@ -155,7 +156,7 @@ sealed class GitLabServiceProvider : IRepositoryServiceProvider
 		}
 		else if(Uri.TryCreate(remoteFetchUrl, UriKind.Absolute, out var remoteUri))
 		{
-			if(remoteUri.Scheme == "http" || remoteUri.Scheme == "https")
+			if(remoteUri.Scheme is "http" or "https")
 			{
 				if(remoteUri.Host == serverUrl.Host)
 				{
@@ -168,7 +169,9 @@ sealed class GitLabServiceProvider : IRepositoryServiceProvider
 		return false;
 	}
 
-	private bool TryMatchServer(Git.Repository git, out ServerInfo server, out string projectId)
+	private bool TryMatchServer(Git.Repository git,
+		[MaybeNullWhen(returnValue: false)] out ServerInfo server,
+		[MaybeNullWhen(returnValue: false)] out string projectId)
 	{
 		server    = default;
 		projectId = default;
@@ -178,19 +181,23 @@ sealed class GitLabServiceProvider : IRepositoryServiceProvider
 			{
 				foreach(var s in Servers)
 				{
-					if(Match(s.ServiceUrl, remote.FetchUrl, out projectId))
+					if(Match(s.ServiceUri, remote.FetchUrl, out projectId))
 					{
 						server = s;
 						break;
 					}
 				}
-				if(server is not null) return true;
+				if(server is not null && projectId is not null)
+				{
+					return true;
+				}
 			}
 		}
 		return false;
 	}
 
-	public bool TryCreateGuiProvider(IRepository repository, out IGuiProvider guiProvider)
+	public bool TryCreateGuiProvider(IRepository repository,
+		[MaybeNullWhen(returnValue: false)] out IGuiProvider guiProvider)
 	{
 		if(Servers.Count == 0 || repository is not Git.Repository { Remotes.Count: not 0 } git)
 		{
@@ -204,7 +211,7 @@ sealed class GitLabServiceProvider : IRepositoryServiceProvider
 			return false;
 		}
 
-		var svc = new GitLabServiceContext(HttpMessageInvoker, server.ServiceUrl, server.ApiKey)
+		var svc = new GitLabServiceContext(HttpMessageInvoker, server)
 		{
 			DefaultProjectId = projectId,
 		};

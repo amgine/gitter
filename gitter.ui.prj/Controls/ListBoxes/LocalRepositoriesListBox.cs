@@ -47,7 +47,7 @@ internal sealed class LocalRepositoriesListBox : CustomListBox
 		_dragHelper = new DragHelper();
 	}
 
-	public List<RepositoryListItem> FullList { get; set; }
+	public List<RepositoryListItem>? FullList { get; set; }
 
 	protected override void OnMouseDown(MouseEventArgs e)
 	{

@@ -21,20 +21,25 @@
 namespace gitter.TeamCity;
 
 using System;
-using System.Globalization;
 using System.Text;
 
 public sealed class BuildLocator : ObjectLocator
 {
-	public string Id { get; set; }
+	public string? Id { get; set; }
 
-	public BuildTypeLocator BuildType { get; set; }
+	public BuildTypeLocator? BuildType { get; set; }
 
-	public string Number { get; set; }
+	public ProjectLocator? Project { get; set; }
 
-	public UserLocator User { get; set; }
+	public string? Number { get; set; }
 
-	public string AgentName { get; set; }
+	public UserLocator? User { get; set; }
+
+	public string? AgentName { get; set; }
+
+	public string? Revision { get; set; }
+
+	public string? Branch { get; set; }
 
 	public BuildStatus BuildStatus { get; set; }
 
@@ -50,27 +55,30 @@ public sealed class BuildLocator : ObjectLocator
 
 	public int Count { get; set; }
 
-	public BuildLocator SinceBuild { get; set; }
+	public BuildLocator? SinceBuild { get; set; }
 
-	public override string ToString()
+	public override void ToString(StringBuilder sb)
 	{
 		if(!string.IsNullOrWhiteSpace(Id))
 		{
-			return "id:" + Id;
+			sb.Append("id:");
+			sb.Append(Id);
+			return;
 		}
-		var sb = new StringBuilder();
 		AppendArgument(sb, "buildType", BuildType);
+		AppendArgument(sb, "project", Project);
 		AppendArgument(sb, "number", Number);
 		AppendArgument(sb, "status", BuildStatus);
+		AppendArgument(sb, "branch", Branch);
 		AppendArgument(sb, "user", User);
 		AppendArgument(sb, "personal", Personal);
 		AppendArgument(sb, "canceled", Canceled);
 		AppendArgument(sb, "running", Running);
 		AppendArgument(sb, "pinned", Pinned);
 		AppendArgument(sb, "agentName", AgentName);
+		AppendArgument(sb, "revision", Revision);
 		AppendArgument(sb, "count", Count);
 		AppendArgument(sb, "start", Start);
 		AppendArgument(sb, "sinceBuild", SinceBuild);
-		return sb.ToString();
 	}
 }

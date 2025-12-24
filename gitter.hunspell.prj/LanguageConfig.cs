@@ -25,62 +25,62 @@ namespace NHunspell;
 
 public class LanguageConfig
 {
-	private string hunspellAffFile;
-	private string hunspellDictFile;
-	private string hyphenDictFile;
-	private string languageCode;
-	private string myThesDatFile;
+	private string? hunspellAffFile;
+	private string? hunspellDictFile;
+	private string? hyphenDictFile;
+	private string? languageCode;
+	private string? myThesDatFile;
 	private int processors;
 
-	public string HunspellAffFile
+	public string? HunspellAffFile
 	{
 		get => this.hunspellAffFile;
 		set
 		{
-			string fullPath = Path.GetFullPath(value);
+			string fullPath = Path.GetFullPath(value ?? "");
 			this.hunspellAffFile = File.Exists(fullPath) ? fullPath : throw new FileNotFoundException("Hunspell Aff file not found: " + fullPath);
 		}
 	}
 
-	public string HunspellDictFile
+	public string? HunspellDictFile
 	{
 		get => this.hunspellDictFile;
 		set
 		{
-			string fullPath = Path.GetFullPath(value);
+			string fullPath = Path.GetFullPath(value ?? "");
 			this.hunspellDictFile = File.Exists(fullPath) ? fullPath : throw new FileNotFoundException("Hunspell Dict file not found: " + fullPath);
 		}
 	}
 
-	public string HunspellKey { get; set; }
+	public string? HunspellKey { get; set; }
 
-	public string HyphenDictFile
+	public string? HyphenDictFile
 	{
 		get => this.hyphenDictFile;
 		set
 		{
-			string fullPath = Path.GetFullPath(value);
+			string fullPath = Path.GetFullPath(value ?? "");
 			this.hyphenDictFile = File.Exists(fullPath) ? fullPath : throw new FileNotFoundException("Hyphen Dict file not found: " + fullPath);
 		}
 	}
 
-	public string LanguageCode
+	public string? LanguageCode
 	{
 		get => this.languageCode;
 		set
 		{
-			if(value == null)
+			if(value is null)
 				throw new ArgumentNullException("LanguageCode cannot be null");
 			this.languageCode = !(value == string.Empty) ? value.ToLower() : throw new ArgumentException("LanguageCode cannot be empty");
 		}
 	}
 
-	public string MyThesDatFile
+	public string? MyThesDatFile
 	{
 		get => this.myThesDatFile;
 		set
 		{
-			string fullPath = Path.GetFullPath(value);
+			string fullPath = Path.GetFullPath(value ?? "");
 			this.myThesDatFile = File.Exists(fullPath) ? fullPath : throw new FileNotFoundException("MyThes Dat file not found: " + fullPath);
 		}
 	}

@@ -28,13 +28,8 @@ using gitter.Framework.Services;
 
 using Resources = gitter.Framework.Properties.Resources;
 
-sealed class LogEventListItem : CustomListBoxItem<LogEvent>
+sealed class LogEventListItem(LogEvent logEvent) : CustomListBoxItem<LogEvent>(logEvent)
 {
-	public LogEventListItem(LogEvent logEvent)
-		: base(logEvent)
-	{
-	}
-
 	/// <inheritdoc/>
 	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)
 		=> (LogListBoxColumnId)measureEventArgs.SubItemId switch
@@ -76,7 +71,10 @@ sealed class LogEventListItem : CustomListBoxItem<LogEvent>
 	{
 		Assert.IsNotNull(requestEventArgs);
 
-		var menu = new ContextMenuStrip();
+		var menu = new ContextMenuStrip
+		{
+			Renderer = GitterApplication.Style.ToolStripRenderer,
+		};
 		var dpiBindings = new DpiBindings(menu);
 		var copy = new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
 			(_, _) => ClipboardEx.TrySetTextSafe(DataContext.Message));

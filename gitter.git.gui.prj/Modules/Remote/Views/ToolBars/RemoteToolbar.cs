@@ -73,7 +73,7 @@ sealed class RemoteToolbar : ToolStrip
 		dpiBindings.BindImage(_btnPrune, Icons.Prune);
 	}
 
-	private void OnFetchClick(object sender, EventArgs e)
+	private void OnFetchClick(object? sender, EventArgs e)
 	{
 		var remote = _remoteView.Remote;
 		if(remote is { IsDeleted: false })
@@ -82,7 +82,7 @@ sealed class RemoteToolbar : ToolStrip
 		}
 	}
 
-	private void OnPullClick(object sender, EventArgs e)
+	private void OnPullClick(object? sender, EventArgs e)
 	{
 		var remote = _remoteView.Remote;
 		if(remote is { IsDeleted: false })
@@ -91,18 +91,18 @@ sealed class RemoteToolbar : ToolStrip
 		}
 	}
 
-	private void OnPushClick(object sender, EventArgs e)
+	private void OnPushClick(object? sender, EventArgs e)
 	{
 		var remote = _remoteView.Remote;
 		if(remote is { IsDeleted: false })
 		{
-			using var dlg = new PushDialog(_remoteView.Repository);
-			dlg.Remote.Value = remote;
-			dlg.Run(_remoteView);
+			using var dialog = new PushDialog(remote.Repository);
+			dialog.Remote.Value = remote;
+			dialog.Run(_remoteView);
 		}
 	}
 
-	private void OnPruneClick(object sender, EventArgs e)
+	private void OnPruneClick(object? sender, EventArgs e)
 	{
 		var remote = _remoteView.Remote;
 		if(remote is { IsDeleted: false })

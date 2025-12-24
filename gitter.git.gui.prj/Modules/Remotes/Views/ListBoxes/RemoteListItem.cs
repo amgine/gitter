@@ -45,7 +45,7 @@ public class RemoteListItem : CustomListBoxItem<Remote>
 				? CompareByName(i1, i2)
 				: 0;
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			return 0;
 		}
@@ -66,7 +66,7 @@ public class RemoteListItem : CustomListBoxItem<Remote>
 				? CompareByFetchUrl(i1, i2)
 				: 0;
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			return 0;
 		}
@@ -87,7 +87,7 @@ public class RemoteListItem : CustomListBoxItem<Remote>
 				? CompareByPushUrl(i1, i2)
 				: 0;
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			return 0;
 		}
@@ -102,12 +102,12 @@ public class RemoteListItem : CustomListBoxItem<Remote>
 		Verify.Argument.IsNotNull(remote);
 	}
 
-	private void OnRemoteDeleted(object sender, EventArgs e)
+	private void OnRemoteDeleted(object? sender, EventArgs e)
 	{
 		RemoveSafe();
 	}
 
-	private void OnRenamed(object sender, EventArgs e)
+	private void OnRenamed(object? sender, EventArgs e)
 	{
 		if(EnsureSortOrderSafe())
 		{
@@ -116,22 +116,22 @@ public class RemoteListItem : CustomListBoxItem<Remote>
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
 		DataContext.Deleted += OnRemoteDeleted;
 		DataContext.Renamed += OnRenamed;
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.Deleted -= OnRemoteDeleted;
 		DataContext.Renamed -= OnRenamed;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
-	private static Image GetImage(Dpi dpi) => Icons.Remote.GetImage(16 * dpi.X / 96);
+	private static Image? GetImage(Dpi dpi) => Icons.Remote.GetImage(16 * dpi.X / 96);
 
 	/// <inheritdoc/>
 	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)

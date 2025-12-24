@@ -25,7 +25,7 @@ using System.Windows.Forms;
 
 using gitter.Framework.Controls;
 
-public sealed class UserListBinding : BaseListBinding<User, UserEventArgs>
+public sealed class UserListBinding : BaseListBinding<UsersCollection.Key, User, UserEventArgs>
 {
 	public UserListBinding(CustomListBoxItemsCollection itemHost, Repository repository)
 		: base(itemHost, repository.Users)

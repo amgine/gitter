@@ -22,11 +22,6 @@ namespace gitter.GitLab.Api;
 
 using System;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
-using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 [DataContract]
 class ModifiableObject
@@ -40,34 +35,18 @@ class ModifiableObject
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Iid)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Iid)]
-#endif
 	public int Iid { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Id)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Id)]
-#endif
 	public int Id { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.CreatedAt)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.CreatedAt)]
-#endif
 	public DateTimeOffset CreatedAt { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.UpdatedAt)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.UpdatedAt)]
-#endif
 	public DateTimeOffset UpdatedAt { get; set; }
 }

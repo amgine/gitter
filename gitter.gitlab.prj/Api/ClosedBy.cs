@@ -22,11 +22,7 @@ namespace gitter.GitLab.Api;
 
 using System;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
 using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 [DataContract]
 sealed class ClosedBy : ModifiableObject
@@ -41,42 +37,22 @@ sealed class ClosedBy : ModifiableObject
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.State)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.State)]
-#endif
-	public string State { get; set; }
+	public string State { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.WebUrl)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.WebUrl)]
-#endif
-	public string WebUrl { get; set; }
+	public string WebUrl { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.AvatarUrl)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.AvatarUrl)]
-#endif
-	public string AvatarUrl { get; set; }
+	public string AvatarUrl { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Username)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Username)]
-#endif
-	public string Username { get; set; }
+	public string Username { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Name)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Name)]
-#endif
-	public string Name { get; set; }
+	public string Name { get; set; } = default!;
 }

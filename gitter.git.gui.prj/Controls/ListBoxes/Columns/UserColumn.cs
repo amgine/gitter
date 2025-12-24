@@ -41,15 +41,15 @@ public class UserColumn : CustomListBoxColumn
 
 	private bool _showEmail  = DefaultShowEmail;
 	private bool _showAvatar = DefaultShowAvatar;
-	private UserColumnExtender _extender;
+	private UserColumnExtender? _extender;
 
 	#endregion
 
 	#region Events
 
-	public event EventHandler ShowEmailChanged;
+	public event EventHandler? ShowEmailChanged;
 
-	public event EventHandler ShowAvatarChanged;
+	public event EventHandler? ShowAvatarChanged;
 
 	#endregion
 
@@ -84,21 +84,19 @@ public class UserColumn : CustomListBoxColumn
 	private ISubItemPainter Painter { get; }
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		_extender = new UserColumnExtender(this);
 		Extender = new Popup(_extender);
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
-		base.OnListBoxDetached();
-		Extender.Dispose();
-		Extender = null;
-		_extender.Dispose();
-		_extender = null;
+		DisposeExtender();
+		DisposableUtility.Dispose(ref _extender);
+		base.OnListBoxDetached(listBox);
 	}
 
 	public bool ShowEmail
@@ -106,12 +104,11 @@ public class UserColumn : CustomListBoxColumn
 		get => _showEmail;
 		set
 		{
-			if(_showEmail != value)
-			{
-				_showEmail = value;
-				AutoSize(80);
-				ShowEmailChanged?.Invoke(this, EventArgs.Empty);
-			}
+			if(_showEmail == value) return;
+
+			_showEmail = value;
+			AutoSize(80);
+			ShowEmailChanged?.Invoke(this, EventArgs.Empty);
 		}
 	}
 
@@ -120,12 +117,11 @@ public class UserColumn : CustomListBoxColumn
 		get => _showAvatar;
 		set
 		{
-			if(_showAvatar != value)
-			{
-				_showAvatar = value;
-				InvalidateContent();
-				ShowAvatarChanged?.Invoke(this, EventArgs.Empty);
-			}
+			if(_showAvatar == value) return;
+
+			_showAvatar = value;
+			InvalidateContent();
+			ShowAvatarChanged?.Invoke(this, EventArgs.Empty);
 		}
 	}
 

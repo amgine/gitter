@@ -27,8 +27,6 @@ using System.Drawing.Drawing2D;
 using gitter.Framework;
 using gitter.Framework.Controls;
 
-using Resources = gitter.Git.Gui.Properties.Resources;
-
 public abstract class FilePanel : FlowPanel
 {
 	protected static readonly StringFormat HeaderFormat = new(StringFormat.GenericDefault)
@@ -101,11 +99,12 @@ public abstract class FilePanel : FlowPanel
 		}
 	}
 
-	protected static int TabSize
-		=> GitterApplication.TextRenderer == GitterApplication.GdiPlusTextRenderer ? 4 : 8;
+	protected static int TabSize => 8;
 
 	protected Rectangle GetLineBounds(int line)
 	{
+		if(FlowControl is null) return Rectangle.Empty;
+
 		int contentWidth = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width);
 		int x = Margin;
 		int w = contentWidth - Margin * 2;
@@ -115,6 +114,8 @@ public abstract class FilePanel : FlowPanel
 
 	protected Rectangle GetLineBounds(int line, int count)
 	{
+		if(FlowControl is null) return Rectangle.Empty;
+
 		int contentWidth = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width);
 		int x = Margin;
 		int w = contentWidth - Margin * 2;
@@ -153,18 +154,23 @@ public abstract class FilePanel : FlowPanel
 	}
 
 	protected void PaintHeader(Graphics graphics, Dpi dpi, Rectangle rcHeader, Rectangle clipRectangle,
-		Image icon, Image overlay, string text)
+		Image? icon, Image? overlay, string text)
 	{
 		PaintHeaderBackground(graphics, rcHeader, clipRectangle);
 		PaintHeaderBorder(graphics, rcHeader);
 
-		var iconSize = new Size(icon.Width, icon.Height);
-		var offset   = (HeaderHeight - iconSize.Height) / 2;
-		var rcStatus = new Rectangle(rcHeader.X + offset, rcHeader.Y + offset, iconSize.Width, iconSize.Height);
-		graphics.DrawImage(icon, rcStatus);
-		if(overlay is not null)
+		var offset = 0;
+		var iconSize = Size.Empty;
+		if(icon is not null)
 		{
-			graphics.DrawImage(overlay, rcStatus);
+			iconSize = new(icon.Width, icon.Height);
+			offset   = (HeaderHeight - iconSize.Height) / 2;
+			var rcStatus = new Rectangle(rcHeader.X + offset, rcHeader.Y + offset, iconSize.Width, iconSize.Height);
+			graphics.DrawImage(icon, rcStatus);
+			if(overlay is not null)
+			{
+				graphics.DrawImage(overlay, rcStatus);
+			}
 		}
 
 		var font = GitterApplication.FontManager.ViewerFont.ScalableFont.GetValue(dpi);

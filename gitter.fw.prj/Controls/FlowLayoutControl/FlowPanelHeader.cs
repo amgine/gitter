@@ -20,16 +20,9 @@
 
 namespace gitter.Framework.Controls;
 
-public abstract class FlowPanelHeader
+public abstract class FlowPanelHeader(FlowPanel flowPanel)
 {
-	protected FlowPanelHeader(FlowPanel flowPanel)
-	{
-		Verify.Argument.IsNotNull(flowPanel);
-
-		FlowPanel = flowPanel;
-	}
-
-	public FlowPanel FlowPanel { get; }
+	public FlowPanel FlowPanel { get; } = flowPanel;
 
 	public abstract int Height { get; }
 

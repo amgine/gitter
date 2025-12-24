@@ -21,27 +21,24 @@
 namespace gitter.Git.Gui.Controls;
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
 using gitter.Framework;
 using gitter.Framework.Controls;
 
 /// <summary>Paints <see cref="Revision.Subject"/> for the <see cref="SubjectColumn"/>.</summary>
-abstract class RevisionSubjectPainterBase<T> : ISubItemPainter
+abstract class RevisionSubjectPainterBase<T>(IGraphStyle graphStyle) : ISubItemPainter
 	where T : CustomListBoxItem
 {
 	private static readonly IDpiBoundValue<int> TagSpacing = DpiBoundValue.ScaleX(2);
 
-	public RevisionSubjectPainterBase(IGraphStyle graphStyle)
-	{
-		Verify.Argument.IsNotNull(graphStyle);
+	protected abstract bool TryGetData(T item,
+		[MaybeNullWhen(returnValue: false)] out Revision revision,
+		out GraphCell[]? graph,
+		out List<PointerBounds>? drawnPointers);
 
-		GraphStyle = graphStyle;
-	}
-
-	private IGraphStyle GraphStyle { get; }
-
-	protected abstract bool TryGetData(T item, out Revision revision, out GraphCell[] graph, out List<PointerBounds> drawnPointers);
+	protected abstract void SetDrawnPointers(T item, List<PointerBounds> drawnPointers);
 
 	public virtual bool TryMeasure(SubItemMeasureEventArgs measureEventArgs, out Size size)
 	{
@@ -85,23 +82,12 @@ abstract class RevisionSubjectPainterBase<T> : ISubItemPainter
 		bool showTags;
 		bool showStash;
 		bool alignToGraph;
-		if(drawnPointers is not null)
-		{
-			drawnPointers.Clear();
-			alignToGraph = column.AlignToGraph;
-			showLocalBranches = column.ShowLocalBranches;
-			showRemoteBranches = column.ShowRemoteBranches;
-			showTags = column.ShowTags;
-			showStash = column.ShowStash;
-		}
-		else
-		{
-			alignToGraph = column.AlignToGraph;
-			showLocalBranches = false;
-			showRemoteBranches = false;
-			showTags = false;
-			showStash = false;
-		}
+		drawnPointers?.Clear();
+		alignToGraph       = column.AlignToGraph;
+		showLocalBranches  = column.ShowLocalBranches;
+		showRemoteBranches = column.ShowRemoteBranches;
+		showTags           = column.ShowTags;
+		showStash          = column.ShowStash;
 
 		#endregion
 
@@ -123,17 +109,25 @@ abstract class RevisionSubjectPainterBase<T> : ISubItemPainter
 		}
 		if(graphColumn is not null && alignToGraph)
 		{
-			var itemHeight = paintEventArgs.ListBox.CurrentItemHeight;
-			int availWidth = graphColumn.CurrentWidth - itemHeight * graph.Length;
-			for(int i = graph.Length - 1; i >= 0; --i)
+			if(graph is null)
 			{
-				if(!graph[i].IsEmpty) break;
-				availWidth += itemHeight;
+				rect.X     -= graphColumn.CurrentWidth;
+				rect.Width += graphColumn.CurrentWidth;
 			}
-			if(availWidth != 0)
+			else
 			{
-				rect.X -= availWidth;
-				rect.Width += availWidth;
+				var itemHeight = paintEventArgs.ListBox.CurrentItemHeight;
+				int availWidth = graphColumn.CurrentWidth - itemHeight * graph.Length;
+				for(int i = graph.Length - 1; i >= 0; --i)
+				{
+					if(!graph[i].IsEmpty) break;
+					availWidth += itemHeight;
+				}
+				if(availWidth != 0)
+				{
+					rect.X -= availWidth;
+					rect.Width += availWidth;
+				}
 			}
 		}
 
@@ -162,7 +156,7 @@ abstract class RevisionSubjectPainterBase<T> : ISubItemPainter
 					switch(reference.Type)
 					{
 						case ReferenceType.LocalBranch when showLocalBranches:
-							bounds = GraphStyle.DrawBranch(
+							bounds = graphStyle.DrawBranch(
 								paintEventArgs.Graphics, paintEventArgs.Dpi,
 								font,
 								GitterApplication.TextRenderer.LeftAlign,
@@ -174,7 +168,7 @@ abstract class RevisionSubjectPainterBase<T> : ISubItemPainter
 								(Branch)reference);
 							break;
 						case ReferenceType.RemoteBranch when showRemoteBranches:
-							bounds = GraphStyle.DrawBranch(
+							bounds = graphStyle.DrawBranch(
 								paintEventArgs.Graphics, paintEventArgs.Dpi,
 								font,
 								GitterApplication.TextRenderer.LeftAlign,
@@ -186,7 +180,7 @@ abstract class RevisionSubjectPainterBase<T> : ISubItemPainter
 								(RemoteBranch)reference);
 							break;
 						case ReferenceType.Tag when showTags:
-							bounds = GraphStyle.DrawTag(
+							bounds = graphStyle.DrawTag(
 								paintEventArgs.Graphics, paintEventArgs.Dpi,
 								font,
 								GitterApplication.TextRenderer.LeftAlign,
@@ -201,6 +195,10 @@ abstract class RevisionSubjectPainterBase<T> : ISubItemPainter
 					if(bounds.Width > 0)
 					{
 						bounds.Y -= paintEventArgs.Bounds.Y;
+						if(drawnPointers is null)
+						{
+							SetDrawnPointers(item, drawnPointers = []);
+						}
 						drawnPointers.Add(new PointerBounds(reference, bounds));
 						xoffset += bounds.Width + TagSpacing.GetValue(paintEventArgs.Dpi);
 						++drawnRefs;
@@ -220,7 +218,7 @@ abstract class RevisionSubjectPainterBase<T> : ISubItemPainter
 		{
 			if(xoffset < rect.Width)
 			{
-				var bounds = GraphStyle.DrawStash(
+				var bounds = graphStyle.DrawStash(
 					paintEventArgs.Graphics, paintEventArgs.Dpi,
 					font,
 					GitterApplication.TextRenderer.LeftAlign,
@@ -229,11 +227,15 @@ abstract class RevisionSubjectPainterBase<T> : ISubItemPainter
 					rect.Right,
 					rect.Height,
 					drawnRefs == hoveredPointer,
-					stash);
+					stash!);
 				if(bounds.Width > 0)
 				{
 					bounds.Y -= paintEventArgs.Bounds.Y;
-					drawnPointers.Add(new PointerBounds(stash, bounds));
+					if(drawnPointers is null)
+					{
+						SetDrawnPointers(item, drawnPointers = []);
+					}
+					drawnPointers.Add(new PointerBounds(stash!, bounds));
 					xoffset += bounds.Width + TagSpacing.GetValue(paintEventArgs.Dpi);
 					++drawnRefs;
 				}
@@ -250,7 +252,7 @@ abstract class RevisionSubjectPainterBase<T> : ISubItemPainter
 			{
 				if(graphColumn is not null)
 				{
-					GraphStyle.DrawReferenceConnector(paintEventArgs.Graphics, paintEventArgs.Dpi,
+					graphStyle.DrawReferenceConnector(paintEventArgs.Graphics, paintEventArgs.Dpi,
 						graph, graphColumnX, paintEventArgs.ListBox.CurrentItemHeight, rect.X, rect.Y, rect.Height);
 				}
 			}
@@ -262,7 +264,7 @@ abstract class RevisionSubjectPainterBase<T> : ISubItemPainter
 			{
 				if(graph is { Length: > 0 } && graphColumn is not null)
 				{
-					GraphStyle.DrawReferencePresenceIndicator(paintEventArgs.Graphics, paintEventArgs.Dpi,
+					graphStyle.DrawReferencePresenceIndicator(paintEventArgs.Graphics, paintEventArgs.Dpi,
 						graph, graphColumnX, paintEventArgs.ListBox.CurrentItemHeight, rect.Y, rect.Height);
 				}
 			}

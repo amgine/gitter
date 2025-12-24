@@ -21,13 +21,8 @@
 namespace gitter.Redmine.Gui;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using gitter.Framework.Controls;
-
-using Resources = gitter.Redmine.Properties.Resources;
 
 public sealed class IssueCustomFieldColumn : CustomListBoxColumn
 {
@@ -40,10 +35,7 @@ public sealed class IssueCustomFieldColumn : CustomListBoxColumn
 		Width = 100;
 	}
 
-	public override string IdentificationString
-	{
-		get { return Name; }
-	}
+	public override string IdentificationString => Name;
 
 	private int Compare(IssueListItem item1, IssueListItem item2)
 	{
@@ -64,8 +56,5 @@ public sealed class IssueCustomFieldColumn : CustomListBoxColumn
 		return Compare(i1, i2);
 	}
 
-	protected override Comparison<CustomListBoxItem> SortComparison
-	{
-		get { return Compare; }
-	}
+	protected override Comparison<CustomListBoxItem> SortComparison => Compare;
 }

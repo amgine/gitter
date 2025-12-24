@@ -64,7 +64,7 @@ public abstract partial class DialogBase : UserControl
 		Font = SystemFonts.MessageBoxFont ?? SystemFonts.DefaultFont;
 #endif
 		AutoScaleMode = AutoScaleMode.Dpi;
-		AutoScaleDimensions = new SizeF(96F, 96F);
+		AutoScaleDimensions = Dpi.Default;
 		Margin = new Padding(10);
 		ResumeLayout(false);
 		PerformLayout();
@@ -110,14 +110,16 @@ public abstract partial class DialogBase : UserControl
 	/// <summary>Runs this dialog.</summary>
 	/// <param name="owner">Owner window.</param>
 	/// <returns><see cref="DialogResult"/>.</returns>
-	public DialogResult Run(IWin32Window owner)
+	public DialogResult Run(IWin32Window? owner)
 	{
 		using var form = new DialogForm(this, OptimalButtons)
 		{
 			OKButtonText     = ActionVerb,
 			CancelButtonText = CancelVerb,
 		};
-		return form.ShowDialog(owner);
+		return owner is not null
+			? form.ShowDialog(owner)
+			: form.ShowDialog();
 	}
 
 	/// <summary>Verb, describing operation.</summary>
@@ -127,27 +129,29 @@ public abstract partial class DialogBase : UserControl
 
 	protected void ClickOk()
 	{
-		if(ParentForm is DialogForm form)
+		var pf = ParentForm;
+		if(pf is DialogForm form)
 		{
 			form.ClickOk();
 		}
-		else
+		else if(pf is not null)
 		{
-			ParentForm.DialogResult = DialogResult.OK;
-			ParentForm.Close();
+			pf.DialogResult = DialogResult.OK;
+			pf.Close();
 		}
 	}
 
 	protected void ClickCancel()
 	{
-		if(ParentForm is DialogForm form)
+		var pf = ParentForm;
+		if(pf is DialogForm form)
 		{
 			form.ClickCancel();
 		}
-		else
+		else if(pf is not null)
 		{
-			ParentForm.DialogResult = DialogResult.Cancel;
-			ParentForm.Close();
+			pf.DialogResult = DialogResult.Cancel;
+			pf.Close();
 		}
 	}
 

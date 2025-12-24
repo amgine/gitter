@@ -22,18 +22,17 @@ namespace gitter.Redmine;
 
 using System;
 using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 public sealed class IssueRelation : RedmineObject
 {
 	#region Static
 
-	public static readonly RedmineObjectProperty<Issue> IssueProperty =
-		new RedmineObjectProperty<Issue>("issue", "Issue");
-	public static readonly RedmineObjectProperty<Issue> IssueToProperty =
-		new RedmineObjectProperty<Issue>("issue_to", "IssueTo");
-	public static readonly RedmineObjectProperty<IssueRelationType> TypeProperty =
-		new RedmineObjectProperty<IssueRelationType>("relation_type", "Type");
+	public static readonly RedmineObjectProperty<Issue>             IssueProperty   = new("issue",         nameof(Issue));
+	public static readonly RedmineObjectProperty<Issue>             IssueToProperty = new("issue_to",      nameof(IssueTo));
+	public static readonly RedmineObjectProperty<IssueRelationType> TypeProperty    = new("relation_type", nameof(Type));
 
 	#endregion
 
@@ -73,11 +72,11 @@ public sealed class IssueRelation : RedmineObject
 		Type	= RedmineUtility.LoadIssueRelationType(node[TypeProperty.XmlNodeName]);
 	}
 
-	public override void Update()
+	public override Task UpdateAsync(CancellationToken cancellationToken = default)
 	{
 		var url = string.Format(CultureInfo.InvariantCulture,
 			@"relations/{0}.xml", Id);
-		Context.Attachments.FetchSingleItem(url);
+		return Context.Attachments.FetchSingleItemAsync(url, cancellationToken);
 	}
 
 	#endregion
@@ -86,20 +85,20 @@ public sealed class IssueRelation : RedmineObject
 
 	public Issue Issue
 	{
-		get { return _issue; }
-		private set { UpdatePropertyValue(ref _issue, value, IssueProperty); }
+		get => _issue;
+		private set => UpdatePropertyValue(ref _issue, value, IssueProperty);
 	}
 
 	public Issue IssueTo
 	{
-		get { return _issueTo; }
-		private set { UpdatePropertyValue(ref _issueTo, value, IssueToProperty); }
+		get => _issueTo;
+		private set => UpdatePropertyValue(ref _issueTo, value, IssueToProperty);
 	}
 
 	public IssueRelationType Type
 	{
-		get { return _type; }
-		private set { UpdatePropertyValue(ref _type, value, TypeProperty); }
+		get => _type;
+		private set => UpdatePropertyValue(ref _type, value, TypeProperty);
 	}
 
 	#endregion

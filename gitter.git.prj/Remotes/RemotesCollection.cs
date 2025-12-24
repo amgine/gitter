@@ -18,13 +18,9 @@
  */
 #endregion
 
-#nullable enable
-
 namespace gitter.Git;
 
 using System;
-using System.Globalization;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -59,7 +55,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 	/// <summary>Invokes <see cref="FetchCompleted"/>.</summary>
 	/// <param name="remote">Remote.</param>
 	/// <param name="changes">Reference changes.</param>
-	internal void OnFetchCompleted(Remote remote, ReferenceChange[] changes)
+	internal void OnFetchCompleted(Remote? remote, Many<ReferenceChange> changes)
 		=> FetchCompleted?.Invoke(this, new FetchCompletedEventArgs(remote, changes));
 
 	/// <summary>Pull completed.</summary>
@@ -68,7 +64,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 	/// <summary>Invokes <see cref="PullCompleted"/>.</summary>
 	/// <param name="remote">Remote.</param>
 	/// <param name="changes">Reference changes.</param>
-	internal void OnPullCompleted(Remote remote, ReferenceChange[] changes)
+	internal void OnPullCompleted(Remote? remote, Many<ReferenceChange> changes)
 		=> PullCompleted?.Invoke(this, new PullCompletedEventArgs(remote, changes));
 
 	/// <summary>Prune completed.</summary>
@@ -77,7 +73,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 	/// <summary>Invokes <see cref="PruneCompleted"/>.</summary>
 	/// <param name="remote">Remote.</param>
 	/// <param name="changes">Reference changes.</param>
-	internal void OnPruneCompleted(Remote remote, ReferenceChange[] changes)
+	internal void OnPruneCompleted(Remote? remote, Many<ReferenceChange> changes)
 		=> PruneCompleted?.Invoke(this, new PruneCompletedEventArgs(remote, changes));
 
 	#endregion
@@ -93,7 +89,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 
 	#region Add()
 
-	private static AddRemoteParameters GetAddRemoteParameters(string name, string url,
+	private static AddRemoteRequest GetAddRemoteRequest(string name, string url,
 		bool fetch = false, bool mirror = false, TagFetchMode tagFetchMode = TagFetchMode.Default)
 		=> new(name, url)
 		{
@@ -110,8 +106,8 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 			Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Remote)));
 		Verify.Argument.IsNeitherNullNorWhitespace(url);
 
-		var parameters = GetAddRemoteParameters(name, url, fetch, mirror, tagFetchMode);
-		Repository.Accessor.AddRemote.Invoke(parameters);
+		var request = GetAddRemoteRequest(name, url, fetch, mirror, tagFetchMode);
+		Repository.Accessor.AddRemote.Invoke(request);
 
 		var remote = new Remote(Repository, name, url, url);
 		AddObject(remote);
@@ -132,9 +128,9 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 			Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Remote)));
 		Verify.Argument.IsNeitherNullNorWhitespace(url);
 
-		var parameters = GetAddRemoteParameters(name, url, fetch, mirror, tagFetchMode);
+		var request = GetAddRemoteRequest(name, url, fetch, mirror, tagFetchMode);
 		await Repository.Accessor.AddRemote
-			.InvokeAsync(parameters)
+			.InvokeAsync(request)
 			.ConfigureAwait(continueOnCapturedContext: false);
 
 		var remote = new Remote(Repository, name, url, url);
@@ -171,7 +167,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 			RepositoryNotifications.BranchChanged))
 		{
 			Repository.Accessor.RenameRemote.Invoke(
-				new RenameRemoteParameters(oldName, name));
+				new RenameRemoteRequest(oldName, name));
 		}
 	}
 
@@ -209,7 +205,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 			RepositoryNotifications.BranchChanged))
 		{
 			Repository.Accessor.RemoveRemote.Invoke(
-				new RemoveRemoteParameters(name));
+				new RemoveRemoteRequest(name));
 		}
 		RemoveObject(remote);
 		Repository.Refs.Remotes.Refresh();
@@ -228,7 +224,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 			RepositoryNotifications.BranchChanged))
 		{
 			await Repository.Accessor.RemoveRemote
-				.InvokeAsync(new RemoveRemoteParameters(name))
+				.InvokeAsync(new RemoveRemoteRequest(name))
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 		RemoveObject(remote);
@@ -245,7 +241,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 	public void Refresh()
 	{
 		var remotes = Repository.Accessor.QueryRemotes.Invoke(
-			new QueryRemotesParameters());
+			new QueryRemotesRequest());
 		lock(SyncRoot)
 		{
 			CacheUpdater.UpdateObjectDictionary<Remote, RemoteData>(
@@ -265,7 +261,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 	public async Task RefreshAsync()
 	{
 		var remotes = await Repository.Accessor.QueryRemotes
-			.InvokeAsync(new QueryRemotesParameters())
+			.InvokeAsync(new QueryRemotesRequest())
 			.ConfigureAwait(continueOnCapturedContext: false);
 		lock(SyncRoot)
 		{
@@ -323,38 +319,28 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 	#region push
 
 	/// <summary>Send local objects to remote repository.</summary>
-	public void PushTo(string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
+	public void PushTo(string url, Many<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(url);
 		Verify.Argument.IsValidRevisionPointerSequence(branches, Repository);
-		Verify.Argument.IsTrue(branches.Count != 0, nameof(branches),
+		Verify.Argument.IsFalse(branches.IsEmpty, nameof(branches),
 			Resources.ExcCollectionMustContainAtLeastOneObject.UseAsFormat("branch"));
 
-		var branchNames = new List<string>(branches.Count);
-		foreach(var branch in branches)
-		{
-			branchNames.Add(branch.Name);
-		}
-		IList<ReferencePushResult> res;
+		var names = branches.ConvertAll(static b => b.Name);
+		Many<ReferencePushResult> res;
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.BranchChanged))
 		{
 			res = Repository.Accessor.Push.Invoke(
-				new PushParameters(url, sendTags ? PushMode.Tags : PushMode.Default, branchNames)
+				new PushRequest(url, sendTags ? PushMode.Tags : PushMode.Default, names)
 				{
-					Force = forceOverwrite,
+					Force    = forceOverwrite,
 					ThinPack = thinPack,
 				});
 		}
-		bool changed = false;
-		for(int i = 0; i < res.Count; ++i)
-		{
-			if(res[i].Type != PushResultType.UpToDate && res[i].Type != PushResultType.Rejected)
-			{
-				changed = true;
-				break;
-			}
-		}
+		var changed = res.Any(static r
+			=> r.Type != PushResultType.UpToDate
+			&& r.Type != PushResultType.Rejected);
 		if(changed)
 		{
 			Repository.Refs.Remotes.Refresh();
@@ -362,7 +348,7 @@ public sealed class RemotesCollection : GitObjectsCollection<Remote, RemoteEvent
 	}
 
 	/// <summary>Send local objects to remote repository.</summary>
-	public Task PushToAsync(string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags,
+	public Task PushToAsync(string url, Many<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags,
 		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(url);

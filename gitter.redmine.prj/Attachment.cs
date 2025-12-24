@@ -22,26 +22,21 @@ namespace gitter.Redmine;
 
 using System;
 using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 public sealed class Attachment : RedmineObject
 {
 	#region Static
 
-	public static readonly RedmineObjectProperty<string> FileNameProperty =
-		new("filename", nameof(FileName));
-	public static readonly RedmineObjectProperty<int> FileSizeProperty =
-		new("filesize", nameof(FileSize));
-	public static readonly RedmineObjectProperty<string> DescriptionProperty =
-		new("description", nameof(Description));
-	public static readonly RedmineObjectProperty<string> ContentTypeProperty =
-		new("content_type", nameof(ContentType));
-	public static readonly RedmineObjectProperty<string> ContentUrlProperty =
-		new("content_url", nameof(ContentUrl));
-	public static readonly RedmineObjectProperty<User> AuthorProperty =
-		new("author", nameof(Author));
-	public static readonly RedmineObjectProperty<DateTime> CreatedOnProperty =
-		new("created_on", nameof(CreatedOn));
+	public static readonly RedmineObjectProperty<string>   FileNameProperty    = new("filename",     nameof(FileName));
+	public static readonly RedmineObjectProperty<int>      FileSizeProperty    = new("filesize",     nameof(FileSize));
+	public static readonly RedmineObjectProperty<string>   DescriptionProperty = new("description",  nameof(Description));
+	public static readonly RedmineObjectProperty<string>   ContentTypeProperty = new("content_type", nameof(ContentType));
+	public static readonly RedmineObjectProperty<string>   ContentUrlProperty  = new("content_url",  nameof(ContentUrl));
+	public static readonly RedmineObjectProperty<User>     AuthorProperty      = new("author",       nameof(Author));
+	public static readonly RedmineObjectProperty<DateTime> CreatedOnProperty   = new("created_on",   nameof(CreatedOn));
 
 	#endregion
 
@@ -73,7 +68,7 @@ public sealed class Attachment : RedmineObject
 		_description	= RedmineUtility.LoadString(node[DescriptionProperty.XmlNodeName]);
 		_contentUrl		= RedmineUtility.LoadString(node[ContentUrlProperty.XmlNodeName]);
 		_author			= RedmineUtility.LoadNamedObject(node[AuthorProperty.XmlNodeName], context.Users.Lookup);
-		_createdOn		= RedmineUtility.LoadDateForSure(node[CreatedOnProperty.XmlNodeName]);
+		_createdOn		= RedmineUtility.LoadDateRequired(node[CreatedOnProperty.XmlNodeName]);
 	}
 
 	#endregion
@@ -90,14 +85,14 @@ public sealed class Attachment : RedmineObject
 		Description	= RedmineUtility.LoadString(node[DescriptionProperty.XmlNodeName]);
 		ContentUrl	= RedmineUtility.LoadString(node[ContentUrlProperty.XmlNodeName]);
 		Author		= RedmineUtility.LoadNamedObject(node[AuthorProperty.XmlNodeName], Context.Users.Lookup);
-		CreatedOn	= RedmineUtility.LoadDateForSure(node[CreatedOnProperty.XmlNodeName]);
+		CreatedOn	= RedmineUtility.LoadDateRequired(node[CreatedOnProperty.XmlNodeName]);
 	}
 
-	public override void Update()
+	public override Task UpdateAsync(CancellationToken cancellationToken = default)
 	{
 		var url = string.Format(CultureInfo.InvariantCulture,
 			@"attachments/{0}.xml", Id);
-		Context.Attachments.FetchSingleItem(url);
+		return Context.Attachments.FetchSingleItemAsync(url, cancellationToken);
 	}
 
 	#endregion

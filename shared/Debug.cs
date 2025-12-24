@@ -22,6 +22,8 @@
 
 namespace gitter;
 
+#nullable enable
+
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -138,7 +140,7 @@ internal static class Assert
 	{
 		if(condition && !result())
 		{
-			_Break();
+			Fail();
 		}
 	}
 
@@ -147,28 +149,16 @@ internal static class Assert
 	/// </summary>
 	/// <param name="value">The string to verify.</param>
 	[Conditional("DEBUG")]
-	public static void IsNeitherNullNorEmpty(string value)
-	{
-		IsFalse(string.IsNullOrEmpty(value));
-	}
+	public static void IsNeitherNullNorEmpty(string? value)
+		=> IsFalse(string.IsNullOrEmpty(value));
 
 	/// <summary>
 	/// Verifies that a string has content.  I.e. it is not null and it is not purely whitespace.
 	/// </summary>
 	/// <param name="value">The string to verify.</param>
 	[Conditional("DEBUG")]
-	public static void IsNeitherNullNorWhitespace(string value)
-	{
-		if(string.IsNullOrEmpty(value))
-		{
-			_Break();
-		}
-
-		if(value.Trim().Length == 0)
-		{
-			_Break();
-		}
-	}
+	public static void IsNeitherNullNorWhitespace(string? value)
+		=> IsFalse(string.IsNullOrWhiteSpace(value));
 
 	/// <summary>
 	/// Verifies the specified value is not null.  The assertion fails if it is.
@@ -177,31 +167,16 @@ internal static class Assert
 	/// <param name="value">The value to check for nullness.</param>
 	/// <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
 	[Conditional("DEBUG")]
-	public static void IsNotNull<T>(T value) where T : class
-	{
-		if(null == value)
-		{
-			_Break();
-		}
-	}
+	public static void IsNotNull<T>(T? value) where T : class
+		=> IsFalse(value is null);
 
 	[Conditional("DEBUG")]
-	public static void IsDefault<T>(T value) where T : struct
-	{
-		if(!value.Equals(default(T)))
-		{
-			Assert.Fail();
-		}
-	}
+	public static void IsDefault<T>(T? value) where T : struct
+		=> IsTrue(Equals(value, default(T)));
 
 	[Conditional("DEBUG")]
-	public static void IsNotDefault<T>(T value) where T : struct
-	{
-		if(value.Equals(default(T)))
-		{
-			Assert.Fail();
-		}
-	}
+	public static void IsNotDefault<T>(T? value) where T : struct
+		=> IsFalse(Equals(value, default(T)));
 
 	/// <summary>
 	/// Verifies that the specified condition is false.  The assertion fails if it is true.
@@ -211,10 +186,7 @@ internal static class Assert
 	[Conditional("DEBUG")]
 	public static void IsFalse(bool condition)
 	{
-		if(condition)
-		{
-			_Break();
-		}
+		if(condition) Fail();
 	}
 
 	/// <summary>
@@ -226,10 +198,7 @@ internal static class Assert
 	[Conditional("DEBUG")]
 	public static void IsFalse(bool condition, string message)
 	{
-		if(condition)
-		{
-			_Break();
-		}
+		if(condition) Fail();
 	}
 
 	/// <summary>
@@ -240,10 +209,7 @@ internal static class Assert
 	[Conditional("DEBUG")]
 	public static void IsTrue(bool condition)
 	{
-		if(!condition)
-		{
-			_Break();
-		}
+		if(!condition) Fail();
 	}
 
 	/// <summary>
@@ -255,10 +221,7 @@ internal static class Assert
 	[Conditional("DEBUG")]
 	public static void IsTrue(bool condition, string message)
 	{
-		if(!condition)
-		{
-			_Break();
-		}
+		if(!condition) Fail();
 	}
 
 	/// <summary>
@@ -266,10 +229,7 @@ internal static class Assert
 	/// </summary>
 	/// <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
 	[Conditional("DEBUG")]
-	public static void Fail()
-	{
-		_Break();
-	}
+	public static void Fail() => _Break();
 
 	/// <summary>
 	/// This line should never be executed.  The assertion always fails.
@@ -277,10 +237,7 @@ internal static class Assert
 	/// <param name="message">The message to display if this function is executed.</param>
 	/// <remarks>This breaks into the debugger in the case of a failed assertion.</remarks>
 	[Conditional("DEBUG")]
-	public static void Fail(string message)
-	{
-		_Break();
-	}
+	public static void Fail(string message) => _Break();
 
 	/// <summary>
 	/// Verifies that the specified object is null.  The assertion fails if it is not.
@@ -288,12 +245,7 @@ internal static class Assert
 	/// <param name="item">The item to verify is null.</param>
 	[Conditional("DEBUG")]
 	public static void IsNull<T>(T item) where T : class
-	{
-		if(null != item)
-		{
-			_Break();
-		}
-	}
+		=> IsFalse(item is null);
 
 	/// <summary>
 	/// Verifies that the specified value is within the expected range.  The assertion fails if it isn't.

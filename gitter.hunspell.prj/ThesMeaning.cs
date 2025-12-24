@@ -22,18 +22,9 @@ using System.Collections.Generic;
 
 namespace NHunspell;
 
-public class ThesMeaning
+public class ThesMeaning(string? description, List<string> synonyms)
 {
-	private readonly string description;
-	private readonly List<string> synonyms;
+	public string? Description => description;
 
-	public ThesMeaning(string description, List<string> synonyms)
-	{
-		this.description = description;
-		this.synonyms = synonyms;
-	}
-
-	public string Description => this.description;
-
-	public List<string> Synonyms => this.synonyms;
+	public List<string> Synonyms => synonyms;
 }

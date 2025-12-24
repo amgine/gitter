@@ -20,6 +20,8 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 using System.Xml;
 
@@ -31,8 +33,8 @@ public sealed class CustomFieldsCollection : NamedRedmineObjectsCache<CustomFiel
 	}
 
 	protected override CustomField Create(int id, string name)
-		=> new CustomField(Context, id, name);
+		=> new(Context, id, name);
 
 	protected override CustomField Create(XmlNode node)
-		=> new CustomField(Context, node);
+		=> new(Context, node);
 }

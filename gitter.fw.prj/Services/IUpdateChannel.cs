@@ -20,11 +20,8 @@
 
 namespace gitter.Framework.Services;
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
-
-#nullable enable
 
 /// <summary>gitter update channel.</summary>
 public interface IUpdateChannel

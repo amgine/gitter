@@ -20,25 +20,23 @@
 
 namespace gitter.Git.AccessLayer;
 
-using System;
-
 using gitter.Framework;
 
 /// <summary>Tag description.</summary>
 public sealed class TagData : INamedObject
 {
-	public TagData(string name, Hash sha1, TagType tagType)
+	public TagData(string name, Sha1Hash hash, TagType tagType)
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(name);
 
 		Name    = name;
-		SHA1    = sha1;
+		Hash    = hash;
 		TagType = tagType;
 	}
 
 	public string Name { get; }
 
-	public Hash SHA1 { get; }
+	public Sha1Hash Hash { get; }
 
 	public TagType TagType { get; }
 

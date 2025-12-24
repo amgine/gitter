@@ -24,120 +24,59 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-public sealed class MSVS2012ButtonRenderer : CustomButtonRenderer
+public sealed class MSVS2012ButtonRenderer(MSVS2012ButtonRenderer.ColorTable colorTable) : CustomButtonRenderer
 {
-	#region Color Tables
+	public readonly record struct Colors(
+		Color Background,
+		Color Foreground,
+		Color Border);
 
-	public interface IColorTable
+	public sealed record class ColorTable(
+		Colors Normal,
+		Colors Hover,
+		Colors Pressed,
+		Colors Disabled)
 	{
-		Color Border { get; }
-		Color Background { get; }
-		Color Foreground { get; }
-
-		Color HoverBorder { get; }
-		Color HoverBackground { get; }
-
-		Color PressedBorder { get; }
-		Color PressedBackground { get; }
-
-		Color DisabledBorder { get; }
-		Color DisabledBackground { get; }
-		Color DisabledForeground { get; }
+		public static ColorTable Dark { get; } = new(
+			Normal: new(
+				Background: Color.FromArgb( 63,  63,  70),
+				Foreground: MSVS2012DarkColors.WINDOW_TEXT,
+				Border:     Color.FromArgb( 84,  84,  92)),
+			Hover: new(
+				Background: Color.FromArgb( 84,  84,  92),
+				Foreground: MSVS2012DarkColors.WINDOW_TEXT,
+				Border:     Color.FromArgb(106, 106, 117)),
+			Pressed: new(
+				Background: Color.FromArgb(  0, 122, 204),
+				Foreground: MSVS2012DarkColors.WINDOW_TEXT,
+				Border:     Color.FromArgb( 28, 151, 234)),
+			Disabled: new(
+				Border:     Color.FromArgb( 67,  67,  70),
+				Foreground: Color.FromArgb(109, 109, 109),
+				Background: Color.FromArgb( 37,  37,  38)));
 	}
 
-	private sealed class DarkColorTable : IColorTable
+	public static ColorTable DarkColors => ColorTable.Dark;
+
+	private Colors GetColors(CustomButton button)
 	{
-		public Color Border => Color.FromArgb(84, 84, 92);
-
-		public Color Background => Color.FromArgb(63, 63, 70);
-
-		public Color Foreground => MSVS2012DarkColors.WINDOW_TEXT;
-
-		public Color HoverBorder => Color.FromArgb(106, 106, 117);
-
-		public Color HoverBackground => Color.FromArgb(84, 84, 92);
-
-		public Color PressedBorder => Color.FromArgb(28, 151, 234);
-
-		public Color PressedBackground => Color.FromArgb(0, 122, 204);
-
-		public Color DisabledBorder => Color.FromArgb(67, 67, 70);
-
-		public Color DisabledBackground => Color.FromArgb(37, 37, 38);
-
-		public Color DisabledForeground => Color.FromArgb(109, 109, 109);
+		if(!button.Enabled) return colorTable.Disabled;
+		if(button.IsPressed && button.IsMouseOver) return colorTable.Pressed;
+		if(button.Focused   || button.IsMouseOver) return colorTable.Hover;
+		return colorTable.Normal;
 	}
-
-	private static IColorTable _darkColors;
-
-	public static IColorTable DarkColors => _darkColors ??= new DarkColorTable();
-
-	#endregion
-
-	#region .ctor
-
-	public MSVS2012ButtonRenderer(IColorTable colorTable)
-	{
-		Verify.Argument.IsNotNull(colorTable);
-
-		ColorTable = colorTable;
-	}
-
-	#endregion
-
-	#region Properties
-
-	private IColorTable ColorTable { get; }
-
-	#endregion
-
-	#region Methods
 
 	public override void Render(Graphics graphics, Rectangle clipRectangle, CustomButton button)
 	{
-		Color border;
-		Color background;
-		Color foreground;
-		if(button.Enabled)
-		{
-			if(button.IsPressed)
-			{
-				border		= ColorTable.PressedBorder;
-				background	= ColorTable.PressedBackground;
-				foreground	= ColorTable.Foreground;
-			}
-			else if(button.Focused || button.IsMouseOver)
-			{
-				border		= ColorTable.HoverBorder;
-				background	= ColorTable.HoverBackground;
-				foreground	= ColorTable.Foreground;
-			}
-			else
-			{
-				border		= ColorTable.Border;
-				background	= ColorTable.Background;
-				foreground	= ColorTable.Foreground;
-			}
-		}
-		else
-		{
-			border		= ColorTable.DisabledBorder;
-			background	= ColorTable.DisabledBackground;
-			foreground	= ColorTable.DisabledForeground;
-		}
-		using(var brush = new SolidBrush(background))
-		{
-			graphics.FillRectangle(brush, clipRectangle);
-		}
+		var colors = GetColors(button);
 		var bounds = new Rectangle(Point.Empty, button.Size);
-		TextRenderer.DrawText(graphics, button.Text, button.Font, bounds, foreground);
-		using(var pen = new Pen(border))
+		using(var hdc = graphics.AsGdi())
 		{
-			bounds.Width -= 1;
-			bounds.Height -= 1;
-			graphics.DrawRectangle(pen, bounds);
+			var conv = DpiConverter.FromDefaultTo(button);
+			var borderThickness = conv.ConvertX(1);
+			hdc.DrawBorder(bounds, colors.Border, colors.Background, borderThickness);
+			bounds.Inflate(-borderThickness, -borderThickness);
 		}
+		TextRenderer.DrawText(graphics, button.Text, button.Font, bounds, colors.Foreground);
 	}
-
-	#endregion
 }

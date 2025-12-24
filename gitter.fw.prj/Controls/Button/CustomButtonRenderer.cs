@@ -25,7 +25,7 @@ using System.Drawing;
 
 public abstract class CustomButtonRenderer
 {
-	private static CustomButtonRenderer _msvs2012Dark;
+	private static CustomButtonRenderer? _msvs2012Dark;
 
 	public static CustomButtonRenderer MSVS2012Dark
 		=> _msvs2012Dark ??= new MSVS2012ButtonRenderer(MSVS2012ButtonRenderer.DarkColors);

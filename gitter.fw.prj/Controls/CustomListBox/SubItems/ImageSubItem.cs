@@ -26,20 +26,14 @@ using System.Drawing;
 /// <summary>Subitem with image content.</summary>
 public class ImageSubItem : BaseImageSubItem
 {
-	#region Data
-
-	private Image _image;
-	private Image _overlayImage;
-
-	#endregion
-
-	#region .ctor
+	private Image? _image;
+	private Image? _overlayImage;
 
 	/// <summary>Create <see cref="ImageSubItem"/>.</summary>
 	/// <param name="id">Subitem id.</param>
 	/// <param name="image">Subitem image.</param>
 	/// <param name="overlayImage">Subitem overlay image.</param>
-	public ImageSubItem(int id, Image image, Image overlayImage)
+	public ImageSubItem(int id, Image? image, Image? overlayImage)
 		: base(id)
 	{
 		_image = image;
@@ -49,7 +43,7 @@ public class ImageSubItem : BaseImageSubItem
 	/// <summary>Create <see cref="ImageSubItem"/>.</summary>
 	/// <param name="id">Subitem id.</param>
 	/// <param name="image">Subitem image.</param>
-	public ImageSubItem(int id, Image image)
+	public ImageSubItem(int id, Image? image)
 		: this(id, image, null)
 	{
 	}
@@ -61,37 +55,29 @@ public class ImageSubItem : BaseImageSubItem
 	{
 	}
 
-	#endregion
-
-	#region Properties
-
 	/// <summary>Subitem image.</summary>
-	public override Image Image
+	public override Image? Image
 	{
 		get => _image;
 		set
 		{
-			if(_image != value)
-			{
-				_image = value;
-				Invalidate();
-			}
+			if(_image == value) return;
+
+			_image = value;
+			Invalidate();
 		}
 	}
 
 	/// <summary>Subitem overlay image.</summary>
-	public override Image OverlayImage
+	public override Image? OverlayImage
 	{
 		get => _overlayImage;
 		set
 		{
-			if(_overlayImage != null)
-			{
-				_overlayImage = value;
-				Invalidate();
-			}
+			if(_overlayImage == null) return;
+
+			_overlayImage = value;
+			Invalidate();
 		}
 	}
-
-	#endregion
 }

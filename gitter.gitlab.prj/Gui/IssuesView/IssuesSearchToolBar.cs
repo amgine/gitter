@@ -30,7 +30,7 @@ using gitter.Framework.Controls;
 internal sealed class IssuesSearchToolBar : SearchToolBar<IssuesSearchOptions>
 {
 	protected override IssuesSearchOptions CreateSearchOptions()
-		=> new IssuesSearchOptions
+		=> new()
 		{
 			Text      = SearchText,
 			MatchCase = MatchCase,

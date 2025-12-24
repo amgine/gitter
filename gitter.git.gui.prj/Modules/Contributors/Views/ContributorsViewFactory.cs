@@ -22,10 +22,5 @@ namespace gitter.Git.Gui.Views;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class ContributorsViewFactory : GitViewFactoryBase<ContributorsView>
-{
-	public ContributorsViewFactory()
-		: base(Guids.ContributorsViewGuid, Resources.StrContributors, Icons.Users, singleton: true)
-	{
-	}
-}
+sealed class ContributorsViewFactory() : GitViewFactoryBase<ContributorsView>(
+	Guids.ContributorsViewGuid, Resources.StrContributors, Icons.Users, singleton: true);

@@ -24,7 +24,7 @@ using gitter.Framework.Mvc;
 
 interface IStashToBranchView : IView
 {
-	IUserInputSource<string> BranchName { get; }
+	IUserInputSource<string?> BranchName { get; }
 
 	IUserInputErrorNotifier ErrorNotifier { get; }
 }

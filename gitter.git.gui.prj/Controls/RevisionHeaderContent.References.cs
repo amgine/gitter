@@ -32,27 +32,16 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 
 partial class RevisionHeaderContent
 {
-	sealed class ReferencesElement : BaseElement
+	sealed class ReferencesElement(RevisionHeaderContent owner) : BaseElement(owner)
 	{
-		private struct ReferenceVisual
+		private readonly struct ReferenceVisual(Reference reference, Rectangle rectangle)
 		{
-			public ReferenceVisual(Reference reference, Rectangle rectangle)
-			{
-				Reference = reference;
-				Rectangle = rectangle;
-			}
+			public Reference Reference { get; } = reference;
 
-			public Reference Reference { get; }
-
-			public Rectangle Rectangle { get; }
+			public Rectangle Rectangle { get; } = rectangle;
 		}
 
-		private readonly List<ReferenceVisual> _drawnReferences = new();
-
-		public ReferencesElement(RevisionHeaderContent owner)
-			: base(owner)
-		{
-		}
+		private readonly List<ReferenceVisual> _drawnReferences = [];
 
 		public override bool IsAvailableFor(Revision revision)
 			=> revision.References.Count != 0;
@@ -67,7 +56,7 @@ partial class RevisionHeaderContent
 				{
 					if(reference.Rectangle.X <= x && reference.Rectangle.Right > x)
 					{
-						ContextMenuStrip menu = reference.Reference switch
+						ContextMenuStrip? menu = reference.Reference switch
 						{
 							BranchBase branch => new BranchMenu(branch),
 							Tag        tag    => new TagMenu(tag),
@@ -121,9 +110,10 @@ partial class RevisionHeaderContent
 			{
 				if(revision.References.Count == 0) return;
 
-				using var tagBrush    = SolidBrushCache.Get(ColorScheme.TagBackColor);
-				using var localBrush  = SolidBrushCache.Get(ColorScheme.LocalBranchBackColor);
-				using var remoteBrush = SolidBrushCache.Get(ColorScheme.RemoteBranchBackColor);
+				var colors = GraphColorScheme.Current;
+				using var tagBrush    = SolidBrushCache.Get(colors.TagBackColor);
+				using var localBrush  = SolidBrushCache.Get(colors.LocalBranchBackColor);
+				using var remoteBrush = SolidBrushCache.Get(colors.RemoteBranchBackColor);
 
 				var conv = DpiConverter.FromDefaultTo(dpi);
 				var r2 = new Rectangle(rect.X + conv.ConvertX(HeaderWidth), rect.Y, rect.Width - conv.ConvertX(HeaderWidth), rect.Height);
@@ -139,12 +129,12 @@ partial class RevisionHeaderContent
 						ReferenceType.LocalBranch  => localBrush,
 						ReferenceType.RemoteBranch => remoteBrush,
 						ReferenceType.Tag          => tagBrush,
-						_ => Brushes.WhiteSmoke,
+						_                          => Brushes.WhiteSmoke,
 					};
 					graphics.FillRoundedRectangle(brush, Pens.Black, r, conv.ConvertX(Radius));
 					var textRect = new Rectangle(r2.X + offset + conv.ConvertX(3), r2.Y, size.Width + conv.ConvertX(6) - 1, size.Height);
 					GitterApplication.TextRenderer.DrawText(
-						graphics, name, font, SystemBrushes.WindowText, textRect, ContentFormat);
+						graphics, name, font, colors.TextColor, textRect, ContentFormat);
 					_drawnReferences.Add(new ReferenceVisual(reference, r));
 					offset += size.Width + conv.ConvertX(3) + conv.ConvertX(6);
 				}

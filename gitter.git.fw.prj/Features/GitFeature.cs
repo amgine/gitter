@@ -22,14 +22,9 @@ namespace gitter.Git;
 
 using gitter.Git.AccessLayer;
 
-public abstract class GitFeature
+public abstract class GitFeature(string name)
 {
-	protected GitFeature(string name)
-	{
-		Name = name;
-	}
-
-	public string Name { get; }
+	public string Name { get; } = name;
 
 	public abstract bool IsAvailableFor(IGitAccessor gitAccessor);
 

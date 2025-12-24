@@ -25,22 +25,22 @@ using System.Linq;
 
 using gitter.Framework;
 using gitter.Framework.Configuration;
+using gitter.Framework.Controls;
+
+using gitter.Git;
+using gitter.Git.Gui.Controls;
 
 using gitter.TeamCity.Gui.Views;
 
-sealed class TeamCityGuiProvider : IGuiProvider
+sealed class TeamCityGuiProvider(IRepository repository, NotifyCollection<ServerInfo> servers, TeamCityServiceContext context) : IGuiProvider
 {
-	private RepositoryExplorer _repositoryExplorer;
+	private RepositoryExplorer? _repositoryExplorer;
 
-	public TeamCityGuiProvider(IRepository repository, TeamCityServiceContext svc)
-	{
-		Repository = repository;
-		ServiceContext = svc;
-	}
+	public IRepository Repository { get; } = repository;
 
-	public IRepository Repository { get; }
+	public NotifyCollection<ServerInfo> Servers { get; } = servers;
 
-	public TeamCityServiceContext ServiceContext { get; }
+	public TeamCityServiceContext ServiceContext { get; } = context;
 
 	public void AttachToEnvironment(IWorkingEnvironment environment)
 	{
@@ -48,6 +48,7 @@ sealed class TeamCityGuiProvider : IGuiProvider
 
 		_repositoryExplorer = new RepositoryExplorer(environment, this);
 		environment.ProvideRepositoryExplorerItem(_repositoryExplorer.RootItem);
+		DiffHeaderPanelsProvider.CreatingPanels += OnDiffHeaderPanelsProviderCreatingPanels;
 	}
 
 	public void DetachFromEnvironment(IWorkingEnvironment environment)
@@ -56,8 +57,31 @@ sealed class TeamCityGuiProvider : IGuiProvider
 
 		var views = environment.ViewDockService.FindViews(Guids.BuildTypeBuildsViewGuid).ToList();
 		foreach(var view in views) view.Close();
-		environment.RemoveRepositoryExplorerItem(_repositoryExplorer.RootItem);
-		_repositoryExplorer = null;
+		if(_repositoryExplorer is not null)
+		{
+			environment.RemoveRepositoryExplorerItem(_repositoryExplorer.RootItem);
+			_repositoryExplorer = null;
+		}
+		DiffHeaderPanelsProvider.CreatingPanels -= OnDiffHeaderPanelsProviderCreatingPanels;
+	}
+
+	private void OnDiffHeaderPanelsProviderCreatingPanels(object? sender, CreatingPanelsEventArgs e)
+	{
+		Assert.IsNotNull(e);
+
+		switch(e.DiffSource)
+		{
+			case IRevisionDiffSource revisionSource:
+				{
+					var revision = revisionSource.Revision.Dereference();
+					if(revision is not null)
+					{
+						e.Panels.Add(new TeamCityRevisionPanel(ServiceContext, revision) { });
+						e.Panels.Add(new FlowPanelSeparator { SeparatorStyle = FlowPanelSeparatorStyle.Line });
+					}
+				}
+				break;
+		}
 	}
 
 	public void SaveTo(Section section)

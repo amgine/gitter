@@ -29,21 +29,16 @@ sealed class MSVS2010Style : IGitterStyle
 {
 	private readonly IGitterStyleColors _colors;
 	private readonly IItemBackgroundStyles _itemBackgroundStyles;
-	private ToolStripRenderer _toolStriprenderer;
+	private ToolStripRenderer? _toolStriprenderer;
 
 	private sealed class SystemItemBackgroundStyles : IItemBackgroundStyles
 	{
-		public IBackgroundStyle Focused => BackgroundStyle.Focused;
-
+		public IBackgroundStyle Focused         => BackgroundStyle.Focused;
 		public IBackgroundStyle SelectedFocused => BackgroundStyle.SelectedFocused;
-
-		public IBackgroundStyle Selected => BackgroundStyle.Selected;
-
+		public IBackgroundStyle Selected        => BackgroundStyle.Selected;
 		public IBackgroundStyle SelectedNoFocus => BackgroundStyle.SelectedNoFocus;
-
-		public IBackgroundStyle Hovered => BackgroundStyle.Hovered;
-
-		public IBackgroundStyle HoveredFocused => BackgroundStyle.HoveredFocused;
+		public IBackgroundStyle Hovered         => BackgroundStyle.Hovered;
+		public IBackgroundStyle HoveredFocused  => BackgroundStyle.HoveredFocused;
 	}
 
 	public MSVS2010Style()
@@ -66,11 +61,17 @@ sealed class MSVS2010Style : IGitterStyle
 	public IScrollBarWidget CreateScrollBar(Orientation orientation)
 		=> new SystemScrollBarAdapter(orientation);
 
-	public ICheckBoxWidget CreateCheckBox()
-		=> new SystemCheckBoxAdapter();
+	public IFactory<ICheckBoxWidget> CheckBoxFactory
+		=> Controls.CheckBoxFactory.System;
 
-	public IButtonWidget CreateButton()
-		=> new SystemButtonAdapter();
+	public IFactory<IRadioButtonWidget> RadioButtonFactory
+		=> Controls.RadioButtonFactory.System;
+
+	public IFactory<IButtonWidget> ButtonFactory
+		=> Controls.ButtonFactory.System;
+
+	public IFactory<IProgressBarWidget> ProgressBarFactory
+		=> Controls.ProgressBarFactory.System;
 
 	public CustomListBoxRenderer ListBoxRenderer
 		=> CustomListBoxManager.Win7Renderer;

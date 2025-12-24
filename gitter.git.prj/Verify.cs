@@ -95,7 +95,7 @@ internal static partial class Verify
 			Assert.IsNotNull(repository);
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
-			if(revision == null)
+			if(revision is null)
 			{
 				throw new ArgumentNullException(parameterName);
 			}
@@ -294,8 +294,7 @@ internal static partial class Verify
 			{
 				throw new ArgumentNullException(parameterName);
 			}
-			string msg;
-			if(!Reference.ValidateName(referenceName, referenceType, out msg))
+			if(!Reference.ValidateName(referenceName, referenceType, out var msg))
 			{
 				throw new ArgumentException(msg, parameterName);
 			}

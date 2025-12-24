@@ -18,8 +18,6 @@
 */
 #endregion
 
-#nullable enable
-
 namespace gitter.Git;
 
 public static class BranchHelper

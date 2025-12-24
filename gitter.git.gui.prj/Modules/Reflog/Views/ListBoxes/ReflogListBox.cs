@@ -20,12 +20,7 @@
 
 namespace gitter.Git.Gui.Controls;
 
-using System;
-
-using gitter.Framework;
 using gitter.Framework.Controls;
-
-using Resources = gitter.Git.Gui.Properties.Resources;
 
 /// <summary><see cref="CustomListBox"/> for displaying <see cref="ReflogRecordListItem"/>.</summary>
 public sealed class ReflogListBox : CustomListBox
@@ -34,42 +29,42 @@ public sealed class ReflogListBox : CustomListBox
 	{
 	}
 
-	public Reflog Reflog { get; private set; }
+	public Reflog? Reflog { get; private set; }
 
-	public void Load(Reflog reflog)
+	public void Load(Reflog? reflog)
 	{
 		if(Reflog == reflog) return;
 
 		if(Reflog is not null)
 		{
-			DetachFromReflog();
+			DetachFromReflog(Reflog);
 		}
 		Reflog = reflog;
 		if(Reflog is not null)
 		{
-			AttachToReflog();
+			AttachToReflog(Reflog);
 		}
 	}
 
-	private void AttachToReflog()
+	private void AttachToReflog(Reflog reflog)
 	{
-		lock(Reflog)
+		lock(reflog)
 		{
-			foreach(var record in Reflog)
+			foreach(var record in reflog)
 			{
 				Items.Add(new ReflogRecordListItem(record));
 			}
-			Reflog.RecordAdded += OnRecordAdded;
+			reflog.RecordAdded += OnRecordAdded;
 		}
 	}
 
-	private void DetachFromReflog()
+	private void DetachFromReflog(Reflog reflog)
 	{
-		Reflog.RecordAdded -= OnRecordAdded;
+		reflog.RecordAdded -= OnRecordAdded;
 		Items.Clear();
 	}
 
-	private void OnRecordAdded(object sender, ReflogRecordEventArgs e)
+	private void OnRecordAdded(object? sender, ReflogRecordEventArgs e)
 	{
 		var item = new ReflogRecordListItem(e.Object);
 		Items.InsertSafe(e.Object.Index, item);
@@ -82,7 +77,7 @@ public sealed class ReflogListBox : CustomListBox
 		{
 			if(Reflog is not null)
 			{
-				DetachFromReflog();
+				DetachFromReflog(Reflog);
 				Reflog = null;
 			}
 		}

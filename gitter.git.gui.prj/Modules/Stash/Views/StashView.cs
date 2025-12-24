@@ -105,7 +105,7 @@ partial class StashView : GitViewBase
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 

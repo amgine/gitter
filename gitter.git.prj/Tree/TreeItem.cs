@@ -18,8 +18,6 @@
  */
 #endregion
 
-#nullable enable
-
 namespace gitter.Git;
 
 using System;
@@ -78,11 +76,10 @@ public abstract class TreeItem : GitNamedObjectWithLifetime
 		{
 			Assert.IsFalse(IsDeleted);
 
-			if(_stagedStatus != value)
-			{
-				_stagedStatus = value;
-				StagedStatusChanged?.Invoke(this, EventArgs.Empty);
-			}
+			if(_stagedStatus == value) return;
+
+			_stagedStatus = value;
+			StagedStatusChanged?.Invoke(this, EventArgs.Empty);
 		}
 	}
 
@@ -93,11 +90,10 @@ public abstract class TreeItem : GitNamedObjectWithLifetime
 		{
 			Assert.IsFalse(IsDeleted);
 
-			if(_status != value)
-			{
-				_status = value;
-				StatusChanged?.Invoke(this, EventArgs.Empty);
-			}
+			if(_status == value) return;
+
+			_status = value;
+			StatusChanged?.Invoke(this, EventArgs.Empty);
 		}
 	}
 
@@ -135,8 +131,8 @@ public abstract class TreeItem : GitNamedObjectWithLifetime
 
 		return _stagedStatus switch
 		{
-			StagedStatus.Staged   => Repository.Status.GetDiffSource(true,  new[] { RelativePath }),
-			StagedStatus.Unstaged => Repository.Status.GetDiffSource(false, new[] { RelativePath }),
+			StagedStatus.Staged   => Repository.Status.GetDiffSource(true,  RelativePath),
+			StagedStatus.Unstaged => Repository.Status.GetDiffSource(false, RelativePath),
 			_ => null,
 		};
 	}
@@ -149,7 +145,7 @@ public abstract class TreeItem : GitNamedObjectWithLifetime
 			RepositoryNotifications.IndexUpdated))
 		{
 			Repository.Accessor.RemoveFiles.Invoke(
-				new RemoveFilesParameters(RelativePath)
+				new RemoveFilesRequest(RelativePath)
 				{
 					Cached = _stagedStatus == Git.StagedStatus.Staged,
 					Force = force,
@@ -163,7 +159,7 @@ public abstract class TreeItem : GitNamedObjectWithLifetime
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.WorktreeUpdated))
 		{
-			System.IO.File.Delete(FullPath);
+			File.Delete(FullPath);
 		}
 		Repository.Status.Refresh();
 	}
@@ -199,7 +195,7 @@ public abstract class TreeItem : GitNamedObjectWithLifetime
 			RepositoryNotifications.WorktreeUpdated))
 		{
 			Repository.Accessor.CheckoutFiles.Invoke(
-				new CheckoutFilesParameters(RelativePath)
+				new CheckoutFilesRequest(RelativePath)
 				{
 					Mode = CheckoutFileMode.IgnoreUnmergedEntries,
 				});
@@ -226,11 +222,11 @@ public abstract class TreeItem : GitNamedObjectWithLifetime
 			{
 				sb.Append(Path.DirectorySeparatorChar);
 			}
-			if(_parent != null)
+			if(_parent is not null)
 			{
 				var stack = new Stack<string>();
 				var p = _parent;
-				while(p != null && p.Parent != null)
+				while(p?.Parent is not null)
 				{
 					if(!string.IsNullOrWhiteSpace(p.Name))
 					{

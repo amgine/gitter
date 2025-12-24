@@ -1,28 +1,30 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git.AccessLayer.CLI;
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text;
 
 using gitter.Framework;
 using gitter.Framework.CLI;
@@ -31,7 +33,7 @@ sealed partial class LogParser : ITextParser<IList<RevisionData>>
 {
 	#region Helpers
 
-	interface ITextFieldParser
+	interface IRevisionFieldParser
 	{
 #if NETCOREAPP
 		bool Parse(ref ReadOnlySpan<char> text);
@@ -42,7 +44,7 @@ sealed partial class LogParser : ITextParser<IList<RevisionData>>
 		void Reset();
 	}
 
-	interface ITextFieldParser<out T> : ITextFieldParser
+	interface IRevisionFieldParser<out T> : IRevisionFieldParser
 	{
 		T GetValue();
 	}
@@ -53,6 +55,123 @@ sealed partial class LogParser : ITextParser<IList<RevisionData>>
 		Buffering,
 		WaitingTerminator,
 		Completed,
+	}
+
+	abstract class RevisionFieldParser<T> : IRevisionFieldParser<T>
+	{
+		protected readonly char[] _buffer;
+		protected int _offset;
+		protected T? _value;
+		protected FieldParserState _state;
+
+		protected RevisionFieldParser(int maxLength)
+		{
+			_buffer = new char[maxLength];
+			_state  = FieldParserState.Initial;
+		}
+
+#if NETCOREAPP
+
+		protected abstract bool ParseInitial(ref ReadOnlySpan<char> text);
+
+		protected abstract bool ParseBuffering(ref ReadOnlySpan<char> text);
+
+		public bool Parse(ref ReadOnlySpan<char> text)
+			=> _state switch
+			{
+				FieldParserState.Initial           => ParseInitial    (ref text),
+				FieldParserState.Buffering         => ParseBuffering  (ref text),
+				FieldParserState.WaitingTerminator => ParseTerminator (ref text),
+				FieldParserState.Completed         => throw new InvalidOperationException("Field is already completed."),
+				_                                  => throw new ApplicationException($"Invalid state: {_state}"),
+			};
+
+#else
+
+		protected abstract bool ParseInitial(ITextSegment textSegment);
+
+		protected abstract bool ParseBuffering(ITextSegment textSegment);
+
+		public bool Parse(ITextSegment text)
+			=> _state switch
+			{
+				FieldParserState.Initial           => ParseInitial    (text),
+				FieldParserState.Buffering         => ParseBuffering  (text),
+				FieldParserState.WaitingTerminator => ParseTerminator (text),
+				FieldParserState.Completed         => throw new InvalidOperationException("Field is already completed."),
+				_                                  => throw new ApplicationException($"Invalid state: {_state}"),
+			};
+
+#endif
+
+		public void Reset()
+		{
+			_state  = FieldParserState.Initial;
+			_offset = 0;
+		}
+
+#if NETCOREAPP
+
+		protected void InitialBuffer(ref ReadOnlySpan<char> text)
+		{
+			_offset = text.Length;
+			text.CopyTo(_buffer);
+			text = default;
+			_state = FieldParserState.Buffering;
+		}
+
+		protected bool ParseTerminator(ref ReadOnlySpan<char> text)
+		{
+			if(text.Length == 0) return false;
+
+			text = text[1..];
+			_state = FieldParserState.Completed;
+			return true;
+		}
+
+#else
+
+		protected void InitialBuffer(ITextSegment text)
+		{
+			_offset = text.Length;
+			text.MoveTo(_buffer, 0, _offset);
+			_state = FieldParserState.Buffering;
+		}
+
+		protected bool ParseTerminator(ITextSegment text)
+		{
+			if(text.Length == 0) return false;
+
+			text.Skip();
+			_state = FieldParserState.Completed;
+			return true;
+		}
+
+#endif
+
+#if NETCOREAPP
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected bool FillBuffer(int total, ref ReadOnlySpan<char> text)
+			=> LogParser.FillBuffer(_buffer, total, ref _offset, ref text);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected bool FillBufferExcludeLastChar(int total, ref ReadOnlySpan<char> text)
+			=> LogParser.FillBufferExcludeLastChar(_buffer, total, ref _offset, ref text);
+
+#else
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected bool FillBuffer(int total, ITextSegment textSegment)
+			=> LogParser.FillBuffer(_buffer, total, ref _offset, textSegment);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected bool FillBufferExcludeLastChar(int total, ITextSegment textSegment)
+			=> LogParser.FillBufferExcludeLastChar(_buffer, total, ref _offset, textSegment);
+
+#endif
+
+		public T GetValue() => _value!;
 	}
 
 	readonly record struct CommitMessage(string Subject, string Body);
@@ -121,7 +240,7 @@ sealed partial class LogParser : ITextParser<IList<RevisionData>>
 
 #endif
 
-	sealed class UnixTimestampField : ITextFieldParser<DateTimeOffset>
+	sealed class UnixTimestampField : IRevisionFieldParser<DateTimeOffset>
 	{
 		const char Terminator = '\n';
 
@@ -155,7 +274,7 @@ sealed partial class LogParser : ITextParser<IList<RevisionData>>
 				}
 				AppendDigit(c);
 			}
-			text = ReadOnlySpan<char>.Empty;
+			text = [];
 			return false;
 		}
 
@@ -190,7 +309,7 @@ sealed partial class LogParser : ITextParser<IList<RevisionData>>
 		}
 	}
 
-	sealed class ISO8601TimestampField : ITextFieldParser<DateTimeOffset>
+	sealed class ISO8601TimestampField : IRevisionFieldParser<DateTimeOffset>
 	{
 		// 0123456789012345678901234
 		// 2020-11-17 00:13:52 +0300
@@ -284,26 +403,26 @@ sealed partial class LogParser : ITextParser<IList<RevisionData>>
 
 	#region Data
 
-	private readonly Dictionary<Hash, RevisionData> _cache;
+	private readonly Dictionary<Sha1Hash, RevisionData> _cache;
 	private readonly List<RevisionData> _log;
-	private readonly ITextFieldParser<Hash> _commitHash;
-	private readonly ITextFieldParser<Hash> _treeHash;
-	private readonly ITextFieldParser<List<Hash>> _parents;
-	private readonly ITextFieldParser<DateTimeOffset> _commitDate;
-	private readonly ITextFieldParser<string> _committerName;
-	private readonly ITextFieldParser<string> _committerEmail;
-	private readonly ITextFieldParser<DateTimeOffset> _authorDate;
-	private readonly ITextFieldParser<string> _authorName;
-	private readonly ITextFieldParser<string> _authorEmail;
-	private readonly ITextFieldParser<CommitMessage> _commitMessage;
-	private readonly ITextFieldParser[] _fields;
+	private readonly HashField _commitHash;
+	private readonly HashField _treeHash;
+	private readonly MultiHashField _parents;
+	private readonly IRevisionFieldParser<DateTimeOffset> _commitDate;
+	private readonly StringLineFieldParser _committerName;
+	private readonly StringLineFieldParser _committerEmail;
+	private readonly IRevisionFieldParser<DateTimeOffset> _authorDate;
+	private readonly StringLineFieldParser _authorName;
+	private readonly StringLineFieldParser _authorEmail;
+	private readonly CommitMessageField _commitMessage;
+	private readonly IRevisionFieldParser[] _fields;
 	private int _currentFieldIndex;
 
 	#endregion
 
 	#region .ctor
 
-	private static ITextFieldParser<DateTimeOffset> CreateTimestampParser(TimestampFormat timestampFormat)
+	private static IRevisionFieldParser<DateTimeOffset> CreateTimestampParser(TimestampFormat timestampFormat)
 		=> timestampFormat switch
 		{
 			TimestampFormat.Unix          => new UnixTimestampField(),
@@ -312,31 +431,31 @@ sealed partial class LogParser : ITextParser<IList<RevisionData>>
 			_ => throw new ArgumentException($"Unsupported timestamp format: {timestampFormat}.", nameof(timestampFormat)),
 		};
 
-	public LogParser(Dictionary<Hash, RevisionData> cache = null, TimestampFormat timestampFormat = TimestampFormat.StrictISO8601)
+	public LogParser(Dictionary<Sha1Hash, RevisionData>? cache = null, TimestampFormat timestampFormat = TimestampFormat.StrictISO8601)
 	{
-		_cache = cache ?? new Dictionary<Hash, RevisionData>(Hash.EqualityComparer);
-		_log   = new List<RevisionData>();
+		_cache = cache ?? new Dictionary<Sha1Hash, RevisionData>(Sha1Hash.EqualityComparer);
+		_log   = [];
 
-		_fields = new ITextFieldParser[]
-		{
+		_fields =
+		[
 			_commitHash     = new HashField(),
 			_treeHash       = new HashField(),
-			_parents        = new MultiHashFieldParser(),
+			_parents        = new MultiHashField(),
 			_commitDate     = CreateTimestampParser(timestampFormat),
 			_committerName  = new StringLineFieldParser(),
 			_committerEmail = new StringLineFieldParser(),
 			_authorDate     = CreateTimestampParser(timestampFormat),
 			_authorName     = new StringLineFieldParser(),
 			_authorEmail    = new StringLineFieldParser(),
-			_commitMessage  = new CommitMessageFieldParser(),
-		};
+			_commitMessage  = new CommitMessageField(),
+		];
 	}
 
 	#endregion
 
 	#region Methods
 
-	private RevisionData GetRevisionData(Hash sha1)
+	private RevisionData GetRevisionData(Sha1Hash sha1)
 	{
 		if(!_cache.TryGetValue(sha1, out var revisionData))
 		{
@@ -345,19 +464,21 @@ sealed partial class LogParser : ITextParser<IList<RevisionData>>
 		return revisionData;
 	}
 
-	private RevisionData[] GetParents()
+	private Many<RevisionData> GetParents()
 	{
 		var parentHashes = _parents.GetValue();
-		if(parentHashes.Count == 0)
+		switch(parentHashes.Count)
 		{
-			return Preallocated<RevisionData>.EmptyArray;
+			case 0: return Many<RevisionData>.None;
+			case 1: return GetRevisionData(parentHashes[0]);
+			default:
+				var parents = new RevisionData[parentHashes.Count];
+				for(int i = 0; i < parents.Length; ++i)
+				{
+					parents[i] = GetRevisionData(parentHashes[i]);
+				}
+				return parents;
 		}
-		var parents = new RevisionData[parentHashes.Count];
-		for(int i = 0; i < parents.Length; ++i)
-		{
-			parents[i] = GetRevisionData(parentHashes[i]);
-		}
-		return parents;
 	}
 
 	private RevisionData BuildRevision()

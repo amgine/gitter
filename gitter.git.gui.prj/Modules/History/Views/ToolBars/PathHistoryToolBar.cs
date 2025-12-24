@@ -96,38 +96,38 @@ internal sealed class PathHistoryToolbar : ToolStrip
 		dpiBindings.BindImage(ShowDiffButton, Icons.Diff);
 	}
 
-	private void OnRefreshButtonClick(object sender, EventArgs e)
+	private void OnRefreshButtonClick(object? sender, EventArgs e)
 	{
 		_view.RefreshContent();
 	}
 
-	private void OnDateOrderButtonClick(object sender, EventArgs e)
+	private void OnDateOrderButtonClick(object? sender, EventArgs e)
 	{
 		_view.LogOptions.Order = RevisionQueryOrder.DateOrder;
 	}
 
-	private void OnTopoOrderButtonClick(object sender, EventArgs e)
+	private void OnTopoOrderButtonClick(object? sender, EventArgs e)
 	{
 		_view.LogOptions.Order = RevisionQueryOrder.TopoOrder;
 	}
 
-	private void OnShowDetailsButtonClick(object sender, EventArgs e)
+	private void OnShowDetailsButtonClick(object? sender, EventArgs e)
 	{
-		var button = (ToolStripButton)sender;
+		var button = (ToolStripButton)sender!;
 		button.Checked = !button.Checked;
 		_view.ShowDetails = button.Checked;
 	}
 
-	private void OnLogOptionsChanged(object sender, EventArgs e)
+	private void OnLogOptionsChanged(object? sender, EventArgs e)
 	{
 		_btnDateOrder.Checked = _view.LogOptions.Order == RevisionQueryOrder.DateOrder;
 		_btnTopoOrder.Checked = _view.LogOptions.Order == RevisionQueryOrder.TopoOrder;
 		UpdateLimitButtonText();
 	}
 
-	private void OnLimitOptionClick(object sender, EventArgs e)
+	private void OnLimitOptionClick(object? sender, EventArgs e)
 	{
-		_view.LogOptions.MaxCount = (int)((ToolStripItem)sender).Tag;
+		_view.LogOptions.MaxCount = (int)((ToolStripItem)sender!).Tag!;
 	}
 
 	private void UpdateLimitButtonText()

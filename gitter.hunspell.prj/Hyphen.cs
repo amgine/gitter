@@ -26,16 +26,18 @@ namespace NHunspell;
 
 public class Hyphen : IDisposable
 {
-	private bool nativeDllIsReferenced;
-	private IntPtr unmanagedHandle;
+	private bool _nativeDllIsReferenced;
+	private IntPtr _handle;
 
 	public Hyphen()
 	{
 	}
 
-	public Hyphen(string dictFile) => this.Load(dictFile);
+	~Hyphen() => Dispose(disposing: false);
 
-	public Hyphen(byte[] dictFileData) => this.Load(dictFileData);
+	public Hyphen(string dictFile) => Load(dictFile);
+
+	public Hyphen(byte[] dictFileData) => Load(dictFileData);
 
 	public static string NativeDllPath
 	{
@@ -45,35 +47,36 @@ public class Hyphen : IDisposable
 
 	public bool IsDisposed { get; private set; }
 
-	public void Dispose() => this.Dispose(true);
-
-	public void Dispose(bool callFromDispose)
+	public void Dispose()
 	{
-		if(this.IsDisposed)
-			return;
-		this.IsDisposed = true;
-		if(this.unmanagedHandle != IntPtr.Zero)
-		{
-			MarshalHunspellDll.HyphenFree(this.unmanagedHandle);
-			this.unmanagedHandle = IntPtr.Zero;
-		}
-		if(this.nativeDllIsReferenced)
-		{
-			MarshalHunspellDll.UnReferenceNativeHunspellDll();
-			this.nativeDllIsReferenced = false;
-		}
-		if(!callFromDispose)
-			return;
-		GC.SuppressFinalize((object)this);
+		if(IsDisposed) return;
+
+		GC.SuppressFinalize(this);
+		Dispose(disposing: true);
+		IsDisposed = true;
 	}
 
-	public HyphenResult Hyphenate(string word)
+	private void Dispose(bool disposing)
 	{
-		if(this.unmanagedHandle == IntPtr.Zero)
+		if(_handle != IntPtr.Zero)
+		{
+			MarshalHunspellDll.HyphenFree(_handle);
+			_handle = IntPtr.Zero;
+		}
+		if(_nativeDllIsReferenced)
+		{
+			MarshalHunspellDll.UnReferenceNativeHunspellDll();
+			_nativeDllIsReferenced = false;
+		}
+	}
+
+	public HyphenResult? Hyphenate(string word)
+	{
+		if(this._handle == IntPtr.Zero)
 			throw new InvalidOperationException("Dictionary is not loaded");
-		if(word == null || word == string.Empty)
-			return (HyphenResult)null;
-		IntPtr ptr1 = MarshalHunspellDll.HyphenHyphenate(this.unmanagedHandle, word);
+		if(word is not { Length: not 0 })
+			return default;
+		IntPtr ptr1 = MarshalHunspellDll.HyphenHyphenate(_handle, word);
 		IntPtr ptr2 = Marshal.ReadIntPtr(ptr1);
 		int size = IntPtr.Size;
 		IntPtr ptr3 = Marshal.ReadIntPtr(ptr1, size);
@@ -95,36 +98,28 @@ public class Hyphen : IDisposable
 			{
 				IntPtr ptr7 = Marshal.ReadIntPtr(ptr4, ofs4 * IntPtr.Size);
 				if(ptr7 != IntPtr.Zero)
-					hyphenationRep[ofs4] = Marshal.PtrToStringUni(ptr7);
+					hyphenationRep[ofs4] = Marshal.PtrToStringUni(ptr7) ?? "";
 				hyphenationPos[ofs4] = Marshal.ReadInt32(ptr5, ofs4 * 4);
 				hyphenationCut[ofs4] = Marshal.ReadInt32(ptr6, ofs4 * 4);
 			}
 		}
-		return new HyphenResult(Marshal.PtrToStringUni(ptr2), hyphenationPoints, hyphenationRep, hyphenationPos, hyphenationCut);
+		return new HyphenResult(Marshal.PtrToStringUni(ptr2) ?? "", hyphenationPoints, hyphenationRep, hyphenationPos, hyphenationCut);
 	}
 
 	public void Load(string dictFile)
 	{
 		dictFile = Path.GetFullPath(dictFile);
-		if(!File.Exists(dictFile))
-			throw new FileNotFoundException("DIC File not found: " + dictFile);
-		byte[] dictFileData;
-		using(FileStream input = File.OpenRead(dictFile))
-		{
-			using(BinaryReader binaryReader = new BinaryReader((Stream)input))
-				dictFileData = binaryReader.ReadBytes((int)input.Length);
-		}
-		this.Load(dictFileData);
+		Load(File.ReadAllBytes(dictFile));
 	}
 
 	public void Load(byte[] dictFileData) => Init(dictFileData);
 
 	private void Init(byte[] dictionaryData)
 	{
-		if(this.unmanagedHandle != IntPtr.Zero)
+		if(this._handle != IntPtr.Zero)
 			throw new InvalidOperationException("Dictionary is already loaded");
 		MarshalHunspellDll.ReferenceNativeHunspellDll();
-		this.nativeDllIsReferenced = true;
-		this.unmanagedHandle = MarshalHunspellDll.HyphenInit(dictionaryData, new IntPtr(dictionaryData.Length));
+		_nativeDllIsReferenced = true;
+		_handle = MarshalHunspellDll.HyphenInit(dictionaryData, new IntPtr(dictionaryData.Length));
 	}
 }

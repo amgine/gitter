@@ -18,8 +18,6 @@
  */
 #endregion
 
-#nullable enable
-
 namespace gitter.Framework.Controls;
 
 using System;
@@ -52,9 +50,10 @@ public class FloatingViewForm : Form
 
 	const int SC_MOUSEMOVE = 0xF012;
 
-	private bool _isForceClosing;
+	//private bool _isForceClosing;
 
 	private ViewHostDockingProcess? _dockingProcess;
+	private CustomWindowBorder? _customBorder;
 
 	internal static Point GetLocationFor(Control control)
 	{
@@ -136,6 +135,39 @@ public class FloatingViewForm : Form
 	{
 		base.OnDeactivate(e);
 		BackColor = Renderer.BackgroundColor;
+	}
+
+	private void ShowCustomBorder()
+	{
+		_customBorder ??= new(this)
+		{
+			Opacity = ActiveForm == this
+				? ViewConstants.ActiveBorderOpacity
+				: ViewConstants.InactiveBorderOpacity,
+		};
+	}
+
+	private void HideCustomBorder()
+	{
+		if(_customBorder is null) return;
+		_customBorder.Dispose();
+		_customBorder = null;
+	}
+
+	/// <summary>Updates window border.</summary>
+	protected void UpdateBorder()
+	{
+		_customBorder?.Update();
+	}
+
+	/// <summary>Updates window border opacity.</summary>
+	/// <param name="isActive">Flag indicating is window is active.</param>
+	protected void UpdateBorderOpacity(bool isActive)
+	{
+		if(_customBorder is null) return;
+		_customBorder.Opacity = isActive
+			? ViewConstants.ActiveBorderOpacity
+			: ViewConstants.InactiveBorderOpacity;
 	}
 
 	private Rectangle GetBoundsForControl(Control control, Dpi dpi)
@@ -237,7 +269,7 @@ public class FloatingViewForm : Form
 	public IEnumerable<ViewHost> GetViewHosts()
 		=> RootControl is not null
 			? new ViewHostsSequence(RootControl)
-			: Enumerable.Empty<ViewHost>();
+			: [];
 
 	internal void UpdateMaximizeBounds()
 	{
@@ -247,12 +279,27 @@ public class FloatingViewForm : Form
 		MaximizedBounds = bounds;
 	}
 
+	private bool _shown;
+
 	/// <inheritdoc/>
 	protected override void WndProc(ref Message m)
 	{
 		bool processed = false;
+		bool updateBorder = false;
+		bool updateBorderOpacity = false;
 		switch((Native.WM)m.Msg)
 		{
+			case Native.WM.SHOWWINDOW:
+				_shown = true;
+				if(WindowState != FormWindowState.Normal)
+				{
+					HideCustomBorder();
+				}
+				else
+				{
+					ShowCustomBorder();
+				}
+				break;
 			case Native.WM.NCHITTEST:
 				processed = OnNcHitTest(ref m);
 				break;
@@ -271,10 +318,30 @@ public class FloatingViewForm : Form
 				}
 				break;
 			case Native.WM.MOVE:
+				updateBorder = true;
 				if(_dockingProcess is not null)
 				{
 					_dockingProcess.Update(Point.Empty);
 				}
+				break;
+			case Native.WM.SIZE:
+				if(_shown)
+				{
+					if(WindowState != FormWindowState.Normal)
+					{
+						HideCustomBorder();
+					}
+					else
+					{
+						ShowCustomBorder();
+					}
+				}
+				break;
+			case Native.WM.SIZING:
+				updateBorder = true;
+				break;
+			case Native.WM.NCACTIVATE:
+				updateBorderOpacity = true;
 				break;
 			case Native.WM.EXITSIZEMOVE:
 				if(_dockingProcess is not null)
@@ -287,11 +354,20 @@ public class FloatingViewForm : Form
 				{
 					UpdateMaximizeBounds();
 				}
+				updateBorder = true;
 				break;
 		}
 		if(!processed)
 		{
 			base.WndProc(ref m);
+		}
+		if(updateBorder)
+		{
+			UpdateBorder();
+		}
+		if(updateBorderOpacity)
+		{
+			UpdateBorderOpacity(ActiveForm == this);
 		}
 	}
 
@@ -485,7 +561,7 @@ public class FloatingViewForm : Form
 
 	internal void ForceClose()
 	{
-		_isForceClosing = true;
+		//_isForceClosing = true;
 		Close();
 	}
 

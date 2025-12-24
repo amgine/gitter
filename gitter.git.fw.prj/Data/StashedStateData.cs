@@ -20,21 +20,13 @@
 
 namespace gitter.Git.AccessLayer;
 
-using System;
-
 using gitter.Framework;
 
-public sealed class StashedStateData : INamedObject
+public sealed class StashedStateData(int index, RevisionData revision) : INamedObject
 {
-	public StashedStateData(int index, RevisionData revision)
-	{
-		Index    = index;
-		Revision = revision;
-	}
-
 	public string Name => GitConstants.StashFullName + "@{" + Index + "}";
 
-	public int Index { get; }
+	public int Index { get; } = index;
 
-	public RevisionData Revision { get; }
+	public RevisionData Revision { get; } = revision;
 }

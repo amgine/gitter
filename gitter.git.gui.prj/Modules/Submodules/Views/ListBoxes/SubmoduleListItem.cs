@@ -44,7 +44,7 @@ public class SubmoduleListItem : CustomListBoxItem<Submodule>
 				? CompareByName(i1, i2)
 				: 0;
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			return 0;
 		}
@@ -65,7 +65,7 @@ public class SubmoduleListItem : CustomListBoxItem<Submodule>
 				? CompareByPath(i1, i2)
 				: 0;
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			return 0;
 		}
@@ -86,7 +86,7 @@ public class SubmoduleListItem : CustomListBoxItem<Submodule>
 				? CompareByUrl(i1, i2)
 				: 0;
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			return 0;
 		}
@@ -97,26 +97,26 @@ public class SubmoduleListItem : CustomListBoxItem<Submodule>
 	{
 	}
 
-	private void OnDeleted(object sender, EventArgs e)
+	private void OnDeleted(object? sender, EventArgs e)
 	{
 		RemoveSafe();
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
 		DataContext.Deleted += OnDeleted;
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.Deleted -= OnDeleted;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
-	private static Image GetImage(Dpi dpi) => Icons.Submodule.GetImage(16 * dpi.X / 96);
+	private static Image? GetImage(Dpi dpi) => Icons.Submodule.GetImage(16 * dpi.X / 96);
 
 	/// <inheritdoc/>
 	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)

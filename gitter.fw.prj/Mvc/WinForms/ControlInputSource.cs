@@ -47,10 +47,10 @@ public class ControlInputSource : IUserInputSource<string>, IWin32ControlInputSo
 	public Control Control { get; }
 }
 
-public abstract class ControlInputSource<TControl, TValue> : IUserInputSource<TValue>, IWin32ControlInputSource
+public abstract class ControlInputSource<TControl, TValue> : IUserInputSource<TValue?>, IWin32ControlInputSource
 	where TControl : Control
 {
-	private TValue _value;
+	private TValue? _value;
 	private bool _isValueValid;
 
 	public ControlInputSource(TControl control)
@@ -66,15 +66,15 @@ public abstract class ControlInputSource<TControl, TValue> : IUserInputSource<TV
 
 	public TControl Control { get; }
 
-	protected abstract TValue FetchValue();
+	protected abstract TValue? FetchValue();
 
-	protected abstract void SetValue(TValue value);
+	protected abstract void SetValue(TValue? value);
 
 	protected abstract void SubscribeToValueChangeEvent();
 
-	protected abstract void UnsubscribeToValueChangeEvent();
+	protected abstract void UnsubscribeFromValueChangeEvent();
 
-	protected virtual void OnControlValueChanged(object sender, EventArgs e)
+	protected virtual void OnControlValueChanged(object? sender, EventArgs e)
 	{
 		InvalidateValue();
 	}
@@ -84,7 +84,7 @@ public abstract class ControlInputSource<TControl, TValue> : IUserInputSource<TV
 		_isValueValid = false;
 	}
 
-	public TValue Value
+	public TValue? Value
 	{
 		get
 		{

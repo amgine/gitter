@@ -22,12 +22,10 @@ namespace gitter.Updater;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 public sealed class CommandLine
 {
-	private readonly Dictionary<string, CommandLineParameter> _parameters = new();
+	private readonly Dictionary<string, CommandLineParameter> _parameters = [];
 
 	public CommandLine()
 	{
@@ -64,7 +62,7 @@ public sealed class CommandLine
 		}
 	}
 
-	public string this[string name]
+	public string? this[string name]
 		=> _parameters.TryGetValue(name, out var p)
 			? p.Value
 			: default;
@@ -73,15 +71,9 @@ public sealed class CommandLine
 		=> _parameters.ContainsKey(name);
 }
 
-public sealed class CommandLineParameter
+public sealed class CommandLineParameter(string name, string? value)
 {
-	public CommandLineParameter(string name, string value)
-	{
-		Name  = name;
-		Value = value;
-	}
+	public string Name { get; } = name;
 
-	public string Name { get; }
-
-	public string Value { get; }
+	public string? Value { get; } = value;
 }

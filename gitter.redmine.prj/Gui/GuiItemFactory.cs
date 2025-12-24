@@ -20,6 +20,8 @@
 
 namespace gitter.Redmine.Gui;
 
+#nullable enable
+
 using System;
 using System.Windows.Forms;
 
@@ -63,7 +65,7 @@ class GuiItemFactory
 		var item = new T()
 		{
 			Text = name,
-			Tag = text,
+			Tag  = text,
 		};
 		_dpiBindings.BindImage(item, CommonIcons.ClipboardCopy);
 		if(enableToolTip && name != text) item.ToolTipText = text;
@@ -86,11 +88,11 @@ class GuiItemFactory
 		return item;
 	}
 
-	private static void OnCopyToClipboardClick(object sender, EventArgs e)
+	private static void OnCopyToClipboardClick(object? sender, EventArgs e)
 	{
 		Assert.IsNotNull(sender);
 
-		var item = (ToolStripItem)sender;
+		var item = (ToolStripItem)sender!;
 		var text = item.Tag switch
 		{
 			string       str  => str,
@@ -100,15 +102,15 @@ class GuiItemFactory
 		ClipboardEx.TrySetTextSafe(text);
 	}
 
-	private static void OnUpdateRedmineObjectClick(object sender, EventArgs e)
+	private static async void OnUpdateRedmineObjectClick(object? sender, EventArgs e)
 	{
 		Assert.IsNotNull(sender);
 
-		var item = (ToolStripItem)sender;
-		var obj = (RedmineObject)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var obj  = (RedmineObject)item.Tag!;
 		try
 		{
-			obj.Update();
+			await obj.UpdateAsync();
 		}
 		catch
 		{

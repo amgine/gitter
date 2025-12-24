@@ -31,54 +31,48 @@ using gitter.Git.Gui.Views;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class RepositoryRemotesListItem : RepositoryExplorerItemBase
+sealed class RepositoryRemotesListItem(IWorkingEnvironment environment)
+	: RepositoryExplorerItemBase(Icons.Remotes, Resources.StrRemotes)
 {
-	private RemoteListBinding _binding;
-
-	public RepositoryRemotesListItem(IWorkingEnvironment environment)
-		: base(Icons.Remotes, Resources.StrRemotes)
-	{
-		Verify.Argument.IsNotNull(environment);
-
-		WorkingEnvironment = environment;
-	}
-
-	private IWorkingEnvironment WorkingEnvironment { get; }
+	private RemoteListBinding? _binding;
 
 	/// <inheritdoc/>
 	protected override void OnActivate()
 	{
 		base.OnActivate();
-		WorkingEnvironment.ViewDockService.ShowView(Guids.RemotesViewGuid);
+		environment.ViewDockService.ShowView(Guids.RemotesViewGuid);
 	}
 
-	private void OnRemoteItemActivated(object sender, BoundItemActivatedEventArgs<Remote> e)
+	private void OnRemoteItemActivated(object? sender, BoundItemActivatedEventArgs<Remote> e)
 	{
 		Assert.IsNotNull(e);
 
-		WorkingEnvironment.ViewDockService.ShowView(Guids.RemoteViewGuid, new RemoteViewModel(e.Object));
+		environment.ViewDockService.ShowView(Guids.RemoteViewGuid, new RemoteViewModel(e.Object));
 	}
 
 	/// <inheritdoc/>
 	public override void OnDoubleClick(int x, int y) { }
 
 	/// <inheritdoc/>
-	protected override void DetachFromRepository()
+	protected override void DetachFromRepository(Repository repository)
 	{
-		_binding.ItemActivated -= OnRemoteItemActivated;
-		_binding.Dispose();
-		_binding = null;
+		if(_binding is not null)
+		{
+			_binding.ItemActivated -= OnRemoteItemActivated;
+			_binding.Dispose();
+			_binding = null;
+		}
 	}
 
 	/// <inheritdoc/>
-	protected override void AttachToRepository()
+	protected override void AttachToRepository(Repository repository)
 	{
-		_binding = new RemoteListBinding(Items, Repository);
+		_binding = new RemoteListBinding(Items, repository);
 		_binding.ItemActivated += OnRemoteItemActivated;
 	}
 
 	/// <inheritdoc/>
-	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	public override ContextMenuStrip? GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
 		Assert.IsNotNull(requestEventArgs);
 

@@ -27,6 +27,8 @@ using System.Drawing;
 using System.Windows.Forms;
 
 using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Options;
 
 using gitter.Git.AccessLayer;
@@ -38,31 +40,85 @@ partial class GitOptionsPage : PropertyPage, IExecutableDialog
 {
 	public static readonly new Guid Guid = new("22102F21-350D-426A-AE8A-685928EAABE5");
 
-	private DialogBase _gitAccessorOptions;
+	private DialogBase? _gitAccessorOptions;
 
-	private readonly Dictionary<Type, Tuple<IGitAccessor, DialogBase>> _cachedControls = new();
+	private readonly Dictionary<Type, Tuple<IGitAccessor, DialogBase>> _cachedControls = [];
 
-	private readonly IGitRepositoryProvider _repositoryProvider;
-	private IGitAccessorProvider _selectedAccessorProvder;
-	private IGitAccessor _selectedAccessor;
-
-	private GitOptionsPage()
-		: base(Guid)
+	readonly struct DialogControls
 	{
-		InitializeComponent();
+		private readonly LabelControl _lblAccessmethod;
+		public  readonly AccessorProviderPicker _cmbAccessorProvider;
+		public  readonly Panel _hostPanel;
 
-		Text = Resources.StrGit;
-		_grpRepositoryAccessor.Text = Resources.StrsRepositoryAccessMethod;
-		_lblAccessmethod.Text = Resources.StrAccessMethod.AddColon();
+		public DialogControls()
+		{
+			_lblAccessmethod = new();
+			_cmbAccessorProvider = new();
+			_hostPanel = new();
+		}
+
+		public void Localize()
+		{
+			_lblAccessmethod.Text = Resources.StrAccessMethod.AddColon();
+		}
+
+		public void Layout(Control parent)
+		{
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					columns:
+					[
+						SizeSpec.Absolute(117),
+						SizeSpec.Everything(),
+					],
+					rows:
+					[
+						LayoutConstants.TextInputRowHeight,
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblAccessmethod,     marginOverride: LayoutConstants.TextBoxLabelMargin), row: 0),
+						new GridContent(new ControlContent(_cmbAccessorProvider, marginOverride: LayoutConstants.TextBoxMargin), row: 0, column: 1),
+						new GridContent(new ControlContent(_hostPanel,           marginOverride: LayoutConstants.NoMargin), row: 1, columnSpan: 2),
+					]),
+			};
+
+			var tabIndex = 0;
+
+			_lblAccessmethod.TabIndex = tabIndex++;
+			_cmbAccessorProvider.TabIndex = tabIndex++;
+			_hostPanel.TabIndex = tabIndex++;
+
+			_lblAccessmethod.Parent = parent;
+			_cmbAccessorProvider.Parent = parent;
+			_hostPanel.Parent = parent;
+		}
 	}
+
+	private readonly DialogControls _controls;
+	private readonly IGitRepositoryProvider _repositoryProvider;
+	private IGitAccessorProvider? _selectedAccessorProvder;
+	private IGitAccessor? _selectedAccessor;
 
 	public GitOptionsPage(
 		IGitRepositoryProvider         repositoryProvider,
 		IAccessLayerOptionsPageFactory accessLayerOptionsPageFactory)
-		: this()
+		: base(Guid)
 	{
 		Verify.Argument.IsNotNull(repositoryProvider);
 		Verify.Argument.IsNotNull(accessLayerOptionsPageFactory);
+
+		Name = nameof(GitOptionsPage);
+		Text = Resources.StrGit;
+
+		SuspendLayout();
+		_controls = new();
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
 
 		_repositoryProvider           = repositoryProvider;
 		AccessLayerOptionsPageFactory = accessLayerOptionsPageFactory;
@@ -73,34 +129,22 @@ partial class GitOptionsPage : PropertyPage, IExecutableDialog
 	/// <inheritdoc/>
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(479, 218));
 
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
+
 	private IAccessLayerOptionsPageFactory AccessLayerOptionsPageFactory { get; }
 
 	private void ShowGitAccessorProviders()
 	{
-		_cmbAccessorProvider.SelectedIndexChanged -= OnGitAccessorChanged;
-		_cmbAccessorProvider.BeginUpdate();
-		_cmbAccessorProvider.Items.Clear();
-		int index = 0;
-		int selectedIndex = -1;
-		foreach(var accessorProvider in _repositoryProvider.GitAccessorProviders)
-		{
-			_cmbAccessorProvider.Items.Add(accessorProvider);
-			if(accessorProvider == _repositoryProvider.ActiveGitAccessorProvider)
-			{
-				selectedIndex = index;
-			}
-			++index;
-		}
-		_cmbAccessorProvider.DisplayMember = "DisplayName";
-		_cmbAccessorProvider.SelectedIndex = selectedIndex;
-		_cmbAccessorProvider.EndUpdate();
-		_cmbAccessorProvider.SelectedIndexChanged += OnGitAccessorChanged;
+		_controls._cmbAccessorProvider.SelectedValueChanged -= OnGitAccessorChanged;
+		_controls._cmbAccessorProvider.LoadData(_repositoryProvider);
+		_controls._cmbAccessorProvider.SelectedValueChanged += OnGitAccessorChanged;
 		ShowGitAccessorSetupControl(
 			_repositoryProvider.ActiveGitAccessorProvider,
 			_repositoryProvider.GitAccessor);
 	}
 
-	private void ShowGitAccessorSetupControl(IGitAccessorProvider accessorProvider, IGitAccessor accessor)
+	private void ShowGitAccessorSetupControl(IGitAccessorProvider? accessorProvider, IGitAccessor? accessor)
 	{
 		if(accessorProvider is null) return;
 
@@ -128,27 +172,23 @@ partial class GitOptionsPage : PropertyPage, IExecutableDialog
 
 	private void ShowGitAccessorSetupControl(DialogBase setupControl)
 	{
-		if(setupControl != _gitAccessorOptions)
+		if(setupControl == _gitAccessorOptions) return;
+
+		if(setupControl is not null)
 		{
-			if(setupControl is not null)
-			{
-				setupControl.SetBounds(0, _cmbAccessorProvider.Bottom + 9, Width, 0,
-					BoundsSpecified.X | BoundsSpecified.Y | BoundsSpecified.Width);
-				setupControl.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right;
-				setupControl.Parent = this;
-			}
-			if(_gitAccessorOptions is not null)
-			{
-				_gitAccessorOptions.Parent = null;
-			}
-			_gitAccessorOptions = setupControl;
+			setupControl.Dock   = DockStyle.Fill;
+			setupControl.Parent = _controls._hostPanel;
 		}
+		if(_gitAccessorOptions is not null)
+		{
+			_gitAccessorOptions.Parent = null;
+		}
+		_gitAccessorOptions = setupControl;
 	}
 
-	private void OnGitAccessorChanged(object sender, EventArgs e)
+	private void OnGitAccessorChanged(object? sender, EventArgs e)
 	{
-		var selectedAccessor = (IGitAccessorProvider)_cmbAccessorProvider.SelectedItem;
-
+		var selectedAccessor = _controls._cmbAccessorProvider.SelectedValue;
 		ShowGitAccessorSetupControl(selectedAccessor, null);
 	}
 
@@ -156,10 +196,8 @@ partial class GitOptionsPage : PropertyPage, IExecutableDialog
 	{
 		base.OnShown();
 
-		_gitAccessorOptions.InvokeOnShown();
+		_gitAccessorOptions?.InvokeOnShown();
 	}
-
-	#region IExecutableDialog Members
 
 	public bool Execute()
 	{
@@ -172,6 +210,4 @@ partial class GitOptionsPage : PropertyPage, IExecutableDialog
 		}
 		return false;
 	}
-
-	#endregion
 }

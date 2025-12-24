@@ -31,7 +31,7 @@ public static class GraphicsUtility
 
 	public static Graphics MeasurementGraphics { get; } = Graphics.FromImage(_dummyImage);
 
-	public static Bitmap QueryIcon(string fileName, Dpi dpi)
+	public static Bitmap? QueryIcon(string fileName, Dpi dpi)
 	{
 		return IconCache.GetIcon(fileName, DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 	}
@@ -76,26 +76,24 @@ public static class GraphicsUtility
 		var h = rect.Height;
 		var d = 2 * arcRadius;
 
-		using(var gp = new GraphicsPath())
+		using var gp = new GraphicsPath();
+		if(arcRadius == 0)
 		{
-			if(arcRadius == 0)
-			{
-				gp.AddRectangle(rect);
-			}
-			else
-			{
-				gp.AddArc(x, y, d, d, 180, 90);
-				gp.AddLine(x + arcRadius, y, x + w - arcRadius + 1, y);
-				gp.AddArc(x + w - d, y, d - 1, d, 270, 90);
-				gp.AddLine(x + w, y + arcRadius, x + w, y + h - arcRadius);
-				gp.AddArc(x + w - d, y + h - d - 1, d - 1, d, 0, 90);
-				gp.AddLine(x + w - arcRadius - 1, y + h, x + arcRadius, y + h);
-				gp.AddArc(x, y + h - d - 1, d, d, 90, 90);
-				gp.AddLine(x, y + h - arcRadius, x, y + arcRadius);
-			}
-			gp.CloseFigure();
-			return new Region(gp);
+			gp.AddRectangle(rect);
 		}
+		else
+		{
+			gp.AddArc(x, y, d, d, 180, 90);
+			gp.AddLine(x + arcRadius, y, x + w - arcRadius + 1, y);
+			gp.AddArc(x + w - d, y, d - 1, d, 270, 90);
+			gp.AddLine(x + w, y + arcRadius, x + w, y + h - arcRadius);
+			gp.AddArc(x + w - d, y + h - d - 1, d - 1, d, 0, 90);
+			gp.AddLine(x + w - arcRadius - 1, y + h, x + arcRadius, y + h);
+			gp.AddArc(x, y + h - d - 1, d, d, 90, 90);
+			gp.AddLine(x, y + h - arcRadius, x, y + arcRadius);
+		}
+		gp.CloseFigure();
+		return new Region(gp);
 	}
 
 	public static Region GetRoundedRegion(RectangleF rect, SizeF arcSize)
@@ -107,26 +105,24 @@ public static class GraphicsUtility
 		var dw = 2 * arcSize.Width;
 		var dh = 2 * arcSize.Height;
 
-		using(var gp = new GraphicsPath())
+		using var gp = new GraphicsPath();
+		if(arcSize.Width == 0 && arcSize.Height == 0)
 		{
-			if(arcSize.Width == 0 && arcSize.Height == 0)
-			{
-				gp.AddRectangle(rect);
-			}
-			else
-			{
-				gp.AddArc(x, y, dw, dh, 180, 90);
-				gp.AddLine(x + arcSize.Width, y, x + w - arcSize.Width + 1, y);
-				gp.AddArc(x + w - dw, y, dw - 1, arcSize.Height, 270, 90);
-				gp.AddLine(x + w, y + arcSize.Height, x + w, y + h - arcSize.Height);
-				gp.AddArc(x + w - dw, y + h - dh - 1, dw - 1, dh, 0, 90);
-				gp.AddLine(x + w - arcSize.Width - 1, y + h, x + arcSize.Width, y + h);
-				gp.AddArc(x, y + h - dh - 1, dw, dh, 90, 90);
-				gp.AddLine(x, y + h - arcSize.Height, x, y + arcSize.Height);
-			}
-			gp.CloseFigure();
-			return new Region(gp);
+			gp.AddRectangle(rect);
 		}
+		else
+		{
+			gp.AddArc(x, y, dw, dh, 180, 90);
+			gp.AddLine(x + arcSize.Width, y, x + w - arcSize.Width + 1, y);
+			gp.AddArc(x + w - dw, y, dw - 1, arcSize.Height, 270, 90);
+			gp.AddLine(x + w, y + arcSize.Height, x + w, y + h - arcSize.Height);
+			gp.AddArc(x + w - dw, y + h - dh - 1, dw - 1, dh, 0, 90);
+			gp.AddLine(x + w - arcSize.Width - 1, y + h, x + arcSize.Width, y + h);
+			gp.AddArc(x, y + h - dh - 1, dw, dh, 90, 90);
+			gp.AddLine(x, y + h - arcSize.Height, x, y + arcSize.Height);
+		}
+		gp.CloseFigure();
+		return new Region(gp);
 	}
 
 	public static GraphicsPath GetRoundedRectangle(RectangleF rect, float topLeftCorner, float topRightCorner, float bottomLeftCorner, float bottomRightCorner)

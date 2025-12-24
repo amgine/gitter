@@ -20,16 +20,13 @@
 
 namespace gitter.Git.Gui.Controls;
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-
+using gitter.Framework;
 using gitter.Framework.Controls;
 
 public sealed class SubmodulesListBox : CustomListBox
 {
-	private Repository _repository;
-	private SubmoduleListBinding _binding;
+	private Repository? _repository;
+	private SubmoduleListBinding? _binding;
 
 	/// <summary>Create <see cref="SubmodulesListBox"/>.</summary>
 	public SubmodulesListBox()
@@ -39,28 +36,26 @@ public sealed class SubmodulesListBox : CustomListBox
 
 	private void DetachFromRepository()
 	{
-		_binding.Dispose();
-		_binding = null;
+		DisposableUtility.Dispose(ref _binding);
 	}
 
-	private void AttachToRepository()
+	private void AttachToRepository(Repository repository)
 	{
-		_binding = new SubmoduleListBinding(Items, _repository);
+		_binding = new SubmoduleListBinding(Items, repository);
 	}
 
-	public void Load(Repository repository)
+	public void Load(Repository? repository)
 	{
-		if(_repository != repository)
+		if(_repository == repository) return;
+
+		if(_repository is not null)
 		{
-			if(_repository is not null)
-			{
-				DetachFromRepository();
-			}
-			_repository = repository;
-			if(_repository is not null)
-			{
-				AttachToRepository();
-			}
+			DetachFromRepository();
+		}
+		_repository = repository;
+		if(_repository is not null)
+		{
+			AttachToRepository(_repository);
 		}
 	}
 

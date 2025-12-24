@@ -20,11 +20,7 @@
 
 namespace gitter.Redmine;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Xml;
+#nullable enable
 
 public abstract class NamedRedmineObjectsCache<T> : RedmineObjectsCacheBase<T>
 	where T : NamedRedmineObject
@@ -38,19 +34,17 @@ public abstract class NamedRedmineObjectsCache<T> : RedmineObjectsCacheBase<T>
 
 	internal T Lookup(int id, string name)
 	{
-		T obj;
 		lock(SyncRoot)
 		{
-			if(!Cache.TryGetValue(id, out obj))
+			if(!Cache.TryGetValue(id, out var obj))
 			{
-				obj = Create(id, name);
-				Cache.Add(id, obj);
+				Cache.Add(id, obj = Create(id, name));
 			}
 			else
 			{
 				obj.Name = name;
 			}
+			return obj;
 		}
-		return obj;
 	}
 }

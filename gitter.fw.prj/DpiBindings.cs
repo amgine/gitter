@@ -32,7 +32,7 @@ public class DpiBindings
 	abstract class ImageControllerBase<T> : IImageController
 		where T : class
 	{
-		private IImageProvider _image;
+		private IImageProvider? _image;
 		private Dpi _dpi;
 
 		protected ImageControllerBase(T target, int size)
@@ -47,23 +47,22 @@ public class DpiBindings
 
 		protected T Target { get; }
 
-		public IImageProvider Image
+		public IImageProvider? Image
 		{
 			get => _image;
 			set
 			{
-				if(_image != value)
+				if(_image == value) return;
+
+				_image = value;
+				if(_dpi != default)
 				{
-					_image = value;
-					if(_dpi != default)
-					{
-						SetImage(value?.GetImage(Size * _dpi.X / 96));
-					}
+					SetImage(value?.GetImage(Size * _dpi.X / 96));
 				}
 			}
 		}
 
-		protected abstract void SetImage(Image image);
+		protected abstract void SetImage(Image? image);
 
 		public void UpdateImage(Dpi dpi)
 		{
@@ -75,62 +74,49 @@ public class DpiBindings
 			=> SetImage(default);
 	}
 
-	class ToolStripItemController : ImageControllerBase<ToolStripItem>
+	class ToolStripItemController(ToolStripItem item, int size)
+		: ImageControllerBase<ToolStripItem>(item, size)
 	{
-		public ToolStripItemController(ToolStripItem item, int size)
-			: base(item, size)
+		protected override void SetImage(Image? image)
 		{
+			Target.ImageScaling = ToolStripItemImageScaling.None;
+			Target.Image = image;
 		}
+	}
 
-		protected override void SetImage(Image image)
+	class PictureBoxController(PictureBox control, int size)
+		: ImageControllerBase<PictureBox>(control, size)
+	{
+		protected override void SetImage(Image? image)
 			=> Target.Image = image;
 	}
 
-	class PictureBoxController : ImageControllerBase<PictureBox>
+	class ImageWidgetController(IImageWidget widget, int size)
+		: ImageControllerBase<IImageWidget>(widget, size)
 	{
-		public PictureBoxController(PictureBox control, int size)
-			: base(control, size)
-		{
-		}
-
-		protected override void SetImage(Image image)
+		protected override void SetImage(Image? image)
 			=> Target.Image = image;
 	}
 
-	class ImageWidgetController : ImageControllerBase<IImageWidget>
+	class LinkButtonController(LinkButton linkButton, int size)
+		: ImageControllerBase<LinkButton>(linkButton, size)
 	{
-		public ImageWidgetController(IImageWidget widget, int size)
-			: base(widget, size)
-		{
-		}
-
-		protected override void SetImage(Image image)
+		protected override void SetImage(Image? image)
 			=> Target.Image = image;
 	}
 
-	class LinkButtonController : ImageControllerBase<LinkButton>
-	{
-		public LinkButtonController(LinkButton linkButton, int size)
-			: base(linkButton, size)
-		{
-		}
-
-		protected override void SetImage(Image image)
-			=> Target.Image = image;
-	}
-
-	private readonly Dictionary<object, IImageController> _bindings = new();
-	private Control _control;
+	private readonly Dictionary<object, IImageController> _bindings = [];
+	private Control? _control;
 
 	public DpiBindings()
 	{
 	}
 
-	public DpiBindings(Control toolStrip)
+	public DpiBindings(Control control)
 	{
-		Verify.Argument.IsNotNull(toolStrip);
+		Verify.Argument.IsNotNull(control);
 
-		Control = toolStrip;
+		Control = control;
 		if(!Control.IsDisposed)
 		{
 			Control.Disposed               += OnControlDisposed;
@@ -138,9 +124,9 @@ public class DpiBindings
 		}
 	}
 
-	private void OnControlDpiChangedBeforeParent(object sender, EventArgs e)
+	private void OnControlDpiChangedBeforeParent(object? sender, EventArgs e)
 	{
-		if(sender != Control) return;
+		if(sender != Control || Control is null) return;
 		var dpi = Dpi.FromControl(Control);
 		foreach(var controller in _bindings.Values)
 		{
@@ -148,13 +134,15 @@ public class DpiBindings
 		}
 	}
 
-	private void OnControlDisposed(object sender, EventArgs e)
+	private void OnControlDisposed(object? sender, EventArgs e)
 	{
-		Control.Disposed               -= OnControlDisposed;
-		Control.DpiChangedBeforeParent -= OnControlDpiChangedBeforeParent;
+		if(sender is not Control control) return;
+
+		control.Disposed               -= OnControlDisposed;
+		control.DpiChangedBeforeParent -= OnControlDpiChangedBeforeParent;
 	}
 
-	public Control Control
+	public Control? Control
 	{
 		get => _control;
 		set
@@ -162,16 +150,16 @@ public class DpiBindings
 			if(_control == value) return;
 			if(_control is not null)
 			{
-				Control.Disposed               -= OnControlDisposed;
-				Control.DpiChangedBeforeParent -= OnControlDpiChangedBeforeParent;
+				_control.Disposed               -= OnControlDisposed;
+				_control.DpiChangedBeforeParent -= OnControlDpiChangedBeforeParent;
 			}
 			_control = value;
 			if(_control is { IsDisposed: false })
 			{
-				Control.Disposed               += OnControlDisposed;
-				Control.DpiChangedBeforeParent += OnControlDpiChangedBeforeParent;
+				_control.Disposed               += OnControlDisposed;
+				_control.DpiChangedBeforeParent += OnControlDpiChangedBeforeParent;
 
-				var dpi = Dpi.FromControl(Control);
+				var dpi = Dpi.FromControl(_control);
 				foreach(var controller in _bindings.Values)
 				{
 					controller.UpdateImage(dpi);
@@ -192,7 +180,7 @@ public class DpiBindings
 	private static IImageController CreateController(LinkButton linkButton, int size)
 		=> new LinkButtonController(linkButton, size);
 
-	private IImageController BindImageCore<T>(T target, Func<T, int, IImageController> controllerFactory, IImageProvider image, int size)
+	private IImageController BindImageCore<T>(T target, Func<T, int, IImageController> controllerFactory, IImageProvider? image, int size)
 		where T : class
 	{
 		if(!_bindings.TryGetValue(target, out var controller))
@@ -212,28 +200,28 @@ public class DpiBindings
 	}
 
 
-	public IImageController BindImage(ToolStripItem item, IImageProvider image, int size = 16)
+	public IImageController BindImage(ToolStripItem item, IImageProvider? image, int size = 16)
 	{
 		Verify.Argument.IsNotNull(item);
 
 		return BindImageCore(item, CreateController, image, size);
 	}
 
-	public IImageController BindImage(PictureBox pictureBox, IImageProvider image, int size = 16)
+	public IImageController BindImage(PictureBox pictureBox, IImageProvider? image, int size = 16)
 	{
 		Verify.Argument.IsNotNull(pictureBox);
 
 		return BindImageCore(pictureBox, CreateController, image, size);
 	}
 
-	public IImageController BindImage(IImageWidget widget, IImageProvider image, int size = 16)
+	public IImageController BindImage(IImageWidget widget, IImageProvider? image, int size = 16)
 	{
 		Verify.Argument.IsNotNull(widget);
 
 		return BindImageCore(widget, CreateController, image, size);
 	}
 
-	public IImageController BindImage(LinkButton linkbutton, IImageProvider image, int size = 16)
+	public IImageController BindImage(LinkButton linkbutton, IImageProvider? image, int size = 16)
 	{
 		Verify.Argument.IsNotNull(linkbutton);
 

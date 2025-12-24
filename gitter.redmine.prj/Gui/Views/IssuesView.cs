@@ -20,9 +20,9 @@
 
 namespace gitter.Redmine.Gui;
 
+#nullable enable
+
 using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Globalization;
 using System.Windows.Forms;
 
@@ -39,8 +39,8 @@ partial class IssuesView : RedmineViewBase, ISearchableView<IssuesSearchOptions>
 	#region Data
 
 	private readonly IssuesToolbar _toolbar;
-	private IssuesSearchToolBar _searchToolbar;
-	private IssuesListBinding _dataSource;
+	private IssuesSearchToolBar? _searchToolbar;
+	private IssuesListBinding? _dataSource;
 
 	#endregion
 
@@ -65,23 +65,16 @@ partial class IssuesView : RedmineViewBase, ISearchableView<IssuesSearchOptions>
 
 	public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"issues");
 
-	private IssuesListBinding DataSource
+	private IssuesListBinding? DataSource
 	{
-		get { return _dataSource; }
+		get => _dataSource;
 		set
 		{
-			if(_dataSource != value)
-			{
-				if(_dataSource != null)
-				{
-					_dataSource.Dispose();
-				}
-				_dataSource = value;
-				if(_dataSource != null)
-				{
-					_dataSource.ReloadData();
-				}
-			}
+			if(_dataSource == value) return;
+
+			_dataSource?.Dispose();
+			_dataSource = value;
+			_dataSource?.ReloadData();
 		}
 	}
 
@@ -89,12 +82,12 @@ partial class IssuesView : RedmineViewBase, ISearchableView<IssuesSearchOptions>
 
 	#region Methods
 
-	protected override void OnContextAttached()
+	protected override void OnContextAttached(RedmineServiceContext context)
 	{
-		DataSource = new IssuesListBinding(ServiceContext, _lstIssues);
+		DataSource = new IssuesListBinding(context, _lstIssues);
 	}
 
-	private void OnItemActivated(object sender, ItemEventArgs e)
+	private void OnItemActivated(object? sender, ItemEventArgs e)
 	{
 		if(e.Item is IssueListItem item)
 		{
@@ -104,6 +97,8 @@ partial class IssuesView : RedmineViewBase, ISearchableView<IssuesSearchOptions>
 
 	private void ShowIssueDetails(Issue issue)
 	{
+		if(ServiceContext is null) return;
+
 		var url = ServiceContext.ServiceUri + "issues/" + issue.Id;
 		RedmineServiceProvider.Environment.ViewDockService.ShowWebBrowserView(url);
 	}
@@ -117,7 +112,7 @@ partial class IssuesView : RedmineViewBase, ISearchableView<IssuesSearchOptions>
 	protected override void LoadMoreViewFrom(Section section)
 	{
 		var listNode = section.TryGetSection("IssuesList");
-		if(listNode != null)
+		if(listNode is not null)
 		{
 			_lstIssues.LoadViewFrom(listNode);
 		}
@@ -129,16 +124,13 @@ partial class IssuesView : RedmineViewBase, ISearchableView<IssuesSearchOptions>
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		switch(e.KeyCode)
 		{
-			case Keys.F:
-				if(e.Modifiers == Keys.Control)
-				{
-					ShowSearchToolBar();
-					e.IsInputKey = true;
-				}
+			case Keys.F when e.Modifiers == Keys.Control:
+				ShowSearchToolBar();
+				e.IsInputKey = true;
 				break;
 			case Keys.F5:
 				RefreshContent();
@@ -147,18 +139,13 @@ partial class IssuesView : RedmineViewBase, ISearchableView<IssuesSearchOptions>
 	}
 
 	public override void RefreshContent()
-	{
-		if(DataSource != null)
-		{
-			DataSource.ReloadData();
-		}
-	}
+		=> DataSource?.ReloadData();
 
 	#endregion
 
 	#region ISearchableView
 
-	private bool TestItem(IssueListItem item, IssuesSearchOptions search)
+	private static bool TestItem(IssueListItem item, IssuesSearchOptions search)
 	{
 		var issue = item.DataContext;
 		if(issue.Subject.Contains(search.Text)) return true;
@@ -190,8 +177,7 @@ partial class IssuesView : RedmineViewBase, ISearchableView<IssuesSearchOptions>
 		}
 		while(start != end)
 		{
-			var item = _lstIssues.Items[start] as IssueListItem;
-			if(item != null)
+			if(_lstIssues.Items[start] is IssueListItem item)
 			{
 				if(TestItem(item, search))
 				{
@@ -244,7 +230,7 @@ partial class IssuesView : RedmineViewBase, ISearchableView<IssuesSearchOptions>
 
 	public bool SearchToolBarVisible
 	{
-		get { return _searchToolbar != null && _searchToolbar.Visible; }
+		get => _searchToolbar is { Visible: true };
 		set
 		{
 			if(value)
@@ -260,7 +246,7 @@ partial class IssuesView : RedmineViewBase, ISearchableView<IssuesSearchOptions>
 
 	private void ShowSearchToolBar()
 	{
-		if(_searchToolbar == null)
+		if(_searchToolbar is null)
 		{
 			AddBottomToolStrip(_searchToolbar = new IssuesSearchToolBar(this));
 		}
@@ -269,7 +255,7 @@ partial class IssuesView : RedmineViewBase, ISearchableView<IssuesSearchOptions>
 
 	private void HideSearchToolBar()
 	{
-		if(_searchToolbar != null)
+		if(_searchToolbar is not null)
 		{
 			RemoveToolStrip(_searchToolbar);
 			_searchToolbar.Dispose();

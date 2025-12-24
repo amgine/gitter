@@ -41,6 +41,6 @@ public class PushUrlColumn : UrlColumn
 	public override string IdentificationString => "PushUrl";
 
 	/// <inheritdoc/>
-	protected override string GetUrl(CustomListBoxItem item)
+	protected override string? GetUrl(CustomListBoxItem item)
 		=> (item as IDataContextProvider<Remote>)?.DataContext.PushUrl;
 }

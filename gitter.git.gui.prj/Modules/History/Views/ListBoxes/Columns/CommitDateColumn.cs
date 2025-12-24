@@ -23,23 +23,18 @@ namespace gitter.Git.Gui.Controls;
 using System;
 using System.Drawing;
 
-using gitter.Framework;
 using gitter.Framework.Controls;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
 /// <summary>"Commit Date" column.</summary>
-public sealed class CommitDateColumn : DateColumn
+public sealed class CommitDateColumn()
+	: DateColumn((int)ColumnId.CommitDate, Resources.StrCommitDate, visible: true)
 {
-	public CommitDateColumn()
-		: base((int)ColumnId.CommitDate, Resources.StrCommitDate, visible: true)
-	{
-	}
-
 	/// <inheritdoc/>
 	public override string IdentificationString => @"CommitDate";
 
-	private static bool TryGetCommitTimestamp(Revision revision, out DateTimeOffset commitTimestamp)
+	private static bool TryGetCommitTimestamp(Revision? revision, out DateTimeOffset commitTimestamp)
 	{
 		if(revision is not null)
 		{

@@ -20,49 +20,27 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 
-public sealed class CustomFieldValue
+public sealed class CustomFieldValue(CustomField field, string? value)
 {
-	#region Data
+	public event EventHandler? ValueChanged;
 
-	private readonly CustomField _field;
-	private string _value;
+	public CustomField Field { get; } = field;
 
-	#endregion
+	private string? _value = value;
 
-	#region Events
-
-	public event EventHandler ValueChanged;
-
-	#endregion
-
-	#region .ctor
-
-	public CustomFieldValue(CustomField field, string value)
+	public string? Value
 	{
-		_field = field;
-		_value = value;
-	}
-
-	#endregion
-
-	public CustomField Field
-	{
-		get { return _field; }
-	}
-
-	public string Value
-	{
-		get { return _value; }
+		get => _value;
 		internal set
 		{
-			if(_value != value)
-			{
-				_value = value;
-				var handler = ValueChanged;
-				if(handler != null) handler(this, EventArgs.Empty);
-			}
+			if(_value == value) return;
+
+			_value = value;
+			ValueChanged?.Invoke(this, EventArgs.Empty);
 		}
 	}
 }

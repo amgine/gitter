@@ -24,22 +24,16 @@ using System;
 
 static class TypeHelpers
 {
-	public static Type GetType<T>(T value)
-	{
-		if(value is not null) return value.GetType();
-		return typeof(T);
-	}
+	public static Type GetType<T>(T? value)
+		=> value is not null ? value.GetType() : typeof(T);
 
-	public static Type GetType(Type type, object value)
-	{
-		if(value is not null) return value.GetType();
-		return type;
-	}
+	public static Type GetType(Type type, object? value)
+		=> value is not null ? value.GetType() : type;
 
-	public static T UnpackValue<T>(object value)
+	public static T? UnpackValue<T>(object? value)
 		=> value is T typed ? typed : default;
 
-	public static bool TryUnpackValue<T>(object value, out T unpacked)
+	public static bool TryUnpackValue<T>(object? value, out T? unpacked)
 	{
 		if(value is T typed)
 		{
@@ -50,9 +44,6 @@ static class TypeHelpers
 		return false;
 	}
 
-	public static object PackValue<T>(T value)
-	{
-		if(value is null) return null;
-		return value;
-	}
+	public static object? PackValue<T>(T? value)
+		=> value is null ? null : value;
 }

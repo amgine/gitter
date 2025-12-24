@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2018  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2018  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git.AccessLayer.CLI;
@@ -24,503 +24,456 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-sealed class CommandBuilder
+sealed class CommandBuilder(GitCLI gitCLI)
 {
-	private readonly GitCLI _gitCLI;
-
-	public CommandBuilder(GitCLI gitCLI)
-	{
-		Verify.Argument.IsNotNull(gitCLI);
-
-		_gitCLI = gitCLI;
-	}
-
 	private static readonly Version SubmodulesStatusArgVersion = new(1, 7, 2, 3);
 
 	private static readonly Version MergeFileArgVersion = new(2, 9, 0);
 
-	public Command GetInitCommand(InitRepositoryParameters parameters)
+	public Command GetInitCommand(InitRepositoryRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>(3);
-		if(parameters.Bare)
+		var builder = new InitCommand.Builder();
+		if(request.Bare)
 		{
-			args.Add(InitCommand.Bare());
+			builder.Bare();
 		}
-		if(!string.IsNullOrEmpty(parameters.Template))
+		if(request.Template is { Length: not 0 } template)
 		{
-			args.Add(InitCommand.Template(parameters.Template));
+			builder.Template(template);
 		}
-		return new InitCommand(args);
+		if(request.InitialBranch is { Length: not 0 } initialBranch)
+		{
+			builder.InitialBranch(initialBranch);
+		}
+		return builder.Build();
 	}
 
-	public Command GetCloneCommand(CloneRepositoryParameters parameters, bool isAsync)
+	public Command GetCloneCommand(CloneRepositoryRequest request, bool isAsync)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>();
-		if(!string.IsNullOrEmpty(parameters.Template))
+		if(!string.IsNullOrEmpty(request.Template))
 		{
-			args.Add(CloneCommand.Template(parameters.Template));
+			args.Add(CloneCommand.Template(request.Template!));
 		}
-		if(parameters.NoCheckout)
+		if(request.NoCheckout)
 		{
-			args.Add(CloneCommand.NoCheckout());
+			args.Add(CloneCommand.NoCheckout);
 		}
-		if(parameters.Bare)
+		if(request.Bare)
 		{
-			args.Add(CloneCommand.Bare());
+			args.Add(CloneCommand.Bare);
 		}
-		if(parameters.Mirror)
+		if(request.Mirror)
 		{
-			args.Add(CloneCommand.Mirror());
+			args.Add(CloneCommand.Mirror);
 		}
-		if(!string.IsNullOrEmpty(parameters.RemoteName))
+		if(!string.IsNullOrEmpty(request.RemoteName))
 		{
-			args.Add(CloneCommand.Origin(parameters.RemoteName));
+			args.Add(CloneCommand.Origin(request.RemoteName!));
 		}
-		if(parameters.Shallow)
+		if(request.Shallow)
 		{
-			args.Add(CloneCommand.Depth(parameters.Depth));
+			args.Add(CloneCommand.Depth(request.Depth));
 		}
-		if(parameters.Recursive)
+		if(request.Recursive)
 		{
-			args.Add(CloneCommand.Recursive());
+			args.Add(CloneCommand.Recursive);
 		}
-		if(isAsync && GitFeatures.ProgressFlag.IsAvailableFor(_gitCLI))
+		if(isAsync && GitFeatures.ProgressFlag.IsAvailableFor(gitCLI))
 		{
-			args.Add(CloneCommand.Progress());
+			args.Add(CloneCommand.Progress);
 		}
-		args.Add(CloneCommand.NoMoreOptions());
-		args.Add(new PathCommandArgument(parameters.Url));
-		args.Add(new PathCommandArgument(parameters.Path));
+		args.Add(CloneCommand.NoMoreOptions);
+		args.Add(new PathCommandArgument(request.Url));
+		args.Add(new PathCommandArgument(request.Path));
 
 		return new CloneCommand(args);
 	}
 
-	public Command GetDereferenceByNameCommand(string refName)
+	public Command GetDereferenceByNameCommand(string reference)
 	{
-		return new LogCommand(
-			LogCommand.MaxCount(1),
-			new CommandParameter(refName),
-			GetRevisionFormatArgument());
+		var builder = new LogCommand.Builder();
+		builder.MaxCount(1);
+		builder.SpecifyReference(reference);
+		builder.AddArgument(GetRevisionFormatArgument());
+		return builder.Build();
 	}
 
-	public Command GetQueryStashTopCommand(QueryStashTopParameters parameters)
+	public Command GetQueryStashTopCommand(QueryStashTopRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		return parameters.LoadCommitInfo
+		return request.LoadCommitInfo
 			? GetDereferenceByNameCommand(GitConstants.StashFullName)
 			: new ShowRefCommand(
 				ShowRefCommand.Verify(),
 				new CommandParameter(GitConstants.StashFullName));
 	}
 
-	public Command GetQueryStatusCommand(QueryStatusParameters parameters)
+	public Command GetQueryStatusCommand(QueryStatusRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>(7);
 		args.Add(StatusCommand.Porcelain());
-		args.Add(StatusCommand.UntrackedFiles(parameters.UntrackedFilesMode));
+		args.Add(StatusCommand.UntrackedFiles(request.UntrackedFilesMode));
 		args.Add(StatusCommand.NullTerminate());
-		if(_gitCLI.GitVersion >= SubmodulesStatusArgVersion)
+		if(gitCLI.GitVersion >= SubmodulesStatusArgVersion)
 		{
-			if(parameters.IgnoreSubmodulesMode != StatusIgnoreSubmodulesMode.Default)
+			if(request.IgnoreSubmodulesMode != StatusIgnoreSubmodulesMode.Default)
 			{
-				args.Add(StatusCommand.IgnoreSubmodules(parameters.IgnoreSubmodulesMode));
+				args.Add(StatusCommand.IgnoreSubmodules(request.IgnoreSubmodulesMode));
 			}
 		}
-		if(!string.IsNullOrEmpty(parameters.Path))
+		if(!string.IsNullOrEmpty(request.Path))
 		{
 			args.Add(StatusCommand.NoMoreOptions());
-			args.Add(new PathCommandArgument(parameters.Path));
+			args.Add(new PathCommandArgument(request.Path!));
 		}
 		return new StatusCommand(args);
 	}
 
-	public Command GetQueryObjectsCommand(QueryObjectsParameters parameters)
+	public Command GetQueryObjectsCommand(QueryObjectsRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>(parameters.Objects.Count);
-		foreach(var obj in parameters.Objects)
+		var args = new List<ICommandArgument>(request.Objects.Count);
+		foreach(var obj in request.Objects)
 		{
 			args.Add(new CommandParameter(obj));
 		}
 		return new ShowCommand(args);
 	}
 
-	public Command GetQueryRevisionsCommand(QueryRevisionsParameters parameters)
+	public Command GetQueryRevisionsCommand(QueryRevisionsRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>(30);
-		InsertQueryRevisionsParameters(parameters, args, GetRevisionFormatArgument());
-		return new LogCommand(args);
+		var builder = new LogCommand.Builder();
+		InsertQueryRevisionsParameters(request, builder, GetRevisionFormatArgument());
+		return builder.Build();
 	}
 
-	public Command GetQueryRevisionGraphCommand(QueryRevisionsParameters parameters)
+	public Command GetQueryRevisionGraphCommand(QueryRevisionsRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>(30);
-		InsertQueryRevisionsParameters(parameters, args, LogCommand.Format("%H%n%P"));
-		return new LogCommand(args);
+		var builder = new LogCommand.Builder();
+		InsertQueryRevisionsParameters(request, builder, LogCommand.KnownArguments.Format("%H%n%P"));
+		return builder.Build();
 	}
 
-	public Command GetQueryRevisionCommand(QueryRevisionParameters parameters)
+	public Command GetQueryRevisionCommand(QueryRevisionRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		return new LogCommand(
-			LogCommand.MaxCount(1),
-			new CommandParameter(parameters.SHA1.ToString()),
-			GetRevisionDataFormatArgument());
+		var builder = new LogCommand.Builder();
+		builder.MaxCount(1);
+		builder.SpecifyReference(request.SHA1);
+		builder.AddArgument(GetRevisionDataFormatArgument());
+		return builder.Build();
 	}
 
-	public Command GetQueryReflogCommand(QueryReflogParameters parameters)
+	public Command GetQueryReflogCommand(QueryReflogRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>(5);
-		args.Add(LogCommand.WalkReflogs());
-		if(parameters.MaxCount != 0)
-		{
-			args.Add(LogCommand.MaxCount(parameters.MaxCount));
-		}
-		args.Add(LogCommand.NullTerminate());
-		args.Add(GetReflogFormatArgument());
-		if(parameters.Reference != null)
-		{
-			args.Add(new CommandParameter(parameters.Reference));
-		}
-		return new LogCommand(args);
+		var builder = new LogCommand.Builder();
+		builder.WalkReflogs();
+		builder.MaxCount(request.MaxCount);
+		builder.NullTerminate();
+		builder.AddArgument(GetReflogFormatArgument());
+		builder.SpecifyOptionalReference(request.Reference);
+		return builder.Build();
 	}
 
 	private ICommandArgument GetReflogFormatArgument()
-		=> GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI)
-			? LogCommand.Format(LogFormatPlaceholders.ReflogFormat)
-			: LogCommand.Format(LogFormatPlaceholders.ReflogFormatOld);
+		=> GitFeatures.LogFormatBTag.IsAvailableFor(gitCLI)
+			? LogCommand.KnownArguments.Format(LogFormatPlaceholders.ReflogFormat)
+			: LogCommand.KnownArguments.Format(LogFormatPlaceholders.ReflogFormatOld);
 
 	private ICommandArgument GetRevisionFormatArgument()
-		=> GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI)
-			? LogCommand.Format(LogFormatPlaceholders.RevisionFormat)
-			: LogCommand.Format(LogFormatPlaceholders.RevisionFormatOld);
+		=> GitFeatures.LogFormatBTag.IsAvailableFor(gitCLI)
+			? LogCommand.KnownArguments.Format(LogFormatPlaceholders.RevisionFormat)
+			: LogCommand.KnownArguments.Format(LogFormatPlaceholders.RevisionFormatOld);
 
 	private ICommandArgument GetRevisionDataFormatArgument()
-		=> GitFeatures.LogFormatBTag.IsAvailableFor(_gitCLI)
-			? LogCommand.Format(LogFormatPlaceholders.RevisionDataFormat)
-			: LogCommand.Format(LogFormatPlaceholders.RevisionDataFormatOld);
+		=> GitFeatures.LogFormatBTag.IsAvailableFor(gitCLI)
+			? LogCommand.KnownArguments.Format(LogFormatPlaceholders.RevisionDataFormat)
+			: LogCommand.KnownArguments.Format(LogFormatPlaceholders.RevisionDataFormatOld);
 
-	private static void InsertQueryRevisionsParameters(QueryRevisionsParameters parameters, IList<ICommandArgument> args, ICommandArgument format)
+	private static void InsertQueryRevisionsParameters(QueryRevisionsRequest request, LogCommand.Builder builder, ICommandArgument format)
 	{
 		#region Commit Limiting
 
-		if(parameters.MaxCount != 0)
+		builder.MaxCount(request.MaxCount);
+		builder.Skip(request.Skip);
+
+		if(request.SinceDate.HasValue)
 		{
-			args.Add(LogCommand.MaxCount(parameters.MaxCount));
+			builder.Since(request.SinceDate.Value);
 		}
-		if(parameters.Skip != 0)
+		if(request.UntilDate.HasValue)
 		{
-			args.Add(LogCommand.Skip(parameters.Skip));
+			builder.Until(request.UntilDate.Value);
 		}
 
-		if(parameters.SinceDate.HasValue)
+		if(request.AuthorPattern is not null)
 		{
-			args.Add(LogCommand.Since(parameters.SinceDate.Value));
+			builder.Author(request.AuthorPattern);
 		}
-		if(parameters.UntilDate.HasValue)
+		if(request.CommitterPattern is not null)
 		{
-			args.Add(LogCommand.Until(parameters.UntilDate.Value));
+			builder.Committer(request.CommitterPattern);
 		}
-
-		if(parameters.AuthorPattern != null)
+		if(request.MessagePattern is not null)
 		{
-			args.Add(LogCommand.Author(parameters.AuthorPattern));
+			builder.Grep(request.MessagePattern);
 		}
-		if(parameters.CommitterPattern != null)
-		{
-			args.Add(LogCommand.Committer(parameters.CommitterPattern));
-		}
-		if(parameters.MessagePattern != null)
-		{
-			args.Add(LogCommand.Grep(parameters.MessagePattern));
-		}
-		if(parameters.AllMatch)
-		{
-			args.Add(LogCommand.AllMatch());
-		}
-		if(parameters.RegexpIgnoreCase)
-		{
-			args.Add(LogCommand.RegexpIgnoreCase());
-		}
-		if(parameters.RegexpExtended)
-		{
-			args.Add(LogCommand.ExtendedRegexp());
-		}
-		if(parameters.RegexpFixedStrings)
-		{
-			args.Add(LogCommand.FixedStrings());
-		}
-		if(parameters.RemoveEmpty)
-		{
-			args.Add(LogCommand.RemoveEmpty());
-		}
-		switch(parameters.MergesMode)
+		if(request.AllMatch)           builder.AllMatch();
+		if(request.RegexpIgnoreCase)   builder.RegexpIgnoreCase();
+		if(request.RegexpExtended)     builder.ExtendedRegexp();
+		if(request.RegexpFixedStrings) builder.FixedStrings();
+		if(request.RemoveEmpty)        builder.RemoveEmpty();
+		switch(request.MergesMode)
 		{
 			case RevisionMergesQueryMode.MergesOnly:
-				args.Add(LogCommand.Merges());
+				builder.Merges();
 				break;
 			case RevisionMergesQueryMode.NoMerges:
-				args.Add(LogCommand.NoMerges());
+				builder.NoMerges();
 				break;
 		}
-		if(parameters.Follow)
-		{
-			args.Add(LogCommand.Follow());
-		}
+		if(request.Follow) builder.Follow();
 
-		if(parameters.Not)
-		{
-			args.Add(LogCommand.Not());
-		}
-		if(parameters.All)
-		{
-			args.Add(LogCommand.All());
-		}
+		if(request.Not) builder.Not();
+		if(request.All) builder.All();
 
-		if(parameters.ReferencesGlob != null)
-		{
-			args.Add(LogCommand.Glob(parameters.ReferencesGlob));
-		}
-		if(parameters.Branches != null)
-		{
-			args.Add(LogCommand.Branches(parameters.Branches));
-		}
-		if(parameters.Tags != null)
-		{
-			args.Add(LogCommand.Tags(parameters.Tags));
-		}
-		if(parameters.Remotes != null)
-		{
-			args.Add(LogCommand.Remotes(parameters.Remotes));
-		}
+		if(request.ReferencesGlob is not null) builder.Glob     (request.ReferencesGlob);
+		if(request.Branches       is not null) builder.Branches (request.Branches);
+		if(request.Tags           is not null) builder.Tags     (request.Tags);
+		if(request.Remotes        is not null) builder.Remotes  (request.Remotes);
 
 		#endregion
 
 		#region History Simplification
 
-		if(parameters.FirstParent)
-		{
-			args.Add(LogCommand.FirstParent());
-		}
-		if(parameters.SimplifyByDecoration)
-		{
-			args.Add(LogCommand.SimplifyByDecoration());
-		}
-		if(parameters.EnableParentsRewriting)
-		{
-			args.Add(LogCommand.Parents());
-		}
+		if(request.FirstParent)            builder.FirstParent();
+		if(request.SimplifyByDecoration)   builder.SimplifyByDecoration();
+		if(request.EnableParentsRewriting) builder.Parents();
 
 		#endregion
 
 		#region Ordering
 
-		switch(parameters.Order)
-		{
-			case RevisionQueryOrder.DateOrder:
-				args.Add(LogCommand.DateOrder());
-				break;
-			case RevisionQueryOrder.TopoOrder:
-				args.Add(LogCommand.TopoOrder());
-				break;
-		}
-
-		if(parameters.Reverse)
-		{
-			args.Add(LogCommand.Reverse());
-		}
+		builder.Order(request.Order);
+		if(request.Reverse) builder.Reverse();
 
 		#endregion
 
 		#region Formatting
 
-		args.Add(LogCommand.NullTerminate());
+		builder.NullTerminate();
 		if(format is not null)
 		{
-			args.Add(format);
+			builder.AddArgument(format);
 		}
 
 		#endregion
 
-		if(parameters.Since is not null && parameters.Until is not null)
+		if(request.Since is not null && request.Until is not null)
 		{
-			args.Add(new CommandParameter(parameters.Since + ".." + parameters.Until));
+			builder.AddArgument(new ReferenceRangeCommandParameter(request.Since, request.Until));
 		}
 
-		if(parameters.References is not null)
-		{
-			foreach(var reference in parameters.References)
-			{
-				args.Add(new CommandParameter(reference));
-			}
-		}
-
-		if(parameters.Paths is { Count: not 0 } paths)
-		{
-			args.Add(CommandFlag.NoMoreOptions);
-			foreach(var path in paths)
-			{
-				args.Add(new PathCommandArgument(path));
-			}
-		}
+		builder.SpecifyReferences (request.References);
+		builder.SpecifyPaths      (request.Paths);
 	}
 
-	public Command GetQueryNotesCommand(QueryNotesParameters parameters)
+	public Command GetQueryNotesCommand(QueryNotesRequest request)
 	{
 		return new NotesCommand(NotesCommand.List());
 	}
 
-	public Command GetDereferenceCommand(DereferenceParameters parameters)
+	public Command GetDereferenceCommand(DereferenceRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		return new LogCommand(
-			new CommandParameter(parameters.Reference),
-			LogCommand.MaxCount(1),
-			parameters.LoadRevisionData ?
-				GetRevisionFormatArgument() : LogCommand.Format("%H"));
+		var builder = new LogCommand.Builder();
+		builder.AddArgument(new CommandParameter(request.Reference));
+		builder.MaxCount(1);
+		if(request.LoadRevisionData)
+		{
+			builder.AddArgument(GetRevisionFormatArgument());
+		}
+		else
+		{
+			builder.Format("%H");
+		}
+		return builder.Build();
 	}
 
-	public Command GetCommitCommand(CommitParameters parameters)
+	public Command GetCommitCommand(CommitRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>(12);
-		if(parameters.All)
+		if(request.All)
 		{
 			args.Add(CommitCommand.All());
 		}
-		if(parameters.SignOff)
+		if(request.SignOff)
 		{
 			args.Add(CommitCommand.SignOff());
 		}
-		if(parameters.Amend)
+		if(request.Amend)
 		{
 			args.Add(CommitCommand.Amend());
 		}
-		if(!string.IsNullOrEmpty(parameters.ReuseMessageFrom))
+		if(!string.IsNullOrEmpty(request.ReuseMessageFrom))
 		{
-			args.Add(CommitCommand.ReuseMessage(parameters.ReuseMessageFrom));
+			args.Add(CommitCommand.ReuseMessage(request.ReuseMessageFrom!));
 		}
-		if(!string.IsNullOrEmpty(parameters.Message))
+		var message = request.Message;
+		switch(message.Type)
 		{
-			args.Add(CommitCommand.Message(parameters.Message));
+			case MessageSpecificationType.Text when message.Text is { Length: not 0 } text:
+				args.Add(CommitCommand.Message(text));
+				break;
+			case MessageSpecificationType.File when message.File is { Length: not 0 } file:
+				args.Add(CommitCommand.File(file));
+				break;
 		}
-		if(!string.IsNullOrEmpty(parameters.MessageFileName))
-		{
-			args.Add(CommitCommand.File(parameters.MessageFileName));
-		}
-		if(parameters.ResetAuthor)
+		if(request.ResetAuthor)
 		{
 			args.Add(CommitCommand.ResetAuthor());
 		}
-		if(parameters.AllowEmpty)
+		if(request.AllowEmpty)
 		{
 			args.Add(CommitCommand.AllowEmpty());
 		}
-		if(parameters.AllowEmptyMessage)
+		if(request.AllowEmptyMessage)
 		{
 			args.Add(CommitCommand.AllowEmptyMessage());
 		}
-		if(parameters.NoVerify)
+		if(request.NoVerify)
 		{
 			args.Add(CommitCommand.NoVerify());
 		}
-		if(!string.IsNullOrEmpty(parameters.Author))
+		if(!string.IsNullOrEmpty(request.Author))
 		{
-			args.Add(CommitCommand.Author(parameters.Author));
+			args.Add(CommitCommand.Author(request.Author!));
 		}
-		if(parameters.AuthorDate.HasValue)
+		if(request.AuthorDate.HasValue)
 		{
-			args.Add(CommitCommand.Date(parameters.AuthorDate.Value));
+			args.Add(CommitCommand.Date(request.AuthorDate.Value));
 		}
 		return new CommitCommand(args);
 	}
 
-	public Command GetQueryFilesToAddCommand(AddFilesParameters parameters)
+	public Command GetQueryFilesToAddCommand(AddFilesRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>((parameters.Paths is not null ? parameters.Paths.Count + 1 : 0) + 6);
-		args.Add(AddCommand.DryRun());
-		InsertAddFilesParameters(parameters, args);
-		return new AddCommand(args);
-	}
-
-	public Command GetQueryFilesToRemoveCommand(RemoveFilesParameters parameters)
-	{
-		Assert.IsNotNull(parameters);
-
-		var args = new List<ICommandArgument>((parameters.Paths is not null ? parameters.Paths.Count + 1 : 0) + 5);
-		args.Add(RmCommand.DryRun());
-		InsertRemoveFilesParameters(parameters, args);
-		return new RmCommand(args);
-	}
-
-	public Command GetQueryFilesToCleanCommand(CleanFilesParameters parameters)
-	{
-		Assert.IsNotNull(parameters);
-
-		var builder = new CleanCommand.Builder();
+		var builder = new AddCommand.Builder();
 		builder.DryRun();
-		InsertCleanFilesParameters(parameters, builder);
+		InsertAddFilesParameters(request, builder);
 		return builder.Build();
 	}
 
-	public Command GetAddFilesCommand(AddFilesParameters parameters)
+	public Command GetQueryFilesToRemoveCommand(RemoveFilesRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>((parameters.Paths is not null ? parameters.Paths.Count + 1 : 0) + 5);
-		InsertAddFilesParameters(parameters, args);
-		return new AddCommand(args);
+		var args = new List<ICommandArgument>(request.Paths.Count + 1 + 5);
+		args.Add(RmCommand.DryRun());
+		InsertRemoveFilesParameters(request, args);
+		return new RmCommand(args);
 	}
 
-	private static void InsertAddFilesParameters(AddFilesParameters parameters, IList<ICommandArgument> args)
+	public Command GetQueryFilesToCleanCommand(CleanFilesRequest request)
 	{
-		if(parameters.Force)
+		Assert.IsNotNull(request);
+
+		var builder = new CleanCommand.Builder();
+		builder.DryRun();
+		InsertCleanFilesParameters(request, builder);
+		return builder.Build();
+	}
+
+	public Command GetAddFilesCommand(AddFilesRequest request)
+	{
+		Assert.IsNotNull(request);
+
+		var builder = new AddCommand.Builder();
+		InsertAddFilesParameters(request, builder);
+		return builder.Build();
+	}
+
+	private static void InsertAddFilesParameters(AddFilesRequest request, AddCommand.Builder builder)
+	{
+		if(request.Force)
 		{
-			args.Add(AddCommand.Force());
+			builder.Force();
 		}
-		switch(parameters.Mode)
+		switch(request.Mode)
 		{
 			case AddFilesMode.All:
-				args.Add(AddCommand.All());
+				builder.All();
 				break;
 			case AddFilesMode.Update:
-				args.Add(AddCommand.Update());
+				builder.Update();
 				break;
 		}
-		if(parameters.IntentToAdd)
+		if(request.IntentToAdd)
 		{
-			args.Add(AddCommand.IntentToAdd());
+			builder.IntentToAdd();
 		}
-		if(parameters.Refresh)
+		if(request.Refresh)
 		{
-			args.Add(AddCommand.Refresh());
+			builder.Refresh();
 		}
-		if(parameters.IgnoreErrors)
+		if(request.IgnoreErrors)
 		{
-			args.Add(AddCommand.IgnoreErrors());
+			builder.IgnoreErrors();
 		}
-		if(parameters.Paths is { Count: not 0 } paths)
+		builder.SpecifyPaths(request.Paths);
+	}
+
+	public Command GetRemoveFilesCommand(RemoveFilesRequest request)
+	{
+		Assert.IsNotNull(request);
+
+		var args = new List<ICommandArgument>(request.Paths.Count + 1 + 4);
+		InsertRemoveFilesParameters(request, args);
+		return new RmCommand(args);
+	}
+
+	private static void InsertRemoveFilesParameters(RemoveFilesRequest request, List<ICommandArgument> args)
+	{
+		if(request.Force)
 		{
-			args.Add(AddCommand.NoMoreOptions());
+			args.Add(RmCommand.Force());
+		}
+		if(request.Recursive)
+		{
+			args.Add(RmCommand.Recursive());
+		}
+		if(request.Cached)
+		{
+			args.Add(RmCommand.Cached());
+		}
+		if(request.IgnoreUnmatch)
+		{
+			args.Add(RmCommand.IgnoreUnmatch());
+		}
+		if(request.Paths is { Count: not 0 } paths)
+		{
+			args.Add(RmCommand.NoMoreOptions());
 			foreach(var path in paths)
 			{
 				args.Add(new PathCommandArgument(path));
@@ -528,74 +481,33 @@ sealed class CommandBuilder
 		}
 	}
 
-	public Command GetRemoveFilesCommand(RemoveFilesParameters parameters)
+	public Command GetCleanFilesCommand(CleanFilesRequest request)
 	{
-		Assert.IsNotNull(parameters);
-
-		var args = new List<ICommandArgument>((parameters.Paths != null ? parameters.Paths.Count + 1 : 0) + 4);
-		InsertRemoveFilesParameters(parameters, args);
-		return new RmCommand(args);
-	}
-
-	private static void InsertRemoveFilesParameters(RemoveFilesParameters parameters, IList<ICommandArgument> args)
-	{
-		if(parameters.Force)
-		{
-			args.Add(RmCommand.Force());
-		}
-		if(parameters.Recursive)
-		{
-			args.Add(RmCommand.Recursive());
-		}
-		if(parameters.Cached)
-		{
-			args.Add(RmCommand.Cached());
-		}
-		if(parameters.IgnoreUnmatch)
-		{
-			args.Add(RmCommand.IgnoreUnmatch());
-		}
-		if(parameters.Paths is { Count: not 0 })
-		{
-			args.Add(RmCommand.NoMoreOptions());
-			foreach(var path in parameters.Paths)
-			{
-				args.Add(new PathCommandArgument(path));
-			}
-		}
-	}
-
-	public Command GetCleanFilesCommand(CleanFilesParameters parameters)
-	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var builder = new CleanCommand.Builder();
-		InsertCleanFilesParameters(parameters, builder);
+		InsertCleanFilesParameters(request, builder);
 		return builder.Build();
 	}
 
-	private void InsertCleanFilesParameters(CleanFilesParameters parameters, CleanCommand.Builder builder)
+	private void InsertCleanFilesParameters(CleanFilesRequest request, CleanCommand.Builder builder)
 	{
-		if(parameters.Force)
+		if(request.Force)
 		{
 			builder.Force();
 		}
-		if(parameters.RemoveDirectories)
+		if(request.RemoveDirectories)
 		{
 			builder.Directories();
 		}
-		switch(parameters.Mode)
+		switch(request.Mode)
 		{
-			case CleanFilesMode.IncludeIgnored:
-				builder.IncludeIgnored();
-				break;
-			case CleanFilesMode.OnlyIgnored:
-				builder.ExcludeUntracked();
-				break;
+			case CleanFilesMode.IncludeIgnored: builder.IncludeIgnored();   break;
+			case CleanFilesMode.OnlyIgnored:    builder.ExcludeUntracked(); break;
 		}
-		if(parameters.ExcludePatterns is { Count: > 0 } patterns && GitFeatures.CleanExcludeOption.IsAvailableFor(_gitCLI))
+		if(!request.ExcludePatterns.IsEmpty && GitFeatures.CleanExcludeOption.IsAvailableFor(gitCLI))
 		{
-			foreach(var pattern in patterns)
+			foreach(var pattern in request.ExcludePatterns)
 			{
 				if(!string.IsNullOrEmpty(pattern))
 				{
@@ -603,323 +515,282 @@ sealed class CommandBuilder
 				}
 			}
 		}
-		if(parameters.Paths is { Count: not 0 } paths)
-		{
-			bool addedAnyPath = false;
-			foreach(var path in paths)
-			{
-				if(string.IsNullOrWhiteSpace(path))
-				{
-					continue;
-				}
-				if(addedAnyPath)
-				{
-					builder.NoMoreOptions();
-					addedAnyPath = true;
-				}
-				builder.AddOption(new PathCommandArgument(path));
-			}
-		}
+		builder.SpecifyPaths(request.Paths);
 	}
 
-	public Command GetResetFilesCommand(ResetFilesParameters parameters)
+	public Command GetResetFilesCommand(ResetFilesRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>((parameters.Paths is not null ? parameters.Paths.Count + 1 : 0) + 1);
-		if(!string.IsNullOrEmpty(parameters.Revision))
+		var builder = new ResetCommand.Builder();
+		if(request.Revision is { Length: not 0 } revision)
 		{
-			args.Add(new CommandParameter(parameters.Revision));
+			builder.AddArgument(new CommandParameter(revision));
 		}
-		if(parameters.Paths is { Count: not 0 })
-		{
-			args.Add(ResetCommand.NoMoreOptions());
-			foreach(var path in parameters.Paths)
-			{
-				args.Add(new PathCommandArgument(path));
-			}
-		}
-		return new ResetCommand(args);
+		builder.SpecifyPaths(request.Paths);
+		return builder.Build();
 	}
 
-	public Command GetAppendNoteCommand(AppendNoteParameters parameters)
+	public Command GetAppendNoteCommand(AppendNoteRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		return new NotesCommand(
-			NotesCommand.Append(),
-			NotesCommand.Message(parameters.Message),
-			new CommandParameter(parameters.Revision));
+		var args = new List<ICommandArgument>(capacity: 3);
+		args.Add(NotesCommand.Append());
+		var message = request.Message;
+		switch(message.Type)
+		{
+			case MessageSpecificationType.Text when message.Text is { Length: not 0 } text:
+				args.Add(NotesCommand.Message(text));
+				break;
+			case MessageSpecificationType.File when message.File is { Length: not 0 } file:
+				args.Add(NotesCommand.File(file));
+				break;
+		}
+		args.Add(new CommandParameter(request.Revision));
+		return new NotesCommand(args);
 	}
 
-	public Command GetPruneNotesCommand(PruneNotesParameters parameters)
+	public Command GetPruneNotesCommand(PruneNotesRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		return new NotesCommand(NotesCommand.Prune());
 	}
 
-	public Command GetDiffCommand(QueryDiffParameters parameters)
+	public Command GetDiffCommand(QueryDiffRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>();
-		InsertDiffParameters1(parameters, args);
-		if(!string.IsNullOrEmpty(parameters.Revision1))
-		{
-			args.Add(new CommandParameter(parameters.Revision1));
-		}
-		if(!string.IsNullOrEmpty(parameters.Revision2))
-		{
-			args.Add(new CommandParameter(parameters.Revision2));
-		}
-		InsertDiffParameters2(parameters, args);
-		return new DiffCommand(args);
+		var builder = new DiffCommand.Builder();
+		InsertDiffParameters1(request, builder);
+		builder.SpecifyOptionalReference(request.Revision1);
+		builder.SpecifyOptionalReference(request.Revision2);
+		InsertDiffParameters2(request, builder);
+		return builder.Build();
 	}
 
-	public Command GetQueryRevisionDiffCommand(QueryRevisionDiffParameters parameters)
+	public Command GetQueryRevisionDiffCommand(QueryRevisionDiffRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>();
-		args.Add(LogCommand.MaxCount(1));
-		InsertDiffParameters1(parameters, args);
-		args.Add(new CommandFlag("-c"));
-		args.Add(new CommandParameter(parameters.Revision));
-		InsertDiffParameters2(parameters, args);
-		return new LogCommand(args);
+		var builder = new LogCommand.Builder();
+		builder.MaxCount(1);
+		InsertDiffParameters1(request, builder);
+		builder.CombinedDiff();
+		builder.SpecifyReference(request.Revision);
+		InsertDiffParameters2(request, builder);
+		return builder.Build();
 	}
 
-	public Command GetQueryStashDiffCommand(QueryRevisionDiffParameters parameters)
+	public Command GetQueryStashDiffCommand(QueryRevisionDiffRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>();
-		args.Add(StashCommand.Show());
-		InsertDiffParameters1(parameters, args);
-		args.Add(new CommandParameter(parameters.Revision));
-		InsertDiffParameters2(parameters, args);
-		return new StashCommand(args);
+		var builder = new StashCommand.Builder();
+		builder.Show();
+		InsertDiffParameters1(request, builder);
+		builder.AddArgument(new CommandParameter(request.Revision));
+		InsertDiffParameters2(request, builder);
+		return builder.Build();
 	}
 
-	private static void InsertDiffParameters1(BaseQueryDiffParameters parameters, IList<ICommandArgument> args)
+	private static void InsertDiffParameters1<T>(BaseQueryDiffRequest request, T builder)
+		where T : IDiffCommandBuilder
 	{
-		Assert.IsNotNull(parameters);
-		Assert.IsNotNull(args);
+		Assert.IsNotNull(request);
 
-		args.Add(DiffCommand.Patch());
-		args.Add(DiffCommand.FullIndex());
-		args.Add(DiffCommand.NoColor());
-		if(parameters.Context >= 0)
+		builder.Patch();
+		builder.FullIndex();
+		builder.NoColor();
+		if(request.Context >= 0)
 		{
-			args.Add(DiffCommand.Unified(parameters.Context));
+			builder.Unified(request.Context);
 		}
-		if(parameters.Cached)
+		if(request.Cached)            builder.Cached();
+		if(request.Binary)            builder.Binary();
+		if(request.Patience)          builder.Patience();
+		if(request.IgnoreAllSpace)    builder.IgnoreAllSpace();
+		if(request.IgnoreSpaceAtEOL)  builder.IgnoreSpaceAtEOL();
+		if(request.IgnoreSpaceChange) builder.IgnoreSpaceChange();
+		if(request.SwapInputs)        builder.SwapInputs();
+		if(request.EnableTextConvFilters.HasValue)
 		{
-			args.Add(DiffCommand.Cached());
-		}
-		if(parameters.Binary)
-		{
-			args.Add(DiffCommand.Binary());
-		}
-		if(parameters.Patience)
-		{
-			args.Add(DiffCommand.Patience());
-		}
-		if(parameters.IgnoreAllSpace)
-		{
-			args.Add(DiffCommand.IgnoreAllSpace());
-		}
-		if(parameters.IgnoreSpaceAtEOL)
-		{
-			args.Add(DiffCommand.IgnoreSpaceAtEOL());
-		}
-		if(parameters.IgnoreSpaceChange)
-		{
-			args.Add(DiffCommand.IgnoreSpaceChange());
-		}
-		if(parameters.SwapInputs)
-		{
-			args.Add(DiffCommand.SwapInputs());
-		}
-		if(parameters.EnableTextConvFilters.HasValue)
-		{
-			if(parameters.EnableTextConvFilters.Value)
+			if(request.EnableTextConvFilters.Value)
 			{
-				args.Add(DiffCommand.TextConv());
+				builder.TextConv();
 			}
 			else
 			{
-				args.Add(DiffCommand.NoTextConv());
+				builder.NoTextConv();
 			}
 		}
-		if(parameters.EnableExternalDiffDrivers.HasValue)
+		if(request.EnableExternalDiffDrivers.HasValue)
 		{
-			if(parameters.EnableExternalDiffDrivers.Value)
+			if(request.EnableExternalDiffDrivers.Value)
 			{
-				args.Add(DiffCommand.ExtDiff());
+				builder.ExtDiff();
 			}
 			else
 			{
-				args.Add(DiffCommand.NoExtDiff());
+				builder.NoExtDiff();
 			}
 		}
-		if(parameters.TreatAllFilesAsText)
+		if(request.TreatAllFilesAsText)
 		{
-			args.Add(DiffCommand.Text());
+			builder.Text();
 		}
-		if(parameters.FindRenames.HasValue)
+		if(request.FindRenames.HasValue)
 		{
-			if(parameters.FindRenames.Value.IsSpecified)
+			if(request.FindRenames.Value.IsSpecified)
 			{
-				args.Add(DiffCommand.FindRenames(parameters.FindRenames.Value.Similarity));
+				builder.FindRenames(request.FindRenames.Value.Similarity);
 			}
 			else
 			{
-				args.Add(DiffCommand.FindRenames());
+				builder.FindRenames();
 			}
 		}
-		if(parameters.FindCopies.HasValue)
+		if(request.FindCopies.HasValue)
 		{
-			if(parameters.FindCopies.Value.IsSpecified)
+			if(request.FindCopies.Value.IsSpecified)
 			{
-				args.Add(DiffCommand.FindCopies(parameters.FindCopies.Value.Similarity));
+				builder.FindCopies(request.FindCopies.Value.Similarity);
 			}
 			else
 			{
-				args.Add(DiffCommand.FindCopies());
+				builder.FindCopies();
 			}
 		}
 	}
 
-	private static void InsertDiffParameters2(BaseQueryDiffParameters parameters, IList<ICommandArgument> args)
+	private static void InsertDiffParameters2<T>(BaseQueryDiffRequest request, T builder)
+		where T : IDiffCommandBuilder
 	{
-		Assert.IsNotNull(parameters);
-		Assert.IsNotNull(args);
+		Assert.IsNotNull(request);
 
-		if(parameters.Paths is { Count: > 0 } paths)
-		{
-			args.Add(DiffCommand.NoMoreOptions());
-			foreach(var path in paths)
-			{
-				args.Add(new PathCommandArgument(path));
-			}
-		}
+		builder.SpecifyPaths(request.Paths);
 	}
 
-	public Command GetQueryStashCommand(QueryStashParameters parameters)
+	public Command GetQueryStashCommand(QueryStashRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		return new LogCommand(
-			LogCommand.WalkReflogs(),
-			LogCommand.NullTerminate(),
-			GetRevisionFormatArgument(),
-			new CommandParameter(GitConstants.StashFullName));
+		var builder = new LogCommand.Builder();
+		builder.WalkReflogs();
+		builder.NullTerminate();
+		builder.AddArgument(GetRevisionFormatArgument());
+		builder.AddArgument(new CommandParameter(GitConstants.StashFullName));
+		return builder.Build();
 	}
 
-	public Command GetStashSaveCommand(StashSaveParameters parameters)
+	public Command GetStashSaveCommand(StashSaveRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>();
-		args.Add(StashCommand.Save());
-		args.Add(parameters.KeepIndex ? StashCommand.KeepIndex() : StashCommand.NoKeepIndex());
-		if(parameters.IncludeUntracked && GitFeatures.StashIncludeUntrackedOption.IsAvailableFor(_gitCLI))
+		var builder = new StashCommand.Builder();
+		builder.Save();
+		if(request.KeepIndex)
 		{
-			args.Add(StashCommand.IncludeUntracked());
-		}
-		if(!string.IsNullOrWhiteSpace(parameters.Message))
-		{
-			args.Add(new CommandParameter(parameters.Message.SurroundWithDoubleQuotes()));
-		}
-
-		return new StashCommand(args);
-	}
-
-	public Command GetStashApplyCommand(StashApplyParameters parameters)
-	{
-		Assert.IsNotNull(parameters);
-
-		var args = new List<ICommandArgument>(3);
-		args.Add(StashCommand.Apply());
-		if(parameters.RestoreIndex)
-		{
-			args.Add(StashCommand.Index());
-		}
-		if(parameters.StashName != null)
-		{
-			args.Add(new CommandParameter(parameters.StashName));
-		}
-		return new StashCommand(args);
-	}
-
-	public Command GetStashPopCommand(StashPopParameters parameters)
-	{
-		Assert.IsNotNull(parameters);
-
-		var args = new List<ICommandArgument>(3);
-		args.Add(StashCommand.Pop());
-		if(parameters.RestoreIndex)
-		{
-			args.Add(StashCommand.Index());
-		}
-		if(parameters.StashName != null)
-		{
-			args.Add(new CommandParameter(parameters.StashName));
-		}
-		return new StashCommand(args);
-	}
-
-	public Command GetStashToBranchCommand(StashToBranchParameters parameters)
-	{
-		Assert.IsNotNull(parameters);
-
-		var args = new List<ICommandArgument>(3);
-		args.Add(StashCommand.Branch());
-		args.Add(new CommandParameter(parameters.BranchName));
-		if(parameters.StashName is not null)
-		{
-			args.Add(new CommandParameter(parameters.StashName));
-		}
-
-		return new StashCommand(args);
-	}
-
-	public Command GetStashDropCommand(StashDropParameters parameters)
-	{
-		Assert.IsNotNull(parameters);
-
-		if(!string.IsNullOrWhiteSpace(parameters.StashName))
-		{
-			return new StashCommand(
-				StashCommand.Drop(),
-				new CommandParameter(parameters.StashName));
+			builder.KeepIndex();
 		}
 		else
 		{
-			return new StashCommand(
-				StashCommand.Drop());
+			builder.NoKeepIndex();
 		}
+		if(request.IncludeUntracked && GitFeatures.StashIncludeUntrackedOption.IsAvailableFor(gitCLI))
+		{
+			builder.IncludeUntracked();
+		}
+		if(!string.IsNullOrWhiteSpace(request.Message))
+		{
+			builder.AddArgument(new CommandParameter(request.Message!.SurroundWithDoubleQuotes()));
+		}
+
+		return builder.Build();
 	}
 
-	public Command GetStashClearCommand(StashClearParameters parameters)
+	public Command GetStashApplyCommand(StashApplyRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		return new StashCommand(StashCommand.Clear());
+		var builder = new StashCommand.Builder();
+		builder.Apply();
+		if(request.RestoreIndex)
+		{
+			builder.Index();
+		}
+		if(request.StashName is not null)
+		{
+			builder.AddArgument(new CommandParameter(request.StashName));
+		}
+		return builder.Build();
 	}
 
-	public Command GetQueryTreeContentCommand(QueryTreeContentParameters parameters)
+	public Command GetStashPopCommand(StashPopRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
+
+		var builder = new StashCommand.Builder();
+		builder.Pop();
+		if(request.RestoreIndex)
+		{
+			builder.Index();
+		}
+		if(request.StashName != null)
+		{
+			builder.AddArgument(new CommandParameter(request.StashName));
+		}
+		return builder.Build();
+	}
+
+	public Command GetStashToBranchCommand(StashToBranchRequest request)
+	{
+		Assert.IsNotNull(request);
+
+		var builder = new StashCommand.Builder();
+		builder.Branch();
+		builder.AddArgument(new CommandParameter(request.BranchName));
+		if(request.StashName is not null)
+		{
+			builder.AddArgument(new CommandParameter(request.StashName));
+		}
+
+		return builder.Build();
+	}
+
+	public Command GetStashDropCommand(StashDropRequest request)
+	{
+		Assert.IsNotNull(request);
+
+		var builder = new StashCommand.Builder();
+		builder.Drop();
+		if(!string.IsNullOrWhiteSpace(request.StashName))
+		{
+			builder.AddArgument(new CommandParameter(request.StashName));
+		}
+		return builder.Build();
+	}
+
+	public Command GetStashClearCommand(StashClearRequest request)
+	{
+		Assert.IsNotNull(request);
+
+		var builder = new StashCommand.Builder();
+		builder.Clear();
+		return builder.Build();
+	}
+
+	public Command GetQueryTreeContentCommand(QueryTreeContentRequest request)
+	{
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>();
-		if(parameters.OnlyTrees)
+		if(request.OnlyTrees)
 		{
 			args.Add(LsTreeCommand.Directories());
 		}
-		if(parameters.Recurse)
+		if(request.Recurse)
 		{
 			args.Add(LsTreeCommand.Recurse());
 		}
@@ -927,23 +798,20 @@ sealed class CommandBuilder
 		args.Add(LsTreeCommand.FullName());
 		args.Add(LsTreeCommand.Long());
 		args.Add(LsTreeCommand.NullTerminate());
-		args.Add(new CommandParameter(parameters.TreeId));
-		if(parameters.Paths != null)
+		args.Add(new CommandParameter(request.TreeId));
+		foreach(var path in request.Paths)
 		{
-			foreach(var path in parameters.Paths)
-			{
-				args.Add(new PathCommandArgument(path));
-			}
+			args.Add(new PathCommandArgument(path));
 		}
 		return new LsTreeCommand(args);
 	}
 
-	public Command GetApplyPatchCommand(ApplyPatchParameters parameters)
+	public Command GetApplyPatchCommand(ApplyPatchRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>();
-		switch(parameters.ApplyTo)
+		switch(request.ApplyTo)
 		{
 			case ApplyPatchTo.WorkingDirectory:
 				break;
@@ -956,44 +824,41 @@ sealed class CommandBuilder
 			default:
 				throw new ArgumentException();
 		}
-		if(parameters.Reverse)
+		if(request.Reverse)
 		{
 			args.Add(ApplyCommand.Reverse());
 		}
 		args.Add(ApplyCommand.UnidiffZero());
-		if(parameters.Patches != null)
+		foreach(var patch in request.Patches)
 		{
-			foreach(var patch in parameters.Patches)
-			{
-				args.Add(new PathCommandArgument(patch));
-			}
+			args.Add(new PathCommandArgument(patch));
 		}
 		return new ApplyCommand(args);
 	}
 
-	public Command GetCheckoutCommand(CheckoutParameters parameters)
+	public Command GetCheckoutCommand(CheckoutRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var builder = new CheckoutCommand.Builder();
-		if(parameters.Force)
+		if(request.Force)
 		{
 			builder.Force();
 		}
-		if(parameters.Merge)
+		if(request.Merge)
 		{
 			builder.Merge();
 		}
-		builder.AddArgument(parameters.Revision);
+		builder.AddArgument(request.Revision);
 		return builder.Build();
 	}
 
-	public Command GetCheckoutFilesCommand(CheckoutFilesParameters parameters)
+	public Command GetCheckoutFilesCommand(CheckoutFilesRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var builder = new CheckoutCommand.Builder();
-		switch(parameters.Mode)
+		switch(request.Mode)
 		{
 			case CheckoutFileMode.Ours:
 				builder.Ours();
@@ -1008,14 +873,14 @@ sealed class CommandBuilder
 				builder.Force();
 				break;
 		}
-		if(!string.IsNullOrEmpty(parameters.Revision))
+		if(!string.IsNullOrEmpty(request.Revision))
 		{
-			builder.AddArgument(parameters.Revision);
+			builder.AddArgument(request.Revision);
 		}
-		if(parameters.Paths is { Count: not 0 })
+		if(request.Paths is { Count: not 0 } paths)
 		{
 			builder.NoMoreOptions();
-			foreach(var path in parameters.Paths)
+			foreach(var path in paths)
 			{
 				builder.AddArgument(new PathCommandArgument(path));
 			}
@@ -1023,33 +888,33 @@ sealed class CommandBuilder
 		return builder.Build();
 	}
 
-	public Command GetQueryBlobBytesCommand(QueryBlobBytesParameters parameters)
+	public Command GetQueryBlobBytesCommand(QueryBlobBytesRequest request)
 	{
 		return new CatFileCommand(
 			new CommandParameter(GitConstants.BlobObjectType),
-			new CommandParameter(parameters.Treeish + ":" + parameters.ObjectName));
+			new CommandParameter(request.Treeish + ":" + request.ObjectName));
 	}
 
-	public Command GetRevertCommand(RevertParameters parameters)
+	public Command GetRevertCommand(RevertRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		if(parameters.Control.HasValue)
+		if(request.Control.HasValue)
 		{
-			return GetRevertCommand(parameters.Control.Value);
+			return GetRevertCommand(request.Control.Value);
 		}
 		else
 		{
 			var builder = new RevertCommand.Builder();
-			if(parameters.NoCommit)
+			if(request.NoCommit)
 			{
 				builder.NoCommit();
 			}
-			if(parameters.Mainline > 0)
+			if(request.Mainline > 0)
 			{
-				builder.Mainline(parameters.Mainline);
+				builder.Mainline(request.Mainline);
 			}
-			foreach(var rev in parameters.Revisions)
+			foreach(var rev in request.Revisions)
 			{
 				builder.AddArgument(new CommandParameter(rev));
 			}
@@ -1078,51 +943,27 @@ sealed class CommandBuilder
 		return builder.Build();
 	}
 
-	public Command GetCherryPickCommand(CherryPickParameters parameters)
+	public Command GetCherryPickCommand(CherryPickRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		if(parameters.Control.HasValue)
+		if(request.Control.HasValue)
 		{
-			return GetCherryPickCommand(parameters.Control.Value);
+			return GetCherryPickCommand(request.Control.Value);
 		}
-		else
+		var builder = new CherryPickCommand.Builder();
+		if(request.NoCommit)             builder.NoCommit();
+		if(request.Mainline > 0)         builder.Mainline(request.Mainline);
+		if(request.SignOff)              builder.SignOff();
+		if(request.FastForward)          builder.FastForward();
+		if(request.AllowEmpty)           builder.AllowEmpty();
+		if(request.AllowEmptyMessage)    builder.AllowEmptyMessage();
+		if(request.KeepRedundantCommits) builder.KeepRedundantCommits();
+		foreach(var rev in request.Revisions)
 		{
-			var builder = new CherryPickCommand.Builder();
-			if(parameters.NoCommit)
-			{
-				builder.NoCommit();
-			}
-			if(parameters.Mainline > 0)
-			{
-				builder.Mainline(parameters.Mainline);
-			}
-			if(parameters.SignOff)
-			{
-				builder.SignOff();
-			}
-			if(parameters.FastForward)
-			{
-				builder.FastForward();
-			}
-			if(parameters.AllowEmpty)
-			{
-				builder.AllowEmpty();
-			}
-			if(parameters.AllowEmptyMessage)
-			{
-				builder.AllowEmptyMessage();
-			}
-			if(parameters.KeepRedundantCommits)
-			{
-				builder.KeepRedundantCommits();
-			}
-			foreach(var rev in parameters.Revisions)
-			{
-				builder.AddArgument(new CommandParameter(rev));
-			}
-			return builder.Build();
+			builder.AddArgument(new CommandParameter(rev));
 		}
+		return builder.Build();
 	}
 
 	public Command GetCherryPickCommand(CherryPickControl control)
@@ -1146,74 +987,74 @@ sealed class CommandBuilder
 		return builder.Build();
 	}
 
-	public Command GetResetCommand(ResetParameters parameters)
+	public Command GetResetCommand(ResetRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>();
-		args.Add(ResetCommand.Mode(parameters.Mode));
-		if(!string.IsNullOrEmpty(parameters.Revision))
+		var builder = new ResetCommand.Builder();
+		builder.Mode(request.Mode);
+		if(!string.IsNullOrEmpty(request.Revision))
 		{
-			args.Add(new CommandParameter(parameters.Revision));
+			builder.AddArgument(new CommandParameter(request.Revision!));
 		}
-		return new ResetCommand(args);
+		return builder.Build();
 	}
 
-	public Command GetMergeCommand(MergeParameters parameters)
+	public Command GetMergeCommand(MergeRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
+
+		static string EscapeMessageText(string text)
+			=> text.Replace("\"", "\\\"");
 
 		var args = new List<ICommandArgument>();
-		if(parameters.NoCommit)
+		if(request.NoCommit)
 		{
 			args.Add(MergeCommand.NoCommit());
 		}
-		if(parameters.Squash)
+		if(request.Squash)
 		{
 			args.Add(MergeCommand.Squash());
 		}
-		if(parameters.NoFastForward)
+		if(request.NoFastForward)
 		{
 			args.Add(MergeCommand.NoFastForward());
 		}
-		if(parameters.MessageFileName is not null)
+		var message = request.Message;
+		switch(message.Type)
 		{
-			if(_gitCLI.GitVersion >= MergeFileArgVersion)
-			{
-				args.Add(MergeCommand.File(parameters.MessageFileName));
-			}
-			else
-			{
-				var message = File.ReadAllText(parameters.MessageFileName).Replace("\"", "\\\"");
-				args.Add(MergeCommand.Message(message));
-			}
+			case MessageSpecificationType.Text when message.Text is { Length: not 0 } text:
+				args.Add(MergeCommand.Message(EscapeMessageText(text)));
+				break;
+			case MessageSpecificationType.File when message.File is { Length: not 0 } file:
+				if(gitCLI.GitVersion >= MergeFileArgVersion)
+				{
+					args.Add(MergeCommand.File(file));
+				}
+				else
+				{
+					var text = EscapeMessageText(File.ReadAllText(file));
+					args.Add(MergeCommand.Message(text));
+				}
+				break;
+			default:
+				args.Add(MergeCommand.NoEdit());
+				break;
 		}
-		else if(!string.IsNullOrEmpty(parameters.Message))
+		foreach(var rev in request.Revisions)
 		{
-			var message = parameters.Message.Replace("\"", "\\\"");
-			args.Add(MergeCommand.Message(message));
-		}
-		else
-		{
-			args.Add(MergeCommand.NoEdit());
-		}
-		if(parameters.Revisions is not null)
-		{
-			foreach(var rev in parameters.Revisions)
-			{
-				args.Add(new CommandParameter(rev));
-			}
+			args.Add(new CommandParameter(rev));
 		}
 		return new MergeCommand(args);
 	}
 
-	public Command GetRebaseCommand(RebaseParameters parameters)
+	public Command GetRebaseCommand(RebaseRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		if(parameters.Control.HasValue)
+		if(request.Control.HasValue)
 		{
-			ICommandArgument arg = parameters.Control.Value switch
+			ICommandArgument arg = request.Control.Value switch
 			{
 				RebaseControl.Abort    => RebaseCommand.Abort(),
 				RebaseControl.Continue => RebaseCommand.Continue(),
@@ -1225,14 +1066,14 @@ sealed class CommandBuilder
 		else
 		{
 			var args = new List<ICommandArgument>();
-			if(!string.IsNullOrEmpty(parameters.NewBase))
+			if(!string.IsNullOrEmpty(request.NewBase))
 			{
-				args.Add(RebaseCommand.Onto(parameters.NewBase));
+				args.Add(RebaseCommand.Onto(request.NewBase));
 			}
-			args.Add(new CommandParameter(parameters.Upstream));
-			if(!string.IsNullOrEmpty(parameters.Branch))
+			args.Add(new CommandParameter(request.Upstream));
+			if(!string.IsNullOrEmpty(request.Branch))
 			{
-				args.Add(new CommandParameter(parameters.Branch));
+				args.Add(new CommandParameter(request.Branch));
 			}
 			return new RebaseCommand(args);
 		}
@@ -1250,9 +1091,9 @@ sealed class CommandBuilder
 		return new RebaseCommand(arg);
 	}
 
-	public Command GetQueryUsersCommand(QueryUsersParameters parameters)
+	public Command GetQueryUsersCommand(QueryUsersRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		return new ShortLogCommand(
 			ShortLogCommand.All(),
@@ -1261,92 +1102,92 @@ sealed class CommandBuilder
 			ShortLogCommand.Email());
 	}
 
-	public Command GetCountObjectsCommand(CountObjectsParameters parameters)
+	public Command GetCountObjectsCommand(CountObjectsRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		return new CountObjectsCommand(CountObjectsCommand.Verbose());
 	}
 
-	public Command GetGarbageCollectCommand(GarbageCollectParameters parameters)
+	public Command GetGarbageCollectCommand(GarbageCollectRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		return new GcCommand();
 	}
 
-	public Command GetArchiveCommand(ArchiveParameters parameters)
+	public Command GetArchiveCommand(ArchiveRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>(5);
-		if(!string.IsNullOrEmpty(parameters.Format))
+		if(request.Format is { Length: not 0 } format)
 		{
-			args.Add(ArchiveCommand.Format(parameters.Format));
+			args.Add(ArchiveCommand.Format(format));
 		}
-		if(!string.IsNullOrEmpty(parameters.OutputFile))
+		if(!string.IsNullOrEmpty(request.OutputFile))
 		{
-			args.Add(ArchiveCommand.Output(parameters.OutputFile));
+			args.Add(ArchiveCommand.Output(request.OutputFile));
 		}
-		if(!string.IsNullOrEmpty(parameters.Remote))
+		if(!string.IsNullOrEmpty(request.Remote))
 		{
-			args.Add(ArchiveCommand.Remote(parameters.Remote));
+			args.Add(ArchiveCommand.Remote(request.Remote));
 		}
-		args.Add(new CommandParameter(parameters.Tree));
-		if(!string.IsNullOrEmpty(parameters.Path))
+		args.Add(new CommandParameter(request.Tree));
+		if(request.Path is { Length: not 0 } path)
 		{
-			args.Add(new PathCommandArgument(parameters.Path));
+			args.Add(new PathCommandArgument(path));
 		}
 		return new ArchiveCommand(args);
 	}
 
-	public Command GetQueryBlameCommand(QueryBlameParameters parameters)
+	public Command GetQueryBlameCommand(QueryBlameRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>();
-		args.Add(BlameCommand.Porcelain());
-		if(!string.IsNullOrEmpty(parameters.Revision))
+		args.Add(BlameCommand.Porcelain);
+		if(!string.IsNullOrEmpty(request.Revision))
 		{
-			args.Add(new CommandParameter(parameters.Revision));
+			args.Add(new CommandParameter(request.Revision));
 		}
 		args.Add(CommandFlag.NoMoreOptions);
-		args.Add(new PathCommandArgument(parameters.FileName));
+		args.Add(new PathCommandArgument(request.FileName));
 		return new BlameCommand(args);
 	}
 
-	public Command GetFetchCommand(FetchParameters parameters, bool isAsync)
+	public Command GetFetchCommand(FetchRequest request, bool isAsync)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>(10);
-		InsertFetchParameters(parameters, args);
-		if(isAsync && GitFeatures.ProgressFlag.IsAvailableFor(_gitCLI))
+		InsertFetchParameters(request, args);
+		if(isAsync && GitFeatures.ProgressFlag.IsAvailableFor(gitCLI))
 		{
 			args.Add(FetchCommand.Progress());
 		}
 		return new FetchCommand(args);
 	}
 
-	private static void InsertFetchParameters(FetchParameters parameters, IList<ICommandArgument> args)
+	private static void InsertFetchParameters(FetchRequest request, IList<ICommandArgument> args)
 	{
-		if(parameters.All)
+		if(request.All)
 		{
 			args.Add(FetchCommand.All());
 		}
-		if(parameters.Append)
+		if(request.Append)
 		{
 			args.Add(FetchCommand.Append());
 		}
-		if(parameters.Prune)
+		if(request.Prune)
 		{
 			args.Add(FetchCommand.Prune());
 		}
-		if(parameters.Depth != 0)
+		if(request.Depth != 0)
 		{
-			args.Add(FetchCommand.Depth(parameters.Depth));
+			args.Add(FetchCommand.Depth(request.Depth));
 		}
-		switch(parameters.TagFetchMode)
+		switch(request.TagFetchMode)
 		{
 			case TagFetchMode.Default:
 				break;
@@ -1357,69 +1198,69 @@ sealed class CommandBuilder
 				args.Add(FetchCommand.NoTags());
 				break;
 		}
-		if(parameters.KeepDownloadedPack)
+		if(request.KeepDownloadedPack)
 		{
 			args.Add(FetchCommand.Keep());
 		}
-		if(parameters.Force)
+		if(request.Force)
 		{
 			args.Add(FetchCommand.Force());
 		}
-		if(!string.IsNullOrWhiteSpace(parameters.UploadPack))
+		if(!string.IsNullOrWhiteSpace(request.UploadPack))
 		{
-			args.Add(FetchCommand.UploadPack(parameters.UploadPack));
+			args.Add(FetchCommand.UploadPack(request.UploadPack!));
 		}
-		if(!string.IsNullOrWhiteSpace(parameters.Repository))
+		if(!string.IsNullOrWhiteSpace(request.Repository))
 		{
-			args.Add(new CommandParameter(parameters.Repository));
+			args.Add(new CommandParameter(request.Repository!));
 		}
 	}
 
-	public Command GetPullCommand(PullParameters parameters, bool isAsync)
+	public Command GetPullCommand(PullRequest request, bool isAsync)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>();
-		InsertPullParameters(parameters, args);
-		if(isAsync && GitFeatures.ProgressFlag.IsAvailableFor(_gitCLI))
+		InsertPullParameters(request, args);
+		if(isAsync && GitFeatures.ProgressFlag.IsAvailableFor(gitCLI))
 		{
 			args.Add(FetchCommand.Progress());
 		}
 		return new PullCommand(args);
 	}
 
-	private static void InsertPullParameters(PullParameters parameters, IList<ICommandArgument> args)
+	private static void InsertPullParameters(PullRequest request, IList<ICommandArgument> args)
 	{
-		if(parameters.NoFastForward)
+		if(request.NoFastForward)
 		{
 			args.Add(MergeCommand.NoFastForward());
 		}
-		if(parameters.NoCommit)
+		if(request.NoCommit)
 		{
 			args.Add(MergeCommand.NoCommit());
 		}
-		if(parameters.Squash)
+		if(request.Squash)
 		{
 			args.Add(MergeCommand.Squash());
 		}
-		var arg = MergeCommand.Strategy(parameters.Strategy);
+		var arg = MergeCommand.Strategy(request.Strategy);
 		if(arg is not null)
 		{
 			args.Add(arg);
 		}
-		if(!string.IsNullOrEmpty(parameters.StrategyOption))
+		if(!string.IsNullOrEmpty(request.StrategyOption))
 		{
-			args.Add(MergeCommand.StrategyOption(parameters.StrategyOption));
+			args.Add(MergeCommand.StrategyOption(request.StrategyOption!));
 		}
-		InsertFetchParameters(parameters, args);
+		InsertFetchParameters(request, args);
 	}
 
-	public Command GetPushCommand(PushParameters parameters, bool isAsync)
+	public Command GetPushCommand(PushRequest request, bool isAsync)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>();
-		switch(parameters.PushMode)
+		switch(request.PushMode)
 		{
 			case PushMode.Default:
 				break;
@@ -1433,81 +1274,75 @@ sealed class CommandBuilder
 				args.Add(PushCommand.Tags());
 				break;
 		}
-		if(!string.IsNullOrEmpty(parameters.ReceivePack))
+		if(!string.IsNullOrEmpty(request.ReceivePack))
 		{
-			args.Add(PushCommand.ReceivePack(parameters.ReceivePack));
+			args.Add(PushCommand.ReceivePack(request.ReceivePack!));
 		}
-		if(parameters.Force)
+		if(request.Force)
 		{
 			args.Add(PushCommand.Force());
 		}
-		if(parameters.Delete)
+		if(request.Delete)
 		{
 			args.Add(PushCommand.Delete());
 		}
-		if(parameters.SetUpstream)
+		if(request.SetUpstream)
 		{
 			args.Add(PushCommand.SetUpstream());
 		}
-		args.Add(parameters.ThinPack ? PushCommand.Thin() : PushCommand.NoThin());
+		args.Add(request.ThinPack ? PushCommand.Thin() : PushCommand.NoThin());
 		args.Add(PushCommand.Porcelain());
-		if(isAsync && GitFeatures.ProgressFlag.IsAvailableFor(_gitCLI))
+		if(isAsync && GitFeatures.ProgressFlag.IsAvailableFor(gitCLI))
 		{
 			args.Add(PushCommand.Progress());
 		}
-		if(!string.IsNullOrWhiteSpace(parameters.Repository))
+		if(!string.IsNullOrWhiteSpace(request.Repository))
 		{
-			args.Add(new CommandParameter(parameters.Repository));
+			args.Add(new CommandParameter(request.Repository));
 		}
-		if(parameters.Refspecs is { Count: not 0 })
+		foreach(var refspec in request.Refspecs)
 		{
-			foreach(var refspec in parameters.Refspecs)
-			{
-				args.Add(new CommandParameter(refspec));
-			}
+			args.Add(new CommandParameter(refspec));
 		}
 		return new PushCommand(args);
 	}
 
-	public Command GetQueryRemoteCommand(QueryRemoteParameters parameters)
+	public Command GetQueryRemoteCommand(QueryRemoteRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		return new RemoteCommand(
 			RemoteCommand.Show(),
 			RemoteCommand.Cached(),
-			new CommandParameter(parameters.RemoteName));
+			new CommandParameter(request.RemoteName));
 	}
 
-	public Command GetQueryRemotesCommand(QueryRemotesParameters parameters)
+	public Command GetQueryRemotesCommand(QueryRemotesRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		return new RemoteCommand(RemoteCommand.Verbose());
 	}
 
-	public Command GetAddRemoteCommand(AddRemoteParameters parameters)
+	public Command GetAddRemoteCommand(AddRemoteRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>((parameters.Branches is not null ? parameters.Branches.Count : 0) + 6);
+		var args = new List<ICommandArgument>(request.Branches.Count + 6);
 		args.Add(RemoteCommand.Add());
-		if(parameters.Branches is { Count: not 0 })
+		foreach(var branch in request.Branches)
 		{
-			foreach(var branch in parameters.Branches)
-			{
-				args.Add(RemoteCommand.TrackBranch(branch));
-			}
+			args.Add(RemoteCommand.TrackBranch(branch));
 		}
-		if(!string.IsNullOrEmpty(parameters.MasterBranch))
+		if(!string.IsNullOrEmpty(request.MasterBranch))
 		{
-			args.Add(RemoteCommand.Master(parameters.MasterBranch));
+			args.Add(RemoteCommand.Master(request.MasterBranch!));
 		}
-		if(parameters.Fetch)
+		if(request.Fetch)
 		{
 			args.Add(RemoteCommand.Fetch());
 		}
-		switch(parameters.TagFetchMode)
+		switch(request.TagFetchMode)
 		{
 			case TagFetchMode.Default:
 				break;
@@ -1518,90 +1353,90 @@ sealed class CommandBuilder
 				args.Add(RemoteCommand.NoTags());
 				break;
 		}
-		if(parameters.Mirror)
+		if(request.Mirror)
 		{
 			args.Add(RemoteCommand.Mirror());
 		}
-		args.Add(new CommandParameter(parameters.RemoteName));
-		args.Add(new CommandParameter(parameters.Url));
+		args.Add(new CommandParameter(request.RemoteName));
+		args.Add(new CommandParameter(request.Url));
 		return new RemoteCommand(args);
 	}
 
-	public Command GetRenameRemoteCommand(RenameRemoteParameters parameters)
+	public Command GetRenameRemoteCommand(RenameRemoteRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		return new RemoteCommand(
 			RemoteCommand.Rename(),
-			new CommandParameter(parameters.OldName),
-			new CommandParameter(parameters.NewName));
+			new CommandParameter(request.OldName),
+			new CommandParameter(request.NewName));
 	}
 
-	public Command GetRemoveRemoteCommand(RemoveRemoteParameters parameters)
+	public Command GetRemoveRemoteCommand(RemoveRemoteRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		return RemoteCommand.FormatRemoveCommand(parameters.RemoteName);
+		return RemoteCommand.FormatRemoveCommand(request.RemoteName);
 	}
 
-	public Command GetQueryPrunedBranchesCommand(PruneRemoteParameters parameters)
+	public Command GetQueryPrunedBranchesCommand(PruneRemoteRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		return new RemoteCommand(
 			RemoteCommand.Prune(),
 			RemoteCommand.DryRun(),
-			new CommandParameter(parameters.RemoteName));
+			new CommandParameter(request.RemoteName));
 	}
 
-	public Command GetPruneRemoteCommand(PruneRemoteParameters parameters)
+	public Command GetPruneRemoteCommand(PruneRemoteRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		return new RemoteCommand(
 			RemoteCommand.Prune(),
-			new CommandParameter(parameters.RemoteName));
+			new CommandParameter(request.RemoteName));
 	}
 
-	public Command GetQueryRemoteReferencesCommand(QueryRemoteReferencesParameters parameters)
+	public Command GetQueryRemoteReferencesCommand(QueryRemoteReferencesRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>(4);
-		if(parameters.Heads)
+		if(request.Heads)
 		{
 			args.Add(LsRemoteCommand.Heads());
 		}
-		if(parameters.Tags)
+		if(request.Tags)
 		{
 			args.Add(LsRemoteCommand.Tags());
 		}
-		args.Add(new CommandParameter(parameters.RemoteName));
-		if(!string.IsNullOrEmpty(parameters.Pattern))
+		args.Add(new CommandParameter(request.RemoteName));
+		if(!string.IsNullOrEmpty(request.Pattern))
 		{
-			args.Add(new CommandParameter(parameters.Pattern));
+			args.Add(new CommandParameter(request.Pattern!));
 		}
 		return new LsRemoteCommand(args);
 	}
 
-	public Command GetRemoveRemoteReferencesCommand(RemoveRemoteReferencesParameters parameters)
+	public Command GetRemoveRemoteReferencesCommand(RemoveRemoteReferencesRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>(1 + parameters.References.Count);
-		args.Add(new CommandParameter(parameters.RemoteName));
-		foreach(var reference in parameters.References)
+		var args = new List<ICommandArgument>(1 + request.References.Count);
+		args.Add(new CommandParameter(request.RemoteName));
+		foreach(var reference in request.References)
 		{
 			args.Add(new CommandParameter(":" + reference));
 		}
 		return new PushCommand(args);
 	}
 
-	public Command GetQueryReferencesCommand(QueryReferencesParameters parameters)
+	public Command GetQueryReferencesCommand(QueryReferencesRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		switch(parameters.ReferenceTypes)
+		switch(request.ReferenceTypes)
 		{
 			case ReferenceType.LocalBranch | ReferenceType.Tag:
 				return new ShowRefCommand(
@@ -1624,13 +1459,13 @@ sealed class CommandBuilder
 
 	#region Branches
 
-	public Command GetQueryBranchCommand(QueryBranchParameters parameters)
+	public Command GetQueryBranchCommand(QueryBranchRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		string fullName = (parameters.IsRemote ?
+		string fullName = (request.IsRemote ?
 			GitConstants.RemoteBranchPrefix :
-			GitConstants.LocalBranchPrefix) + parameters.BranchName;
+			GitConstants.LocalBranchPrefix) + request.BranchName;
 		return new ShowRefCommand(
 				ShowRefCommand.Verify(),
 				ShowRefCommand.Heads(),
@@ -1639,15 +1474,15 @@ sealed class CommandBuilder
 				new CommandParameter(fullName));
 	}
 
-	public Command GetQueryBranchesCommand(QueryBranchesParameters parameters)
+	public Command GetQueryBranchesCommand(QueryBranchesRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var builder = new BranchCommand.Builder(_gitCLI.GitVersion);
+		var builder = new BranchCommand.Builder(gitCLI.GitVersion);
 		builder.NoColor();
 		builder.Verbose();
 		builder.NoAbbrev();
-		switch(parameters.Restriction)
+		switch(request.Restriction)
 		{
 			case QueryBranchRestriction.All:
 				builder.All();
@@ -1656,29 +1491,29 @@ sealed class CommandBuilder
 				builder.Remotes();
 				break;
 		}
-		switch(parameters.Mode)
+		switch(request.Mode)
 		{
 			case BranchQueryMode.Contains:
-				builder.Contains(parameters.Revision);
+				builder.Contains(request.Revision);
 				break;
 			case BranchQueryMode.Merged:
-				builder.Merged(parameters.Revision);
+				builder.Merged(request.Revision);
 				break;
 			case BranchQueryMode.NoMerged:
-				builder.NoMerged(parameters.Revision);
+				builder.NoMerged(request.Revision);
 				break;
 		}
 		return builder.Build();
 	}
 
-	public Command GetCreateBranchCommand(CreateBranchParameters parameters)
+	public Command GetCreateBranchCommand(CreateBranchRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		if(parameters.Checkout)
+		if(request.Checkout)
 		{
 			var builder = new CheckoutCommand.Builder();
-			switch(parameters.TrackingMode)
+			switch(request.TrackingMode)
 			{
 				case BranchTrackingMode.NotTracking:
 					builder.NoTrack();
@@ -1687,11 +1522,11 @@ sealed class CommandBuilder
 					builder.Track();
 					break;
 			}
-			if(parameters.CreateReflog)
+			if(request.CreateReflog)
 			{
 				builder.CreateReflog();
 			}
-			if(parameters.Orphan)
+			if(request.Orphan)
 			{
 				builder.Orphan();
 			}
@@ -1699,17 +1534,17 @@ sealed class CommandBuilder
 			{
 				builder.Branch();
 			}
-			builder.AddArgument(new CommandParameter(parameters.BranchName));
-			if(!string.IsNullOrEmpty(parameters.StartingRevision))
+			builder.AddArgument(new CommandParameter(request.BranchName));
+			if(!string.IsNullOrEmpty(request.StartingRevision))
 			{
-				builder.AddArgument(new CommandParameter(parameters.StartingRevision));
+				builder.AddArgument(new CommandParameter(request.StartingRevision));
 			}
 			return builder.Build();
 		}
 		else
 		{
-			var builder = new BranchCommand.Builder(_gitCLI.GitVersion);
-			switch(parameters.TrackingMode)
+			var builder = new BranchCommand.Builder(gitCLI.GitVersion);
+			switch(request.TrackingMode)
 			{
 				case BranchTrackingMode.NotTracking:
 					builder.NoTrack();
@@ -1718,52 +1553,52 @@ sealed class CommandBuilder
 					builder.Track();
 					break;
 			}
-			if(parameters.CreateReflog)
+			if(request.CreateReflog)
 			{
 				builder.CreateReflog();
 			}
-			builder.AddArgument(new CommandParameter(parameters.BranchName));
-			if(!string.IsNullOrEmpty(parameters.StartingRevision))
+			builder.AddArgument(new CommandParameter(request.BranchName));
+			if(!string.IsNullOrEmpty(request.StartingRevision))
 			{
-				builder.AddArgument(new CommandParameter(parameters.StartingRevision));
+				builder.AddArgument(new CommandParameter(request.StartingRevision));
 			}
 			return builder.Build();
 		}
 	}
 
-	public Command GetResetBranchCommand(ResetBranchParameters parameters)
+	public Command GetResetBranchCommand(ResetBranchRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var builder = new BranchCommand.Builder(_gitCLI.GitVersion);
+		var builder = new BranchCommand.Builder(gitCLI.GitVersion);
 		builder.Force();
-		builder.AddArgument(parameters.BranchName);
-		builder.AddArgument(parameters.Revision);
+		builder.AddArgument(request.BranchName);
+		builder.AddArgument(request.Revision);
 		return builder.Build();
 	}
 
-	public Command GetDeleteBranchCommand(DeleteBranchParameters parameters)
+	public Command GetDeleteBranchCommand(DeleteBranchRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var builder = new BranchCommand.Builder(_gitCLI.GitVersion);
-		builder.Delete(parameters.Force);
-		if(parameters.Remote)
+		var builder = new BranchCommand.Builder(gitCLI.GitVersion);
+		builder.Delete(request.Force);
+		if(request.Remote)
 		{
 			builder.Remotes();
 		}
-		builder.AddArgument(parameters.BranchName);
+		builder.AddArgument(request.BranchName);
 		return builder.Build();
 	}
 
-	public Command GetRenameBranchCommand(RenameBranchParameters parameters)
+	public Command GetRenameBranchCommand(RenameBranchRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var builder = new BranchCommand.Builder(_gitCLI.GitVersion);
-		builder.Move(parameters.Force);
-		builder.AddArgument(parameters.OldName);
-		builder.AddArgument(parameters.NewName);
+		var builder = new BranchCommand.Builder(gitCLI.GitVersion);
+		builder.Move(request.Force);
+		builder.AddArgument(request.OldName);
+		builder.AddArgument(request.NewName);
 		return builder.Build();
 	}
 
@@ -1771,11 +1606,11 @@ sealed class CommandBuilder
 
 	#region Tags
 
-	public Command GetQueryTagCommand(QueryTagParameters parameters)
+	public Command GetQueryTagCommand(QueryTagRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		string fullTagName = GitConstants.TagPrefix + parameters.TagName;
+		string fullTagName = GitConstants.TagPrefix + request.TagName;
 		return new ShowRefCommand(
 			ShowRefCommand.Tags(),
 			ShowRefCommand.Dereference(),
@@ -1784,49 +1619,49 @@ sealed class CommandBuilder
 			new CommandParameter(fullTagName));
 	}
 
-	public Command GetQueryTagsCommand(QueryTagsParameters parameters)
+	public Command GetQueryTagsCommand(QueryTagsRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		return new ShowRefCommand(
 			ShowRefCommand.Dereference(),
 			ShowRefCommand.Tags());
 	}
 
-	public Command GetQueryTagMessageCommand(QueryTagMessageParameters parameters)
+	public Command GetQueryTagMessageCommand(QueryTagMessageRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		return new CatFileCommand(
 			new CommandParameter("tag"),
-			new CommandParameter(parameters.TagName));
+			new CommandParameter(request.TagName));
 	}
 
-	public Command GetDescribeCommand(DescribeParameters parameters)
+	public Command GetDescribeCommand(DescribeRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>(2);
 		args.Add(DescribeCommand.Tags());
-		if(parameters.Revision != null)
+		if(request.Revision != null)
 		{
-			args.Add(new CommandParameter(parameters.Revision));
+			args.Add(new CommandParameter(request.Revision));
 		}
 		return new DescribeCommand(args);
 	}
 
-	public Command GetCreateTagCommand(CreateTagParameters parameters)
+	public Command GetCreateTagCommand(CreateTagRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>(5);
-		if(parameters.TagType == TagType.Annotated)
+		if(request.TagType == TagType.Annotated)
 		{
-			if(parameters.Signed)
+			if(request.Signed)
 			{
-				if(parameters.KeyId is not null)
+				if(request.KeyId is not null)
 				{
-					args.Add(TagCommand.SignByKey(parameters.KeyId));
+					args.Add(TagCommand.SignByKey(request.KeyId));
 				}
 				else
 				{
@@ -1838,61 +1673,63 @@ sealed class CommandBuilder
 				args.Add(TagCommand.Annotate());
 			}
 		}
-		if(parameters.Force)
+		if(request.Force)
 		{
 			args.Add(TagCommand.Force());
 		}
-		if(!string.IsNullOrEmpty(parameters.Message))
+		var message = request.Message;
+		switch(message.Type)
 		{
-			args.Add(TagCommand.Message(parameters.Message));
+			case MessageSpecificationType.Text when message.Text is { Length: not 0 } text:
+				args.Add(TagCommand.Message(text));
+				break;
+			case MessageSpecificationType.File when message.File is { Length: not 0 } file:
+				args.Add(TagCommand.MessageFromFile(file));
+				break;
 		}
-		else if(!string.IsNullOrEmpty(parameters.MessageFile))
+		args.Add(new CommandParameter(request.TagName));
+		if(request.TaggedObject is not null)
 		{
-			args.Add(TagCommand.MessageFromFile(parameters.MessageFile));
-		}
-		args.Add(new CommandParameter(parameters.TagName));
-		if(parameters.TaggedObject is not null)
-		{
-			args.Add(new CommandParameter(parameters.TaggedObject));
+			args.Add(new CommandParameter(request.TaggedObject));
 		}
 		return new TagCommand(args);
 	}
 
-	public Command GetDeleteTagCommand(DeleteTagParameters parameters)
+	public Command GetDeleteTagCommand(DeleteTagRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		return new TagCommand(
 			TagCommand.Delete(),
-			new CommandParameter(parameters.TagName));
+			new CommandParameter(request.TagName));
 	}
 
-	public Command GetVerifyTagsCommand(VerifyTagsParameters parameters)
+	public Command GetVerifyTagsCommand(VerifyTagsRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>(1 + parameters.TagNames.Count);
+		var args = new List<ICommandArgument>(1 + request.TagNames.Count);
 		args.Add(TagCommand.Verify());
-		foreach(var tagName in parameters.TagNames)
+		foreach(var tagName in request.TagNames)
 		{
 			args.Add(new CommandParameter(tagName));
 		}
 		return new TagCommand(args);
 	}
 
-	public Command GetRunMergeToolCommand(RunMergeToolParameters parameters)
+	public Command GetRunMergeToolCommand(RunMergeToolRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
-		var args = new List<ICommandArgument>((parameters.Files is not null ? parameters.Files.Count : 0) + 2);
-		if(!string.IsNullOrEmpty(parameters.Tool))
+		var args = new List<ICommandArgument>(request.Files.Count + 2);
+		if(!string.IsNullOrEmpty(request.Tool))
 		{
-			args.Add(MergeToolCommand.Tool(parameters.Tool));
+			args.Add(MergeToolCommand.Tool(request.Tool!));
 		}
 		args.Add(MergeToolCommand.NoPrompt());
-		if(parameters.Files is { Count: not 0 })
+		if(request.Files is { Count: not 0 } files)
 		{
-			foreach(var file in parameters.Files)
+			foreach(var file in files)
 			{
 				args.Add(new PathCommandArgument(file));
 			}
@@ -1900,49 +1737,49 @@ sealed class CommandBuilder
 		return new MergeToolCommand(args);
 	}
 
-	public Command GetAddSubmoduleCommand(AddSubmoduleParameters parameters)
+	public Command GetAddSubmoduleCommand(AddSubmoduleRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>();
 		args.Add(SubmoduleCommand.Add());
-		if(parameters.Branch is not null)
+		if(request.Branch is not null)
 		{
-			args.Add(SubmoduleCommand.Branch(parameters.Branch));
+			args.Add(SubmoduleCommand.Branch(request.Branch));
 		}
-		if(parameters.Force)
+		if(request.Force)
 		{
 			args.Add(SubmoduleCommand.Force());
 		}
-		if(parameters.ReferenceRepository is not null)
+		if(request.ReferenceRepository is not null)
 		{
-			args.Add(SubmoduleCommand.Reference(parameters.ReferenceRepository));
+			args.Add(SubmoduleCommand.Reference(request.ReferenceRepository));
 		}
 		args.Add(CommandFlag.NoMoreOptions);
-		args.Add(new CommandParameter(parameters.Repository));
-		if(parameters.Path is not null)
+		args.Add(new CommandParameter(request.Repository));
+		if(request.Path is not null)
 		{
-			var path = parameters.Path.Replace('\\', '/').Trim('/');
+			var path = request.Path.Replace('\\', '/').Trim('/');
 			args.Add(new PathCommandArgument(path));
 		}
 		return new SubmoduleCommand(args);
 	}
 
-	public Command GetUpdateSubmoduleCommand(UpdateSubmoduleParameters parameters)
+	public Command GetUpdateSubmoduleCommand(UpdateSubmoduleRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>();
 		args.Add(SubmoduleCommand.Update());
-		if(parameters.Init)
+		if(request.Init)
 		{
 			args.Add(SubmoduleCommand.InitFlag());
 		}
-		if(parameters.NoFetch)
+		if(request.NoFetch)
 		{
 			args.Add(SubmoduleCommand.NoFetch());
 		}
-		switch(parameters.Mode)
+		switch(request.Mode)
 		{
 			case SubmoduleUpdateMode.Merge:
 				args.Add(SubmoduleCommand.Merge());
@@ -1951,32 +1788,32 @@ sealed class CommandBuilder
 				args.Add(SubmoduleCommand.Rebase());
 				break;
 		}
-		if(parameters.Recursive)
+		if(request.Recursive)
 		{
 			args.Add(SubmoduleCommand.Recursive());
 		}
-		if(!string.IsNullOrEmpty(parameters.Path))
+		if(!string.IsNullOrEmpty(request.Path))
 		{
 			args.Add(SubmoduleCommand.NoMoreOptions());
-			args.Add(new PathCommandArgument(parameters.Path));
+			args.Add(new PathCommandArgument(request.Path));
 		}
 		return new SubmoduleCommand(args);
 	}
 
-	public Command GetSyncSubmoduleCommand(SyncSubmoduleParameters parameters)
+	public Command GetSyncSubmoduleCommand(SyncSubmoduleRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>();
 		args.Add(SubmoduleCommand.Sync());
-		if(parameters.Recursive)
+		if(request.Recursive)
 		{
 			args.Add(SubmoduleCommand.Recursive());
 		}
-		if(parameters.Submodules is { Count: not 0 })
+		if(request.Submodules is { Count: not 0 } submodules)
 		{
 			args.Add(SubmoduleCommand.NoMoreOptions());
-			foreach(var submodule in parameters.Submodules)
+			foreach(var submodule in submodules)
 			{
 				args.Add(new PathCommandArgument(submodule));
 			}
@@ -1989,98 +1826,98 @@ sealed class CommandBuilder
 
 	#region Config
 
-	private static void InsertConfigFileSpecifier(IList<ICommandArgument> args, BaseConfigParameters parameters)
+	private static void InsertConfigFileSpecifier(IList<ICommandArgument> args, BaseConfigRequest request)
 	{
-		switch(parameters.ConfigFile)
+		switch(request.ConfigFile)
 		{
 			case ConfigFile.Repository:
 			case ConfigFile.Other:
-				if(parameters.FileName is not null)
+				if(request.FileName is not null)
 				{
-					args.Add(ConfigCommand.File(parameters.FileName));
+					args.Add(ConfigCommand.File(request.FileName));
 				}
 				break;
-			case ConfigFile.System:
+			case ConfigFile.LocalSystem:
 				args.Add(ConfigCommand.System());
 				break;
-			case ConfigFile.User:
+			case ConfigFile.CurrentUser:
 				args.Add(ConfigCommand.Global());
 				break;
 		}
 	}
 
-	public Command GetQueryConfigParameterCommand(QueryConfigParameterParameters parameters)
+	public Command GetQueryConfigParameterCommand(QueryConfigParameterRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>(2);
-		InsertConfigFileSpecifier(args, parameters);
-		args.Add(new CommandParameter(parameters.ParameterName));
+		InsertConfigFileSpecifier(args, request);
+		args.Add(new CommandParameter(request.ParameterName));
 		return new ConfigCommand(args);
 	}
 
-	public Command GetQueryConfigCommand(QueryConfigParameters parameters)
+	public Command GetQueryConfigCommand(QueryConfigRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>(3);
 		args.Add(ConfigCommand.NullTerminate());
 		args.Add(ConfigCommand.List());
-		InsertConfigFileSpecifier(args, parameters);
+		InsertConfigFileSpecifier(args, request);
 		return new ConfigCommand(args);
 	}
 
-	public Command GetAddConfigValueCommand(AddConfigValueParameters parameters)
+	public Command GetAddConfigValueCommand(AddConfigValueRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>(4);
-		InsertConfigFileSpecifier(args, parameters);
+		InsertConfigFileSpecifier(args, request);
 		args.Add(ConfigCommand.Add());
-		args.Add(new CommandParameter(parameters.ParameterName));
-		args.Add(new CommandParameter(parameters.ParameterValue.SurroundWith("\"", "\"")));
+		args.Add(new CommandParameter(request.ParameterName));
+		args.Add(new CommandParameter(request.ParameterValue.SurroundWith("\"", "\"")));
 		return new ConfigCommand(args);
 	}
 
-	public Command GetSetConfigValueCommand(SetConfigValueParameters parameters)
+	public Command GetSetConfigValueCommand(SetConfigValueRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>(3);
-		InsertConfigFileSpecifier(args, parameters);
-		args.Add(new CommandFlag(parameters.ParameterName));
-		args.Add(new CommandFlag(parameters.ParameterValue.SurroundWith("\"", "\"")));
+		InsertConfigFileSpecifier(args, request);
+		args.Add(new CommandFlag(request.ParameterName));
+		args.Add(new CommandFlag(request.ParameterValue.SurroundWith("\"", "\"")));
 		return new ConfigCommand(args);
 	}
 
-	public Command GetUnsetConfigValueCommand(UnsetConfigValueParameters parameters)
+	public Command GetUnsetConfigValueCommand(UnsetConfigValueRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>(3);
-		InsertConfigFileSpecifier(args, parameters);
+		InsertConfigFileSpecifier(args, request);
 		args.Add(ConfigCommand.Unset());
-		args.Add(new CommandParameter(parameters.ParameterName));
+		args.Add(new CommandParameter(request.ParameterName));
 		return new ConfigCommand(args);
 	}
 
-	public Command GetRenameConfigSectionCommand(RenameConfigSectionParameters parameters)
+	public Command GetRenameConfigSectionCommand(RenameConfigSectionRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>(2);
-		InsertConfigFileSpecifier(args, parameters);
-		args.Add(ConfigCommand.RenameSection(parameters.OldName, parameters.NewName));
+		InsertConfigFileSpecifier(args, request);
+		args.Add(ConfigCommand.RenameSection(request.OldName, request.NewName));
 		return new ConfigCommand(args);
 	}
 
-	public Command GetDeleteConfigSectionCommand(DeleteConfigSectionParameters parameters)
+	public Command GetDeleteConfigSectionCommand(DeleteConfigSectionRequest request)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 
 		var args = new List<ICommandArgument>(2);
-		InsertConfigFileSpecifier(args, parameters);
-		args.Add(ConfigCommand.RemoveSection(parameters.SectionName));
+		InsertConfigFileSpecifier(args, request);
+		args.Add(ConfigCommand.RemoveSection(request.SectionName));
 		return new ConfigCommand(args);
 	}
 

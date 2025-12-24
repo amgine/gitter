@@ -31,7 +31,7 @@ public interface IPropertyPageFactory
 
 	string Name { get; }
 
-	Bitmap Icon { get; }
+	Bitmap? Icon { get; }
 
-	PropertyPage CreatePropertyPage(IWorkingEnvironment environment);
+	PropertyPage? CreatePropertyPage(IWorkingEnvironment environment);
 }

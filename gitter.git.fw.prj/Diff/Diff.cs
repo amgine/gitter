@@ -41,7 +41,7 @@ public sealed class Diff : IReadOnlyList<DiffFile>, ICloneable
 	public Diff(DiffType type)
 	{
 		_type = type;
-		_files = new List<DiffFile>();
+		_files = [];
 	}
 
 	/// <summary>Create <see cref="Diff"/>.</summary>
@@ -91,7 +91,7 @@ public sealed class Diff : IReadOnlyList<DiffFile>, ICloneable
 
 	public DiffFile this[int index] => _files[index];
 
-	public DiffFile this[string name]
+	public DiffFile? this[string name]
 	{
 		get
 		{

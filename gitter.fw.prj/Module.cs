@@ -49,15 +49,15 @@ public sealed class Module : Autofac.Module
 			})
 			.SingleInstance();
 
-		builder.RegisterTypes(new[]
-		{
+		builder.RegisterTypes(
+		[
 			typeof(IntegrationOptionsPage),
 			typeof(SpellingPage),
 			typeof(AppearancePage),
 			typeof(FontsPage),
 			typeof(ColorsPage),
 			typeof(OptionsDialog),
-		}).AsSelf().ExternallyOwned();
+		]).AsSelf().ExternallyOwned();
 
 		builder
 			.Register(static c =>

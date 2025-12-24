@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git.AccessLayer.CLI;
@@ -44,7 +44,7 @@ public sealed class ArchiveCommand : Command
 
 	/// <summary>Write the archive to file instead of stdout.</summary>
 	public static ICommandArgument Output(string file)
-		=> new CommandParameterValue("--output", file.AssureDoubleQuotes());
+		=> new CommandParameterPathValue("--output", file);
 
 	/// <summary>Look for attributes in .gitattributes in working directory too.</summary>
 	public static ICommandArgument WorktreeAttributes()
@@ -56,7 +56,7 @@ public sealed class ArchiveCommand : Command
 
 	/// <summary>Used with --remote to specify the path to the git-upload-archive on the remote side.</summary>
 	public static ICommandArgument Exec(string gitUploadArchive)
-		=> new CommandParameterValue("--exec", gitUploadArchive);
+		=> new CommandParameterPathValue("--exec", gitUploadArchive);
 
 	public ArchiveCommand()
 		: base("archive")

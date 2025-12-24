@@ -21,7 +21,6 @@
 namespace gitter.Controls;
 
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 using gitter.Framework;
@@ -47,28 +46,28 @@ sealed class StandardToolbar : ToolStrip
 		const TextImageRelation         tir = TextImageRelation.ImageAboveText;
 		const ToolStripItemDisplayStyle ds  = ToolStripItemDisplayStyle.ImageAndText;
 
-		Items.AddRange(new ToolStripItem[]
-			{
+		Items.AddRange(
+			[
 				_initRepositoryButton = new ToolStripButton(Resources.StrInit, default, OnInitRepositoryClick)
 					{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipInit },
 				_cloneRepositoryButton = new ToolStripButton(Resources.StrClone, default, OnCloneRepositoryClick)
 					{ TextImageRelation = tir, DisplayStyle = ds, ToolTipText = Resources.TipClone },
-			});
+			]);
 
 		_bindings = new DpiBindings(this);
 		_bindings.BindImage(_initRepositoryButton,  CommonIcons.Init);
 		_bindings.BindImage(_cloneRepositoryButton, CommonIcons.Clone);
 	}
 
-	private void OnInitRepositoryClick(object sender, EventArgs e)
+	private void OnInitRepositoryClick(object? sender, EventArgs e)
 	{
-		using var dlg = new InitRepositoryDialog(_environment);
-		dlg.Run(_environment.MainForm);
+		using var dialog = new InitRepositoryDialog(_environment);
+		dialog.Run(_environment.MainForm);
 	}
 
-	private void OnCloneRepositoryClick(object sender, EventArgs e)
+	private void OnCloneRepositoryClick(object? sender, EventArgs e)
 	{
-		using var dlg = new CloneRepositoryDialog(_environment);
-		dlg.Run(_environment.MainForm);
+		using var dialog = new CloneRepositoryDialog(_environment);
+		dialog.Run(_environment.MainForm);
 	}
 }

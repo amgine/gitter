@@ -31,48 +31,38 @@ using gitter.Git.Gui.Interfaces;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class AddNoteController : ViewControllerBase<IAddNoteView>, IAddNoteController
+sealed class AddNoteController(Repository repository)
+	: ViewControllerBase<IAddNoteView>, IAddNoteController
 {
-	public AddNoteController(Repository repository)
-	{
-		Verify.Argument.IsNotNull(repository);
-
-		Repository = repository;
-	}
-
-	private Repository Repository { get; }
-
 	public bool TryAddNote()
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
-
-		var revision = View.Revision.Value;
-		var message  = View.Message.Value;
-		if(!GitControllerUtility.ValidateRefspec(revision, View.Revision, View.ErrorNotifier))
+		var view     = RequireView();
+		var revision = view.Revision.Value;
+		if(!GitControllerUtility.ValidateRefspec(revision, view.Revision, view.ErrorNotifier))
 		{
 			return false;
 		}
-		if(string.IsNullOrWhiteSpace(message))
+		var message = view.Message.Value?.Trim();
+		if(message is not { Length: not 0 } || string.IsNullOrWhiteSpace(message))
 		{
-			View.ErrorNotifier.NotifyError(View.Message,
+			view.ErrorNotifier.NotifyError(view.Message,
 				new UserInputError(
 					Resources.ErrInvalidMessage,
 					Resources.ErrMessageCannotBeEmpty));
 			return false;
 		}
 		revision = revision.Trim();
-		message  = message.Trim();
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				var ptr = Repository.GetRevisionPointer(revision);
-				ptr.AddNote(message);
+				var ptr = repository.GetRevisionPointer(revision);
+				ptr.AppendNote(message);
 			}
 		}
 		catch(UnknownRevisionException)
 		{
-			View.ErrorNotifier.NotifyError(View.Revision,
+			view.ErrorNotifier.NotifyError(view.Revision,
 				new UserInputError(
 					Resources.ErrInvalidRevisionExpression,
 					Resources.ErrRevisionIsUnknown));
@@ -81,7 +71,7 @@ sealed class AddNoteController : ViewControllerBase<IAddNoteView>, IAddNoteContr
 		catch(GitException exc)
 		{
 			GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
+				view as IWin32Window,
 				exc.Message,
 				Resources.ErrFailedToAddNote,
 				MessageBoxButton.Close,

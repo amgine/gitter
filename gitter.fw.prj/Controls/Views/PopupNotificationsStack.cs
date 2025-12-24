@@ -59,7 +59,9 @@ public sealed class PopupNotificationsStack : IDisposable
 	private static Point GetDefaultOrigin()
 	{
 		var conv = DpiConverter.FromDefaultTo(Dpi.System);
-		var area = Screen.PrimaryScreen.WorkingArea;
+		var screen = Screen.PrimaryScreen;
+		if(screen is null) return Point.Empty;
+		var area = screen.WorkingArea;
 		var w = area.Right;
 		var h = area.Bottom;
 		return new Point(w - conv.ConvertX(ViewConstants.PopupWidth) - conv.ConvertX(5), h - conv.ConvertY(5));
@@ -119,21 +121,21 @@ public sealed class PopupNotificationsStack : IDisposable
 		MakeRoomInStack(window);
 		window.SizeChanged += OnWindowSizeChanged;
 		AnimateFadeIn(window);
-		window.Closed	+= OnWindowClosed;
+		window.FormClosed += OnWindowClosed;
 		window.Show();
 	}
 
-	private void OnWindowSizeChanged(object sender, EventArgs e)
+	private void OnWindowSizeChanged(object? sender, EventArgs e)
 	{
-		var window = (PopupNotificationForm)sender;
+		var window = (PopupNotificationForm)sender!;
 		MakeRoomInStack(window);
 	}
 
-	private void OnWindowClosed(object sender, EventArgs e)
+	private void OnWindowClosed(object? sender, EventArgs e)
 	{
-		var window = (PopupNotificationForm)sender;
+		var window = (PopupNotificationForm)sender!;
 		window.SizeChanged -= OnWindowSizeChanged;
-		window.Closed -= OnWindowClosed;
+		window.FormClosed -= OnWindowClosed;
 		_windows.Remove(window);
 		if(_windows.Count < MaximumVisibleNotifications && _queue.Count != 0)
 		{
@@ -191,7 +193,7 @@ public sealed class PopupNotificationsStack : IDisposable
 			foreach(var window in _windows)
 			{
 				window.SizeChanged -= OnWindowSizeChanged;
-				window.Closed -= OnWindowClosed;
+				window.FormClosed -= OnWindowClosed;
 				window.Dispose();
 			}
 			_windows.Clear();

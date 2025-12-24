@@ -48,7 +48,7 @@ public class DiffViewer : FlowLayoutControl
 
 	internal void OnFileContextMenuRequested(DiffFile file)
 	{
-		var handler = (EventHandler<DiffFileContextMenuRequestedEventArgs>)Events[DiffFileContextMenuRequestedEvent];
+		var handler = (EventHandler<DiffFileContextMenuRequestedEventArgs>?)Events[DiffFileContextMenuRequestedEvent];
 		if(handler is not null)
 		{
 			var args = new DiffFileContextMenuRequestedEventArgs(file);
@@ -59,7 +59,7 @@ public class DiffViewer : FlowLayoutControl
 
 	internal void OnFileContextMenuRequested(TreeFile file)
 	{
-		var handler = (EventHandler<UntrackedFileContextMenuRequestedEventArgs>)Events[UntrackedFileContextMenuRequestedEvent];
+		var handler = (EventHandler<UntrackedFileContextMenuRequestedEventArgs>?)Events[UntrackedFileContextMenuRequestedEvent];
 		if(handler is not null)
 		{
 			var args = new UntrackedFileContextMenuRequestedEventArgs(file);
@@ -99,45 +99,26 @@ public class DiffViewer : FlowLayoutControl
 	/// <inheritdoc/>
 	protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
 	{
+		Assert.IsNotNull(e);
+
 		switch(e.KeyCode)
 		{
-			case Keys.C:
-				if(Control.ModifierKeys == Keys.Control)
+			case Keys.C when e.Modifiers is Keys.Control:
+				foreach(var panel in Panels)
 				{
-					foreach(var p in Panels)
+					if(panel is not FileDiffPanel { SelectionLength: not 0 } filePanel) continue;
+					var lines = filePanel.GetSelectedLines();
+					if(lines is not { Length: not 0 }) break;
+					var sb = new StringBuilder();
+					foreach(var line in lines)
 					{
-						var filePanel = p as FileDiffPanel;
-						if(filePanel != null && filePanel.SelectionLength != 0)
-						{
-							var lines = filePanel.GetSelectedLines();
-							var sb = new StringBuilder();
-							bool first = true;
-							foreach(var line in lines)
-							{
-								if(first)
-								{
-									first = false;
-								}
-								else
-								{
-									sb.Append('\n');
-								}
-								sb.Append(line.Text);
-							}
-							if(sb.Length != 0)
-							{
-								if(sb[sb.Length - 1] == '\r')
-								{
-									sb.Remove(sb.Length - 1, 1);
-								}
-							}
-							ClipboardEx.TrySetTextSafe(sb.ToString());
-							break;
-						}
+						sb.Append(line.Text);
+						sb.Append(line.Ending);
 					}
-
-					e.IsInputKey = true;
+					ClipboardEx.TrySetTextSafe(sb.ToString());
+					break;
 				}
+				e.IsInputKey = true;
 				break;
 		}
 		base.OnPreviewKeyDown(e);

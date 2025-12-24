@@ -24,16 +24,16 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 
 partial class RevisionHeaderContent
 {
-	sealed class AuthorElement : UserElement
+	sealed class AuthorElement(RevisionHeaderContent owner)
+		: UserElement(owner)
 	{
-		public AuthorElement(RevisionHeaderContent owner)
-			: base(owner)
-		{
-		}
+		static readonly string StaticHeaderText = Resources.StrAuthor.AddColon();
 
-		protected override string HeaderText { get; } = Resources.StrAuthor.AddColon();
+		protected override string HeaderText
+			=> StaticHeaderText;
 
-		public override Element Element => Element.Author;
+		public override Element Element
+			=> Element.Author;
 
 		protected override User GetUser(Revision revision)
 			=> revision.Author;

@@ -39,9 +39,13 @@ public interface IGitterStyle
 
 	IScrollBarWidget CreateScrollBar(Orientation orientation);
 
-	ICheckBoxWidget CreateCheckBox();
+	IFactory<ICheckBoxWidget> CheckBoxFactory { get; }
 
-	IButtonWidget CreateButton();
+	IFactory<IRadioButtonWidget> RadioButtonFactory { get; }
+
+	IFactory<IButtonWidget> ButtonFactory { get; }
+
+	IFactory<IProgressBarWidget> ProgressBarFactory { get; }
 
 	CustomListBoxRenderer ListBoxRenderer { get; }
 

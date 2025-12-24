@@ -32,8 +32,8 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 
 public sealed class ConfigListBox : CustomListBox
 {
-	private Repository _repository;
-	private ConfigurationFile _configurationFile;
+	private Repository? _repository;
+	private ConfigurationFile? _configurationFile;
 
 	/// <summary>Create <see cref="ConfigListBox"/>.</summary>
 	public ConfigListBox()
@@ -49,44 +49,44 @@ public sealed class ConfigListBox : CustomListBox
 		Items.Comparison = ConfigParameterListItem.CompareByName;
 	}
 
-	public void LoadData(Repository repository)
+	public void LoadData(Repository? repository)
 	{
 		if(_configurationFile is not null)
 		{
-			DetachFromConfigFile();
+			DetachFromConfigFile(_configurationFile);
 			_configurationFile = null;
 		}
 		if(_repository != repository)
 		{
 			if(_repository is not null)
 			{
-				DetachFromRepository();
+				DetachFromRepository(_repository);
 			}
 			_repository = repository;
 			if(_repository is not null)
 			{
-				AttachToRepository();
+				AttachToRepository(_repository);
 			}
 		}
 	}
 
-	public void LoadData(ConfigurationFile configurationFile)
+	public void LoadData(ConfigurationFile? configurationFile)
 	{
 		if(_repository is not null)
 		{
-			DetachFromRepository();
+			DetachFromRepository(_repository);
 			_repository = null;
 		}
 		if(_configurationFile != configurationFile)
 		{
 			if(_configurationFile is not null)
 			{
-				DetachFromConfigFile();
+				DetachFromConfigFile(_configurationFile);
 			}
 			_configurationFile = configurationFile;
 			if(_configurationFile is not null)
 			{
-				AttachToConfigurationFile();
+				AttachToConfigurationFile(_configurationFile);
 			}
 		}
 	}
@@ -95,24 +95,24 @@ public sealed class ConfigListBox : CustomListBox
 	{
 		if(_repository is not null)
 		{
-			DetachFromRepository();
+			DetachFromRepository(_repository);
 			_repository = null;
 		}
 		if(_configurationFile is not null)
 		{
-			DetachFromConfigFile();
+			DetachFromConfigFile(_configurationFile);
 			_configurationFile = null;
 		}
 	}
 
-	private void AttachToRepository()
+	private void AttachToRepository(Repository repository)
 	{
-		_repository.Configuration.ParameterCreated += OnParamCreated;
+		repository.Configuration.ParameterCreated += OnParamCreated;
 		BeginUpdate();
 		Items.Clear();
-		lock(_repository.Configuration.SyncRoot)
+		lock(repository.Configuration.SyncRoot)
 		{
-			foreach(var p in _repository.Configuration)
+			foreach(var p in repository.Configuration)
 			{
 				Items.Add(new ConfigParameterListItem(p));
 			}
@@ -120,20 +120,20 @@ public sealed class ConfigListBox : CustomListBox
 		EndUpdate();
 	}
 
-	private void DetachFromRepository()
+	private void DetachFromRepository(Repository repository)
 	{
-		_repository.Configuration.ParameterCreated -= OnParamCreated;
+		repository.Configuration.ParameterCreated -= OnParamCreated;
 		Items.Clear();
 	}
 
-	private void AttachToConfigurationFile()
+	private void AttachToConfigurationFile(ConfigurationFile file)
 	{
-		_configurationFile.ParameterCreated += OnParamCreated;
+		file.ParameterCreated += OnParamCreated;
 		BeginUpdate();
 		Items.Clear();
-		lock(_configurationFile.SyncRoot)
+		lock(file.SyncRoot)
 		{
-			foreach(var parameter in _configurationFile)
+			foreach(var parameter in file)
 			{
 				Items.Add(new ConfigParameterListItem(parameter));
 			}
@@ -141,13 +141,13 @@ public sealed class ConfigListBox : CustomListBox
 		EndUpdate();
 	}
 
-	private void DetachFromConfigFile()
+	private void DetachFromConfigFile(ConfigurationFile file)
 	{
-		_configurationFile.ParameterCreated -= OnParamCreated;
+		file.ParameterCreated -= OnParamCreated;
 		Items.Clear();
 	}
 
-	private void OnParamCreated(object sender, ConfigParameterEventArgs e)
+	private void OnParamCreated(object? sender, ConfigParameterEventArgs e)
 	{
 		Items.AddSafe(new ConfigParameterListItem(e.Object));
 	}

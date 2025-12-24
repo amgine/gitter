@@ -70,7 +70,7 @@ sealed class RepositoryGroupBinding : IDisposable
 
 	#region Methods
 
-	private void OnGroupsChanged(object sender, NotifyCollectionEventArgs e)
+	private void OnGroupsChanged(object? sender, NotifyCollectionEventArgs e)
 	{
 		switch(e.Event)
 		{
@@ -113,7 +113,7 @@ sealed class RepositoryGroupBinding : IDisposable
 		}
 	}
 
-	private void OnRepositoriesChanged(object sender, NotifyCollectionEventArgs e)
+	private void OnRepositoriesChanged(object? sender, NotifyCollectionEventArgs e)
 	{
 		switch(e.Event)
 		{

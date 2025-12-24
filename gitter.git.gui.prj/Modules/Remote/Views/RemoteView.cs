@@ -59,7 +59,7 @@ partial class RemoteView : GitViewBase, ISearchableView<RemoteSearchOptions>
 
 		private RemoteReferencesListBox ListBox { get; }
 
-		protected override async Task<RemoteReferencesCollection> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		protected override async Task<RemoteReferencesCollection> FetchDataAsync(IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
 		{
 			ListBox.Text = string.Empty;
 			ListBox.Cursor = Cursors.WaitCursor;
@@ -107,8 +107,8 @@ partial class RemoteView : GitViewBase, ISearchableView<RemoteSearchOptions>
 	private readonly RemoteReferencesListBox _lstRemoteReferences;
 	private RemoteToolbar _toolbar;
 	private readonly ISearchToolBarController _searchToolbar;
-	private Remote _remote;
-	private RemoteReferencesDataSource _dataSource;
+	private Remote? _remote;
+	private RemoteReferencesDataSource? _dataSource;
 
 	public RemoteView(GuiProvider gui, IFactory<RemoteReferencesListBox> remoteReferencesListBoxfactory)
 		: base(Guids.RemoteViewGuid, gui)
@@ -151,50 +151,43 @@ partial class RemoteView : GitViewBase, ISearchableView<RemoteSearchOptions>
 
 	public override bool IsDocument => true;
 
-	public Remote Remote
+	public Remote? Remote
 	{
 		get => _remote;
 		private set
 		{
-			if(IsDisposed) throw new ObjectDisposedException(GetType().Name);
+			Verify.State.IsNotDisposed(IsDisposed, this);
 
-			if(_remote != value)
+			if(_remote == value) return;
+
+			if(_remote is not null)
 			{
-				if(_remote is not null)
-				{
-					DetachRemote(_remote);
-				}
-				_remote = value;
-				if(_remote is not null)
-				{
-					AttachRemote(_remote);
-				}
-
-				UpdateText();
-				DataSource = value is not null
-					? new RemoteReferencesDataSource(value, _lstRemoteReferences)
-					: null;
+				DetachRemote(_remote);
 			}
+			_remote = value;
+			if(_remote is not null)
+			{
+				AttachRemote(_remote);
+			}
+
+			UpdateText();
+			DataSource = value is not null
+				? new RemoteReferencesDataSource(value, _lstRemoteReferences)
+				: null;
 		}
 	}
 
-	private RemoteReferencesDataSource DataSource
+	private RemoteReferencesDataSource? DataSource
 	{
 		get => _dataSource;
 		set
 		{
-			if(_dataSource != value)
-			{
-				if(_dataSource is not null)
-				{
-					_dataSource.Dispose();
-				}
-				_dataSource = value;
-				if(_dataSource is not null)
-				{
-					_dataSource.ReloadData();
-				}
-			}
+			if(_dataSource == value) return;
+
+			DisposableUtility.Dispose(ref _dataSource);
+
+			_dataSource = value;
+			_dataSource?.ReloadData();
 		}
 	}
 
@@ -253,7 +246,7 @@ partial class RemoteView : GitViewBase, ISearchableView<RemoteSearchOptions>
 		}
 	}
 
-	private void OnRemoteRenamed(object sender, NameChangeEventArgs e)
+	private void OnRemoteRenamed(object? sender, NameChangeEventArgs e)
 	{
 		if(IsDisposed) return;
 		if(InvokeRequired)
@@ -272,7 +265,7 @@ partial class RemoteView : GitViewBase, ISearchableView<RemoteSearchOptions>
 		}
 	}
 
-	private void OnRemoteDeleted(object sender, EventArgs e)
+	private void OnRemoteDeleted(object? sender, EventArgs e)
 	{
 		if(IsDisposed) return;
 		if(InvokeRequired)
@@ -297,7 +290,7 @@ partial class RemoteView : GitViewBase, ISearchableView<RemoteSearchOptions>
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 

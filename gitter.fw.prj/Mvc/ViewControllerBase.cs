@@ -20,36 +20,42 @@
 
 namespace gitter.Framework.Mvc;
 
+using System;
+
 public class ViewControllerBase<T> : IViewController<T>
 	where T : class, IView
 {
-	private T _view;
+	private T? _view;
 
-	public T View
+	public T? View
 	{
 		get => _view;
 		set
 		{
 			if(_view != value)
 			{
-				if(_view != null)
+				if(_view is not null)
 				{
-					OnViewDetaching();
+					OnViewDetaching(_view);
 				}
 				_view = value;
-				if(_view != null)
+				if(_view is not null)
 				{
-					OnViewAttached();
+					OnViewAttached(_view);
 				}
 			}
 		}
 	}
 
-	protected virtual void OnViewDetaching()
+	protected T RequireView()
+		=> _view
+		?? throw new InvalidOperationException("Controller is not attached to a view.");
+
+	protected virtual void OnViewDetaching(T view)
 	{
 	}
 
-	protected virtual void OnViewAttached()
+	protected virtual void OnViewAttached(T view)
 	{
 	}
 }

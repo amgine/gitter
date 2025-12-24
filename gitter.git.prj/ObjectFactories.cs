@@ -24,10 +24,30 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
+using gitter.Framework;
 using gitter.Git.AccessLayer;
 
 static class ObjectFactories
 {
+	static bool ReferenceTargetChanged<T>(T reference, Sha1Hash hash)
+		where T : Reference
+	{
+		var revision = reference.Revision;
+		return revision is null || revision.Hash != hash;
+	}
+
+	static bool UpdateReferenceTarget<T>(T reference, Sha1Hash hash)
+		where T : Reference
+	{
+		if(!ReferenceTargetChanged(reference, hash)) return false;
+		var sitory = reference.Repository;
+		lock(sitory.Revisions.SyncRoot)
+		{
+			reference.Pointer = sitory.Revisions.GetOrCreateRevision(hash);
+		}
+		return true;
+	}
+
 	public static Branch CreateBranch(Repository repository, BranchData branchData)
 	{
 		Verify.Argument.IsNotNull(repository);
@@ -37,7 +57,7 @@ static class ObjectFactories
 		Revision revision;
 		lock(repository.Revisions.SyncRoot)
 		{
-			revision = repository.Revisions.GetOrCreateRevision(branchData.SHA1);
+			revision = repository.Revisions.GetOrCreateRevision(branchData.Hash);
 		}
 		var branch = new Branch(repository, branchData.Name, revision);
 		if(branchData.IsCurrent) repository.Head.Pointer = branch;
@@ -50,17 +70,10 @@ static class ObjectFactories
 		Verify.Argument.IsNotNull(branchData);
 		Verify.Argument.IsFalse(branchData.IsRemote, nameof(branchData), "Cannot update remote branch.");
 
-		var repo = branch.Repository;
-		if(branch.Revision.Hash != branchData.SHA1)
-		{
-			lock(repo.Revisions.SyncRoot)
-			{
-				branch.Pointer = repo.Revisions.GetOrCreateRevision(branchData.SHA1);
-			}
-		}
+		UpdateReferenceTarget(branch, branchData.Hash);
 		if(branchData.IsCurrent)
 		{
-			repo.Head.Pointer = branch;
+			branch.Repository.Head.Pointer = branch;
 		}
 	}
 
@@ -73,7 +86,7 @@ static class ObjectFactories
 		Revision revision;
 		lock(repository.Revisions.SyncRoot)
 		{
-			revision = repository.Revisions.GetOrCreateRevision(branchData.SHA1);
+			revision = repository.Revisions.GetOrCreateRevision(branchData.Hash);
 		}
 		return new RemoteBranch(repository, branchData.Name, revision);
 	}
@@ -84,14 +97,7 @@ static class ObjectFactories
 		Verify.Argument.IsNotNull(branchData);
 		Verify.Argument.IsTrue(branchData.IsRemote, nameof(branchData), "Cannot update local branch.");
 
-		if(remoteBranch.Revision.Hash != branchData.SHA1)
-		{
-			var revisionCache = remoteBranch.Repository.Revisions;
-			lock(revisionCache.SyncRoot)
-			{
-				remoteBranch.Pointer = revisionCache.GetOrCreateRevision(branchData.SHA1);
-			}
-		}
+		UpdateReferenceTarget(remoteBranch, branchData.Hash);
 	}
 
 	public static RemoteBranch CreateRemoteBranch(Repository repository, RemoteBranchData branchData)
@@ -102,7 +108,7 @@ static class ObjectFactories
 		Revision revision;
 		lock(repository.Revisions.SyncRoot)
 		{
-			revision = repository.Revisions.GetOrCreateRevision(branchData.SHA1);
+			revision = repository.Revisions.GetOrCreateRevision(branchData.Hash);
 		}
 		return new RemoteBranch(repository, branchData.Name, revision);
 	}
@@ -112,10 +118,7 @@ static class ObjectFactories
 		Verify.Argument.IsNotNull(remoteBranch);
 		Verify.Argument.IsNotNull(branchData);
 
-		if(remoteBranch.Revision.Hash != branchData.SHA1)
-		{
-			remoteBranch.Pointer = remoteBranch.Repository.Revisions.GetOrCreateRevision(branchData.SHA1);
-		}
+		UpdateReferenceTarget(remoteBranch, branchData.Hash);
 	}
 
 	public static Tag CreateTag(Repository repository, TagData tagData)
@@ -126,7 +129,7 @@ static class ObjectFactories
 		Revision revision;
 		lock(repository.Revisions.SyncRoot)
 		{
-			revision = repository.Revisions.GetOrCreateRevision(tagData.SHA1);
+			revision = repository.Revisions.GetOrCreateRevision(tagData.Hash);
 		}
 		return new Tag(repository, tagData.Name, revision, tagData.TagType);
 	}
@@ -136,16 +139,7 @@ static class ObjectFactories
 		Verify.Argument.IsNotNull(tag);
 		Verify.Argument.IsNotNull(tagData);
 
-		if(tag.Revision.Hash != tagData.SHA1)
-		{
-			var repo = tag.Repository;
-			Revision revision;
-			lock(repo.Revisions.SyncRoot)
-			{
-				revision = repo.Revisions.GetOrCreateRevision(tagData.SHA1);
-			}
-			tag.Pointer = revision;
-		}
+		UpdateReferenceTarget(tag, tagData.Hash);
 		tag.TagType = tagData.TagType;
 	}
 
@@ -163,7 +157,7 @@ static class ObjectFactories
 		Verify.Argument.IsNotNull(noteData);
 
 		note.Object = noteData.ObjectName;
-		if(noteData.Message != null)
+		if(noteData.Message is not null)
 		{
 			note.Message = noteData.Message;
 		}
@@ -201,23 +195,21 @@ static class ObjectFactories
 		Verify.Argument.IsNotNull(configAccessor);
 		Verify.Argument.IsNotNull(configParameterData);
 
-		switch(configParameterData.ConfigFile)
+		return configParameterData.ConfigFile switch
 		{
-			case ConfigFile.Repository:
-				throw new ArgumentException("Config file cannot be 'Repository'.", "configParameterData");
-			case ConfigFile.Other:
-				return new ConfigParameter(
-					configAccessor,
-					configParameterData.SpecifiedFile,
-					configParameterData.Name,
-					configParameterData.Value);
-			default:
-				return new ConfigParameter(
-					configAccessor,
-					configParameterData.ConfigFile,
-					configParameterData.Name,
-					configParameterData.Value);
-		}
+			ConfigFile.Repository => throw new ArgumentException(
+				"Config file cannot be 'Repository'.", nameof(configParameterData)),
+			ConfigFile.Other => new ConfigParameter(
+				configAccessor,
+				configParameterData.SpecifiedFile!,
+				configParameterData.Name,
+				configParameterData.Value),
+			_ => new ConfigParameter(
+				configAccessor,
+				configParameterData.ConfigFile,
+				configParameterData.Name,
+				configParameterData.Value),
+		};
 	}
 
 	public static void UpdateConfigParameter(ConfigParameter configParameter, ConfigParameterData configParameterData)
@@ -318,100 +310,80 @@ static class ObjectFactories
 		return new Submodule(repository, submoduleData.Name, submoduleData.Path, submoduleData.Url);
 	}
 
-	private static void UpdateParents(Revision revision, RevisionData revisionData)
-	{
-		Assert.IsNotNull(revision);
-		Assert.IsNotNull(revisionData);
-
-		HashSet<Revision> hset = null;
-		if(revision.Parents.Count != 0)
-		{
-			hset = new HashSet<Revision>(revision.Parents);
-		}
-		int id = 0;
-		foreach(var info in revisionData.Parents)
-		{
-			bool found = false;
-			for(int i = id; i < revision.Parents.Count; ++i)
-			{
-				if(revision.Parents[i].Hash == info.CommitHash)
-				{
-					if(i != id)
-					{
-						var temp = revision.Parents[i];
-						revision.Parents[i] = revision.Parents[id];
-						revision.Parents[id] = temp;
-					}
-					hset?.Remove(revision.Parents[id]);
-					found = true;
-					break;
-				}
-			}
-			if(!found)
-			{
-				var obj = CreateRevision(revision.Repository, info);
-				revision.Parents.InsertInternal(id, obj);
-			}
-			++id;
-		}
-		if(hset is { Count: not 0 })
-		{
-			foreach(var obj in hset)
-			{
-				revision.Parents.RemoveInternal(obj);
-			}
-		}
-	}
-
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	private static bool HasFlag(RevisionField flags, RevisionField flag)
 		=> (flags & flag) == flag;
 
-	public static void UpdateRevision(Revision revision, RevisionData revisionData, bool updateParents = true)
+	private static Many<Revision> CreateAndLoadRevisions(Repository repository, Many<RevisionData> data)
+	{
+		if(data.Count == 0) return Many<Revision>.None;
+		if(data.Count == 1) return CreateRevision(repository, data.First());
+		var revisions = new Revision[data.Count];
+		for(int i = 0; i < revisions.Length; ++i)
+		{
+			revisions[i] = CreateRevision(repository, data[i]);
+		}
+		return revisions;
+	}
+
+	private static Many<Revision> GetOrCreateRevisions(Repository repository, Many<RevisionData> data)
+	{
+		if(data.Count == 0) return Many<Revision>.None;
+		if(data.Count == 1) return GetOrCreateRevision(repository, data.First());
+		var revisions = new Revision[data.Count];
+		for(int i = 0; i < revisions.Length; ++i)
+		{
+			revisions[i] = GetOrCreateRevision(repository, data[i]);
+		}
+		return revisions;
+	}
+
+	private static void LoadRevision(Revision revision, RevisionData revisionData)
+	{
+		var fields = revisionData.Fields;
+		if(HasFlag(fields, RevisionField.Subject))
+		{
+			revision.Subject = revisionData.Subject;
+		}
+		if(HasFlag(fields, RevisionField.Body))
+		{
+			revision.Body = revisionData.Body;
+		}
+		if(HasFlag(fields, RevisionField.TreeHash))
+		{
+			revision.TreeHash = revisionData.TreeHash;
+		}
+		if(HasFlag(fields, RevisionField.Parents))
+		{
+			revision.Parents = GetOrCreateRevisions(revision.Repository, revisionData.Parents);
+		}
+		if(HasFlag(fields, RevisionField.CommitDate))
+		{
+			revision.CommitDate = revisionData.CommitDate;
+		}
+		if(HasFlag(fields, RevisionField.CommitterName | RevisionField.CommitterEmail))
+		{
+			revision.Committer = revision.Repository.Users.GetOrCreateUser(revisionData.CommitterName, revisionData.CommitterEmail);
+		}
+		if(HasFlag(fields, RevisionField.AuthorDate))
+		{
+			revision.AuthorDate = revisionData.AuthorDate;
+		}
+		if(HasFlag(fields, RevisionField.AuthorName | RevisionField.AuthorEmail))
+		{
+			revision.Author = revision.Repository.Users.GetOrCreateUser(revisionData.AuthorName, revisionData.AuthorEmail);
+		}
+	}
+
+	public static void UpdateRevision(Revision revision, RevisionData revisionData)
 	{
 		Verify.Argument.IsNotNull(revision);
 		Verify.Argument.IsNotNull(revisionData);
 
-		var fields = revisionData.Fields;
-		if(fields != RevisionField.CommitHash)
+		if(revisionData.Fields != RevisionField.CommitHash)
 		{
-			var repository = revision.Repository;
-			if(HasFlag(fields, RevisionField.Subject))
-			{
-				revision.Subject = revisionData.Subject;
-			}
-			if(HasFlag(fields, RevisionField.Body))
-			{
-				revision.Body = revisionData.Body;
-			}
-			if(HasFlag(fields, RevisionField.TreeHash))
-			{
-				revision.TreeHash = revisionData.TreeHash;
-			}
-			if(updateParents && HasFlag(fields, RevisionField.Parents))
-			{
-				UpdateParents(revision, revisionData);
-			}
-			if(HasFlag(fields, RevisionField.CommitDate))
-			{
-				revision.CommitDate = revisionData.CommitDate;
-			}
-			if(HasFlag(fields, RevisionField.CommitterName | RevisionField.CommitterEmail))
-			{
-				revision.Committer = repository.Users.GetOrCreateUser(
-					revisionData.CommitterName, revisionData.CommitterEmail);
-			}
-			if(HasFlag(fields, RevisionField.AuthorDate))
-			{
-				revision.AuthorDate = revisionData.AuthorDate;
-			}
-			if(HasFlag(fields, RevisionField.AuthorName | RevisionField.AuthorEmail))
-			{
-				revision.Author = repository.Users.GetOrCreateUser(
-					revisionData.AuthorName, revisionData.AuthorEmail);
-			}
-
 			revision.IsLoaded = true;
+			LoadRevision(revision, revisionData);
 		}
 	}
 
@@ -427,45 +399,22 @@ static class ObjectFactories
 			var fields = revisionData.Fields;
 			if(!revision.IsLoaded && (fields != RevisionField.CommitHash))
 			{
-				if(HasFlag(fields, RevisionField.Subject))
-				{
-					revision.Subject = revisionData.Subject;
-				}
-				if(HasFlag(fields, RevisionField.Body))
-				{
-					revision.Body = revisionData.Body;
-				}
-				if(HasFlag(fields, RevisionField.TreeHash))
-				{
-					revision.TreeHash = revisionData.TreeHash;
-				}
-				if(HasFlag(fields, RevisionField.Parents))
-				{
-					foreach(var parentData in revisionData.Parents)
-					{
-						var parent = revisions.GetOrCreateRevision(parentData.CommitHash);
-						revision.Parents.AddInternal(parent);
-					}
-				}
-				if(HasFlag(fields, RevisionField.CommitDate))
-				{
-					revision.CommitDate = revisionData.CommitDate;
-				}
-				if(HasFlag(fields, RevisionField.CommitterName | RevisionField.CommitterEmail))
-				{
-					revision.Committer = repository.Users.GetOrCreateUser(revisionData.CommitterName, revisionData.CommitterEmail);
-				}
-				if(HasFlag(fields, RevisionField.AuthorDate))
-				{
-					revision.AuthorDate = revisionData.AuthorDate;
-				}
-				if(HasFlag(fields, RevisionField.AuthorName | RevisionField.AuthorEmail))
-				{
-					revision.Author = repository.Users.GetOrCreateUser(revisionData.AuthorName, revisionData.AuthorEmail);
-				}
 				revision.IsLoaded = true;
+				LoadRevision(revision, revisionData);
 			}
 			return revision;
+		}
+	}
+
+	public static Revision GetOrCreateRevision(Repository repository, RevisionData revisionData)
+	{
+		Verify.Argument.IsNotNull(repository);
+		Verify.Argument.IsNotNull(revisionData);
+
+		var revisions = repository.Revisions;
+		lock(revisions.SyncRoot)
+		{
+			return revisions.GetOrCreateRevision(revisionData.CommitHash);
 		}
 	}
 
@@ -509,7 +458,7 @@ static class ObjectFactories
 		Verify.Argument.IsNotNull(treeFileData);
 
 		treeFile.ConflictType = treeFileData.ConflictType;
-		treeFile.Status = treeFileData.FileStatus;
+		treeFile.Status       = treeFileData.FileStatus;
 		treeFile.StagedStatus = treeFileData.StagedStatus;
 	}
 
@@ -518,7 +467,7 @@ static class ObjectFactories
 		Verify.Argument.IsNotNull(repository);
 		Verify.Argument.IsNotNull(userData);
 
-		return new User(repository, userData.UserName, userData.Email, userData.Commits);
+		return new User(repository, userData.Name, userData.Email, userData.Commits);
 	}
 
 	public static void UpdateUser(User user, UserData userData)

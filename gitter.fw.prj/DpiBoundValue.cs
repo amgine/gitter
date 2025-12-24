@@ -31,7 +31,7 @@ public class DpiBoundValue
 		where T : notnull
 	{
 		private readonly T _original;
-		private readonly Dictionary<Dpi, T> _cache = new();
+		private readonly Dictionary<Dpi, T> _cache = [];
 
 		public CachedScalable(T original)
 		{
@@ -61,11 +61,10 @@ public class DpiBoundValue
 #if NET6_0_OR_GREATER
 	[global::System.Runtime.Versioning.SupportedOSPlatform("windows")]
 #endif
-	internal sealed class FontValueImpl : CachedScalable<Font>
+	internal sealed class FontValueImpl(Font font, Dpi dpi)
+		: CachedScalable<Font>(font, dpi)
 	{
-		private readonly Dpi _dpi;
-
-		public FontValueImpl(Font font, Dpi dpi) : base(font, dpi) => _dpi = dpi;
+		private readonly Dpi _dpi = dpi;
 
 		protected override Font Scale(Font original, Dpi dpi)
 		{
@@ -79,52 +78,29 @@ public class DpiBoundValue
 		}
 	}
 
-	sealed class IconImpl : IDpiBoundValue<Bitmap>
+	sealed class IconImpl(CachedScaledImageResources resources, string name, int size)
+		: IDpiBoundValue<Bitmap?>
 	{
-		public IconImpl(CachedScaledImageResources resources, string name, int size)
+		public Bitmap? GetValue(Dpi dpi)
 		{
-			Resources = resources;
-			Name      = name;
-			Size      = size;
-		}
-
-		private CachedScaledImageResources Resources { get; }
-
-		private string Name { get; }
-
-		private int Size { get; }
-
-		public Bitmap GetValue(Dpi dpi)
-		{
-			var size = (int)(Size * dpi.X / 96);
-			return Resources[Name, size];
+			var s = (int)(size * dpi.X / 96);
+			return resources[name, s];
 		}
 	}
 
-	sealed class IconImpl2 : IDpiBoundValue<Bitmap>
+	sealed class IconImpl2(IImageProvider imageProvider, int size)
+		: IDpiBoundValue<Bitmap?>
 	{
-		public IconImpl2(IImageProvider imageProvider, int size)
+		public Bitmap? GetValue(Dpi dpi)
 		{
-			ImageProvider = imageProvider;
-			Size          = size;
-		}
-
-		private IImageProvider ImageProvider { get; }
-
-		private int Size { get; }
-
-		public Bitmap GetValue(Dpi dpi)
-		{
-			var size = (int)(Size * dpi.X / 96);
-			return ImageProvider.GetImage(size) as Bitmap;
+			var s = (int)(size * dpi.X / 96);
+			return imageProvider.GetImage(s) as Bitmap;
 		}
 	}
 
-	sealed class ConstantImpl<T> : IDpiBoundValue<T>
+	sealed class ConstantImpl<T>(T value) : IDpiBoundValue<T>
 	{
-		public ConstantImpl(T value) => Value = value;
-
-		public T Value { get; }
+		public T Value { get; } = value;
 
 		public T GetValue(Dpi dpi) => Value;
 	}
@@ -174,7 +150,7 @@ public class DpiBoundValue
 	#if NET6_0_OR_GREATER
 	[global::System.Runtime.Versioning.SupportedOSPlatform("windows")]
 	#endif
-	public static IDpiBoundValue<Bitmap> Icon(CachedScaledImageResources resources, string name, int size = 16)
+	public static IDpiBoundValue<Bitmap?> Icon(CachedScaledImageResources resources, string name, int size = 16)
 	{
 		Verify.Argument.IsNotNull(resources);
 		Verify.Argument.IsNeitherNullNorWhitespace(name);
@@ -186,7 +162,7 @@ public class DpiBoundValue
 	#if NET6_0_OR_GREATER
 	[global::System.Runtime.Versioning.SupportedOSPlatform("windows")]
 	#endif
-	public static IDpiBoundValue<Bitmap> Icon(IImageProvider imageProvider, int size = 16)
+	public static IDpiBoundValue<Bitmap?> Icon(IImageProvider imageProvider, int size = 16)
 	{
 		Verify.Argument.IsNotNull(imageProvider);
 		Verify.Argument.IsPositive(size);
@@ -215,8 +191,14 @@ public class DpiBoundValue
 	public static IDpiBoundValue<Size> Size(Size size)
 		=> new ScaledSizeImpl(size);
 
+	public static IDpiBoundValue<Size> Size(int width, int height)
+		=> new ScaledSizeImpl(new(width, height));
+
 	public static IDpiBoundValue<SizeF> Size(SizeF size)
 		=> new ScaledSizeFImpl(size);
+
+	public static IDpiBoundValue<SizeF> Size(float width, float height)
+		=> new ScaledSizeFImpl(new(width, height));
 
 	public static IDpiBoundValue<Rectangle> Rectangle(Rectangle rectangle)
 		=> new ScaledRectangleImpl(rectangle);

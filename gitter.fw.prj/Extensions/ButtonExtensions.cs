@@ -26,26 +26,29 @@ using System.Windows.Forms;
 using gitter.Native;
 using gitter.Framework;
 
-/// <summary>Extension methods for <see cref="T:SystemWindows.Forms.Button"/> class.</summary>
+/// <summary>Extension methods for <see cref="Button"/> class.</summary>
 public static class ButtonExtenstions
 {
-	public static void ShowUACShield(this Button button)
+	extension(Button button)
 	{
-		Verify.Argument.IsNotNull(button);
-
-		if(Utility.IsOSVistaOrNewer)
+		public void ShowUACShield()
 		{
-			User32.SendMessage(button.Handle, 0x1600 + 0x000C, IntPtr.Zero, (IntPtr)(-1));
+			Verify.Argument.IsNotNull(button);
+
+			if(Utility.IsOSVistaOrNewer)
+			{
+				User32.SendMessage(button.Handle, 0x1600 + 0x000C, IntPtr.Zero, (IntPtr)(-1));
+			}
 		}
-	}
-			
-	public static void HideUACShield(this Button button)
-	{
-		Verify.Argument.IsNotNull(button);
 
-		if(Utility.IsOSVistaOrNewer)
+		public void HideUACShield()
 		{
-			User32.SendMessage(button.Handle, 0x1600 + 0x000C, IntPtr.Zero, IntPtr.Zero);
+			Verify.Argument.IsNotNull(button);
+
+			if(Utility.IsOSVistaOrNewer)
+			{
+				User32.SendMessage(button.Handle, 0x1600 + 0x000C, IntPtr.Zero, IntPtr.Zero);
+			}
 		}
 	}
 }

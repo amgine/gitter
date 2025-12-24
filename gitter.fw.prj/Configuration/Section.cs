@@ -22,31 +22,24 @@ namespace gitter.Framework.Configuration;
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>Configuration section.</summary>
-public sealed class Section : INamedObject
+/// <param name="name">Section name.</param>
+public sealed class Section(string name) : INamedObject
 {
 	#region Data
 
 	/// <summary>Subsections dictionary.</summary>
-	private readonly Dictionary<string, Section> _sections = new();
+	private readonly Dictionary<string, Section> _sections = [];
 	/// <summary>Parameters dictionary.</summary>
-	private readonly Dictionary<string, Parameter> _parameters = new();
-
-	#endregion
-
-	#region .ctor
-
-	/// <summary>Initializes a new instance of the <see cref="Section"/> class.</summary>
-	/// <param name="name">Section name.</param>
-	public Section(string name) => Name = name;
+	private readonly Dictionary<string, Parameter> _parameters = [];
 
 	#endregion
 
 	/// <summary>Gets section name.</summary>
 	/// <value>Section name.</value>
-	public string Name { get; }
+	public string Name { get; } = name;
 
 	/// <summary>Gets a value indicating whether this section is modified.</summary>
 	/// <value><c>true</c> if this section is modified; otherwise, <c>false</c>.</value>
@@ -89,8 +82,7 @@ public sealed class Section : INamedObject
 
 		if(!_sections.TryGetValue(name, out var section))
 		{
-			section = new Section(name);
-			_sections.Add(name, section);
+			_sections.Add(name, section = new(name));
 		}
 		else
 		{
@@ -110,8 +102,7 @@ public sealed class Section : INamedObject
 
 		if(!_sections.TryGetValue(name, out var section))
 		{
-			section = new Section(name);
-			_sections.Add(name, section);
+			_sections.Add(name, section = new(name));
 		}
 		return section;
 	}
@@ -120,19 +111,15 @@ public sealed class Section : INamedObject
 	/// <param name="name">Subsection name.</param>
 	/// <returns>Subsection with the specified name</returns>
 	public Section GetSection(string name)
-	{
-		Verify.Argument.IsTrue(
-			_sections.TryGetValue(name, out var section),
-			nameof(name), "Section not found.");
-		return section;
-	}
+		=> TryGetSection(name)
+		?? throw new ArgumentException($"Section '{name}' was not found.", nameof(name));
 
-	public Section TryGetSection(string name)
+	public Section? TryGetSection(string name)
 		=> _sections.TryGetValue(name, out var section)
 			? section
 			: default;
 
-	public bool TryGetSection(string name, out Section section)
+	public bool TryGetSection(string name, [MaybeNullWhen(returnValue: false)] out Section section)
 		=> _sections.TryGetValue(name, out section);
 
 	public void AddSection(Section section)
@@ -164,8 +151,6 @@ public sealed class Section : INamedObject
 	/// <value>Parameter count.</value>
 	public int ParameterCount => _parameters.Count;
 
-	public Parameter GetParameter(string name) => _parameters[name];
-
 	public void AddParameter(Parameter parameter)
 	{
 		Verify.Argument.IsNotNull(parameter);
@@ -186,12 +171,16 @@ public sealed class Section : INamedObject
 		}
 	}
 
-	public Parameter TryGetParameter(string name)
+	public Parameter GetParameter(string name)
+		=> TryGetParameter(name)
+		?? throw new ArgumentException($"Parameter '{name}' was not found.", nameof(name));
+
+	public Parameter? TryGetParameter(string name)
 		=> _parameters.TryGetValue(name, out var parameter)
 			? parameter
 			: default;
 
-	public bool TryGetParameter(string name, out Parameter parameter)
+	public bool TryGetParameter(string name, [MaybeNullWhen(returnValue: false)] out Parameter parameter)
 		=> _parameters.TryGetValue(name, out parameter);
 
 	public void SetValue<T>(string name, T value)
@@ -213,16 +202,13 @@ public sealed class Section : INamedObject
 		}
 	}
 
-	public T GetValue<T>(string name, T defaultValue)
+	public T? GetValue<T>(string name, T? defaultValue = default)
 	{
 		if(!_parameters.TryGetValue(name, out var parameter)) return defaultValue;
-		return TypeHelpers.TryUnpackValue(parameter.Value, out T value)
+		return TypeHelpers.TryUnpackValue(parameter.Value, out T? value)
 			? value
 			: defaultValue;
 	}
-
-	public T GetValue<T>(string name)
-		=> GetValue<T>(name, default);
 
 	#endregion
 

@@ -40,6 +40,7 @@ public sealed class DiffHunk : IList<DiffLine>, ICloneable
 	/// <param name="headers">Column headers.</param>
 	/// <param name="lines">List of diff lines.</param>
 	/// <param name="stats"><see cref="DiffStats"/>.</param>
+	/// <param name="isBinary">Binary patch flag.</param>
 	public DiffHunk(DiffColumnHeader[] headers, IList<DiffLine> lines, DiffStats stats, bool isBinary)
 	{
 		Verify.Argument.IsNotNull(headers);
@@ -55,7 +56,7 @@ public sealed class DiffHunk : IList<DiffLine>, ICloneable
 	/// <summary>Create empty <see cref="DiffHunk"/>.</summary>
 	/// <param name="headers">Column headers.</param>
 	public DiffHunk(DiffColumnHeader[] headers)
-		: this(headers, new List<DiffLine>(), new DiffStats(), false)
+		: this(headers, [], new DiffStats(), false)
 	{
 	}
 
@@ -217,8 +218,8 @@ public sealed class DiffHunk : IList<DiffLine>, ICloneable
 			var culture = System.Globalization.CultureInfo.InvariantCulture;
 			var header = new DiffLine(
 				DiffLineState.Header,
-				new [] { DiffLineState.Header, DiffLineState.Header },
-				new [] { 0, 0 },
+				[DiffLineState.Header, DiffLineState.Header],
+				[0, 0],
 				string.Format(culture, "@@ -{0},{1} +{2},{3} @@", rf, rc, af, ac),
 				LineEnding.Lf);
 			lines.Add(header);
@@ -231,11 +232,11 @@ public sealed class DiffHunk : IList<DiffLine>, ICloneable
 				lines.Add(line);
 				stats.Increment(line.State);
 			}
-			return new DiffHunk(new[]
-				{
+			return new DiffHunk(
+				[
 					new DiffColumnHeader(DiffColumnAction.Remove, rf, rc),
 					new DiffColumnHeader(DiffColumnAction.Add, af, ac)
-				}, lines, stats, IsBinary);
+				], lines, stats, IsBinary);
 		}
 	}
 

@@ -20,8 +20,6 @@
 
 namespace gitter.Framework.Controls;
 
-#nullable enable
-
 /// <summary>Dock markers of <see cref="ViewHost"/>.</summary>
 sealed class ViewHostDockMarkers : DockMarkers<ViewHostDockMarker>
 {
@@ -43,6 +41,6 @@ sealed class ViewHostDockMarkers : DockMarkers<ViewHostDockMarker>
 	/// <returns>Created markers.</returns>
 	protected override ViewHostDockMarker[]? CreateMarkers(ViewHost dockClient)
 		=> ViewHost.IsDocumentWell || !dockClient.IsDocumentWell
-			? new[] { new ViewHostDockMarker(ViewHost, dockClient) }
+			? [new ViewHostDockMarker(ViewHost, dockClient)]
 			: default;
 }

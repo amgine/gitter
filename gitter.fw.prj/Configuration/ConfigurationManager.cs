@@ -20,14 +20,13 @@
 
 namespace gitter.Framework.Configuration;
 
-using System;
-using System.IO;
-
 public sealed class ConfigurationManager : INamedObject
 {
 	public ConfigurationManager(IDataAdapter dataAdapter)
 	{
-		Load(dataAdapter);
+		Verify.Argument.IsNotNull(dataAdapter);
+
+		RootSection = dataAdapter.Load();
 	}
 
 	public ConfigurationManager(string name)

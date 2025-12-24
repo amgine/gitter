@@ -27,10 +27,13 @@ public sealed class SystemStyleColors : IGitterStyleColors
 {
 	public Color WorkArea                    => Color.FromArgb(41, 57, 85);
 	public Color Window                      => SystemColors.Window;
+	public Color WindowFooter                => SystemColors.Control;
+	public Color WindowFooterSeparator       => SystemColors.ControlLight;
 	public Color ScrollBarSpacing            => SystemColors.Control;
 	public Color Separator                   => Color.FromArgb(209, 226, 252);
 	public Color Alternate                   => Color.WhiteSmoke;
 	public Color WindowText                  => SystemColors.WindowText;
+	public Color AccentFill                  => SystemColors.Highlight;
 	public Color GrayText                    => SystemColors.GrayText;
 	public Color HyperlinkText               => Color.Blue;
 	public Color HyperlinkTextHotTrack       => Color.Blue;

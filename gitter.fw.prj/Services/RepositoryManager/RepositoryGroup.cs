@@ -34,12 +34,12 @@ public sealed class RepositoryGroup
 
 	#region Events
 
-	public event EventHandler NameChanged;
+	public event EventHandler? NameChanged;
 
 	private void OnNameChanged()
 		=> NameChanged?.Invoke(this, EventArgs.Empty);
 
-	public event EventHandler Deleted;
+	public event EventHandler? Deleted;
 
 	internal void OnDeleted()
 		=> Deleted?.Invoke(this, EventArgs.Empty);

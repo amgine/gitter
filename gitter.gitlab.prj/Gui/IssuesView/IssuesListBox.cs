@@ -32,8 +32,7 @@ class IssuesListBox : CustomListBox
 	public IssuesListBox()
 	{
 		Columns.AddRange(
-			new CustomListBoxColumn[]
-			{
+			[
 				new IssueIdColumn(),
 				new IssueAuthorColumn(),
 				new IssueCreatedAtColumn(),
@@ -42,6 +41,6 @@ class IssuesListBox : CustomListBox
 				new IssueAssigneeColumn(),
 				new IssueClosedByColumn(),
 				new IssueMilestoneColumn(),
-			});
+			]);
 	}
 }

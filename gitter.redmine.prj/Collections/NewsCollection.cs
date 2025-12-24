@@ -20,11 +20,12 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
 using System.Globalization;
 using System.Xml;
 
@@ -40,39 +41,34 @@ public sealed class NewsCollection : RedmineObjectsCache<News>
 	}
 
 	protected override News Create(int id)
-	{
-		return new News(Context, id);
-	}
+		=> new(Context, id);
 
 	protected override News Create(XmlNode node)
-	{
-		return new News(Context, node);
-	}
+		=> new(Context, node);
 
-	public LinkedList<News> Fetch(Project project)
+	public Task<List<News>> FetchAsync(Project project, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(project);
 
-		return Fetch(project.Id);
+		return FetchAsync(project.Id, cancellationToken);
 	}
 
-	public LinkedList<News> Fetch(int projectId)
-	{
-		return Fetch(projectId.ToString(CultureInfo.InvariantCulture));
-	}
+	public Task<List<News>> FetchAsync(int projectId, CancellationToken cancellationToken = default)
+		=> FetchAsync(projectId.ToString(CultureInfo.InvariantCulture), cancellationToken);
 
-	public LinkedList<News> Fetch(string projectId)
+	public Task<List<News>> FetchAsync(string projectId, CancellationToken cancellationToken = default)
 	{
 		var url = string.Format(CultureInfo.InvariantCulture,
 			@"projects/{0}/news.xml", projectId);
-		return FetchItemsFromAllPages(url);
+		return FetchItemsFromAllPagesAsync(url, cancellationToken);
 	}
 
-	public Task<LinkedList<News>> FetchAsync(string projectId, System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	public Task<List<News>> FetchAsync(string projectId,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
+		progress?.Report(OperationProgress.Indeterminate(Resources.StrsFetchingNews.AddEllipsis()));
 		var url = string.Format(CultureInfo.InvariantCulture,
 			@"projects/{0}/news.xml", projectId);
-		progress?.Report(new OperationProgress(Resources.StrsFetchingNews.AddEllipsis()));
 		return FetchItemsFromAllPagesAsync(url, cancellationToken);
 	}
 }

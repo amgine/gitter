@@ -30,7 +30,11 @@ public readonly struct DpiConverter
 
 	public static readonly DpiConverter Identity = new(from: Dpi.Default, to: Dpi.Default);
 
-	public static DpiConverter FromDefaultTo(Dpi dpi) => new(from: Dpi.Default, to: dpi);
+	public static DpiConverter FromDefaultTo(Dpi dpi)
+		=> new(from: Dpi.Default, to: dpi);
+
+	public static DpiConverter FromDefaultTo(Control control)
+		=> FromDefaultTo(Dpi.FromControl(control));
 
 	public DpiConverter(Dpi from, Dpi to)
 	{

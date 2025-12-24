@@ -24,156 +24,107 @@ using System;
 
 using gitter.Framework;
 
-public sealed class RevisionData : INamedObject
+public sealed class RevisionData(Sha1Hash commitHash) : INamedObject
 {
 	#region Data
 
-	private Hash _treeHash;
-	private RevisionData[] _parents;
-	private RevisionData[] _children;
-	private string _subject;
-	private string _body;
+	private Sha1Hash _treeHash;
+	private Many<RevisionData> _parents;
+	private Many<RevisionData> _children;
+	private string _subject = default!;
+	private string _body = default!;
 	private DateTimeOffset _commitDate;
-	private string _committerName;
-	private string _committerEmail;
+	private string _committerName = default!;
+	private string _committerEmail = default!;
 	private DateTimeOffset _authorDate;
-	private string _authorName;
-	private string _authorEmail;
-
-	#endregion
-
-	#region .ctor
-
-	public RevisionData(Hash commitHash)
-	{
-		CommitHash = commitHash;
-		Fields     = RevisionField.CommitHash;
-	}
+	private string _authorName = default!;
+	private string _authorEmail = default!;
 
 	#endregion
 
 	#region Properties
 
-	public Hash CommitHash { get; }
+	public Sha1Hash CommitHash { get; } = commitHash;
 
-	public Hash TreeHash
+	public Sha1Hash TreeHash
 	{
 		get => _treeHash;
-		set
-		{
-			_treeHash = value;
-			Fields |= RevisionField.TreeHash;
-		}
+		set => SetValue(ref _treeHash, value, RevisionField.TreeHash);
 	}
 
-	public RevisionData[] Parents
+	public Many<RevisionData> Parents
 	{
 		get => _parents;
-		set
-		{
-			_parents = value;
-			Fields |= RevisionField.Parents;
-		}
+		set => SetValue(ref _parents, value, RevisionField.Parents);
 	}
 
-	public RevisionData[] Children
+	public Many<RevisionData> Children
 	{
 		get => _children;
-		set
-		{
-			_children = value;
-			Fields |= RevisionField.Children;
-		}
+		set => SetValue(ref _children, value, RevisionField.Children);
 	}
 
 	public string Subject
 	{
 		get => _subject;
-		set
-		{
-			_subject = value;
-			Fields |= RevisionField.Subject;
-		}
+		set => SetValue(ref _subject, value, RevisionField.Subject);
 	}
 
 	public string Body
 	{
 		get => _body;
-		set
-		{
-			_body = value;
-			Fields |= RevisionField.Body;
-		}
+		set => SetValue(ref _body, value, RevisionField.Body);
 	}
 
 	public DateTimeOffset CommitDate
 	{
 		get => _commitDate;
-		set
-		{
-			_commitDate = value;
-			Fields |= RevisionField.CommitDate;
-		}
+		set => SetValue(ref _commitDate, value, RevisionField.CommitDate);
 	}
 
 	public string CommitterName
 	{
 		get => _committerName;
-		set
-		{
-			_committerName = value;
-			Fields |= RevisionField.CommitterName;
-		}
+		set => SetValue(ref _committerName, value, RevisionField.CommitterName);
 	}
 
 	public string CommitterEmail
 	{
 		get => _committerEmail;
-		set
-		{
-			_committerEmail = value;
-			Fields |= RevisionField.CommitterEmail;
-		}
+		set => SetValue(ref _committerEmail, value, RevisionField.CommitterEmail);
 	}
-
 
 	public DateTimeOffset AuthorDate
 	{
 		get => _authorDate;
-		set
-		{
-			_authorDate = value;
-			Fields |= RevisionField.AuthorDate;
-		}
+		set => SetValue(ref _authorDate, value, RevisionField.AuthorDate);
 	}
 
 	public string AuthorName
 	{
 		get => _authorName;
-		set
-		{
-			_authorName = value;
-			Fields |= RevisionField.AuthorName;
-		}
+		set => SetValue(ref _authorName, value, RevisionField.AuthorName);
 	}
 
 	public string AuthorEmail
 	{
 		get => _authorEmail;
-		set
-		{
-			_authorEmail = value;
-			Fields |= RevisionField.AuthorEmail;
-		}
+		set => SetValue(ref _authorEmail, value, RevisionField.AuthorEmail);
 	}
 
-	public RevisionField Fields { get; private set; }
+	private void SetValue<T>(ref T fieldRef, T value, RevisionField field)
+	{
+		fieldRef = value;
+		Fields |= field;
+	}
+
+	public RevisionField Fields { get; private set; } = RevisionField.CommitHash;
 
 	#endregion
 
 	#region Methods
 
-	public bool DataValid(RevisionField data)
+	public bool HasData(RevisionField data)
 		=> (Fields & data) == data;
 
 	string INamedObject.Name => CommitHash.ToString();

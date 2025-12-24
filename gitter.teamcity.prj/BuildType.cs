@@ -21,23 +21,20 @@
 namespace gitter.TeamCity;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml;
 
 public sealed class BuildType : NamedTeamCityObject
 {
 	#region Static
 
-	public static readonly TeamCityObjectProperty<Project> ProjectProperty = new("projectId", nameof(Project));
+	public static readonly TeamCityObjectProperty<Project?> ProjectProperty = new("projectId", nameof(Project));
 
 	#endregion
 
 	#region Data
 
 	private readonly BuildTypeBuildsCollection _builds;
-	private Project _project;
+	private Project? _project;
 
 	#endregion
 
@@ -59,7 +56,10 @@ public sealed class BuildType : NamedTeamCityObject
 		: base(context, node)
 	{
 		_builds = new BuildTypeBuildsCollection(this, Context.Builds);
-		_project = Context.Projects.Lookup(TeamCityUtility.LoadString(node.Attributes["projectId"]), TeamCityUtility.LoadString(node.Attributes["projectName"]));
+		var projectId = TeamCityUtility.LoadString(node.Attributes?["projectId"])
+			?? throw new ArgumentException("Project ID is not defined.", nameof(node));
+		var projectName = TeamCityUtility.LoadString(node.Attributes?["projectName"]);
+		_project = Context.Projects.Lookup(projectId, projectName);
 	}
 
 	#endregion
@@ -69,9 +69,10 @@ public sealed class BuildType : NamedTeamCityObject
 	internal override void Update(XmlNode node)
 	{
 		base.Update(node);
-		Project = Context.Projects.Lookup(
-			TeamCityUtility.LoadString(node.Attributes["projectId"]),
-			TeamCityUtility.LoadString(node.Attributes["projectName"]));
+		var projectId = TeamCityUtility.LoadString(node.Attributes?["projectId"])
+			?? throw new ArgumentException("Project ID is not defined.", nameof(node));
+		var projectName = TeamCityUtility.LoadString(node.Attributes?["projectName"]);
+		Project = Context.Projects.Lookup(projectId, projectName);
 	}
 
 	public BuildTypeLocator CreateLocator() => new() { Id = Id };
@@ -82,7 +83,7 @@ public sealed class BuildType : NamedTeamCityObject
 
 	public BuildTypeBuildsCollection Builds => _builds;
 
-	public Project Project
+	public Project? Project
 	{
 		get => _project;
 		private set => UpdatePropertyValue(ref _project, value, ProjectProperty);

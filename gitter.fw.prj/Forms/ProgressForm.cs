@@ -22,35 +22,32 @@ namespace gitter.Framework;
 
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using gitter.Framework.Controls;
+using gitter.Framework.Layout;
+
 using Resources = gitter.Framework.Properties.Resources;
 
+[DesignerCategory("")]
 public partial class ProgressForm : Form, IProgress<OperationProgress>
 {
-	#region Data
-
 	private bool _canCancel;
-	private IAsyncResult _context;
+	private IAsyncResult? _context;
 	private volatile bool _isCancelRequested;
-	private CancellationTokenSource _cancellationTokenSource;
-
-	#endregion
-
-	#region Events
+	private CancellationTokenSource? _cancellationTokenSource;
 
 	/// <summary>
 	/// Monitor raises this event to stop monitored action execution.
 	/// </summary>
-	public event EventHandler Canceled;
+	public event EventHandler? Canceled;
 
 	/// <summary>
 	/// Monitor raises this event when it is ready to receive Set() calls after Start() call.
 	/// </summary>
-	public event EventHandler Started;
+	public event EventHandler? Started;
 
 	protected virtual void OnStarted()
 		=> Started?.Invoke(this, EventArgs.Empty);
@@ -58,42 +55,140 @@ public partial class ProgressForm : Form, IProgress<OperationProgress>
 	protected virtual void OnCanceled()
 		=> Canceled?.Invoke(this, EventArgs.Empty);
 
-	#endregion
+	private readonly LabelControl _lblAction;
+	private readonly IProgressBarWidget _progressBar;
+	private readonly IButtonWidget _btnCancel;
 
 	/// <summary>Initializes a new instance of the <see cref="ProgressForm"/> class.</summary>
 	public ProgressForm()
 	{
-		InitializeComponent();
+		SuspendLayout();
 
-		if(LicenseManager.UsageMode == LicenseUsageMode.Runtime)
-		{
-			Font = GitterApplication.FontManager.UIFont;
-		}
-		else
-		{
-			Font = SystemFonts.MessageBoxFont;
-		}
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode = AutoScaleMode.Dpi;
+		Font = GitterApplication.FontManager.UIFont;
+		FormBorderStyle = FormBorderStyle.FixedDialog;
+		ClientSize = new(389, 104);
+		MaximizeBox = false;
+		MinimizeBox = false;
+		Name = nameof(ProgressForm);
+		Text = "Progress";
+		ShowIcon = false;
+		ShowInTaskbar = false;
+		StartPosition = FormStartPosition.CenterParent;
 
-		ClientSize = new Size(ClientSize.Width, _pnlContainer.Height + panel1.Height);
+		var noMargin = DpiBoundValue.Constant(Padding.Empty);
+
+		Panel pnlButtons;
+
+		var style = GitterApplication.Style;
+		var colors = style.Colors;
+
+		BackColor = colors.Window;
+		ForeColor = colors.WindowText;
+
+		_lblAction   = new();
+		_progressBar = style.ProgressBarFactory.Create();
+		_btnCancel   = style.ButtonFactory.Create();
+
+		_ = new ControlLayout(this)
+		{
+			Content = new Grid(
+				rows:
+				[
+					SizeSpec.Everything(),
+					Application.RenderWithVisualStyles ? SizeSpec.Absolute(1) : SizeSpec.Nothing(),
+					SizeSpec.Absolute(39),
+				],
+				content:
+				[
+					new GridContent(new Grid(
+						padding: DpiBoundValue.Padding(new Padding(12)),
+						rows:
+						[
+							SizeSpec.Absolute(18),
+							SizeSpec.Absolute(2),
+							SizeSpec.Absolute(18),
+						],
+						content:
+						[
+							new GridContent(new ControlContent(_lblAction,   marginOverride: noMargin), row: 0),
+							new GridContent(new WidgetContent (_progressBar, marginOverride: noMargin), row: 2),
+						]), row: 0),
+						new GridContent(new ControlContent(new Panel
+						{
+							BackColor = colors.WindowFooterSeparator,
+							Parent    = this,
+						},
+						marginOverride: noMargin,
+						horizontalContentAlignment: HorizontalContentAlignment.Stretch,
+						verticalContentAlignment:   VerticalContentAlignment.Stretch),
+						row: 1),
+					new GridContent(new ControlContent(pnlButtons = new Panel
+					{
+						BackColor = colors.WindowFooter,
+						Parent    = this,
+					},
+					marginOverride: noMargin,
+					horizontalContentAlignment: HorizontalContentAlignment.Stretch,
+					verticalContentAlignment:   VerticalContentAlignment.Stretch),
+					row: 2),
+				]),
+		};
+
+		const int ButtonHeight = 23;
+		const int TopMargin = 8;
+		const int RightMargin = 6;
+
+		_ = new ControlLayout(pnlButtons)
+		{
+			Content = new Grid(
+				rows:
+				[
+					SizeSpec.Absolute(TopMargin),
+					SizeSpec.Absolute(ButtonHeight),
+					SizeSpec.Everything(),
+				],
+				columns:
+				[
+					SizeSpec.Everything(),
+					SizeSpec.Absolute(75),
+					SizeSpec.Absolute(RightMargin),
+				],
+				content:
+				[
+					new GridContent(new WidgetContent(_btnCancel, marginOverride: noMargin), column: 1, row: 1),
+				]),
+		};
+
+		_lblAction.Parent   = this;
+		_progressBar.Parent = this;
+		_btnCancel.Parent   = pnlButtons;
 
 		_btnCancel.Text = Resources.StrCancel;
-
 		_lblAction.Text = string.Empty;
 		_canCancel = true;
 
-		if(!Application.RenderWithVisualStyles)
-		{
-			_pnlContainer.BackColor = SystemColors.Control;
-			_pnlLine.BackColor = SystemColors.Control;
-
-			int d = _btnCancel.Top - _pnlContainer.Bottom;
-
-			_pnlContainer.Height += d;
-			ClientSize = new Size(ClientSize.Width, ClientSize.Height - d);
-		}
+		ResumeLayout(performLayout: false);
+		PerformLayout();
 	}
 
-	private static void RunAsModalWithTask(IWin32Window parent, Form dialog, Task task)
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
+
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(_cancellationTokenSource is not null)
+		{
+			_cancellationTokenSource.Dispose();
+			_cancellationTokenSource = null;
+		}
+		StopWin7ProgressBar();
+		base.Dispose(disposing);
+	}
+
+	private static void RunAsModalWithTask(IWin32Window? parent, Form dialog, Task task)
 	{
 		Assert.IsNotNull(task);
 
@@ -120,7 +215,7 @@ public partial class ProgressForm : Form, IProgress<OperationProgress>
 		TaskUtility.PropagateFaultedStates(task);
 	}
 
-	private static T RunAsModalWithTask<T>(IWin32Window parent, Form dialog, Task<T> task)
+	private static T RunAsModalWithTask<T>(IWin32Window? parent, Form dialog, Task<T> task)
 	{
 		Assert.IsNotNull(task);
 
@@ -147,7 +242,7 @@ public partial class ProgressForm : Form, IProgress<OperationProgress>
 		return TaskUtility.UnwrapResult(task);
 	}
 
-	public static void MonitorTaskAsModalWindow(IWin32Window parent, string windowTitle, Func<IProgress<OperationProgress>, Task> func)
+	public static void MonitorTaskAsModalWindow(IWin32Window? parent, string windowTitle, Func<IProgress<OperationProgress>, Task> func)
 	{
 		Verify.Argument.IsNotNull(func);
 
@@ -160,7 +255,7 @@ public partial class ProgressForm : Form, IProgress<OperationProgress>
 		RunAsModalWithTask(parent, dialog, task);
 	}
 
-	public static void MonitorTaskAsModalWindow(IWin32Window parent, string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task> func)
+	public static void MonitorTaskAsModalWindow(IWin32Window? parent, string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task> func)
 	{
 		Verify.Argument.IsNotNull(func);
 
@@ -173,7 +268,7 @@ public partial class ProgressForm : Form, IProgress<OperationProgress>
 		RunAsModalWithTask(parent, dialog, task);
 	}
 
-	public static T MonitorTaskAsModalWindow<T>(IWin32Window parent, string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task<T>> func)
+	public static T MonitorTaskAsModalWindow<T>(IWin32Window? parent, string windowTitle, Func<IProgress<OperationProgress>, CancellationToken, Task<T>> func)
 	{
 		Verify.Argument.IsNotNull(func);
 
@@ -188,10 +283,9 @@ public partial class ProgressForm : Form, IProgress<OperationProgress>
 
 	private void UpdateWin7ProgressBar()
 	{
-		var form = GitterApplication.MainForm;
-		if(form is { IsDisposed: false })
+		if(GitterApplication.MainForm is { IsDisposed: false } form)
 		{
-			if(_progressBar.Style == ProgressBarStyle.Marquee)
+			if(_progressBar.IsIndeterminate)
 			{
 				form.SetTaskbarProgressState(TbpFlag.Indeterminate);
 			}
@@ -207,32 +301,25 @@ public partial class ProgressForm : Form, IProgress<OperationProgress>
 
 	private void StopWin7ProgressBar()
 	{
-		var form = GitterApplication.MainForm;
-		if(form is { IsDisposed: false })
+		if(GitterApplication.MainForm is { IsDisposed: false } form)
 		{
 			form.SetTaskbarProgressState(TbpFlag.NoProgress);
 		}
 	}
 
-	/// <summary>
-	/// Raises the <see cref="E:System.Windows.Forms.Form.Shown"/> event.
-	/// </summary>
-	/// <param name="e">A <see cref="T:System.EventArgs"/> that contains the event data.</param>
+	/// <inheritdoc/>
+	protected override void OnHandleCreated(EventArgs e)
+	{
+		this.EnableImmersiveDarkModeIfNeeded();
+		base.OnHandleCreated(e);
+	}
+
+	/// <inheritdoc/>
 	protected override void OnShown(EventArgs e)
 	{
 		base.OnShown(e);
 		OnStarted();
 		UpdateWin7ProgressBar();
-	}
-
-	/// <summary>
-	/// Raises the <see cref="E:System.Windows.Forms.Form.Closed" /> event.
-	/// </summary>
-	/// <param name="e">The <see cref="T:System.EventArgs" /> that contains the event data.</param>
-	protected override void OnClosed(EventArgs e)
-	{
-		StopWin7ProgressBar();
-		base.OnClosed(e);
 	}
 
 	/// <summary>
@@ -255,22 +342,15 @@ public partial class ProgressForm : Form, IProgress<OperationProgress>
 	}
 
 	private CancellationToken CancellationToken
-	{
-		get
-		{
-			if(_cancellationTokenSource is null)
-			{
-				return CancellationToken.None;
-			}
-			return _cancellationTokenSource.Token;
-		}
-	}
+		=> _cancellationTokenSource is not null
+			? _cancellationTokenSource.Token
+			: CancellationToken.None;
 
 	/// <summary>
 	/// Executing action.
 	/// </summary>
 	/// <value></value>
-	public IAsyncResult CurrentContext => _context;
+	public IAsyncResult? CurrentContext => _context;
 
 	/// <summary>
 	/// Async action name.
@@ -403,7 +483,7 @@ public partial class ProgressForm : Form, IProgress<OperationProgress>
 		}
 		else
 		{
-			_progressBar.Style = ProgressBarStyle.Continuous;
+			_progressBar.IsIndeterminate = false;
 			_progressBar.Minimum = min;
 			_progressBar.Maximum = max;
 			UpdateWin7ProgressBar();
@@ -495,7 +575,7 @@ public partial class ProgressForm : Form, IProgress<OperationProgress>
 	{
 		if(IsDisposed) return;
 
-		_progressBar.Style = ProgressBarStyle.Continuous;
+		_progressBar.IsIndeterminate = false;
 		_progressBar.Minimum = 0;
 		_progressBar.Maximum = maximum;
 		_progressBar.Value = current;
@@ -529,9 +609,9 @@ public partial class ProgressForm : Form, IProgress<OperationProgress>
 	{
 		if(IsDisposed) return;
 
-		if(_progressBar.Style != ProgressBarStyle.Marquee)
+		if(!_progressBar.IsIndeterminate)
 		{
-			_progressBar.Style = ProgressBarStyle.Marquee;
+			_progressBar.IsIndeterminate = true;
 			UpdateWin7ProgressBar();
 		}
 	}

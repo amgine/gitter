@@ -31,57 +31,53 @@ using gitter.Git.Gui.Views;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class RepositoryReferencesListItem : RepositoryExplorerItemBase
+sealed class RepositoryReferencesListItem(IWorkingEnvironment environment)
+	: RepositoryExplorerItemBase(Icons.Branch, Resources.StrReferences)
 {
-	private readonly IWorkingEnvironment _environment;
-	private ReferenceTreeBinding _refsBinding;
-
-	public RepositoryReferencesListItem(IWorkingEnvironment environment)
-		: base(Icons.Branch, Resources.StrReferences)
-	{
-		Verify.Argument.IsNotNull(environment);
-
-		_environment = environment;
-	}
+	private ReferenceTreeBinding? _refsBinding;
 
 	/// <inheritdoc/>
 	protected override void OnActivate()
 	{
 		base.OnActivate();
-		_environment.ViewDockService.ShowView(Guids.ReferencesViewGuid);
+		environment.ViewDockService.ShowView(Guids.ReferencesViewGuid);
 	}
 
 	/// <inheritdoc/>
 	public override void OnDoubleClick(int x, int y) { }
 
 	/// <inheritdoc/>
-	protected override void AttachToRepository()
+	protected override void AttachToRepository(Repository repository)
 	{
-		_refsBinding = new ReferenceTreeBinding(Items, Repository, true, true, null,
-			ReferenceType.LocalBranch | ReferenceType.RemoteBranch | ReferenceType.Tag);
+		_refsBinding = new ReferenceTreeBinding(Items, repository,
+			groupItems: true, groupRemoteBranches: true, predicate: null,
+			referenceTypes: ReferenceType.LocalBranch | ReferenceType.RemoteBranch | ReferenceType.Tag);
 		_refsBinding.ReferenceItemActivated += OnReferenceItemActivated;
 	}
 
 	/// <inheritdoc/>
-	protected override void DetachFromRepository()
+	protected override void DetachFromRepository(Repository repository)
 	{
-		_refsBinding.ReferenceItemActivated -= OnReferenceItemActivated;
-		_refsBinding.Dispose();
-		_refsBinding = null;
+		if(_refsBinding is not null)
+		{
+			_refsBinding.ReferenceItemActivated -= OnReferenceItemActivated;
+			_refsBinding.Dispose();
+			_refsBinding = null;
+		}
 		Collapse();
 	}
 
-	private void OnReferenceItemActivated(object sender, RevisionPointerEventArgs e)
+	private void OnReferenceItemActivated(object? sender, RevisionPointerEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
 		var rev = e.Object;
-		var view = (HistoryView)_environment.ViewDockService.ShowView(Guids.HistoryViewGuid, false);
+		var view = (HistoryView)environment.ViewDockService.ShowView(Guids.HistoryViewGuid, false);
 		view.SelectRevision(rev);
 	}
 
 	/// <inheritdoc/>
-	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	public override ContextMenuStrip? GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
 		Assert.IsNotNull(requestEventArgs);
 

@@ -22,10 +22,5 @@ namespace gitter.Git.Gui.Views;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class CommitViewFactory : GitViewFactoryBase<CommitView>
-{
-	public CommitViewFactory()
-		: base(Guids.CommitViewGuid, Resources.StrCommit, Icons.Commit)
-	{
-	}
-}
+sealed class CommitViewFactory() : GitViewFactoryBase<CommitView>(
+	Guids.CommitViewGuid, Resources.StrCommit, Icons.Commit);

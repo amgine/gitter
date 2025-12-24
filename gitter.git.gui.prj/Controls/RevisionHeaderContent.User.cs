@@ -30,20 +30,18 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 
 partial class RevisionHeaderContent
 {
-	abstract class UserElement : BaseElement
+	abstract class UserElement(RevisionHeaderContent owner) : BaseElement(owner)
 	{
-		protected UserElement(RevisionHeaderContent owner)
-			: base(owner)
-		{
-		}
-
 		protected abstract User GetUser(Revision revision);
 
 		public override ContextMenuStrip CreateContextMenu(Revision revision)
 		{
 			Assert.IsNotNull(revision);
 
-			var menu        = new ContextMenuStrip();
+			var menu = new ContextMenuStrip
+			{
+				Renderer = GitterApplication.Style.ToolStripRenderer,
+			};
 			var dpiBindings = new DpiBindings(menu);
 			var factory     = new GuiItemFactory(dpiBindings);
 			var user        = GetUser(revision);
@@ -58,7 +56,21 @@ partial class RevisionHeaderContent
 		protected abstract string HeaderText { get; }
 
 		private static string GetText(User user)
-			=> string.Format("{0} <{1}>", user.Name, user.Email);
+		{
+			var name  = user.Name;
+			var email = user.Email;
+			if(string.IsNullOrEmpty(name))  return email;
+			if(string.IsNullOrEmpty(email)) return name;
+			return string.Format("{0} <{1}>", name, email);
+		}
+
+		public override bool IsAvailableFor(Revision revision)
+		{
+			var user = GetUser(revision);
+			if(user is null) return false;
+			return !string.IsNullOrEmpty(user.Name)
+				|| !string.IsNullOrEmpty(user.Email);
+		}
 
 		public override Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width)
 		{

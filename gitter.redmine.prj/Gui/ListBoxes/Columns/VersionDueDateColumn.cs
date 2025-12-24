@@ -21,9 +21,6 @@
 namespace gitter.Redmine.Gui;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using gitter.Framework.Controls;
 
@@ -37,13 +34,8 @@ public class VersionDueDateColumn : DateColumn
 		Width = 55;
 	}
 
-	public override string IdentificationString
-	{
-		get { return "DueDate"; }
-	}
+	public override string IdentificationString => "DueDate";
 
 	protected override Comparison<CustomListBoxItem> SortComparison
-	{
-		get { return VersionListItem.CompareByDueDate; }
-	}
+		=> VersionListItem.CompareByDueDate;
 }

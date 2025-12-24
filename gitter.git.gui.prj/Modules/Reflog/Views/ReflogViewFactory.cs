@@ -22,10 +22,5 @@ namespace gitter.Git.Gui.Views;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class ReflogViewFactory : GitViewFactoryBase<ReflogView>
-{
-	public ReflogViewFactory()
-		: base(Guids.ReflogViewGuid, Resources.StrReflog, Icons.BranchReflog)
-	{
-	}
-}
+sealed class ReflogViewFactory() : GitViewFactoryBase<ReflogView>(
+	Guids.ReflogViewGuid, Resources.StrReflog, Icons.BranchReflog);

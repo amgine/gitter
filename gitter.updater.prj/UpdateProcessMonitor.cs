@@ -24,15 +24,15 @@ using System;
 
 public sealed class UpdateProcessMonitor
 {
-	public event EventHandler StageChanged;
-	public event EventHandler MaximumProgressChanged;
-	public event EventHandler CurrentProgressChanged;
-	public event EventHandler UpdateCancelled;
-	public event EventHandler<UpdateFailedEventArgs> UpdateFailed;
-	public event EventHandler UpdateSuccessful;
-	public event EventHandler CanCancelChanged;
+	public event EventHandler? StageChanged;
+	public event EventHandler? MaximumProgressChanged;
+	public event EventHandler? CurrentProgressChanged;
+	public event EventHandler? UpdateCancelled;
+	public event EventHandler<UpdateFailedEventArgs>? UpdateFailed;
+	public event EventHandler? UpdateSuccessful;
+	public event EventHandler? CanCancelChanged;
 
-	private string _stage;
+	private string? _stage;
 	private int _maximumProgress;
 	private int _currentProgress;
 	private bool _canCancel;
@@ -42,7 +42,7 @@ public sealed class UpdateProcessMonitor
 		_canCancel = true;
 	}
 
-	public string Stage
+	public string? Stage
 	{
 		get => _stage;
 		set
@@ -103,12 +103,7 @@ public sealed class UpdateProcessMonitor
 	public bool CancelRequested { get; set; }
 }
 
-public sealed class UpdateFailedEventArgs : EventArgs
+public sealed class UpdateFailedEventArgs(string message) : EventArgs
 {
-	public UpdateFailedEventArgs(string message)
-	{
-		Message = message;
-	}
-
-	public string Message { get; }
+	public string Message { get; } = message;
 }

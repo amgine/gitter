@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git.AccessLayer.CLI;
@@ -26,93 +26,171 @@ using System.Collections.Generic;
 /// <summary>Add file contents to the index.</summary>
 public sealed class AddCommand : Command
 {
-	/// <summary>Don't actually add the file(s), just show if they exist.</summary>
-	public static ICommandArgument DryRun()
-		=> CommandFlag.DryRun;
+	const string AddCommandName = "add";
 
-	/// <summary>Be verbose.</summary>
-	public static ICommandArgument Verbose()
-		=> CommandFlag.Verbose;
+	public static class KnownwArguments
+	{
+		/// <summary>Don't actually add the file(s), just show if they exist.</summary>
+		public static ICommandArgument DryRun
+			=> CommandFlag.DryRun;
 
-	/// <summary>Allow adding otherwise ignored files.</summary>
-	public static ICommandArgument Force()
-		=> new CommandFlag("--force");
+		/// <summary>Be verbose.</summary>
+		public static ICommandArgument Verbose
+			=> CommandFlag.Verbose;
 
-	/// <summary>
-	///	Add modified contents in the working tree interactively to the index. Optional path arguments
-	///	may be supplied to limit operation to a subset of the working tree. See “Interactive mode” for details.
-	/// </summary>
-	public static ICommandArgument Interactive()
-		=> CommandFlag.Interactive;
+		/// <summary>Allow adding otherwise ignored files.</summary>
+		public static ICommandArgument Force
+			{ get; } = new CommandFlag("--force");
 
-	/// <summary>
-	/// Similar to Interactive mode but the initial command loop is bypassed and the patch subcommand
-	/// is invoked using each of the specified filepatterns before exiting.
-	/// </summary>
-	public static ICommandArgument Patch()
-		=> new CommandFlag("--patch");
+		/// <summary>
+		///	Add modified contents in the working tree interactively to the index. Optional path arguments
+		///	may be supplied to limit operation to a subset of the working tree. See “Interactive mode” for details.
+		/// </summary>
+		public static ICommandArgument Interactive
+			=> CommandFlag.Interactive;
 
-	/// <summary>
-	///	Open the diff vs. the index in an editor and let the user edit it. After the editor was closed,
-	///	adjust the hunk headers and apply the patch to the index. 
-	/// </summary>
-	public static ICommandArgument Edit()
-		=> new CommandFlag("--edit");
+		/// <summary>
+		/// Similar to Interactive mode but the initial command loop is bypassed and the patch subcommand
+		/// is invoked using each of the specified filepatterns before exiting.
+		/// </summary>
+		public static ICommandArgument Patch
+			{ get; } = new CommandFlag("--patch");
 
-	/// <summary>
-	///	Update only files that git already knows about, staging modified content for commit and marking
-	///	deleted files for removal. This is similar to what "git commit -a" does in preparation for making a
-	///	commit, except that the update is limited to paths specified on the command line. If no paths are
-	///	specified, all tracked files in the current directory and its subdirectories are updated.
-	/// </summary>
-	public static ICommandArgument Update()
-		=> new CommandFlag("--update");
+		/// <summary>
+		///	Open the diff vs. the index in an editor and let the user edit it. After the editor was closed,
+		///	adjust the hunk headers and apply the patch to the index. 
+		/// </summary>
+		public static ICommandArgument Edit
+			{ get; } = new CommandFlag("--edit");
 
-	/// <summary>
-	///	Update files that git already knows about (same as --update) and add all untracked files that are
-	///	not ignored by .gitignore  mechanism.
-	/// </summary>
-	public static ICommandArgument All()
-		=> new CommandFlag("--all");
+		/// <summary>
+		///	Update only files that git already knows about, staging modified content for commit and marking
+		///	deleted files for removal. This is similar to what "git commit -a" does in preparation for making a
+		///	commit, except that the update is limited to paths specified on the command line. If no paths are
+		///	specified, all tracked files in the current directory and its subdirectories are updated.
+		/// </summary>
+		public static ICommandArgument Update
+			{ get; } = new CommandFlag("--update");
 
-	/// <summary>
-	///	Record only the fact that the path will be added later. An entry for the path is placed in the
-	///	index with no content. This is useful for, among other things, showing the unstaged content of such
-	///	files with git diff and committing them with git commit -a.
-	/// </summary>
-	public static ICommandArgument IntentToAdd()
-		=> new CommandFlag("--intent-to-add");
+		/// <summary>
+		///	Update files that git already knows about (same as --update) and add all untracked files that are
+		///	not ignored by .gitignore  mechanism.
+		/// </summary>
+		public static ICommandArgument All
+			{ get; } = new CommandFlag("--all");
 
-	/// <summary>Don't add the file(s), but only refresh their stat() information in the index.</summary>
-	public static ICommandArgument Refresh()
-		=> new CommandFlag("--refresh");
+		/// <summary>
+		///	Record only the fact that the path will be added later. An entry for the path is placed in the
+		///	index with no content. This is useful for, among other things, showing the unstaged content of such
+		///	files with git diff and committing them with git commit -a.
+		/// </summary>
+		public static ICommandArgument IntentToAdd
+			{ get; } = new CommandFlag("--intent-to-add");
 
-	/// <summary>
-	///	If some files could not be added because of errors indexing them, do not abort the operation,
-	///	but continue adding the others. The command shall still exit with non-zero status.
-	/// </summary>
-	public static ICommandArgument IgnoreErrors()
-		=> new CommandFlag("--ignore-errors");
+		/// <summary>Don't add the file(s), but only refresh their stat() information in the index.</summary>
+		public static ICommandArgument Refresh
+			{ get; } = new CommandFlag("--refresh");
 
-	/// <summary>
-	///	This option can be used to separate command-line options from the list of files,
-	///	(useful when filenames might be mistaken for command-line options).
-	/// </summary>
-	public static ICommandArgument NoMoreOptions()
-		=> CommandFlag.NoMoreOptions;
+		/// <summary>
+		///	If some files could not be added because of errors indexing them, do not abort the operation,
+		///	but continue adding the others. The command shall still exit with non-zero status.
+		/// </summary>
+		public static ICommandArgument IgnoreErrors
+			{ get; } = new CommandFlag("--ignore-errors");
+
+		/// <summary>
+		///	This option can be used to separate command-line options from the list of files,
+		///	(useful when filenames might be mistaken for command-line options).
+		/// </summary>
+		public static ICommandArgument NoMoreOptions
+			=> CommandFlag.NoMoreOptions;
+	}
+
+	public sealed class Builder()
+		: CommandBuilderBase(AddCommandName)
+		, ICommandBuilderSpecifyPaths
+	{
+		/// <summary>Allow adding otherwise ignored files.</summary>
+		public void Force()
+			=> AddArgument(KnownwArguments.Force);
+
+		/// <summary>
+		///	Add modified contents in the working tree interactively to the index. Optional path arguments
+		///	may be supplied to limit operation to a subset of the working tree. See “Interactive mode” for details.
+		/// </summary>
+		public void Interactive()
+			=> AddArgument(KnownwArguments.Interactive);
+
+		/// <summary>
+		/// Similar to Interactive mode but the initial command loop is bypassed and the patch subcommand
+		/// is invoked using each of the specified filepatterns before exiting.
+		/// </summary>
+		public void Patch()
+			=> AddArgument(KnownwArguments.Patch);
+
+		/// <summary>
+		///	Open the diff vs. the index in an editor and let the user edit it. After the editor was closed,
+		///	adjust the hunk headers and apply the patch to the index. 
+		/// </summary>
+		public void Edit()
+			=> AddArgument(KnownwArguments.Edit);
+
+		/// <summary>
+		///	Update only files that git already knows about, staging modified content for commit and marking
+		///	deleted files for removal. This is similar to what "git commit -a" does in preparation for making a
+		///	commit, except that the update is limited to paths specified on the command line. If no paths are
+		///	specified, all tracked files in the current directory and its subdirectories are updated.
+		/// </summary>
+		public void Update()
+			=> AddArgument(KnownwArguments.Update);
+
+		/// <summary>
+		///	Update files that git already knows about (same as --update) and add all untracked files that are
+		///	not ignored by .gitignore  mechanism.
+		/// </summary>
+		public void All()
+			=> AddArgument(KnownwArguments.All);
+
+		/// <summary>
+		///	Record only the fact that the path will be added later. An entry for the path is placed in the
+		///	index with no content. This is useful for, among other things, showing the unstaged content of such
+		///	files with git diff and committing them with git commit -a.
+		/// </summary>
+		public void IntentToAdd()
+			=> AddArgument(KnownwArguments.IntentToAdd);
+
+		/// <summary>Don't add the file(s), but only refresh their stat() information in the index.</summary>
+		public void Refresh()
+			=> AddArgument(KnownwArguments.Refresh);
+
+		/// <summary>
+		///	If some files could not be added because of errors indexing them, do not abort the operation,
+		///	but continue adding the others. The command shall still exit with non-zero status.
+		/// </summary>
+		public void IgnoreErrors()
+			=> AddArgument(KnownwArguments.IgnoreErrors);
+
+		/// <summary>Don't actually add the file(s), just show if they exist.</summary>
+		public void DryRun()
+			=> AddArgument(KnownwArguments.DryRun);
+
+		/// <summary>Be verbose.</summary>
+		public void Verbose()
+			=> AddArgument(KnownwArguments.Verbose);
+	}
 
 	public AddCommand()
-		: base("add")
+		: base(AddCommandName)
 	{
 	}
 
 	public AddCommand(params ICommandArgument[] args)
-		: base("add", args)
+		: base(AddCommandName, args)
 	{
 	}
 
 	public AddCommand(IList<ICommandArgument> args)
-		: base("add", args)
+		: base(AddCommandName, args)
 	{
 	}
 }

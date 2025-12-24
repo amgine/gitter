@@ -3,6 +3,7 @@
   <PropertyGroup>
     <AssemblyName>gitter.git</AssemblyName>
     <RootNamespace>gitter.Git</RootNamespace>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Autofac" Version="8.0.0" />
+    <PackageReference Include="Autofac" Version="8.4.0" />
   </ItemGroup>
 
   <ItemGroup>

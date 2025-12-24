@@ -25,7 +25,7 @@ using gitter.Git.AccessLayer;
 
 interface ICreateBranchView : IView
 {
-	IUserInputSource<string> BranchName { get; }
+	IUserInputSource<string?> BranchName { get; }
 
 	IUserInputSource<string> StartingRevision { get; }
 

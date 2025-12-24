@@ -27,16 +27,16 @@ using gitter.Framework.Controls;
 
 sealed class MSVS2012DarkStyle : MSVS2012Style, IGitterStyle
 {
-	private ToolStripRenderer _toolStriprenderer;
+	private ToolStripRenderer? _toolStriprenderer;
 
 	private sealed class MSVS2012DarkItemBackgroundStyles : IItemBackgroundStyles
 	{
-		public IBackgroundStyle Focused         { get; } = new BackgroundWithBorder(MSVS2012DarkColors.WINDOW, MSVS2012DarkColors.HIGHLIGHT);
-		public IBackgroundStyle SelectedFocused { get; } = new SolidBackground(MSVS2012DarkColors.HIGHLIGHT);
-		public IBackgroundStyle Selected        { get; } = new SolidBackground(MSVS2012DarkColors.HIGHLIGHT);
+		public IBackgroundStyle Focused         { get; } = new BackgroundWithBorder(MSVS2012DarkColors.WINDOW, MSVS2012DarkColors.ACCENT_FILL);
+		public IBackgroundStyle SelectedFocused { get; } = new SolidBackground(MSVS2012DarkColors.ACCENT_FILL);
+		public IBackgroundStyle Selected        { get; } = new SolidBackground(MSVS2012DarkColors.ACCENT_FILL);
 		public IBackgroundStyle SelectedNoFocus { get; } = new SolidBackground(MSVS2012DarkColors.HIDDEN_HIGHLIGHT);
 		public IBackgroundStyle Hovered         { get; } = new SolidBackground(MSVS2012DarkColors.HOT_TRACK);
-		public IBackgroundStyle HoveredFocused  { get; } = new BackgroundWithBorder(MSVS2012DarkColors.HOT_TRACK, MSVS2012DarkColors.HIGHLIGHT);
+		public IBackgroundStyle HoveredFocused  { get; } = new BackgroundWithBorder(MSVS2012DarkColors.HOT_TRACK, MSVS2012DarkColors.ACCENT_FILL);
 	}
 
 	public string Name => "MSVS2012DarkStyle";
@@ -52,11 +52,17 @@ sealed class MSVS2012DarkStyle : MSVS2012Style, IGitterStyle
 	public IScrollBarWidget CreateScrollBar(Orientation orientation)
 		=> new CustomScrollBarAdapter(orientation, CustomScrollBarRenderer.MSVS2012Dark);
 
-	public ICheckBoxWidget CreateCheckBox()
-		=> new CustomCheckBoxAdapter(CustomCheckBoxRenderer.MSVS2012Dark);
+	public IFactory<ICheckBoxWidget> CheckBoxFactory
+		=> Controls.CheckBoxFactory.MSVS2012Dark;
 
-	public IButtonWidget CreateButton()
-		=> new CustomButtonAdapter(CustomButtonRenderer.MSVS2012Dark);
+	public IFactory<IRadioButtonWidget> RadioButtonFactory
+		=> Controls.RadioButtonFactory.MSVS2012Dark;
+
+	public IFactory<IButtonWidget> ButtonFactory
+		=> Controls.ButtonFactory.MSVS2012Dark;
+
+	public IFactory<IProgressBarWidget> ProgressBarFactory
+		=> Controls.ProgressBarFactory.MSVS2012Dark;
 
 	public CustomListBoxRenderer ListBoxRenderer
 		=> CustomListBoxManager.MSVS2012DarkRenderer;

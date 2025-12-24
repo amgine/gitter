@@ -30,11 +30,14 @@ class DownloadAndUnzipDriver : IUpdateDriver
 {
 	public string Name => "download+unzip";
 
-	public IUpdateProcess CreateProcess(CommandLine cmdline)
+	public IUpdateProcess? CreateProcess(CommandLine cmdline)
 	{
+		if(cmdline[@"source"] is not { Length: not 0 } source) return default;
+		if(cmdline[@"target"] is not { Length: not 0 } target) return default;
+
 		return new DownloadAndUnzipProcess(
-			downloadUrl:     cmdline[@"source"],
-			targetDirectory: cmdline[@"target"]);
+			downloadUrl:     source,
+			targetDirectory: target);
 	}
 }
 

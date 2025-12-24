@@ -40,7 +40,7 @@ using Resources = gitter.Properties.Resources;
 /// <summary>Main application form.</summary>
 sealed class MainForm : FormEx, IWorkingEnvironment
 {
-	static Icon LoadWindowIcon()
+	static Icon? LoadWindowIcon()
 	{
 		using var stream = typeof(MainForm)
 			.Assembly
@@ -71,13 +71,13 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 	private readonly INotificationService _notificationService;
 	private readonly ViewDockService _viewDockService;
 
-	private readonly Dictionary<string, IRepositoryProvider> _repositoryProviders = new();
-	private readonly Dictionary<string, IRepositoryServiceProvider> _repositoryServiceProviders = new();
-	private IRepositoryProvider _currentProvider;
-	private HashSet<IRepositoryServiceProvider> _activeIssueTrackerProviders = new();
-	private IRepository _repository;
-	private IRepositoryGuiProvider _repositoryGui;
-	private readonly List<IGuiProvider> _additionalGui = new();
+	private readonly Dictionary<string, IRepositoryProvider> _repositoryProviders = [];
+	private readonly Dictionary<string, IRepositoryServiceProvider> _repositoryServiceProviders = [];
+	private IRepositoryProvider? _currentProvider;
+	private readonly HashSet<IRepositoryServiceProvider> _activeRepositoryServiceProviders = [];
+	private IRepository? _repository;
+	private IRepositoryGuiProvider? _repositoryGui;
+	private readonly List<IGuiProvider> _additionalGui = [];
 
 	private string _recentRepositoryPath = string.Empty;
 
@@ -135,14 +135,14 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		_statusStrip.Dock        = DockStyle.None;
 		_statusStrip.LayoutStyle = ToolStripLayoutStyle.HorizontalStackWithOverflow;
 		_statusStrip.Name        = nameof(_statusStrip);
-		_statusStrip.RenderMode  = ToolStripRenderMode.ManagerRenderMode;
-		_statusStrip.Items.AddRange(new ToolStripItem[]
-		{
+		_statusStrip.Renderer    = GitterApplication.Style.ToolStripRenderer;
+		_statusStrip.Items.AddRange(
+		[
 			_statusSeparator = new ToolStripStatusLabel()
 			{
 				Spring = true,
 			},
-		});
+		]);
 
 		ToolStripMenuItem init;
 		ToolStripMenuItem clone;
@@ -151,8 +151,9 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		MainMenuStrip = _menuStrip = new();
 		_menuStrip.SuspendLayout();
 		_menuStrip.Dock = DockStyle.None;
-		_menuStrip.Items.AddRange(new ToolStripItem[]
-		{
+		_menuStrip.Renderer = GitterApplication.Style.ToolStripRenderer;
+		_menuStrip.Items.AddRange(
+		[
 			new ToolStripMenuItem(Resources.StrRepository, null,
 			[
 				init  = new ToolStripMenuItem(Resources.StrInit.AddEllipsis(),  default, OnInitRepositoryClick),
@@ -195,14 +196,13 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 			[
 				new ToolStripMenuItem(Resources.StrAbout.AddEllipsis(), null, _mnuAbout_Click),
 			]),
-		});
+		]);
 
 		_bindings.BindImage(init,  CommonIcons.Init);
 		_bindings.BindImage(clone, CommonIcons.Clone);
 		_bindings.BindImage(open,  Icons.RepositoryOpen);
 
-		_toolStripContainer = new ToolStripContainer();
-		_toolStripContainer.Dock = DockStyle.Fill;
+		_toolStripContainer = new() { Dock = DockStyle.Fill };
 		_toolStripContainer.BottomToolStripPanel.SuspendLayout();
 		_toolStripContainer.ContentPanel.SuspendLayout();
 		_toolStripContainer.TopToolStripPanel.SuspendLayout();
@@ -254,13 +254,7 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 	/// <inheritdoc/>
 	protected override void OnHandleCreated(EventArgs e)
 	{
-		if(Environment.OSVersion.Version.Build >= 22000)
-		{
-			if(GitterApplication.Style.Type == GitterStyleType.DarkBackground)
-			{
-				Utility.UseImmersiveDarkMode(Handle);
-			}
-		}
+		this.EnableImmersiveDarkModeIfNeeded();
 		base.OnHandleCreated(e);
 	}
 
@@ -271,7 +265,7 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 	public IEnumerable<IRepositoryProvider> RepositoryProviders
 		=> _repositoryProviders.Values;
 
-	public T GetRepositoryProvider<T>() where T : class, IRepositoryProvider
+	public T? GetRepositoryProvider<T>() where T : class, IRepositoryProvider
 	{
 		foreach(var prov in RepositoryProviders)
 		{
@@ -284,18 +278,18 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		=> _repositoryServiceProviders.Values;
 
 	public IEnumerable<IRepositoryServiceProvider> ActiveIssueTrackerProviders
-		=> _activeIssueTrackerProviders;
+		=> _activeRepositoryServiceProviders;
 
 	public bool TryLoadIssueTracker(IRepositoryServiceProvider provider)
 	{
 		Verify.Argument.IsNotNull(provider);
 		Verify.State.IsTrue(_repository != null);
 
-		if(!_activeIssueTrackerProviders.Contains(provider) && provider.TryCreateGuiProvider(_repository, out var gui))
+		if(!_activeRepositoryServiceProviders.Contains(provider) && provider.TryCreateGuiProvider(_repository, out var gui))
 		{
 			gui.AttachToEnvironment(this);
 			_additionalGui.Add(gui);
-			_activeIssueTrackerProviders.Add(provider);
+			_activeRepositoryServiceProviders.Add(provider);
 			return true;
 		}
 		else
@@ -320,16 +314,16 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		}
 	}
 
-	private void OnInitRepositoryClick(object sender, EventArgs e)
+	private void OnInitRepositoryClick(object? sender, EventArgs e)
 	{
-		using var dlg = new InitRepositoryDialog(this);
-		dlg.Run(this);
+		using var dialog = new InitRepositoryDialog(this);
+		dialog.Run(this);
 	}
 
-	private void OnCloneRepositoryClick(object sender, EventArgs e)
+	private void OnCloneRepositoryClick(object? sender, EventArgs e)
 	{
-		using var dlg = new CloneRepositoryDialog(this);
-		dlg.Run(this);
+		using var dialog = new CloneRepositoryDialog(this);
+		dialog.Run(this);
 	}
 
 	/// <inheritdoc/>
@@ -339,9 +333,9 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 
 		_viewDockService.ShowView(Guids.RepositoryExplorerView);
 
-		var cd = Directory.GetCurrentDirectory().ToLower();
-		var appPath = Path.GetDirectoryName(Application.ExecutablePath).ToLower();
-		string[] args = null;
+		var cd      = Directory.GetCurrentDirectory().ToLower();
+		var appPath = Path.GetDirectoryName(Application.ExecutablePath)!.ToLower();
+		var args    = default(string[]);
 		try
 		{
 			args = Environment.GetCommandLineArgs();
@@ -351,8 +345,8 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		}
 		if(args is not { Length: > 1 })
 		{
-			if(!cd.EndsWith("\\")) cd += "\\";
-			if(!appPath.EndsWith("\\")) appPath += "\\";
+			if(!cd.EndsWith('\\')) cd += "\\";
+			if(!appPath.EndsWith('\\')) appPath += "\\";
 
 			if(appPath != cd)
 			{
@@ -392,12 +386,12 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 	public INotificationService NotificationService
 		=> _notificationService;
 
-	private void _mnuExit_Click(object sender, EventArgs e)
+	private void _mnuExit_Click(object? sender, EventArgs e)
 	{
 		Close();
 	}
 
-	private void _mnuAbout_Click(object sender, EventArgs e)
+	private void _mnuAbout_Click(object? sender, EventArgs e)
 	{
 		using var dialog = AboutDialogFactory.Create();
 		dialog.Run(this);
@@ -409,12 +403,12 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		dialog.Run(this);
 	}
 
-	private void _mnuOptions_Click(object sender, EventArgs e)
+	private void _mnuOptions_Click(object? sender, EventArgs e)
 	{
 		StartOptionsDialog();
 	}
 
-	private void _mnuOpen_Click(object sender, EventArgs e)
+	private void _mnuOpen_Click(object? sender, EventArgs e)
 	{
 		var path = Utility.ShowPickFolderDialog(this);
 		if(path is not null)
@@ -436,6 +430,7 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 
 	private void LoadGuiView(IRepositoryGuiProvider gui)
 	{
+		if(_currentProvider is null) return;
 		gui.LoadFrom(_configurationService.GetSectionForProviderGui(_currentProvider));
 	}
 
@@ -451,6 +446,7 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 
 	private void SaveGuiView(IRepositoryGuiProvider gui)
 	{
+		if(_currentProvider is null) return;
 		gui.SaveTo(_configurationService.GetSectionForProviderGui(_currentProvider));
 	}
 
@@ -504,16 +500,20 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 					doc.Load(stream);
 				}
 				var node = doc["Recent"];
-				foreach(XmlNode repoNode in node.ChildNodes)
+				if(node is not null)
 				{
-					if(repoNode.Name == "Repository")
+					foreach(XmlNode repoNode in node.ChildNodes)
 					{
-						var path = repoNode.Attributes["Path"].Value;
-						_repositoryManagerService.RecentRepositories.Add(new RepositoryLink(path, @""));
+						if(repoNode.Name == "Repository" && repoNode.NodeType == XmlNodeType.Element)
+						{
+							var path = repoNode.Attributes!["Path"]?.Value;
+							if(path is null) continue;
+							_repositoryManagerService.RecentRepositories.Add(new RepositoryLink(path, @""));
+						}
 					}
 				}
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 			}
 		}
@@ -525,10 +525,10 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 	{
 		var cfgName = "recent.xml";
 		var newdoc = new XmlDocument();
-		var rootnode = newdoc.AppendChild(newdoc.CreateElement("Recent"));
+		var rootnode = newdoc.AppendChild(newdoc.CreateElement("Recent"))!;
 		for(int i = 0; i < _repositoryManagerService.RecentRepositories.Count; ++i)
 		{
-			rootnode.AppendChild(newdoc.CreateElement("Repository")).Attributes.Append(newdoc.CreateAttribute("Path")).Value =
+			rootnode.AppendChild(newdoc.CreateElement("Repository"))!.Attributes!.Append(newdoc.CreateAttribute("Path")).Value =
 				_repositoryManagerService.RecentRepositories[i].Path;
 		}
 		try
@@ -536,7 +536,7 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 			using var stream = _configurationService.CreateFile(cfgName);
 			SaveXml(newdoc, stream);
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 		}
 	}
@@ -573,13 +573,13 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		}
 	}
 
-	private void OnRecentRepositoryClick(object sender, EventArgs e)
+	private void OnRecentRepositoryClick(object? sender, EventArgs e)
 	{
-		var repo = (RepositoryLink)((ToolStripItem)sender).Tag;
+		var repo = (RepositoryLink)((ToolStripItem)sender!).Tag!;
 		OpenRepository(repo.Path);
 	}
 
-	protected override void OnClosing(CancelEventArgs e)
+	protected override void OnFormClosing(FormClosingEventArgs e)
 	{
 		foreach(var provider in _repositoryProviders.Values)
 		{
@@ -598,20 +598,20 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		SaveRecentRepositories();
 		if(_repository is not null)
 		{
-			_currentProvider.CloseRepository(_repository);
+			_currentProvider?.CloseRepository(_repository);
 		}
-		base.OnClosing(e);
+		base.OnFormClosing(e);
 	}
 
 	#region IWorkingEnvironment
 
 	public ViewDockService ViewDockService => _viewDockService;
 
-	public IRepositoryProvider ActiveRepositoryProvider => _currentProvider;
+	public IRepositoryProvider? ActiveRepositoryProvider => _currentProvider;
 
-	public IRepository ActiveRepository => _repository;
+	public IRepository? ActiveRepository => _repository;
 
-	public IRepositoryProvider FindProviderForDirectory(string workingDirectory)
+	public IRepositoryProvider? FindProviderForDirectory(string workingDirectory)
 	{
 		foreach(var prov in _repositoryProviders.Values)
 		{
@@ -638,7 +638,7 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 				gui.DetachFromEnvironment(this);
 			}
 			_additionalGui.Clear();
-			_activeIssueTrackerProviders.Clear();
+			_activeRepositoryServiceProviders.Clear();
 		}
 
 		try
@@ -653,7 +653,7 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		{
 			return false;
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			GitterApplication.MessageBoxService.Show(
 				this,
@@ -684,12 +684,12 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 
 		repositoryProvider.OnRepositoryLoaded(_repository);
 
-		OpenIssueTrackers();
+		OpenIssueTrackers(_repository);
 
 		return true;
 	}
 
-	private void OnRepositoryDeleted(object sender, EventArgs e)
+	private void OnRepositoryDeleted(object? sender, EventArgs e)
 	{
 		if(sender is not IRepository repository) return;
 
@@ -714,20 +714,20 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		}
 	}
 
-	private void OnRecentRepositoriesChanged(object sender, NotifyCollectionEventArgs e)
+	private void OnRecentRepositoriesChanged(object? sender, NotifyCollectionEventArgs e)
 	{
 		UpdateRecentRepositoriesMenu();
 	}
 
-	private void OpenIssueTrackers()
+	private void OpenIssueTrackers(IRepository repository)
 	{
 		foreach(var prov in _repositoryServiceProviders.Values)
 		{
-			if(prov.TryCreateGuiProvider(_repository, out var gui))
+			if(prov.TryCreateGuiProvider(repository, out var gui))
 			{
 				gui.AttachToEnvironment(this);
 				_additionalGui.Add(gui);
-				_activeIssueTrackerProviders.Add(prov);
+				_activeRepositoryServiceProviders.Add(prov);
 			}
 		}
 	}
@@ -757,7 +757,7 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 		{
 			_recentRepositoryPath = path;
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			_recentRepositoryPath = string.Empty;
 		}
@@ -827,7 +827,7 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 			(gui as IDisposable)?.Dispose();
 		}
 		_additionalGui.Clear();
-		_activeIssueTrackerProviders.Clear();
+		_activeRepositoryServiceProviders.Clear();
 
 		Text = Application.ProductName;
 	}
@@ -839,7 +839,7 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 			_repository.Deleted -= OnRepositoryDeleted;
 			//var layout = new ViewLayout(_viewDockService);
 			//layout.SaveTo(_repository.ConfigSection.GetCreateEmptySection("Layout"));
-			_currentProvider.CloseRepository(_repository);
+			_currentProvider?.CloseRepository(_repository);
 			_repository = null;
 		}
 	}
@@ -873,6 +873,7 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 	{
 		Verify.Argument.IsNotNull(toolStrip);
 
+		toolStrip.Renderer = GitterApplication.Style.ToolStripRenderer;
 		if(_toolStripContainer.TopToolStripPanel.Rows.Length > 1)
 		{
 			var row = _toolStripContainer.TopToolStripPanel.Rows[1];
@@ -905,8 +906,8 @@ sealed class MainForm : FormEx, IWorkingEnvironment
 				null,
 				static (sender, e) =>
 				{
-					var item  = (ToolStripMenuItem)sender;
-					var strip = (ToolStrip)item.Tag;
+					var item  = (ToolStripMenuItem)sender!;
+					var strip = (ToolStrip)item.Tag!;
 					strip.Visible = !strip.Visible;
 					item.Checked  = strip.Visible;
 				})

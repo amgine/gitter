@@ -20,17 +20,10 @@
 
 namespace gitter.Git;
 
-using System;
-
-public sealed class BlobData : TreeContentData
+public sealed class BlobData(Sha1Hash hash, int mode, string name, long size)
+	: TreeContentData(hash, mode, name)
 {
-	public BlobData(string hash, int mode, string name, long size)
-		: base(hash, mode, name)
-	{
-		Size = size;
-	}
-
 	public override TreeContentType Type => TreeContentType.Blob;
 
-	public long Size { get; }
+	public long Size { get; } = size;
 }

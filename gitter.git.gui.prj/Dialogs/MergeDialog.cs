@@ -28,6 +28,7 @@ using System.Windows.Forms;
 
 using gitter.Framework;
 using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Mvc;
 using gitter.Framework.Mvc.WinForms;
 using gitter.Framework.Services;
@@ -41,16 +42,10 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public partial class MergeDialog : GitDialogBase, IExecutableDialog, IMergeView
 {
-	#region Helpers
-
-	private sealed class RevisionsInput : ControlInputSource<ReferencesListBox, IList<IRevisionPointer>>
+	private sealed class RevisionsInput(ReferencesListBox referencesListBox)
+		: ControlInputSource<ReferencesListBox, Many<IRevisionPointer>>(referencesListBox)
 	{
 		private bool _multiselect;
-
-		public RevisionsInput(ReferencesListBox referencesListBox)
-			: base(referencesListBox)
-		{
-		}
 
 		public bool Multiselect
 		{
@@ -59,7 +54,7 @@ public partial class MergeDialog : GitDialogBase, IExecutableDialog, IMergeView
 			{
 				if(_multiselect != value)
 				{
-					UnsubscribeToValueChangeEvent();
+					UnsubscribeFromValueChangeEvent();
 					_multiselect = value;
 					SubscribeToValueChangeEvent();
 					if(value)
@@ -87,7 +82,7 @@ public partial class MergeDialog : GitDialogBase, IExecutableDialog, IMergeView
 			}
 		}
 
-		protected override void UnsubscribeToValueChangeEvent()
+		protected override void UnsubscribeFromValueChangeEvent()
 		{
 			if(Multiselect)
 			{
@@ -114,7 +109,7 @@ public partial class MergeDialog : GitDialogBase, IExecutableDialog, IMergeView
 			}
 		}
 
-		protected override IList<IRevisionPointer> FetchValue()
+		protected override Many<IRevisionPointer> FetchValue()
 		{
 			if(Multiselect)
 			{
@@ -125,51 +120,37 @@ public partial class MergeDialog : GitDialogBase, IExecutableDialog, IMergeView
 				}
 				return selectedRevisions;
 			}
-			else
+			if(Control.SelectedItems.Count == 0)
 			{
-				if(Control.SelectedItems.Count == 0)
-				{
-					return null;
-				}
-				else
-				{
-					if(Control.SelectedItems[0] is not IRevisionPointerListItem item)
-					{
-						return null;
-					}
-					var revision = item.RevisionPointer;
-					if(revision is null)
-					{
-						return null;
-					}
-					return new IRevisionPointer[] { revision };
-				}
+				return default;
 			}
+			if(Control.SelectedItems[0] is not IRevisionPointerListItem revItem)
+			{
+				return default;
+			}
+			var revision = revItem.RevisionPointer;
+			if(revision is null) return default;
+			return new(revision);
 		}
 
-		private static void SelItemCheckedState(CustomListBoxItem item, IList<IRevisionPointer> list)
+		private static void SetItemCheckedState(CustomListBoxItem item, Many<IRevisionPointer> list)
 		{
 			if(item.CheckedState != CheckedState.Unavailable)
 			{
 				if(item is IRevisionPointerListItem revPointerlistItem)
 				{
-					if(list is null || !list.Contains(revPointerlistItem.RevisionPointer))
-					{
-						item.CheckedState = CheckedState.Unchecked;
-					}
-					else
-					{
-						item.CheckedState = CheckedState.Checked;
-					}
+					item.CheckedState = list.Contains(revPointerlistItem.RevisionPointer)
+						? CheckedState.Checked
+						: CheckedState.Unchecked;
 				}
 			}
-			foreach(var i in item.Items)
+			foreach(var child in item.Items)
 			{
-				SelItemCheckedState(i, list);
+				SetItemCheckedState(child, list);
 			}
 		}
 
-		private static CustomListBoxItem TryFindItem(CustomListBoxItemsCollection items, IRevisionPointer revisionPointer)
+		private static CustomListBoxItem? TryFindItem(CustomListBoxItemsCollection items, IRevisionPointer revisionPointer)
 		{
 			if(revisionPointer is null)
 			{
@@ -196,13 +177,13 @@ public partial class MergeDialog : GitDialogBase, IExecutableDialog, IMergeView
 			return null;
 		}
 
-		protected override void SetValue(IList<IRevisionPointer> value)
+		protected override void SetValue(Many<IRevisionPointer> value)
 		{
 			if(Multiselect)
 			{
 				foreach(var item in Control.Items)
 				{
-					SelItemCheckedState(item, value);
+					SetItemCheckedState(item, value);
 				}
 			}
 			else
@@ -217,19 +198,149 @@ public partial class MergeDialog : GitDialogBase, IExecutableDialog, IMergeView
 		}
 	}
 
-	#endregion
+	readonly struct DialogControls
+	{
+		public  readonly ReferencesListBox _references;
+		private readonly LabelControl _lblMergeWith;
+		public  readonly ICheckBoxWidget _chkNoFF;
+		public  readonly ICheckBoxWidget _chkNoCommit;
+		public  readonly ICheckBoxWidget _chkSquash;
+		private readonly LabelControl _lblMessage;
+		public  readonly TextBox _txtMessage;
+		public  readonly LinkLabel _lnkAutoFormat;
+		public  readonly GroupSeparator _grpOptions;
 
-	#region Data
+		public DialogControls(IGitterStyle style)
+		{
+			style ??= GitterApplication.Style;
 
+			var cbf = style.CheckBoxFactory;
+			_references = new()
+			{
+				ShowTreeLines  = true,
+				HeaderStyle    = HeaderStyle.Hidden,
+				ItemActivation = gitter.Framework.Controls.ItemActivation.SingleClick,
+				Style          = style,
+			};
+			_lblMergeWith = new();
+			_chkNoFF = cbf.Create();
+			_chkNoCommit = cbf.Create();
+			_chkSquash = cbf.Create();
+			_lblMessage = new();
+			_txtMessage = new()
+			{
+				Multiline = true,
+				AcceptsReturn = true,
+				AcceptsTab = true,
+				WordWrap = false,
+				//ScrollBars = ScrollBars.Vertical,
+			};
+			_lnkAutoFormat = new()
+			{
+				TextAlign       = ContentAlignment.MiddleRight,
+				LinkColor       = style.Colors.HyperlinkText,
+				ActiveLinkColor = style.Colors.HyperlinkTextHotTrack,
+			};
+			_grpOptions = new();
+
+			GitterApplication.FontManager.InputFont.Apply(_txtMessage);
+		}
+
+		public void Localize()
+		{
+			_references.Text = Resources.StrNoBranchesToMergeWith;
+			_lblMergeWith.Text = Resources.StrMergeWith.AddColon();
+			_grpOptions.Text = Resources.StrOptions;
+			_lblMessage.Text = Resources.StrMessage.AddColon();
+			_lnkAutoFormat.Text = Resources.StrAutoFormat;
+			_chkNoFF.Text = Resources.StrsNoFastForward;
+			_chkNoCommit.Text = Resources.StrsNoCommit;
+			_chkSquash.Text = Resources.StrSquash;
+		}
+
+		public void Layout(Control parent)
+		{
+			var messageDec = new TextBoxDecorator(_txtMessage);
+
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					columns:
+					[
+						SizeSpec.Absolute(230),
+						LayoutConstants.RowSpacing,
+						SizeSpec.Everything(),
+					],
+					rows:
+					[
+						LayoutConstants.LabelRowHeight,
+						LayoutConstants.LabelRowSpacing,
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblMergeWith,  marginOverride: LayoutConstants.NoMargin), column: 0, row: 0),
+						new	GridContent(new ControlContent(_references,    marginOverride: LayoutConstants.NoMargin), column: 0, row: 2),
+						new GridContent(new Grid(
+							columns:
+							[
+								SizeSpec.Everything(),
+								SizeSpec.Absolute(50),
+							],
+							content:
+							[
+								new GridContent(new ControlContent(_lblMessage,    marginOverride: LayoutConstants.NoMargin), column: 0),
+								new GridContent(new ControlContent(_lnkAutoFormat, marginOverride: LayoutConstants.NoMargin), column: 1),
+							]), column: 2),
+						new GridContent(new Grid(
+							rows:
+							[
+								SizeSpec.Everything(),
+								LayoutConstants.GroupSeparatorRowHeight,
+								LayoutConstants.CheckBoxRowHeight,
+								LayoutConstants.CheckBoxRowHeight,
+								LayoutConstants.CheckBoxRowHeight,
+							],
+							content:
+							[
+								new GridContent(new ControlContent(messageDec,   marginOverride: LayoutConstants.NoMargin), row: 0),
+								new GridContent(new ControlContent(_grpOptions,  marginOverride: LayoutConstants.NoMargin), row: 1),
+								new GridContent(new WidgetContent (_chkNoFF,     marginOverride: LayoutConstants.GroupPadding), row: 2),
+								new GridContent(new WidgetContent (_chkNoCommit, marginOverride: LayoutConstants.GroupPadding), row: 3),
+								new GridContent(new WidgetContent (_chkSquash,   marginOverride: LayoutConstants.GroupPadding), row: 4),
+							]), column: 2, row: 2),
+					]),
+			};
+
+			var tabIndex = 0;
+			_lblMergeWith.TabIndex = tabIndex++;
+			_references.TabIndex = tabIndex++;
+			_lblMessage.TabIndex = tabIndex++;
+			_lnkAutoFormat.TabIndex = tabIndex++;
+			messageDec.TabIndex = tabIndex++;
+			_grpOptions.TabIndex = tabIndex++;
+			_chkNoFF.TabIndex = tabIndex++;
+			_chkNoCommit.TabIndex = tabIndex++;
+			_chkSquash.TabIndex = tabIndex++;
+
+			_lblMergeWith.Parent = parent;
+			_references.Parent = parent;
+			_lblMessage.Parent = parent;
+			_lnkAutoFormat.Parent = parent;
+			messageDec.Parent = parent;
+			_grpOptions.Parent = parent;
+			_chkNoFF.Parent = parent;
+			_chkNoCommit.Parent = parent;
+			_chkSquash.Parent = parent;
+		}
+	}
+
+	private readonly DialogControls _controls;
 	private readonly Repository _repository;
 	private readonly HashSet<BranchBase> _unmergedBranches;
-	private TextBoxSpellChecker _speller;
+	private readonly TextBoxSpellChecker? _speller;
 	private readonly RevisionsInput _revisionsInput;
 	private readonly IMergeController _controller;
-
-	#endregion
-
-	#region .ctor
 
 	public MergeDialog(Repository repository)
 	{
@@ -237,68 +348,68 @@ public partial class MergeDialog : GitDialogBase, IExecutableDialog, IMergeView
 
 		_repository = repository;
 
-		InitializeComponent();
-		Localize();
+		Name = nameof(MergeDialog);
+		Text = Resources.StrMergeBranches;
+
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		Size                = ScalableSize.GetValue(Dpi.Default);
+		_controls = new(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
+
 		SetupTooltips();
 
 		var inputs = new IUserInputSource[]
 		{
-			_revisionsInput = new RevisionsInput(_references),
-			Message         = new TextBoxInputSource(_txtMessage),
-			NoFastForward   = new CheckBoxInputSource(_chkNoFF),
-			NoCommit        = new CheckBoxInputSource(_chkNoCommit),
-			Squash          = new CheckBoxInputSource(_chkSquash),
+			_revisionsInput = new RevisionsInput(_controls._references),
+			Message         = new TextBoxInputSource(_controls._txtMessage),
+			NoFastForward   = new CheckBoxWidgetInputSource(_controls._chkNoFF),
+			NoCommit        = new CheckBoxWidgetInputSource(_controls._chkNoCommit),
+			Squash          = new CheckBoxWidgetInputSource(_controls._chkSquash),
 		};
 		ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
 		if(SpellingService.Enabled)
 		{
-			_speller = new TextBoxSpellChecker(_txtMessage, true);
+			_speller = new TextBoxSpellChecker(_controls._txtMessage, true);
 		}
 
-		GitterApplication.FontManager.InputFont.Apply(_txtMessage);
+		_unmergedBranches = [.. _repository.Refs.GetUnmergedBranches()];
+		_controls._references.DisableContextMenus = true;
+		_controls._references.LoadData(_repository, ReferenceType.Branch, false, GlobalBehavior.GroupRemoteBranches,
+			reference => reference is BranchBase branch && _unmergedBranches.Contains(branch));
 
-		_unmergedBranches = new HashSet<BranchBase>(_repository.Refs.GetUnmergedBranches());
-		_references.DisableContextMenus = true;
-		_references.Style = GitterApplication.DefaultStyle;
-		_references.LoadData(_repository, ReferenceType.Branch, false, GlobalBehavior.GroupRemoteBranches,
-			reference => _unmergedBranches.Contains(reference as BranchBase));
-
-		_txtMessage.Height = _pnlOptions.Top - _txtMessage.Top - 6;
+		_controls._lnkAutoFormat.LinkClicked += OnAutoFormatLinkClicked;
 
 		_controller = new MergeController(repository) { View = this };
 	}
 
-	#endregion
-
-	#region Methods
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			_speller?.Dispose();
+		}
+		base.Dispose(disposing);
+	}
 
 	/// <inheritdoc/>
 	protected override void OnLoad(EventArgs e)
 	{
 		base.OnLoad(e);
-		BeginInvoke(_txtMessage.Focus);
-	}
-
-	private void Localize()
-	{
-		Text = Resources.StrMergeBranches;
-
-		_references.Text    = Resources.StrNoBranchesToMergeWith;
-		_lblMergeWith.Text  = Resources.StrMergeWith.AddColon();
-		_grpOptions.Text    = Resources.StrOptions;
-		_lblMessage.Text    = Resources.StrMessage.AddColon();
-		_lnkAutoFormat.Text = Resources.StrAutoFormat;
-		_chkNoFF.Text       = Resources.StrsNoFastForward;
-		_chkNoCommit.Text   = Resources.StrsNoCommit;
-		_chkSquash.Text     = Resources.StrSquash;
+		BeginInvoke(_controls._txtMessage.Focus);
 	}
 
 	private void SetupTooltips()
 	{
-		ToolTipService.Register(_chkNoFF, Resources.TipNoFF);
-		ToolTipService.Register(_chkNoCommit, Resources.TipMergeNoCommit);
-		ToolTipService.Register(_chkSquash, Resources.TipSquash);
+		ToolTipService.Register(_controls._chkNoFF.Control, Resources.TipNoFF);
+		ToolTipService.Register(_controls._chkNoCommit.Control, Resources.TipMergeNoCommit);
+		ToolTipService.Register(_controls._chkSquash.Control, Resources.TipSquash);
 	}
 
 	public void EnableMultipleBrunchesMerge()
@@ -309,40 +420,26 @@ public partial class MergeDialog : GitDialogBase, IExecutableDialog, IMergeView
 	private void AutoFormatMessage()
 	{
 		var revisions = Revisions.Value;
-		if(revisions is null || revisions.Count == 0)
+		if(revisions.Count == 0)
 		{
 			return;
 		}
-		if(revisions.Count > 1)
+		try
 		{
-			try
-			{
-				_txtMessage.Text = _repository.Head.FormatMergeMessage(revisions);
-			}
-			catch(Exception exc) when(!exc.IsCritical())
-			{
-			}
+			_controls._txtMessage.Text = _repository.Head.FormatMergeMessage(revisions);
 		}
-		else
+		catch(Exception exc) when(!exc.IsCritical)
 		{
-			try
-			{
-				_txtMessage.Text = _repository.Head.FormatMergeMessage(revisions[0]);
-			}
-			catch(Exception exc) when(!exc.IsCritical())
-			{
-			}
 		}
 	}
 
-	private void OnAutoFormatLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+	private void OnAutoFormatLinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
 	{
 		AutoFormatMessage();
 	}
 
-	#endregion
-
-	#region Properties
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
 
 	/// <inheritdoc/>
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(642, 359));
@@ -350,9 +447,9 @@ public partial class MergeDialog : GitDialogBase, IExecutableDialog, IMergeView
 	/// <inheritdoc/>
 	protected override string ActionVerb => Resources.StrMerge;
 
-	public IUserInputSource<IList<IRevisionPointer>> Revisions => _revisionsInput;
+	public IUserInputSource<Many<IRevisionPointer>> Revisions => _revisionsInput;
 
-	public IUserInputSource<string> Message { get; }
+	public IUserInputSource<string?> Message { get; }
 
 	public IUserInputSource<bool> NoFastForward { get; }
 
@@ -362,12 +459,6 @@ public partial class MergeDialog : GitDialogBase, IExecutableDialog, IMergeView
 
 	public IUserInputErrorNotifier ErrorNotifier { get; }
 
-	#endregion
-
-	#region IExecutableDialog Members
-
 	/// <inheritdoc/>
 	public bool Execute() => _controller.TryMerge();
-
-	#endregion
 }

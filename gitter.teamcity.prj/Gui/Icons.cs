@@ -20,8 +20,6 @@
 
 namespace gitter.TeamCity.Gui;
 
-using System;
-
 using gitter.Framework;
 
 static class Icons

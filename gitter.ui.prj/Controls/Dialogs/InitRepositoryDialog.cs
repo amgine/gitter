@@ -21,7 +21,6 @@
 namespace gitter.Controls;
 
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 
 using gitter.Framework;
@@ -55,7 +54,7 @@ public partial class InitRepositoryDialog : PickerDialog<RepositoryProviderPicke
 		}
 	}
 
-	protected override Control CreateControl(IRepositoryProvider item)
+	protected override Control? CreateControl(IRepositoryProvider item)
 		=> item?.CreateInitDialog();
 
 	public override bool Execute()
@@ -71,7 +70,7 @@ public partial class InitRepositoryDialog : PickerDialog<RepositoryProviderPicke
 			var repositoryPath = initDialog.RepositoryPath.Value;
 			WorkingEnvironment.BeginInvoke(
 				new Func<string, bool>(WorkingEnvironment.OpenRepository),
-				new object[] { repositoryPath });
+				[repositoryPath]);
 		}
 		return true;
 	}

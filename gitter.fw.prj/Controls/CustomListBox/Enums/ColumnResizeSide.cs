@@ -22,6 +22,6 @@ namespace gitter.Framework.Controls;
 
 enum ColumnResizeSide
 {
-    Left,
-    Right
+	Left,
+	Right
 }

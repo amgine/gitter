@@ -43,8 +43,7 @@ sealed class UntrackedFilesPanel : FlowPanel
 
 	private static readonly IDpiBoundValue<int>  LineHeight = DpiBoundValue.ScaleY(16 + 4);
 	private static readonly IDpiBoundValue<Font> Font       = GitterApplication.FontManager.UIFont.ScalableFont;
-	private static int FontHeight = -1;
-	private FileItem[] _items;
+	private readonly FileItem[] _items;
 	private readonly TrackingService<FileItem> _fileHover;
 
 	private sealed class FileItem
@@ -55,7 +54,7 @@ sealed class UntrackedFilesPanel : FlowPanel
 		{
 			Verify.Argument.IsNotNull(file);
 
-			File  = file;
+			File = file;
 			_text = file.RelativePath;
 		}
 
@@ -71,7 +70,7 @@ sealed class UntrackedFilesPanel : FlowPanel
 			{
 				graphics.DrawImage(icon, iconRect);
 			}
-			var overlay = CachedResources.ScaledBitmaps[@"overlays.add", conv.ConvertX(16)];
+			var overlay = Icons.Overlays.Add.GetImage(conv.ConvertX(16));
 			if(overlay is not null)
 			{
 				graphics.DrawImage(overlay, iconRect);
@@ -79,7 +78,7 @@ sealed class UntrackedFilesPanel : FlowPanel
 			var dx = dy + iconSize.Width + conv.ConvertX(3);
 			rect.X     += dx;
 			rect.Width -= dx;
-			dy = (LineHeight.GetValue(conv.To) - FontHeight) / 2;
+			dy = (LineHeight.GetValue(conv.To) - GetFontHeight(conv.To)) / 2;
 			rect.Y      += dy;
 			rect.Height -= dy;
 			GitterApplication.TextRenderer.DrawText(
@@ -94,7 +93,7 @@ sealed class UntrackedFilesPanel : FlowPanel
 
 	public int Count => _items.Length;
 
-	public UntrackedFilesPanel(Status status, IEnumerable<string> paths)
+	public UntrackedFilesPanel(Status status, IEnumerable<string>? paths)
 	{
 		Verify.Argument.IsNotNull(status);
 
@@ -103,39 +102,33 @@ sealed class UntrackedFilesPanel : FlowPanel
 			var items = new List<FileItem>(status.UnstagedUntrackedCount);
 			foreach(var file in status.UnstagedFiles)
 			{
-				if(file.Status == FileStatus.Added)
-				{
-					bool found;
-					if(paths != null)
-					{
-						found = false;
-						foreach(var path in paths)
-						{
-							if(file.RelativePath.StartsWith(path))
-							{
-								found = true;
-								break;
-							}
-						}
-					}
-					else
-					{
-						found = true;
-					}
-					if(found)
-					{
-						items.Add(new FileItem(file));
-					}
-				}
+				if(file.Status != FileStatus.Added) continue;
+				if(!Filter(file, paths)) continue;
+				items.Add(new FileItem(file));
 			}
-			_items = items.ToArray();
+			_items = [.. items];
 		}
 		_fileHover = new TrackingService<FileItem>();
 		_fileHover.Changed += OnFileHoverChanged;
 	}
 
-	private void OnFileHoverChanged(object sender, TrackingEventArgs<FileItem> e)
+	private static bool Filter(TreeFile file, IEnumerable<string>? paths)
 	{
+		if(paths is null) return true;
+		foreach(var path in paths)
+		{
+			if(file.RelativePath.StartsWith(path))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void OnFileHoverChanged(object? sender, TrackingEventArgs<FileItem> e)
+	{
+		if(FlowControl is null) return;
+
 		var h = LineHeight.GetValue(Dpi.FromControl(FlowControl));
 		Invalidate(new Rectangle(0, (e.Index + 1) * h, FlowControl.ContentArea.Width, h));
 		//if(e.IsTracked)
@@ -146,6 +139,8 @@ sealed class UntrackedFilesPanel : FlowPanel
 
 	private int HitTest(int x, int y)
 	{
+		if(FlowControl is null) return -1;
+
 		var dpi     = Dpi.FromControl(FlowControl);
 		var conv    = DpiConverter.FromDefaultTo(dpi);
 		var padding = conv.ConvertX(5);
@@ -164,7 +159,6 @@ sealed class UntrackedFilesPanel : FlowPanel
 
 	protected override void OnMouseMove(int x, int y)
 	{
-		if(FontHeight == -1) return;
 		int id = HitTest(x, y);
 		if(id == -1)
 		{
@@ -193,13 +187,26 @@ sealed class UntrackedFilesPanel : FlowPanel
 		}
 	}
 
+	private static int _fontHeight;
+	private static Dpi _fontHeightDpi;
+
+	private static int GetFontHeight(Dpi dpi)
+	{
+		if(_fontHeightDpi != dpi)
+		{
+			_fontHeight = (int)(GitterApplication.TextRenderer.GetFontHeight(Font.GetValue(dpi)) + 0.5f);
+			_fontHeightDpi = dpi;
+		}
+		return _fontHeight;
+	}
+
 	protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
 	{
 		Assert.IsNotNull(measureEventArgs);
 
+		if(FlowControl is null) return Size.Empty;
+
 		if(_items is not { Length: > 0 }) return Size.Empty;
-		var font = FlowControl.Font;
-		if(FontHeight == -1) FontHeight = (int)(GitterApplication.TextRenderer.GetFontHeight(measureEventArgs.Graphics, font) + 0.5);
 		return new Size(0, (_items.Length + 1) * LineHeight.GetValue(measureEventArgs.Dpi));
 	}
 
@@ -207,16 +214,14 @@ sealed class UntrackedFilesPanel : FlowPanel
 	{
 		Assert.IsNotNull(paintEventArgs);
 
+		if(FlowControl is null) return;
+
 		if(_items is not { Length: > 0 }) return;
 		var graphics = paintEventArgs.Graphics;
-		var conv = DpiConverter.FromDefaultTo(paintEventArgs.Dpi);
-		var rect = paintEventArgs.Bounds;
-		var clip = paintEventArgs.ClipRectangle;
-		var font = Font.GetValue(paintEventArgs.Dpi);
-		if(FontHeight == -1)
-		{
-			FontHeight = (int)(GitterApplication.TextRenderer.GetFontHeight(graphics, font) + 0.5);
-		}
+		var conv   = DpiConverter.FromDefaultTo(paintEventArgs.Dpi);
+		var rect   = paintEventArgs.Bounds;
+		var clip   = paintEventArgs.ClipRectangle;
+		var font   = Font.GetValue(paintEventArgs.Dpi);
 		var h      = LineHeight.GetValue(paintEventArgs.Dpi);
 		var rc     = new Rectangle(rect.X + conv.ConvertX(5), rect.Y, FlowControl.ContentArea.Width - conv.ConvertX(5) * 2, h);
 		var rcClip = Rectangle.Intersect(rc, clip);
@@ -238,7 +243,7 @@ sealed class UntrackedFilesPanel : FlowPanel
 				}
 				if(i == _fileHover.Index)
 				{
-					FlowControl.Style.ItemBackgroundStyles.Hovered.Draw(graphics, conv.To, rc);
+					FlowControl.Style.ItemBackgroundStyles.Hovered.Draw(graphics, new(conv.To, rc, clip));
 				}
 				_items[i].Draw(graphics, font, conv, textBrush, rc, i);
 			}

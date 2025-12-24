@@ -39,28 +39,28 @@ public class TreeFileListItem : TreeItemListItem<TreeFile>
 		_showFullPath = showFullPath;
 	}
 
-	/// <summary>Called when item is attached to listbox.</summary>
-	protected override void OnListBoxAttached()
+	/// <inheritdoc/>
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		DataContext.StagedStatusChanged += OnStagedStatusChanged;
 		DataContext.StatusChanged += OnStatusChanged; 
 	}
 
-	/// <summary>Called when item is detached from listbox.</summary>
-	protected override void OnListBoxDetached()
+	/// <inheritdoc/>
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.StagedStatusChanged -= OnStagedStatusChanged;
 		DataContext.StatusChanged -= OnStatusChanged;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
-	protected virtual void OnStatusChanged(object sender, EventArgs e)
+	protected virtual void OnStatusChanged(object? sender, EventArgs e)
 	{
 		InvalidateSubItemSafe((int)ColumnId.Name);
 	}
 
-	protected virtual void OnStagedStatusChanged(object sender, EventArgs e)
+	protected virtual void OnStagedStatusChanged(object? sender, EventArgs e)
 	{
 		InvalidateSubItemSafe((int)ColumnId.Name);
 	}
@@ -77,7 +77,7 @@ public class TreeFileListItem : TreeItemListItem<TreeFile>
 	//    }
 	//}
 
-	protected override Image GetBitmapIcon(Dpi dpi)
+	protected override Image? GetBitmapIcon(Dpi dpi)
 	{
 		var path = DataContext.RelativePath;
 		return path.EndsWith('/')
@@ -104,13 +104,13 @@ public class TreeFileListItem : TreeItemListItem<TreeFile>
 				return new FileSize(size);
 			}
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 		}
 		return null;
 	}
 
-	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	public override ContextMenuStrip? GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
 		Assert.IsNotNull(requestEventArgs);
 
@@ -134,7 +134,7 @@ public class WorktreeConflictedFileItem : TreeFileListItem
 	{
 	}
 
-	protected override void OnStatusChanged(object sender, EventArgs e)
+	protected override void OnStatusChanged(object? sender, EventArgs e)
 	{
 		if(DataContext.Status != FileStatus.Unmerged)
 		{

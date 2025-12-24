@@ -23,11 +23,9 @@ namespace gitter.Git.Gui.Controls;
 using System;
 using System.Windows.Forms;
 
-public sealed class DiffFileContextMenuRequestedEventArgs : EventArgs
+public sealed class DiffFileContextMenuRequestedEventArgs(DiffFile file) : EventArgs
 {
-	public DiffFileContextMenuRequestedEventArgs(DiffFile file) => File = file;
+	public DiffFile File { get; } = file;
 
-	public DiffFile File { get; }
-
-	public ContextMenuStrip ContextMenu { get; set; }
+	public ContextMenuStrip? ContextMenu { get; set; }
 }

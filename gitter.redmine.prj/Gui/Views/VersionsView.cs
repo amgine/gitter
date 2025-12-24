@@ -20,12 +20,10 @@
 
 namespace gitter.Redmine.Gui;
 
+#nullable enable
+
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Globalization;
-using System.Text;
 using System.Windows.Forms;
 
 using gitter.Framework;
@@ -41,8 +39,8 @@ partial class VersionsView : RedmineViewBase, ISearchableView<VersionsSearchOpti
 	#region Data
 
 	private readonly VersionsToolbar _toolbar;
-	private VersionsSearchToolBar _searchToolbar;
-	private VersionsListBinding _dataSource;
+	private VersionsSearchToolBar? _searchToolbar;
+	private VersionsListBinding? _dataSource;
 
 	#endregion
 
@@ -67,23 +65,16 @@ partial class VersionsView : RedmineViewBase, ISearchableView<VersionsSearchOpti
 
 	public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"versions");
 
-	private VersionsListBinding DataSource
+	private VersionsListBinding? DataSource
 	{
-		get { return _dataSource; }
+		get => _dataSource;
 		set
 		{
-			if(_dataSource != value)
-			{
-				if(_dataSource != null)
-				{
-					_dataSource.Dispose();
-				}
-				_dataSource = value;
-				if(_dataSource != null)
-				{
-					_dataSource.ReloadData();
-				}
-			}
+			if(_dataSource == value) return;
+
+			_dataSource?.Dispose();
+			_dataSource = value;
+			_dataSource?.ReloadData();
 		}
 	}
 
@@ -91,15 +82,14 @@ partial class VersionsView : RedmineViewBase, ISearchableView<VersionsSearchOpti
 
 	#region Methods
 
-	protected override void OnContextAttached()
+	protected override void OnContextAttached(RedmineServiceContext context)
 	{
-		DataSource = new VersionsListBinding(ServiceContext, _lstVersions);
+		DataSource = new VersionsListBinding(context, _lstVersions);
 	}
 
-	private void OnItemActivated(object sender, ItemEventArgs e)
+	private void OnItemActivated(object? sender, ItemEventArgs e)
 	{
-		var item = e.Item as VersionListItem;
-		if(item != null)
+		if(e.Item is VersionListItem item)
 		{
 			ShowVersionDetails(item.DataContext);
 		}
@@ -107,6 +97,8 @@ partial class VersionsView : RedmineViewBase, ISearchableView<VersionsSearchOpti
 
 	private void ShowVersionDetails(ProjectVersion version)
 	{
+		if(ServiceContext is null) return;
+
 		var url = ServiceContext.ServiceUri + "versions/" + version.Id;
 		RedmineServiceProvider.Environment.ViewDockService.ShowWebBrowserView(url);
 	}
@@ -120,7 +112,7 @@ partial class VersionsView : RedmineViewBase, ISearchableView<VersionsSearchOpti
 	protected override void LoadMoreViewFrom(Section section)
 	{
 		var listNode = section.TryGetSection("VersionsList");
-		if(listNode != null)
+		if(listNode is not null)
 		{
 			_lstVersions.LoadViewFrom(listNode);
 		}
@@ -132,7 +124,7 @@ partial class VersionsView : RedmineViewBase, ISearchableView<VersionsSearchOpti
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		switch(e.KeyCode)
 		{
@@ -150,12 +142,7 @@ partial class VersionsView : RedmineViewBase, ISearchableView<VersionsSearchOpti
 	}
 
 	public override void RefreshContent()
-	{
-		if(DataSource != null)
-		{
-			DataSource.ReloadData();
-		}
-	}
+		=> DataSource?.ReloadData();
 
 	#endregion
 
@@ -194,8 +181,7 @@ partial class VersionsView : RedmineViewBase, ISearchableView<VersionsSearchOpti
 		}
 		while(start != end)
 		{
-			var item = _lstVersions.Items[start] as VersionListItem;
-			if(item != null)
+			if(_lstVersions.Items[start] is VersionListItem item)
 			{
 				if(TestItem(item, search))
 				{
@@ -273,7 +259,7 @@ partial class VersionsView : RedmineViewBase, ISearchableView<VersionsSearchOpti
 
 	private void HideSearchToolBar()
 	{
-		if(_searchToolbar != null)
+		if(_searchToolbar is not null)
 		{
 			RemoveToolStrip(_searchToolbar);
 			_searchToolbar.Dispose();

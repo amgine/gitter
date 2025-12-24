@@ -40,7 +40,7 @@ public class TagListItem : ReferenceListItemBase<Tag>
 	}
 
 	/// <inheritdoc/>
-	protected override Image GetImage(Dpi dpi)
+	protected override Image? GetImage(Dpi dpi)
 	{
 		var icon = DataContext.TagType == TagType.Annotated
 			? Icons.TagAnnotated

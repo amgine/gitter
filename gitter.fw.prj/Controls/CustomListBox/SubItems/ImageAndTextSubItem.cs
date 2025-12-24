@@ -28,9 +28,9 @@ public class ImageAndTextSubItem : BaseImageAndTextSubItem
 {
 	#region Data
 
-	private string _text;
-	private Image _image;
-	private Image _overlayImage;
+	private string? _text;
+	private Image? _image;
+	private Image? _overlayImage;
 
 	#endregion
 
@@ -41,7 +41,7 @@ public class ImageAndTextSubItem : BaseImageAndTextSubItem
 	/// <param name="image">Subitem image.</param>
 	/// <param name="overlayImage">Overlay image.</param>
 	/// <param name="text">Subitem text.</param>
-	public ImageAndTextSubItem(int id, Image image, Image overlayImage, string text)
+	public ImageAndTextSubItem(int id, Image? image, Image? overlayImage, string? text)
 		: base(id)
 	{
 		_image = image;
@@ -53,7 +53,7 @@ public class ImageAndTextSubItem : BaseImageAndTextSubItem
 	/// <param name="id">Subitem id.</param>
 	/// <param name="image">Subitem image.</param>
 	/// <param name="text">Subitem text.</param>
-	public ImageAndTextSubItem(int id, Image image, string text)
+	public ImageAndTextSubItem(int id, Image? image, string? text)
 		: this(id, image, null, text)
 	{
 	}
@@ -61,7 +61,7 @@ public class ImageAndTextSubItem : BaseImageAndTextSubItem
 	/// <summary>Create <see cref="ImageAndTextSubItem"/>.</summary>
 	/// <param name="id">Subitem id.</param>
 	/// <param name="image">Subitem image.</param>
-	public ImageAndTextSubItem(int id, Image image)
+	public ImageAndTextSubItem(int id, Image? image)
 		: this(id, image, null)
 	{
 	}
@@ -69,7 +69,7 @@ public class ImageAndTextSubItem : BaseImageAndTextSubItem
 	/// <summary>Create <see cref="ImageAndTextSubItem"/>.</summary>
 	/// <param name="id">Subitem id.</param>
 	/// <param name="text">Subitem text.</param>
-	public ImageAndTextSubItem(int id, string text)
+	public ImageAndTextSubItem(int id, string? text)
 		: this(id, null, text)
 	{
 	}
@@ -84,7 +84,7 @@ public class ImageAndTextSubItem : BaseImageAndTextSubItem
 	#endregion
 
 	/// <summary>Subitem text.</summary>
-	public override string Text
+	public override string? Text
 	{
 		get => _text;
 		set
@@ -95,7 +95,7 @@ public class ImageAndTextSubItem : BaseImageAndTextSubItem
 	}
 
 	/// <summary>Subitem image.</summary>
-	public override Image Image
+	public override Image? Image
 	{
 		get => _image;
 		set
@@ -109,7 +109,7 @@ public class ImageAndTextSubItem : BaseImageAndTextSubItem
 	}
 
 	/// <summary>Subitem overlay image.</summary>
-	public override Image OverlayImage
+	public override Image? OverlayImage
 	{
 		get => _overlayImage;
 		set

@@ -20,20 +20,14 @@
 
 namespace gitter.Git.Gui.Controls;
 
-using System;
-
 using gitter.Framework.Controls;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
 /// <summary>"Committer" column.</summary>
-public sealed class CommitterColumn : UserColumn
+public sealed class CommitterColumn(ISubItemPainter painter, bool visible = false)
+	: UserColumn(painter, (int)ColumnId.Committer, Resources.StrCommitter, visible)
 {
-	public CommitterColumn(ISubItemPainter painter, bool visible = false)
-		: base(painter, (int)ColumnId.Committer, Resources.StrCommitter, visible)
-	{
-	}
-
 	/// <inheritdoc/>
 	public override string IdentificationString => "Committer";
 }

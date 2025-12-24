@@ -20,10 +20,6 @@
 
 namespace gitter.Redmine;
 
-using System;
-using System.Collections.Generic;
-using System.Xml;
-
 public abstract class RedmineObjectModification<T> : RedmineObjectDefinition<T>
 	where T : RedmineObject
 {

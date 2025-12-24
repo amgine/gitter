@@ -49,7 +49,7 @@ public class NotifyCollectionBinding<T> : IDisposable
 		_boundCollection.Changed += OnChanged;
 	}
 
-	private void OnChanged(object sender, NotifyCollectionEventArgs e)
+	private void OnChanged(object? sender, NotifyCollectionEventArgs e)
 	{
 		switch(e.Event)
 		{

@@ -18,8 +18,6 @@
  */
 #endregion
 
-#nullable enable
-
 namespace gitter.Git;
 
 using System;
@@ -88,7 +86,7 @@ public sealed class TreeFile : TreeItem
 	private void UseTheirs()
 	{
 		Repository.Accessor.CheckoutFiles.Invoke(
-			new CheckoutFilesParameters(RelativePath)
+			new CheckoutFilesRequest(RelativePath)
 			{
 				Mode = CheckoutFileMode.Theirs
 			});
@@ -97,7 +95,7 @@ public sealed class TreeFile : TreeItem
 	private void UseOurs()
 	{
 		Repository.Accessor.CheckoutFiles.Invoke(
-			new CheckoutFilesParameters(RelativePath)
+			new CheckoutFilesRequest(RelativePath)
 			{
 				Mode = CheckoutFileMode.Ours
 			});
@@ -114,7 +112,7 @@ public sealed class TreeFile : TreeItem
 				RepositoryNotifications.WorktreeUpdated))
 			{
 				Repository.Accessor.RunMergeTool.Invoke(
-					new RunMergeToolParameters(RelativePath)
+					new RunMergeToolRequest(RelativePath)
 					{
 						Tool = mergeTool?.Name,
 					});
@@ -135,7 +133,7 @@ public sealed class TreeFile : TreeItem
 			RepositoryNotifications.WorktreeUpdated);
 		return Repository.Accessor
 			.RunMergeTool.InvokeAsync(
-				new RunMergeToolParameters(RelativePath)
+				new RunMergeToolRequest(RelativePath)
 				{
 					Tool = mergeTool?.Name,
 				},

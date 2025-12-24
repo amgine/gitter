@@ -22,7 +22,6 @@ namespace gitter.Git.Gui.Views;
 
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.Windows.Forms;
 
 using gitter.Framework;
@@ -54,9 +53,11 @@ internal sealed class ConfigToolBar : ToolStrip
 		_dpiBindings.BindImage(_btnConfigAdd, Icons.ConfigAdd);
 	}
 
-	private void OnAddParameterButtonClick(object sender, EventArgs e)
+	private void OnAddParameterButtonClick(object? sender, EventArgs e)
 	{
-		using var dlg = new AddParameterDialog(_configView.WorkingEnvironment, _configView.Repository);
-		dlg.Run(_configView);
+		if(_configView.Repository is null) return;
+
+		using var dialog = new AddParameterDialog(_configView.WorkingEnvironment, _configView.Repository);
+		dialog.Run(_configView);
 	}
 }

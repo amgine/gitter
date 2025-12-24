@@ -41,7 +41,7 @@ sealed class StatusToolTip : CustomToolTip
 		public IImageProvider ImageOverlay;
 	}
 
-	private List<TextEntry> _textEntries;
+	private List<TextEntry>? _textEntries;
 	private Dpi _cachedDpi;
 	private Size _cachedSize;
 	private int _rowHeight;
@@ -146,11 +146,9 @@ sealed class StatusToolTip : CustomToolTip
 		return textEntries;
 	}
 
-	public override Size Measure(Control control)
+	public override Size Measure(Control? control)
 	{
-		var dpi = control is not null
-			? Dpi.FromControl(control)
-			: Dpi.Default;
+		var dpi = Dpi.FromControlOrSystem(control);
 
 		if(dpi == _cachedDpi) return _cachedSize;
 
@@ -211,15 +209,15 @@ sealed class StatusToolTip : CustomToolTip
 
 		if(_textEntries is not { Count: > 0 }) return;
 
-		var dpi = e.AssociatedControl is not null
-			? Dpi.FromControl(e.AssociatedControl)
-			: Dpi.System;
+		var dpi  = Dpi.FromControlOrSystem(e.AssociatedControl);
 		var conv = DpiConverter.FromDefaultTo(dpi);
 
 		var gx       = e.Graphics;
 		var font     = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi);
 		var y        = conv.ConvertY(VerticalMargin);
 		var iconSize = conv.ConvertX(16);
+		var color    = Style.Colors.WindowText;
+
 		foreach(var entry in _textEntries)
 		{
 			var x = HorizontalMargin;
@@ -236,12 +234,12 @@ sealed class StatusToolTip : CustomToolTip
 				x += image.Width + conv.ConvertX(3);
 			}
 			GitterApplication.TextRenderer.DrawText(
-				gx, entry.Text1, font, SystemBrushes.InfoText, x, y, StringFormat.GenericTypographic);
-			if(entry.Text2 != null)
+				gx, entry.Text1, font, color, x, y, StringFormat.GenericTypographic);
+			if(entry.Text2 is { Length: not 0 } text2)
 			{
 				x = HorizontalMargin + _colWidth;
 				GitterApplication.TextRenderer.DrawText(
-					gx, entry.Text2, font, SystemBrushes.InfoText, x, y, StringFormat.GenericTypographic);
+					gx, text2, font, color, x, y, StringFormat.GenericTypographic);
 			}
 			y += _rowHeight + conv.ConvertY(VerticalSpacing);
 		}

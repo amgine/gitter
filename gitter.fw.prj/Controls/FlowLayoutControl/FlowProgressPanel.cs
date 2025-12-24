@@ -23,33 +23,39 @@ namespace gitter.Framework.Controls;
 using System;
 using System.Drawing;
 
-public class FlowProgressPanel : FlowPanel
+public class FlowProgressPanel : FlowPanel, IProgress<OperationProgress>
 {
-	private readonly ProcessOverlay _overlay;
+	private ProcessOverlay? _overlay;
 	private int _height;
 
 	/// <summary>Create <see cref="FlowProgressPanel"/>.</summary>
 	public FlowProgressPanel()
 	{
 		_height = 150;
-		_overlay = new ProcessOverlay()
+	}
+
+	protected override void OnFlowControlAttached(FlowLayoutControl flowControl)
+	{
+		if(_overlay is null)
 		{
-			DisableHost = false,
-			InvalidateHost = false,
-		};
-		_overlay.RepaintRequired += (sender, e) => InvalidateSafe();
+			_overlay = new ProcessOverlay()
+			{
+				DisableHost    = false,
+				InvalidateHost = false,
+			};
+			_overlay.RepaintRequired += (_, _) => InvalidateSafe();
+		}
+		_overlay.Renderer    = flowControl.Style.OverlayRenderer;
+		_overlay.HostControl = flowControl;
 	}
 
-	protected override void OnFlowControlAttached()
+	protected override void OnFlowControlDetached(FlowLayoutControl flowControl)
 	{
-		_overlay.Renderer = FlowControl.Style.OverlayRenderer;
-		_overlay.HostControl = FlowControl;
-	}
-
-	protected override void OnFlowControlDetached()
-	{
-		_overlay.HostControl = null;
-		_overlay.Renderer = null;
+		if(_overlay is not null)
+		{
+			_overlay.Dispose();
+			_overlay = null;
+		}
 	}
 
 	public int Height
@@ -67,9 +73,7 @@ public class FlowProgressPanel : FlowPanel
 		}
 	}
 
-	public string Message { get; set; }
-
-	public IProgress<OperationProgress> ProgressMonitor => _overlay;
+	public string? Message { get; set; }
 
 	protected override Size OnMeasure(FlowPanelMeasureEventArgs measureEventArgs)
 	{
@@ -81,7 +85,7 @@ public class FlowProgressPanel : FlowPanel
 		var graphics = paintEventArgs.Graphics;
 		var rect = paintEventArgs.Bounds;
 
-		var mw = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width);
+		var mw = Math.Max(FlowControl!.ContentSize.Width, FlowControl!.ContentArea.Width);
 		var w = mw - 5 * 2;
 		int h = _height  - 5 * 2;
 		if(w > 300) w = 300;
@@ -90,19 +94,19 @@ public class FlowProgressPanel : FlowPanel
 			rect.X + (mw - w) / 2,
 			rect.Y + (rect.Height - h) / 2,
 			w, h);
-		if(_overlay != null)
+		if(_overlay is not null)
 		{
 			if(_overlay.IsVisible)
 			{
 				_overlay.OnPaint(graphics, rc);
 			}
-			else
+			else if(Message is { Length: not 0 } message)
 			{
-				if(!string.IsNullOrEmpty(Message))
-				{
-					_overlay.DrawMessage(graphics, rc, Message);
-				}
+				_overlay.DrawMessage(graphics, rc, message);
 			}
 		}
 	}
+
+	void IProgress<OperationProgress>.Report(OperationProgress value)
+		=> _overlay?.Report(value);
 }

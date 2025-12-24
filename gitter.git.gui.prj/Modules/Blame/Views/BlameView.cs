@@ -34,7 +34,7 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 internal partial class BlameView : GitViewBase
 {
 	private BlameViewer _blameViewer;
-	private BlameFileBinding _blameFileBinding;
+	private BlameFileBinding? _blameFileBinding;
 
 	public BlameView(GuiProvider gui)
 		: base(Guids.BlameViewGuid, gui)
@@ -69,17 +69,16 @@ internal partial class BlameView : GitViewBase
 
 	public override bool IsDocument => true;
 
-	private BlameFileBinding BlameFileBinding
+	private BlameFileBinding? BlameFileBinding
 	{
 		get => _blameFileBinding;
 		set
 		{
-			if(_blameFileBinding != value)
-			{
-				_blameFileBinding?.Dispose();
-				_blameFileBinding = value;
-				_blameFileBinding?.ReloadData();
-			}
+			if(_blameFileBinding == value) return;
+
+			_blameFileBinding?.Dispose();
+			_blameFileBinding = value;
+			_blameFileBinding?.ReloadData();
 		}
 	}
 

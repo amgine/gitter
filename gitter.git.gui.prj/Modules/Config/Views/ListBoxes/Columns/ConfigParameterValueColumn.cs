@@ -21,9 +21,8 @@
 namespace gitter.Git.Gui.Controls;
 
 using System;
-using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.Text;
 
 using gitter.Framework;
 using gitter.Framework.Controls;
@@ -45,7 +44,7 @@ public class ConfigParameterValueColumn : CustomListBoxColumn
 	{
 	}
 
-	private static bool TryGetContent(CustomListBoxItem item, out string value)
+	private static bool TryGetContent(CustomListBoxItem item, [MaybeNullWhen(returnValue: false)] out string value)
 	{
 		if(item is ConfigParameterListItem cpli)
 		{

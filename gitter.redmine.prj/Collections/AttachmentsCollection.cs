@@ -20,10 +20,9 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Globalization;
 using System.Xml;
 
 public class AttachmentsCollection : RedmineObjectsCache<Attachment>
@@ -34,12 +33,8 @@ public class AttachmentsCollection : RedmineObjectsCache<Attachment>
 	}
 
 	protected override Attachment Create(int id)
-	{
-		return new Attachment(Context, id);
-	}
+		=> new(Context, id);
 
 	protected override Attachment Create(XmlNode node)
-	{
-		return new Attachment(Context, node);
-	}
+		=> new(Context, node);
 }

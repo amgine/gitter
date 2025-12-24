@@ -22,10 +22,5 @@ namespace gitter.Git.Gui.Views;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class BlameViewFactory : GitViewFactoryBase<BlameView>
-{
-	public BlameViewFactory()
-		: base(Guids.BlameViewGuid, Resources.StrBlame, Icons.Blame)
-	{
-	}
-}
+sealed class BlameViewFactory() : GitViewFactoryBase<BlameView>(
+	Guids.BlameViewGuid, Resources.StrBlame, Icons.Blame);

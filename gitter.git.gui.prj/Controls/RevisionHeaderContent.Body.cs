@@ -30,20 +30,16 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 
 partial class RevisionHeaderContent
 {
-	sealed class BodyElement : TextWithHyperlinksElementBase
+	sealed class BodyElement(RevisionHeaderContent owner)
+		: TextWithHyperlinksElementBase(owner, Resources.StrBody.AddColon())
 	{
-		public BodyElement(RevisionHeaderContent owner)
-			: base(owner, Resources.StrBody.AddColon())
-		{
-		}
-
 		public override bool IsAvailableFor(Revision revision)
-		{
-			return !string.IsNullOrEmpty(revision.Body);
-		}
+			=> !string.IsNullOrEmpty(revision.Body);
 
-		public override Element Element => Element.Body;
+		public override Element Element
+			=> Element.Body;
 
-		protected override string GetText(Revision revision) => revision.Body;
+		protected override string GetText(Revision revision)
+			=> revision.Body;
 	}
 }

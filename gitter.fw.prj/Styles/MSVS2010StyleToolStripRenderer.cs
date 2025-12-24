@@ -25,8 +25,6 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-using Resources = gitter.Framework.Properties.Resources;
-
 sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 {
 	private static class ColorTable
@@ -82,11 +80,23 @@ sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 		using var stream = typeof(MSVS2010StyleToolStripRenderer)
 			.Assembly
 			.GetManifestResourceStream(@"gitter.Framework.Resources.images." + name + ".png");
-		if(stream is null) return default;
+		if(stream is null) throw new ApplicationException($"Missing resource '{name}'.");
 		return new Bitmap(stream);
 	}
 
 	private static readonly Bitmap ImgMenuCheck = LoadBitmap(@"menu-check");
+
+	protected override void Initialize(ToolStrip toolStrip)
+	{
+		base.Initialize(toolStrip);
+
+		toolStrip.Font = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(Dpi.FromControl(toolStrip));
+		toolStrip.DpiChangedAfterParent += (s, _) =>
+		{
+			if(s is not ToolStrip ts) return;
+			ts.Font = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(Dpi.FromControl(ts));
+		};
+	}
 
 	#region Stage 1 - Container Backgrounds
 
@@ -219,15 +229,17 @@ sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 
 	protected override void OnRenderButtonBackground(ToolStripItemRenderEventArgs e)
 	{
-		var item = e.Item as ToolStripButton;
+		if(e.Item is not ToolStripButton item) return;
+
 		RenderItemBackgroundInternal(e.Graphics, item.Width, item.Height, item.Pressed, item.Selected || item.Checked);
 	}
 
 	protected override void OnRenderDropDownButtonBackground(ToolStripItemRenderEventArgs e)
 	{
-		var item = e.Item as ToolStripDropDownButton;
+		if(e.Item is not ToolStripDropDownButton item) return;
+
 		RenderItemBackgroundInternal(e.Graphics, item.Width, item.Height, item.Pressed, item.Selected && item.Enabled);
-		Rectangle arrowBounds = new Rectangle(item.Width - 16, 0, 16, item.Height);
+		var arrowBounds = new Rectangle(item.Width - 16, 0, 16, item.Height);
 
 		DrawArrow(new ToolStripArrowRenderEventArgs(
 			e.Graphics, e.Item,
@@ -252,13 +264,15 @@ sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 
 	protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
 	{
-		var item = e.Item as ToolStripMenuItem;
+		if(e.Item is not ToolStripMenuItem item) return;
+
 		RenderMenuItemBackgroundInternal(e.Graphics, 0, 0, item.Width, item.Height, item.Pressed, item.Selected && item.Enabled, e.ToolStrip is MenuStrip);
 	}
 
 	protected override void OnRenderSplitButtonBackground(ToolStripItemRenderEventArgs e)
 	{
-		var splitButton = e.Item as ToolStripSplitButton;
+		if(e.Item is not ToolStripSplitButton splitButton) return;
+
 		if(splitButton.DropDownButtonPressed)
 		{
 			RenderItemBackgroundInternal(e.Graphics, e.Item.Width, e.Item.Height, true, e.Item.Selected);
@@ -297,10 +311,8 @@ sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 
 	protected override void OnRenderToolStripStatusLabelBackground(ToolStripItemRenderEventArgs e)
 	{
-		using(var b = new SolidBrush(ColorTable.StatusLabelBackground))
-		{
-			e.Graphics.FillRectangle(b, e.Item.Bounds);
-		}
+		using var b = SolidBrushCache.Get(ColorTable.StatusLabelBackground);
+		e.Graphics.FillRectangle(b, e.Item.Bounds);
 	}
 
 	#endregion
@@ -309,23 +321,22 @@ sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 
 	protected override void OnRenderItemImage(ToolStripItemImageRenderEventArgs e)
 	{
-		if(e.Image != null)
+		if(e.Image is null) return;
+
+		var item = e.Item as ToolStripMenuItem;
+		if(item is { Checked: true })
 		{
-			var item = e.Item as ToolStripMenuItem;
-			if(item != null && item.Checked)
-			{
-				RenderItemBackgroundInternal(e.Graphics,
-					e.ImageRectangle.X - 2,
-					e.ImageRectangle.Y - 2,
-					e.ImageRectangle.Width + 4,
-					e.ImageRectangle.Height + 4,
-					true, false);
-			}
-			if(!e.Item.Enabled)
-				base.OnRenderItemImage(e);
-			else
-				e.Graphics.DrawImage(e.Image, e.ImageRectangle);
+			RenderItemBackgroundInternal(e.Graphics,
+				e.ImageRectangle.X - 2,
+				e.ImageRectangle.Y - 2,
+				e.ImageRectangle.Width + 4,
+				e.ImageRectangle.Height + 4,
+				true, false);
 		}
+		if(!e.Item.Enabled)
+			base.OnRenderItemImage(e);
+		else
+			e.Graphics.DrawImage(e.Image, e.ImageRectangle);
 	}
 
 	protected override void OnRenderItemCheck(ToolStripItemImageRenderEventArgs e)
@@ -335,7 +346,7 @@ sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 			backColor = ColorTable.CheckboxSelected;
 		else
 			backColor = ColorTable.CheckboxNormal;
-		using(var brush = new SolidBrush(backColor))
+		using(var brush = SolidBrushCache.Get(backColor))
 		{
 			e.Graphics.FillRectangle(brush, e.ImageRectangle);
 		}
@@ -353,7 +364,7 @@ sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 
 	protected override void OnRenderArrow(ToolStripArrowRenderEventArgs e)
 	{
-		if(e.Item.Enabled)
+		if(e.Item is { Enabled: true })
 			e.ArrowColor = Color.Black;
 		else
 			e.ArrowColor = SystemColors.GrayText;
@@ -432,7 +443,7 @@ sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 		}
 		else
 		{
-			using(var brush = new SolidBrush(ColorTable.PanelBackground))
+			using(var brush = SolidBrushCache.Get(ColorTable.PanelBackground))
 			{
 				e.Graphics.FillRectangle(brush, e.AffectedBounds);
 			}
@@ -442,7 +453,7 @@ sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 			rc.Height -= 2;
 			using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
 			using(var p = new Pen(ColorTable.ToolStripBorder))
-			using(var b = new SolidBrush(ColorTable.ToolStripBackground))
+			using(var b = SolidBrushCache.Get(ColorTable.ToolStripBackground))
 			{
 				graphics.FillRoundedRectangle(b, p, rc, 3);
 			}
@@ -451,7 +462,8 @@ sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 
 	private static void RenderDropDownBorder(ToolStripRenderEventArgs e)
 	{
-		var strip = e.ToolStrip as ToolStripDropDown;
+		if(e.ToolStrip is not ToolStripDropDown strip) return;
+
 		var rc = new Rectangle(0, 0, e.ToolStrip.Width - 1, e.ToolStrip.Height - 1);
 		using(var pen = new Pen(ColorTable.DropDownBorder))
 		{
@@ -459,12 +471,10 @@ sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 		}
 		if(strip.OwnerItem != null && strip.OwnerItem.Owner is MenuStrip)
 		{
-			using(var brush = new SolidBrush(ColorTable.DropDownBackgroundStart))
-			{
-				rc = e.ConnectedArea;
-				rc.Width -= 1;
-				e.Graphics.FillRectangle(brush, rc);
-			}
+			using var brush = SolidBrushCache.Get(ColorTable.DropDownBackgroundStart);
+			rc = e.ConnectedArea;
+			rc.Width -= 1;
+			e.Graphics.FillRectangle(brush, rc);
 		}
 	}
 
@@ -477,7 +487,7 @@ sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 			{
 				rc.Height += 4;
 				using(var pen = new Pen(ColorTable.RootMenuItemPressedBorder))
-				using(var brush = new SolidBrush(ColorTable.RootMenuItemPressedBackground))
+				using(var brush = SolidBrushCache.Get(ColorTable.RootMenuItemPressedBackground))
 				{
 					graphics.FillRoundedRectangle(brush, pen, rc, 2);
 				}
@@ -533,7 +543,7 @@ sealed class MSVS2010StyleToolStripRenderer : ToolStripRenderer
 			rc.Offset(1, 1);
 			rc.Width -= 1;
 			rc.Height -= 1;
-			using(var brush = new SolidBrush(ColorTable.ItemPressedBackground))
+			using(var brush = SolidBrushCache.Get(ColorTable.ItemPressedBackground))
 			{
 				graphics.FillRectangle(brush, rc);
 			}

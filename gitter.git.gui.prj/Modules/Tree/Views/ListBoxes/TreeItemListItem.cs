@@ -27,8 +27,6 @@ using System.Windows.Forms;
 using gitter.Framework;
 using gitter.Framework.Controls;
 
-using Resources = gitter.Git.Gui.Properties.Resources;
-
 public static class TreeItemListItem
 {
 	public static int CompareByName(ITreeItemListItem item1, ITreeItemListItem item2)
@@ -58,7 +56,7 @@ public static class TreeItemListItem
 				? CompareByName(i1, i2)
 				: 0;
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			return 0;
 		}
@@ -91,7 +89,7 @@ public static class TreeItemListItem
 				? CompareByRelativePath(i1, i2)
 				: 0;
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			return 0;
 		}
@@ -103,7 +101,7 @@ public abstract class TreeItemListItem<T> : CustomListBoxItem<T>, ITreeItemListI
 {
 	#region Data
 
-	private string _type;
+	private string? _type;
 	private FileSize? _size;
 	private bool _cachedInfo;
 	private bool _showFullPath;
@@ -120,32 +118,28 @@ public abstract class TreeItemListItem<T> : CustomListBoxItem<T>, ITreeItemListI
 		_showFullPath = showFullPath;
 	}
 
-	/// <summary>
-	/// Called when item is attached to listbox.
-	/// </summary>
-	protected override void OnListBoxAttached()
+	/// <inheritdoc/>
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		DataContext.Deleted += OnDeleted;
 	}
 
-	/// <summary>
-	/// Called when item is detached from listbox.
-	/// </summary>
-	protected override void OnListBoxDetached()
+	/// <inheritdoc/>
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.Deleted -= OnDeleted;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
-	private void OnDeleted(object sender, EventArgs e)
+	private void OnDeleted(object? sender, EventArgs e)
 	{
 		RemoveSafe();
 	}
 
-	protected virtual Icon GetIcon() => null;
+	protected virtual Icon? GetIcon() => null;
 
-	protected virtual Image GetBitmapIcon(Dpi dpi) => null;
+	protected virtual Image? GetBitmapIcon(Dpi dpi) => null;
 
 	protected abstract FileSize? GetSize();
 
@@ -154,7 +148,7 @@ public abstract class TreeItemListItem<T> : CustomListBoxItem<T>, ITreeItemListI
 	private string GetItemText()
 		=> _showFullPath ? DataContext.RelativePath : DataContext.Name;
 
-	private Bitmap GetItemOverlay(Dpi dpi)
+	private Bitmap? GetItemOverlay(Dpi dpi)
 	{
 		var name = DataContext.Status switch
 		{
@@ -242,7 +236,7 @@ public abstract class TreeItemListItem<T> : CustomListBoxItem<T>, ITreeItemListI
 	/// <summary>Gets the context menu.</summary>
 	/// <param name="requestEventArgs">Request parameters.</param>
 	/// <returns>Context menu for specified location.</returns>
-	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	public override ContextMenuStrip? GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
 		Assert.IsNotNull(requestEventArgs);
 

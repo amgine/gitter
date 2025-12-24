@@ -22,11 +22,6 @@ namespace gitter.GitLab.Api;
 
 using System;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
-using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 [DataContract]
 sealed class Issue : ModifiableObject
@@ -54,146 +49,74 @@ sealed class Issue : ModifiableObject
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Confidential)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Confidential)]
-#endif
 	public bool Confidential { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Assignees)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Assignees)]
-#endif
-	public Assignee[] Assignees { get; set; }
+	public Assignee[]? Assignees { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Assignee)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Assignee)]
-#endif
-	public Assignee Assignee { get; set; }
+	public Assignee? Assignee { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Author)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Author)]
-#endif
-	public Assignee Author { get; set; }
+	public Assignee Author { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Description)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Description)]
-#endif
-	public string Description { get; set; }
+	public string Description { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.DueDate)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.DueDate)]
-#endif
-	public string DueDate { get; set; }
+	public string? DueDate { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.ProjectId)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.ProjectId)]
-#endif
 	public long ProjectId { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Labels)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Labels)]
-#endif
-	public string[] Labels { get; set; }
+	public string[]? Labels { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Milestone)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Milestone)]
-#endif
-	public Milestone Milestone { get; set; }
+	public Milestone? Milestone { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.ClosedAt)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.ClosedAt)]
-#endif
 	public DateTime? ClosedAt { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.ClosedBy)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.ClosedBy)]
-#endif
-	public ClosedBy ClosedBy { get; set; }
+	public ClosedBy? ClosedBy { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Title)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Title)]
-#endif
-	public string Title { get; set; }
+	public string Title { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.UserNotesCount)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.UserNotesCount)]
-#endif
 	public int UserNotesCount { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.State)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.State)]
-#endif
 	public IssueState State { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.WebUrl)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.WebUrl)]
-#endif
-	public string WebUrl { get; set; }
+	public string WebUrl { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Weight)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Weight)]
-#endif
 	public int? Weight { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.TimeStats)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.TimeStats)]
-#endif
-	public IssueTimeStatistic TimeStats { get; set; }
+	public IssueTimeStatistic? TimeStats { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.TaskCompletionStatus)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.TaskCompletionStatus)]
-#endif
-	public IssueTaskCompletionStatus TaskCompletionStatus { get; set; }
+	public IssueTaskCompletionStatus? TaskCompletionStatus { get; set; }
 }

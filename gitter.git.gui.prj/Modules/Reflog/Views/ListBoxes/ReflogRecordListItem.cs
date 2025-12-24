@@ -22,7 +22,7 @@ namespace gitter.Git.Gui.Controls;
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Forms;
 
 using gitter.Framework;
@@ -33,7 +33,7 @@ public class ReflogRecordListItem : RevisionPointerListItemBase<ReflogRecord>
 {
 	#region Static
 
-	private static IImageProvider GetImage(string message)
+	private static IImageProvider? GetImage(string message)
 	{
 		if(string.IsNullOrWhiteSpace(message))
 		{
@@ -104,12 +104,6 @@ public class ReflogRecordListItem : RevisionPointerListItemBase<ReflogRecord>
 
 	#endregion
 
-	#region Data
-
-	private readonly List<PointerBounds> _drawnPointers = new();
-
-	#endregion
-
 	#region .ctor
 
 	/// <summary>Create <see cref="RevisionListItem"/>.</summary>
@@ -124,9 +118,9 @@ public class ReflogRecordListItem : RevisionPointerListItemBase<ReflogRecord>
 
 	#region Properties
 
-	public IImageProvider ImageProvider { get; private set; }
+	public IImageProvider? ImageProvider { get; private set; }
 
-	public List<PointerBounds> DrawnPointers => _drawnPointers;
+	public List<PointerBounds>? DrawnPointers { get; set; }
 
 	#endregion
 
@@ -134,12 +128,12 @@ public class ReflogRecordListItem : RevisionPointerListItemBase<ReflogRecord>
 
 	private void UpdateImage() => ImageProvider = GetImage(DataContext.Message);
 
-	private void OnDeleted(object sender, EventArgs e)
+	private void OnDeleted(object? sender, EventArgs e)
 	{
 		RemoveSafe();
 	}
 
-	private void OnMessageChanged(object sender, EventArgs e)
+	private void OnMessageChanged(object? sender, EventArgs e)
 	{
 		UpdateImage();
 		InvalidateSubItemSafe((int)ColumnId.Message);
@@ -150,30 +144,33 @@ public class ReflogRecordListItem : RevisionPointerListItemBase<ReflogRecord>
 	#region Overrides
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		DataContext.Deleted        += OnDeleted;
 		DataContext.MessageChanged += OnMessageChanged;
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.Deleted        -= OnDeleted;
 		DataContext.MessageChanged -= OnMessageChanged;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
 	/// <inheritdoc/>
 	protected override int OnHitTest(int x, int y)
 	{
-		for(int i = 0; i < _drawnPointers.Count; ++i)
+		if(DrawnPointers is not null)
 		{
-			var rc = _drawnPointers[i].Bounds;
-			if(rc.X <= x && rc.Right > x)
+			for(int i = 0; i < DrawnPointers.Count; ++i)
 			{
-				return SubjectColumn.PointerTagHitOffset + i;
+				var rc = DrawnPointers[i].Bounds;
+				if(rc.X <= x && rc.Right > x)
+				{
+					return SubjectColumn.PointerTagHitOffset + i;
+				}
 			}
 		}
 		return base.OnHitTest(x, y);
@@ -190,7 +187,7 @@ public class ReflogRecordListItem : RevisionPointerListItemBase<ReflogRecord>
 			case ColumnId.Subject:
 				var x = requestEventArgs.X - requestEventArgs.ItemBounds.X;
 				var y = requestEventArgs.Y - requestEventArgs.ItemBounds.Y;
-				menu = PointerBounds.GetContextMenu(_drawnPointers, x, y);
+				menu = PointerBounds.GetContextMenu(DrawnPointers, x, y);
 				break;
 		}
 		menu ??= new ReflogRecordMenu(DataContext);

@@ -39,7 +39,7 @@ public class BranchListItem : ReferenceListItemBase<Branch>
 		Verify.Argument.IsNotNull(branch);
 	}
 
-	private void OnRenamed(object sender, EventArgs e)
+	private void OnRenamed(object? sender, EventArgs e)
 	{
 		if(EnsureSortOrderSafe())
 		{
@@ -47,20 +47,20 @@ public class BranchListItem : ReferenceListItemBase<Branch>
 		}
 	}
 
-	protected override Image GetImage(Dpi dpi)
+	protected override Image? GetImage(Dpi dpi)
 		=> Icons.Branch.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		DataContext.Renamed += OnRenamed;
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 		DataContext.Renamed -= OnRenamed;
 	}
 
@@ -69,8 +69,8 @@ public class BranchListItem : ReferenceListItemBase<Branch>
 	/// <returns>Context menu for specified location.</returns>
 	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
-		var mnu = new BranchMenu(DataContext);
-		Utility.MarkDropDownForAutoDispose(mnu);
-		return mnu;
+		var menu = new BranchMenu(DataContext);
+		Utility.MarkDropDownForAutoDispose(menu);
+		return menu;
 	}
 }

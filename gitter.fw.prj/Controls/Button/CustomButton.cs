@@ -25,11 +25,11 @@ using System.Drawing;
 using System.Windows.Forms;
 
 [System.ComponentModel.DesignerCategory("")]
-public sealed class CustomButton : Control
+public sealed class CustomButton : Control, IButtonControl
 {
 	#region Data
 
-	private CustomButtonRenderer _renderer;
+	private CustomButtonRenderer? _renderer;
 	private bool _isPressed;
 	private bool _isMouseOver;
 
@@ -62,16 +62,15 @@ public sealed class CustomButton : Control
 		get => _renderer ?? CustomButtonRenderer.Default;
 		set
 		{
-			if(_renderer != value)
+			if(_renderer == value) return;
+
+			bool needsInvalidate =
+				!(_renderer is null && value == CustomButtonRenderer.Default) &&
+				!(_renderer == CustomButtonRenderer.Default && value is null);
+			_renderer = value;
+			if(needsInvalidate)
 			{
-				bool needsInvalidate =
-					!(_renderer is null && value == CustomButtonRenderer.Default) &&
-					!(_renderer == CustomButtonRenderer.Default && value is null);
-				_renderer = value;
-				if(needsInvalidate)
-				{
-					Invalidate();
-				}
+				Invalidate();
 			}
 		}
 	}
@@ -101,6 +100,10 @@ public sealed class CustomButton : Control
 			}
 		}
 	}
+
+	public bool IsDefault { get; private set; }
+
+	DialogResult IButtonControl.DialogResult { get; set; }
 
 	#endregion
 
@@ -201,15 +204,33 @@ public sealed class CustomButton : Control
 	}
 
 	/// <inheritdoc/>
+	protected override void OnMouseMove(MouseEventArgs e)
+	{
+		IsMouseOver = ClientRectangle.Contains(e.Location);
+		base.OnMouseMove(e);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnClick(EventArgs e)
+	{
+		IsPressed = false;
+		base.OnClick(e);
+	}
+
+	/// <inheritdoc/>
 	protected override void OnPaintBackground(PaintEventArgs pevent)
 	{
 	}
 
 	/// <inheritdoc/>
 	protected override void OnPaint(PaintEventArgs e)
-	{
-		Renderer.Render(e.Graphics, e.ClipRectangle, this);
-	}
+		=> Renderer.Render(e.Graphics, e.ClipRectangle, this);
+
+	void IButtonControl.NotifyDefault(bool value)
+		=> IsDefault = value;
+
+	void IButtonControl.PerformClick()
+		=> OnClick(EventArgs.Empty);
 
 	#endregion
 }

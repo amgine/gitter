@@ -22,11 +22,7 @@ namespace gitter.GitLab.Api;
 
 using System;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
 using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 [DataContract]
 class TestReport
@@ -43,58 +39,30 @@ class TestReport
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.TotalTime)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.TotalTime)]
-#endif
 	public double TotalTime { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.TotalCount)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.TotalCount)]
-#endif
 	public int TotalCount { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.SuccessCount)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Name)]
-#endif
 	public int SuccessCount { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.FailedCount)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.FailedCount)]
-#endif
 	public int FailedCount { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.SkippedCount)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.SkippedCount)]
-#endif
 	public int SkippedCount { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.ErrorCount)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.ErrorCount)]
-#endif
 	public int ErrorCount { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.TestSuites)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.TestSuites)]
-#endif
-	public TestSuite[] TestSuites { get; set; }
+	public TestSuite[]? TestSuites { get; set; }
 }

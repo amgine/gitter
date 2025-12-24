@@ -20,9 +20,6 @@
 
 namespace gitter.Git.Gui.Controls;
 
-using System;
-using System.Windows.Forms;
-
 using gitter.Framework.Controls;
 
 using Resources = Properties.Resources;
@@ -30,7 +27,7 @@ using Resources = Properties.Resources;
 /// <summary><see cref="CustomListBox"/> for displaying <see cref="Repository.Stash"/> contents.</summary>
 sealed class StashListBox : CustomListBox
 {
-	private Repository _repository;
+	private Repository? _repository;
 
 	/// <summary>Create <see cref="StashListBox"/>.</summary>
 	public StashListBox()
@@ -38,38 +35,42 @@ sealed class StashListBox : CustomListBox
 		Text = Resources.StrsNothingStashed;
 	}
 
-	public void LoadData(Repository repository)
+	public void LoadData(Repository? repository)
 	{
-		if(_repository != null)
-			DetachFromRepository();
+		if(_repository is not null)
+		{
+			DetachFromRepository(_repository);
+		}
 		_repository = repository;
-		if(_repository != null)
-			AttachToRepository();
+		if(_repository is not null)
+		{
+			AttachToRepository(_repository);
+		}
 	}
 
-	private void AttachToRepository()
+	private void AttachToRepository(Repository repository)
 	{
 		BeginUpdate();
 		Items.Clear();
-		lock(_repository.Stash.SyncRoot)
+		lock(repository.Stash.SyncRoot)
 		{
-			foreach(var ss in _repository.Stash)
+			foreach(var ss in repository.Stash)
 			{
 				Items.Add(new StashedStateListItem(ss));
 			}
 		}
 		EndUpdate();
-		_repository.Stash.StashedStateCreated += OnStashCreated;
+		repository.Stash.StashedStateCreated += OnStashCreated;
 	}
 
-	private void OnStashCreated(object sender, StashedStateEventArgs e)
+	private void OnStashCreated(object? sender, StashedStateEventArgs e)
 	{
 		Items.AddSafe(new StashedStateListItem(e.Object));
 	}
 
-	private void DetachFromRepository()
+	private void DetachFromRepository(Repository repository)
 	{
-		_repository.Stash.StashedStateCreated -= OnStashCreated;
+		repository.Stash.StashedStateCreated -= OnStashCreated;
 		Items.Clear();
 	}
 
@@ -78,9 +79,9 @@ sealed class StashListBox : CustomListBox
 	{
 		if(disposing)
 		{
-			if(_repository != null)
+			if(_repository is not null)
 			{
-				DetachFromRepository();
+				DetachFromRepository(_repository);
 				_repository = null;
 			}
 		}

@@ -20,30 +20,19 @@
 
 namespace gitter.Git.AccessLayer;
 
-public sealed class ObjectCountData
+public sealed class ObjectCountData(int count, int size, int inPack, int packs, int sizePack, int prunePackable, int garbage)
 {
-	public ObjectCountData(int count, int size, int inPack, int packs, int sizePack, int prunePackable, int garbage)
-	{
-		Count = count;
-		Size = size;
-		InPack = inPack;
-		Packs = packs;
-		SizePack = sizePack;
-		PrunePackable = prunePackable;
-		Garbage = garbage;
-	}
+	public int Count { get; } = count;
 
-	public int Count { get; }
+	public int Size { get; } = size;
 
-	public int Size { get; }
+	public int InPack { get; } = inPack;
 
-	public int InPack { get; }
+	public int Packs { get; } = packs;
 
-	public int Packs { get; }
+	public int SizePack { get; } = sizePack;
 
-	public int SizePack { get; }
+	public int PrunePackable { get; } = prunePackable;
 
-	public int PrunePackable { get; }
-
-	public int Garbage { get; }
+	public int Garbage { get; } = garbage;
 }

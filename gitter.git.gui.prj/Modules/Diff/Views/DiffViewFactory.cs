@@ -22,18 +22,11 @@ namespace gitter.Git.Gui.Views;
 
 using Autofac;
 
-using gitter.Framework;
-using gitter.Framework.Controls;
-
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class DiffViewFactory : GitViewFactoryBase<DiffView>
+sealed class DiffViewFactory() : GitViewFactoryBase<DiffView>(
+	Guids.DiffViewGuid, Resources.StrDiff, Icons.Diff)
 {
-	public DiffViewFactory()
-		: base(Guids.DiffViewGuid, Resources.StrDiff, Icons.Diff)
-	{
-	}
-
-	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		=> Scope.Resolve<DiffView>(TypedParameter.From(Guids.DiffViewGuid));
+	protected override DiffView ResolveView(ILifetimeScope scope)
+		=> scope.Resolve<DiffView>(TypedParameter.From(Guids.DiffViewGuid));
 }

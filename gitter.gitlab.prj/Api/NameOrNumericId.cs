@@ -24,7 +24,7 @@ using System;
 using System.Globalization;
 using System.Text;
 
-readonly record struct NameOrNumericId(string Name, long Id)
+readonly record struct NameOrNumericId(string? Name, long Id)
 {
 	public static NameOrNumericId FromName(string name) => new(name, -1);
 

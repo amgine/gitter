@@ -33,11 +33,11 @@ public sealed class TextBoxSpellChecker : NativeWindow, IDisposable
 
 	private static readonly SpellcheckerCache _cache = new();
 	private readonly TextBox _textBox;
-	private readonly List<Substring> _errors = new();
+	private readonly List<Substring> _errors = [];
 	private bool _enabled;
-	private Bitmap _bitmap;
-	private Graphics _textBoxGraphics;  
-	private Graphics _bufferGraphics;  
+	private Bitmap? _bitmap;
+	private Graphics? _textBoxGraphics;  
+	private Graphics? _bufferGraphics;  
 
 	#endregion
 
@@ -179,16 +179,19 @@ public sealed class TextBoxSpellChecker : NativeWindow, IDisposable
 				graphics.DrawLine(pen, pos1, pos2);
 			}
 		}
-		_textBoxGraphics.DrawImageUnscaled(_bitmap, 0, 0);
+		if(_bitmap is not null)
+		{
+			_textBoxGraphics?.DrawImageUnscaled(_bitmap, 0, 0);
+		}
 	}
 
-	private void OnSizeChanged(object sender, EventArgs e)
+	private void OnSizeChanged(object? sender, EventArgs e)
 	{
 		_textBoxGraphics?.Dispose();
 		_textBoxGraphics = Graphics.FromHwnd(_textBox.Handle);
 	}
 
-	private void OnTextChanged(object sender, EventArgs e)
+	private void OnTextChanged(object? sender, EventArgs e)
 	{
 		if(SpellingService.Enabled)
 		{

@@ -90,10 +90,19 @@ static class GitControllerUtility
 		return true;
 	}
 
-	public static bool ValidateAbsolutePath(string path, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	public static bool ValidateAbsolutePath(string? path, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 	{
 		Verify.Argument.IsNotNull(userInputSource);
 		Verify.Argument.IsNotNull(inputErrorNotifier);
+
+		if(path is not { Length: not 0 })
+		{
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrNoPathSpecified,
+					Resources.ErrPathCannotBeEmpty));
+			return false;
+		}
 
 		int start = -1;
 		int end = -1;
@@ -186,8 +195,16 @@ static class GitControllerUtility
 		return true;
 	}
 
-	public static bool ValidateRelativePath(string path, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	public static bool ValidateRelativePath(string? path, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 	{
+		if(path is not { Length: not 0 })
+		{
+			inputErrorNotifier.NotifyError(userInputSource,
+				new UserInputError(
+					Resources.ErrNoPathSpecified,
+					Resources.ErrPathCannotBeEmpty));
+			return false;
+		}
 		int start = -1;
 		int end = -1;
 		for(int i = 0; i < path.Length; ++i)
@@ -221,7 +238,7 @@ static class GitControllerUtility
 		return true;
 	}
 
-	public static bool ValidateBranchName(string branchName, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	public static bool ValidateBranchName(string? branchName, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 	{
 		Verify.Argument.IsNotNull(userInputSource);
 		Verify.Argument.IsNotNull(inputErrorNotifier);
@@ -245,7 +262,7 @@ static class GitControllerUtility
 		return true;
 	}
 
-	public static bool ValidateNewBranchName(string branchName, Repository repository, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	public static bool ValidateNewBranchName(string? branchName, Repository repository, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 	{
 		Verify.Argument.IsNotNull(repository);
 		Verify.Argument.IsNotNull(userInputSource);
@@ -255,8 +272,8 @@ static class GitControllerUtility
 		{
 			return false;
 		}
-		if(repository.Refs.Heads.Contains(branchName) ||
-			repository.Refs.Remotes.Contains(branchName))
+		if(repository.Refs.Heads.Contains(branchName!) ||
+			repository.Refs.Remotes.Contains(branchName!))
 		{
 			inputErrorNotifier.NotifyError(userInputSource,
 				new UserInputError(
@@ -267,7 +284,7 @@ static class GitControllerUtility
 		return true;
 	}
 
-	public static bool ValidateTagName(string tagName, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	public static bool ValidateTagName(string? tagName, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 	{
 		Verify.Argument.IsNotNull(userInputSource);
 		Verify.Argument.IsNotNull(inputErrorNotifier);
@@ -291,7 +308,7 @@ static class GitControllerUtility
 		return true;
 	}
 
-	public static bool ValidateNewTagName(string tagName, Repository repository, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	public static bool ValidateNewTagName(string? tagName, Repository repository, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 	{
 		Verify.Argument.IsNotNull(repository);
 		Verify.Argument.IsNotNull(userInputSource);
@@ -301,7 +318,7 @@ static class GitControllerUtility
 		{
 			return false;
 		}
-		if(repository.Refs.Tags.Contains(tagName))
+		if(repository.Refs.Tags.Contains(tagName!))
 		{
 			inputErrorNotifier.NotifyError(userInputSource,
 				new UserInputError(
@@ -359,7 +376,7 @@ static class GitControllerUtility
 		return true;
 	}
 
-	public static bool ValidateUrl(string url, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	public static bool ValidateUrl(string? url, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 	{
 		Verify.Argument.IsNotNull(userInputSource);
 		Verify.Argument.IsNotNull(inputErrorNotifier);
@@ -375,7 +392,7 @@ static class GitControllerUtility
 		return true;
 	}
 
-	public static bool ValidateRemoteName(string remoteName, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	public static bool ValidateRemoteName(string? remoteName, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 	{
 		Verify.Argument.IsNotNull(userInputSource);
 		Verify.Argument.IsNotNull(inputErrorNotifier);
@@ -399,7 +416,7 @@ static class GitControllerUtility
 		return true;
 	}
 
-	public static bool ValidateNewRemoteName(string remoteName, Repository repository, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
+	public static bool ValidateNewRemoteName(string? remoteName, Repository repository, IUserInputSource userInputSource, IUserInputErrorNotifier inputErrorNotifier)
 	{
 		Verify.Argument.IsNotNull(repository);
 		Verify.Argument.IsNotNull(userInputSource);
@@ -409,7 +426,7 @@ static class GitControllerUtility
 		{
 			return false;
 		}
-		if(repository.Remotes.Contains(remoteName))
+		if(repository.Remotes.Contains(remoteName!))
 		{
 			inputErrorNotifier.NotifyError(userInputSource,
 				new UserInputError(

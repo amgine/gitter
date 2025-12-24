@@ -20,14 +20,8 @@
 
 namespace gitter.Git;
 
-using System;
-
-public sealed class TreeCommitData : TreeContentData
+public sealed class TreeCommitData(Sha1Hash hash, int mode, string name)
+	: TreeContentData(hash, mode, name)
 {
-	public TreeCommitData(string hash, int mode, string name)
-		: base(hash, mode, name)
-	{
-	}
-
 	public override TreeContentType Type => TreeContentType.Commit;
 }

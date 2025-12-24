@@ -23,28 +23,21 @@ namespace gitter.Framework;
 using System;
 using System.Collections.Generic;
 
-public class ValueSource<T> : IValueSource<T>
+public class ValueSource<T>(T initialValue) : IValueSource<T>
 {
-	private T _value;
-
-	public event EventHandler ValueChanged;
+	public event EventHandler? ValueChanged;
 
 	protected virtual void OnValueChanged(EventArgs e)
 		=> ValueChanged?.Invoke(this, e);
 
-	public ValueSource(T initialValue)
-	{
-		_value = initialValue;
-	}
-
 	public T Value
 	{
-		get => _value;
+		get => initialValue;
 		set
 		{
-			if(EqualityComparer<T>.Default.Equals(_value, value)) return;
+			if(EqualityComparer<T>.Default.Equals(initialValue, value)) return;
 
-			_value = value;
+			initialValue = value;
 			OnValueChanged(EventArgs.Empty);
 		}
 	}

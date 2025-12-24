@@ -20,26 +20,18 @@
 
 namespace gitter.Git.AccessLayer;
 
-using System;
-
 using gitter.Framework;
 
 /// <summary>Information about submodule.</summary>
-public sealed class SubmoduleData : INamedObject
+/// <param name="name">Submodule name.</param>
+public sealed class SubmoduleData(string name) : INamedObject
 {
-	/// <summary>Create <see cref="SubmoduleData"/>.</summary>
-	/// <param name="name">Submodule name.</param>
-	public SubmoduleData(string name)
-	{
-		Name = name;
-	}
-
 	/// <summary>Submodule name.</summary>
-	public string Name { get; }
+	public string Name { get; } = name;
 
 	/// <summary>Submodule path.</summary>
-	public string Path { get; set; }
+	public string Path { get; set; } = default!;
 
 	/// <summary>Submodule URL.</summary>
-	public string Url { get; set; }
+	public string Url { get; set; } = default!;
 }

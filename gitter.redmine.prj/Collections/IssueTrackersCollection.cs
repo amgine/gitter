@@ -20,10 +20,12 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 public sealed class IssueTrackersCollection : NamedRedmineObjectsCache<IssueTracker>
@@ -34,18 +36,14 @@ public sealed class IssueTrackersCollection : NamedRedmineObjectsCache<IssueTrac
 	}
 
 	protected override IssueTracker Create(int id, string name)
-	{
-		return new IssueTracker(Context, id, name);
-	}
+		=> new(Context, id, name);
 
 	protected override IssueTracker Create(XmlNode node)
-	{
-		return new IssueTracker(Context, node);
-	}
+		=> new(Context, node);
 
-	public LinkedList<IssueTracker> Fetch()
+	public Task<List<IssueTracker>> FetchAsync(CancellationToken cancellationToken = default)
 	{
 		const string url = "trackers.xml";
-		return FetchItemsFromSinglePage(url);
+		return FetchItemsFromSinglePageAsync(url, cancellationToken);
 	}
 }

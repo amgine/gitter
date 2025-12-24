@@ -25,7 +25,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Principal;
@@ -59,43 +58,87 @@ public static class Utility
 
 	private static string GetRelative(TimeSpan span)
 	{
-		if(span.TotalDays >= 365)
+		if(span.Ticks >= 0)
 		{
-			var years = (int)(span.TotalDays / 365);
-			return (years == 1) ? "1 year ago" : years.ToString(CultureInfo.InvariantCulture) + " years ago";
+			if(span.TotalDays >= 365)
+			{
+				var years = (int)(span.TotalDays / 365);
+				return (years == 1) ? "1 year ago" : years.ToString(CultureInfo.InvariantCulture) + " years ago";
+			}
+			if(span.TotalDays >= 30)
+			{
+				var months = (int)(span.TotalDays / 30);
+				return (months == 1) ? "1 month ago" : months.ToString(CultureInfo.InvariantCulture) + " months ago";
+			}
+			if(span.TotalDays >= 7)
+			{
+				var weeks = (int)(span.TotalDays / 7);
+				return (weeks == 1) ? "1 week ago" : weeks.ToString(CultureInfo.InvariantCulture) + " weeks ago";
+			}
+			if(span.TotalDays >= 1)
+			{
+				var days = (int)span.TotalDays;
+				return (days == 1) ? "1 day ago" : days.ToString(CultureInfo.InvariantCulture) + " days ago";
+			}
+			if(span.TotalHours >= 1)
+			{
+				var hours = (int)span.TotalHours;
+				return (hours == 1) ? "1 hour ago" : hours.ToString(CultureInfo.InvariantCulture) + " hours ago";
+			}
+			if(span.TotalMinutes >= 1)
+			{
+				var minutes = (int)span.TotalMinutes;
+				return (minutes == 1) ? "1 minute ago" : minutes.ToString(CultureInfo.InvariantCulture) + " minutes ago";
+			}
+			var seconds = (int)span.TotalSeconds;
+			return seconds switch
+			{
+				0 => "just now",
+				1 => "1 second ago",
+				_ => seconds.ToString(CultureInfo.InvariantCulture) + " seconds ago",
+			};
 		}
-		if(span.TotalDays >= 30)
+		else
 		{
-			var months = (int)(span.TotalDays / 30);
-			return (months == 1) ? "1 month ago" : months.ToString(CultureInfo.InvariantCulture) + " months ago";
+			span = new(-span.Ticks);
+			if(span.TotalDays >= 365)
+			{
+				var years = (int)(span.TotalDays / 365);
+				return (years == 1) ? "in 1 year" : "in " + years.ToString(CultureInfo.InvariantCulture) + " years";
+			}
+			if(span.TotalDays >= 30)
+			{
+				var months = (int)(span.TotalDays / 30);
+				return (months == 1) ? "in 1 month" : "in " + months.ToString(CultureInfo.InvariantCulture) + " months";
+			}
+			if(span.TotalDays >= 7)
+			{
+				var weeks = (int)(span.TotalDays / 7);
+				return (weeks == 1) ? "in 1 week" : "in " + weeks.ToString(CultureInfo.InvariantCulture) + " weeks";
+			}
+			if(span.TotalDays >= 1)
+			{
+				var days = (int)span.TotalDays;
+				return (days == 1) ? "in 1 day" : "in " + days.ToString(CultureInfo.InvariantCulture) + " days";
+			}
+			if(span.TotalHours >= 1)
+			{
+				var hours = (int)span.TotalHours;
+				return (hours == 1) ? "in 1 hour" : "in " + hours.ToString(CultureInfo.InvariantCulture) + " hours";
+			}
+			if(span.TotalMinutes >= 1)
+			{
+				var minutes = (int)span.TotalMinutes;
+				return (minutes == 1) ? "in 1 minute" : "in " + minutes.ToString(CultureInfo.InvariantCulture) + " minutes";
+			}
+			var seconds = (int)span.TotalSeconds;
+			return seconds switch
+			{
+				0 => "just now",
+				1 => "in 1 second",
+				_ => "in " + seconds.ToString(CultureInfo.InvariantCulture) + " seconds",
+			};
 		}
-		if(span.TotalDays >= 7)
-		{
-			var weeks = (int)(span.TotalDays / 7);
-			return (weeks == 1) ? "1 week ago" : weeks.ToString(CultureInfo.InvariantCulture) + " weeks ago";
-		}
-		if(span.TotalDays >= 1)
-		{
-			var days = (int)span.TotalDays;
-			return (days == 1) ? "1 day ago" : days.ToString(CultureInfo.InvariantCulture) + " days ago";
-		}
-		if(span.TotalHours >= 1)
-		{
-			var hours = (int)span.TotalHours;
-			return (hours == 1) ? "1 hour ago" : hours.ToString(CultureInfo.InvariantCulture) + " hours ago";
-		}
-		if(span.TotalMinutes >= 1)
-		{
-			var minutes = (int)span.TotalMinutes;
-			return (minutes == 1) ? "1 minute ago" : minutes.ToString(CultureInfo.InvariantCulture) + " minutes ago";
-		}
-		var seconds = (int)span.TotalSeconds;
-		return seconds switch
-		{
-			0 => "just now",
-			1 => "1 second ago",
-			_ => seconds.ToString(CultureInfo.InvariantCulture) + " seconds ago",
-		};
 	}
 
 	public static string FormatDate(DateTime date, DateFormat format, bool includeUTCOffset = true)
@@ -168,20 +211,8 @@ public static class Utility
 		return sb.ToString();
 	}
 
-	private static readonly Func<int, string> _strAlloc = GetAllocateStringMethod();
-
-	private static Func<int, string> GetAllocateStringMethod()
-	{
-		var method = typeof(string).GetMethod("FastAllocateString", BindingFlags.Static | BindingFlags.NonPublic);
-		return method is null
-			? new Func<int, string>(static length => new string(' ', length))
-			: (Func<int, string>)Delegate.CreateDelegate(typeof(Func<int, string>), method);
-	}
-
 	public static string FastAllocateString(int length)
-	{
-		return _strAlloc(length);
-	}
+		=> new('\0', length);
 
 	public static string GetFileType(string fileName, bool dir, bool useExtensionOnly)
 	{
@@ -199,7 +230,7 @@ public static class Utility
 		return info.szTypeName;
 	}
 
-	public static Control GetParentControl(ToolStripItem item)
+	public static Control? GetParentControl(ToolStripItem item)
 	{
 		Verify.Argument.IsNotNull(item);
 
@@ -211,30 +242,29 @@ public static class Utility
 		};
 	}
 
-	private static readonly LinkedList<IDisposable> LazyDisposables = new();
+	private static readonly List<IDisposable> LazyDisposables = [];
 
 	public static void MarkDropDownForAutoDispose(ToolStripDropDown menu)
 	{
 		Verify.Argument.IsNotNull(menu);
 
-		menu.Closed += static /*async*/ (sender, _) =>
+		menu.Closed += static (sender, _) =>
 		{
-			//await System.Threading.Tasks.Task.Delay(50);
-			var m = (ContextMenuStrip)sender;
-			DisposeOnIdle(m);
+			if(sender is not ContextMenuStrip menu) return;
+			DisposeOnIdle(menu);
 		};
 	}
 
 	private static void DisposeOnIdle(IDisposable obj)
 	{
-		LazyDisposables.AddLast(obj);
+		LazyDisposables.Add(obj);
 		if(LazyDisposables.Count == 1)
 		{
 			Application.Idle += DisposeRegisteredObjects;
 		}
 	}
 
-	private static void DisposeRegisteredObjects(object sender, EventArgs e)
+	private static void DisposeRegisteredObjects(object? sender, EventArgs e)
 	{
 		foreach(var obj in LazyDisposables)
 		{
@@ -268,11 +298,11 @@ public static class Utility
 
 	internal static int WM_TASKBAR_BUTTON_CREATED;
 
-	internal static ITaskbarList TaskBarList { get; private set; }
+	internal static ITaskbarList? TaskBarList { get; private set; }
 
 	public static void EnableWin7TaskbarSupport()
 	{
-		if(TaskBarList != null) return;
+		if(TaskBarList is not null) return;
 		if(IsOSWindows7OrNewer)
 		{
 			WM_TASKBAR_BUTTON_CREATED = User32.RegisterWindowMessage("TaskbarButtonCreated");
@@ -282,7 +312,7 @@ public static class Utility
 
 	public static void DisableWin7TaskbarSupport()
 	{
-		if(TaskBarList == null) return;
+		if(TaskBarList is null) return;
 		Marshal.ReleaseComObject(TaskBarList);
 		TaskBarList = null;
 	}
@@ -325,20 +355,19 @@ public static class Utility
 	{
 		const int SW_NORMAL = 1;
 
-		OpenAs_RunDLL(
+		_ = OpenAs_RunDLL(
 			GitterApplication.MainForm.Handle,
 			Marshal.GetHINSTANCE(GitterApplication.MainForm.GetType().Module),
 			fileName,
 			SW_NORMAL);
 	}
 
-	private static readonly Lazy<bool> _isRunningWithAdministratorRights =
-		new Lazy<bool>(
-			() =>
-			{
-				var pricipal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
-				return pricipal.IsInRole(WindowsBuiltInRole.Administrator);
-			});
+	private static readonly Lazy<bool> _isRunningWithAdministratorRights = new(
+		() =>
+		{
+			var pricipal = new WindowsPrincipal(WindowsIdentity.GetCurrent());
+			return pricipal.IsInRole(WindowsBuiltInRole.Administrator);
+		});
 
 	/// <summary>Checks if process is running with administrator privileges.</summary>
 	public static bool IsRunningWithAdministratorRights
@@ -396,7 +425,7 @@ public static class Utility
 		TerminateProcess(hProcess, exitCode);
 	}
 
-	public static string ShowPickFolderDialog(IWin32Window parent)
+	public static string? ShowPickFolderDialog(IWin32Window parent)
 	{
 #if !NET6_0_OR_GREATER
 		if(IsOSVistaOrNewer)
@@ -408,14 +437,14 @@ public static class Utility
 			catch { }
 		}
 #endif
-		using(var dlg = new FolderBrowserDialog())
+		using(var dialog = new FolderBrowserDialog())
 		{
 			var result = parent is not null
-				? dlg.ShowDialog(parent)
-				: dlg.ShowDialog();
+				? dialog.ShowDialog(parent)
+				: dialog.ShowDialog();
 			if(result == DialogResult.OK)
 			{
-				return dlg.SelectedPath;
+				return dialog.SelectedPath;
 			}
 		}
 		return null;

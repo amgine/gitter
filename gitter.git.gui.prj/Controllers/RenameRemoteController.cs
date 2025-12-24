@@ -31,28 +31,19 @@ using gitter.Git.Gui.Interfaces;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class RenameRemoteController : ViewControllerBase<IRenameRemoteView>, IRenameRemoteController
+sealed class RenameRemoteController(Remote remote)
+	: ViewControllerBase<IRenameRemoteView>, IRenameRemoteController
 {
-	public RenameRemoteController(Remote remote)
-	{
-		Verify.Argument.IsNotNull(remote);
-
-		Remote = remote;
-	}
-
-	private Remote Remote { get; }
-
 	public bool TryRename()
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
-
-		var repository = Remote.Repository;
-		var oldName    = Remote.Name;
-		var newName    = View.NewName.Value.Trim();
+		var view       = RequireView();
+		var repository = remote.Repository;
+		var oldName    = remote.Name;
+		var newName    = view.NewName.Value?.Trim();
 		if(oldName == newName) return true;
-		if(newName.Length == 0)
+		if(newName is not { Length: not 0 })
 		{
-			View.ErrorNotifier.NotifyError(View.NewName,
+			view.ErrorNotifier.NotifyError(view.NewName,
 				new UserInputError(
 					Resources.ErrNoRemoteNameSpecified,
 					Resources.ErrRemoteNameCannotBeEmpty));
@@ -60,16 +51,15 @@ sealed class RenameRemoteController : ViewControllerBase<IRenameRemoteView>, IRe
 		}
 		if(repository.Remotes.Contains(newName))
 		{
-			View.ErrorNotifier.NotifyError(View.NewName,
+			view.ErrorNotifier.NotifyError(view.NewName,
 				new UserInputError(
 					Resources.ErrInvalidRemoteName,
 					Resources.ErrRemoteAlreadyExists));
 			return false;
 		}
-		string errmsg;
-		if(!Reference.ValidateName(newName, ReferenceType.Remote, out errmsg))
+		if(!Reference.ValidateName(newName, ReferenceType.Remote, out var errmsg))
 		{
-			View.ErrorNotifier.NotifyError(View.NewName,
+			view.ErrorNotifier.NotifyError(view.NewName,
 				new UserInputError(
 					Resources.ErrInvalidRemoteName,
 					errmsg));
@@ -77,15 +67,15 @@ sealed class RenameRemoteController : ViewControllerBase<IRenameRemoteView>, IRe
 		}
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				Remote.Name = newName;
+				remote.Name = newName;
 			}
 		}
 		catch(GitException exc)
 		{
 			GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
+				view as IWin32Window,
 				exc.Message,
 				string.Format(Resources.ErrFailedToRenameRemote, oldName),
 				MessageBoxButton.Close,

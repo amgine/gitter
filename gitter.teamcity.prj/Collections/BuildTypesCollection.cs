@@ -21,6 +21,8 @@
 namespace gitter.TeamCity;
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 public sealed class BuildTypesCollection : NamedTeamCityObjectsCache<BuildType>
@@ -31,33 +33,43 @@ public sealed class BuildTypesCollection : NamedTeamCityObjectsCache<BuildType>
 	}
 
 	protected override BuildType Create(string id, string name)
-		=> new BuildType(Context, id, name);
+		=> new(Context, id, name);
 
 	protected override BuildType Create(string id)
-		=> new BuildType(Context, id);
+		=> new(Context, id);
 
 	protected override BuildType Create(XmlNode node)
-		=> new BuildType(Context, node);
+		=> new(Context, node);
 
-	public void UpdateCache()
+	private void UpdateCache(XmlDocument xml)
 	{
-		var xml = Context.GetXml("buildTypes");
-		foreach(XmlElement node in xml["buildTypes"])
+		var buildTypes = xml["buildTypes"];
+		if(buildTypes is not null)
 		{
-			Lookup(node);
+			foreach(XmlElement node in buildTypes)
+			{
+				Lookup(node);
+			}
 		}
 	}
 
-	public void UpdateCache(ProjectLocator projectLocator)
+	public async Task UpdateCacheAsync(CancellationToken cancellationToken = default)
+	{
+		var xml = await Context
+			.GetXmlAsync("buildTypes", cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		UpdateCache(xml);
+	}
+
+	public async Task UpdateCacheAsync(ProjectLocator projectLocator, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(projectLocator);
 		var pl = projectLocator.ToString();
-		Verify.Argument.IsNeitherNullNorWhitespace(pl, "projectLocator");
+		Verify.Argument.IsNeitherNullNorWhitespace(pl, nameof(projectLocator));
 
-		var xml = Context.GetXml("projects/" + pl + "/buildTypes");
-		foreach(XmlElement node in xml["buildTypes"])
-		{
-			Lookup(node);
-		}
+		var xml = await Context
+			.GetXmlAsync("projects/" + pl + "/buildTypes", cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		UpdateCache(xml);
 	}
 }

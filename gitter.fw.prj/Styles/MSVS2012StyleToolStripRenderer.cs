@@ -25,7 +25,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
+sealed class MSVS2012StyleToolStripRenderer(MSVS2012StyleToolStripRenderer.ColorTable colorTable) : ToolStripRenderer
 {
 	public record class ColorTable(
 		Color Grip,
@@ -106,15 +106,6 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 			NormalCheckboxForeground:   Color.FromArgb(153, 153, 153));
 	}
 
-	private readonly ColorTable _colorTable;
-
-	public MSVS2012StyleToolStripRenderer(ColorTable colorTable)
-	{
-		Verify.Argument.IsNotNull(colorTable);
-
-		_colorTable = colorTable;
-	}
-
 	#region Stage 0 - Initialization
 
 	/// <inheritdoc/>
@@ -124,12 +115,66 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 
 		toolStrip.BackColor = toolStrip switch
 		{
-			ToolStripDropDown => _colorTable.DropDownBackground,
-			StatusStrip       => _colorTable.StatusStripBackground,
-			MenuStrip         => _colorTable.MenuStripBackground,
-			_                 => _colorTable.ToolStripBackground,
+			ToolStripDropDown => colorTable.DropDownBackground,
+			StatusStrip       => colorTable.StatusStripBackground,
+			MenuStrip         => colorTable.MenuStripBackground,
+			_                 => colorTable.ToolStripBackground,
 		};
-		toolStrip.ForeColor = _colorTable.Text;
+		toolStrip.ForeColor = colorTable.Text;
+
+		if(colorTable == ColorTable.Dark)
+		{
+			OverrideToolTip(toolStrip);
+		}
+		ForceScaledFont(toolStrip);
+	}
+
+	private static Font GetFont(Dpi dpi)
+		=> GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi);
+
+	private static Font GetFont(ToolStrip toolStrip)
+		=> GetFont(Dpi.FromControl(toolStrip));
+
+	private void ForceScaledFont(ToolStrip toolStrip)
+	{
+		toolStrip.Font = GetFont(toolStrip);
+		toolStrip.DpiChangedAfterParent += OnDpiChangedAfterParent;
+	}
+
+	private void OnDpiChangedAfterParent(object? sender, EventArgs e)
+	{
+		if(sender is not ToolStrip ts) return;
+		if(ts.Renderer != this)
+		{
+			ts.DpiChangedAfterParent -= OnDpiChangedAfterParent;
+			return;
+		}
+		ts.Font = GetFont(ts);
+	}
+
+	private static void OverrideToolTip(ToolStrip toolStrip)
+	{
+		var prop = typeof(ToolStrip).GetProperty("ToolTip", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+		if(prop is null) return;
+		var toolTip = prop.GetValue(toolStrip) as ToolTip;
+		if(toolTip is null) return;
+
+		toolTip.BackColor = Color.FromArgb(46, 47, 47);
+		toolTip.ForeColor = Color.FromArgb(255, 255, 255);
+		toolTip.Draw += OnToolTipDraw;
+		toolTip.OwnerDraw = true;
+	}
+
+	private static void OnToolTipDraw(object? sender, DrawToolTipEventArgs e)
+	{
+		if(sender is not ToolTip toolTip) return;
+		e.DrawBackground();
+		const TextFormatFlags textFlags =
+			TextFormatFlags.VerticalCenter |
+			TextFormatFlags.HidePrefix |
+			TextFormatFlags.Left;
+		TextRenderer.DrawText(e.Graphics, e.ToolTipText, e.Font, e.Bounds, toolTip.ForeColor, textFlags);
+		e.DrawBorder();
 	}
 
 	/// <inheritdoc/>
@@ -137,7 +182,7 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 	{
 		Assert.IsNotNull(toolStripPanel);
 
-		toolStripPanel.BackColor = _colorTable.ToolStripBackground;
+		toolStripPanel.BackColor = colorTable.ToolStripBackground;
 	}
 
 	/// <inheritdoc/>
@@ -145,7 +190,7 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 	{
 		Assert.IsNotNull(contentPanel);
 
-		contentPanel.BackColor = _colorTable.ContentPanelBackground;
+		contentPanel.BackColor = colorTable.ContentPanelBackground;
 	}
 
 	/// <inheritdoc/>
@@ -157,8 +202,8 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 		{
 			case ToolStripTextBox tsTextBox:
 				tsTextBox.BorderStyle = BorderStyle.FixedSingle;
-				tsTextBox.BackColor = _colorTable.TextBoxBackground;
-				tsTextBox.ForeColor = _colorTable.Text;
+				tsTextBox.BackColor = colorTable.TextBoxBackground;
+				tsTextBox.ForeColor = colorTable.Text;
 				break;
 		}
 	}
@@ -199,7 +244,7 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 	{
 		Assert.IsNotNull(e);
 
-		e.Graphics.GdiFill(_colorTable.ContentPanelBackground, new Rectangle(Point.Empty, e.ToolStripContentPanel.Size));
+		e.Graphics.GdiFill(colorTable.ContentPanelBackground, new Rectangle(Point.Empty, e.ToolStripContentPanel.Size));
 		e.Handled = true;
 	}
 
@@ -208,7 +253,7 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 	{
 		Assert.IsNotNull(e);
 
-		e.Graphics.GdiFill(_colorTable.ToolStripBackground, e.ToolStripPanel.Bounds);
+		e.Graphics.GdiFill(colorTable.ToolStripBackground, e.ToolStripPanel.Bounds);
 		e.Handled = true;
 	}
 
@@ -220,8 +265,8 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 		var dpi = Dpi.FromControl(e.ToolStrip);
 		int x = e.ToolStrip.Bounds.Width  - 13 * dpi.X / 96;
 		int y = e.ToolStrip.Bounds.Height - 13 * dpi.X / 96;
-		var brush0 = _colorTable.ResizeGrip0;
-		var brush1 = _colorTable.ResizeGrip1;
+		var brush0 = colorTable.ResizeGrip0;
+		var brush1 = colorTable.ResizeGrip1;
 		using var gdi = e.Graphics.AsGdi();
 		for(int i = 0; i < 5; ++i)
 		{
@@ -248,26 +293,21 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 		var size = e.Item.Size;
 		if(e.Vertical)
 		{
-			var x = size.Width / 2;
-			var y = 4;
-			using(var pen = new Pen(_colorTable.VerticalSeparator0))
-			{
-				e.Graphics.DrawLine(pen, x, y, x, y + size.Height - 8);
-			}
-			++x;
-			using(var pen = new Pen(_colorTable.VerticalSeparator1))
-			{
-				e.Graphics.DrawLine(pen, x, y, x, y + size.Height - 8);
-			}
+			var conv = e.ToolStrip is not null
+				? DpiConverter.FromDefaultTo(e.ToolStrip)
+				: DpiConverter.Identity;
+			var w = conv.ConvertX(1);
+			var x = (size.Width - w) / 2;
+			var y = conv.ConvertY(4);
+			using var brush = SolidBrushCache.Get(colorTable.VerticalSeparator1);
+			e.Graphics.FillRectangle(brush, new Rectangle(x, y, w, size.Height - y * 2));
 		}
 		else
 		{
 			var x = 0;
 			var y = size.Height / 2;
-			using(var pen = new Pen(_colorTable.MenuBorder))
-			{
-				e.Graphics.DrawLine(pen, x + 26, y, x + size.Width - 3, y);
-			}
+			using var pen = new Pen(colorTable.MenuBorder);
+			e.Graphics.DrawLine(pen, x + 26, y, x + size.Width - 3, y);
 		}
 	}
 
@@ -294,7 +334,7 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 				break;
 		}
 		if(client.Width <= 0 || client.Height <= 0) return;
-		using var brush = new HatchBrush(HatchStyle.Percent20, _colorTable.Grip, _colorTable.ToolStripBackground);
+		using var brush = new HatchBrush(HatchStyle.Percent20, colorTable.Grip, colorTable.ToolStripBackground);
 		var ro = default(Point);
 		try
 		{
@@ -323,7 +363,7 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 		RenderItemBackgroundInternal(e.Graphics, item.Width, item.Height, item.Pressed, item.Selected || item.Checked);
 		if(item.Checked)
 		{
-			using var pen = new Pen(_colorTable.CheckedBorder);
+			using var pen = new Pen(colorTable.CheckedBorder);
 			e.Graphics.DrawRectangle(pen, 0, 0, item.Width - 1, item.Height - 1);
 		}
 	}
@@ -335,11 +375,11 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 
 		if(e.Item is not ToolStripDropDownButton item) return;
 		RenderItemBackgroundInternal(e.Graphics, item.Width, item.Height, item.Pressed, item.Selected && item.Enabled);
-		var arrowBounds = new Rectangle(item.Width - 16, 0, 16, item.Height);
-		DrawArrow(new ToolStripArrowRenderEventArgs(
-			e.Graphics, e.Item,
-			arrowBounds,
-			Color.Black, ArrowDirection.Down));
+		//var arrowBounds = new Rectangle(item.Width - 16, 0, 16, item.Height);
+		//DrawArrow(new ToolStripArrowRenderEventArgs(
+		//	e.Graphics, e.Item,
+		//	arrowBounds,
+		//	Color.Black, ArrowDirection.Down));
 	}
 
 	/// <inheritdoc/>
@@ -404,7 +444,7 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 			{
 				RenderItemBackgroundInternal(e.Graphics, e.Item.Width, e.Item.Height, false, true);
 				var x = splitButton.ButtonBounds.Right;
-				using var pen = new Pen(_colorTable.ToolStripBackground);
+				using var pen = new Pen(colorTable.ToolStripBackground);
 				e.Graphics.DrawLine(pen, x, 0, x, splitButton.Height - 1);
 			}
 		}
@@ -420,7 +460,7 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 	{
 		Assert.IsNotNull(e);
 
-		e.Graphics.GdiFill(_colorTable.StatusLabelBackground, e.Item.Bounds);
+		e.Graphics.GdiFill(colorTable.StatusLabelBackground, e.Item.Bounds);
 	}
 
 	#endregion
@@ -436,9 +476,11 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 
 		var bounds = e.ImageRectangle;
 
-		if(e.Item is ToolStripMenuItem { Checked: true } item)
+		if(e.Item is ToolStripMenuItem { Checked: true })
 		{
-			var conv = new DpiConverter(e.ToolStrip);
+			var conv = e.ToolStrip is not null
+				? new DpiConverter(e.ToolStrip)
+				: DpiConverter.Identity;
 			var dx = conv.ConvertX(2);
 			var dy = conv.ConvertY(2);
 			RenderItemBackgroundInternal(e.Graphics,
@@ -468,17 +510,19 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 		Color checkboxForeground;
 		if(e.Item.Selected)
 		{
-			checkboxBackground = _colorTable.SelectedCheckboxBackground;
-			checkboxForeground = _colorTable.SelectedCheckboxForeground;
+			checkboxBackground = colorTable.SelectedCheckboxBackground;
+			checkboxForeground = colorTable.SelectedCheckboxForeground;
 		}
 		else
 		{
-			checkboxBackground = _colorTable.NormalCheckboxBackground;
-			checkboxForeground = _colorTable.NormalCheckboxForeground;
+			checkboxBackground = colorTable.NormalCheckboxBackground;
+			checkboxForeground = colorTable.NormalCheckboxForeground;
 		}
 		var graphics = e.Graphics;
 		var rect = e.ImageRectangle;
-		var conv = new DpiConverter(e.ToolStrip);
+		var conv = e.ToolStrip is not null
+			? new DpiConverter(e.ToolStrip)
+			: DpiConverter.Identity;
 		graphics.GdiFill(checkboxBackground, rect);
 		var rc1 = rect;
 		rc1.Width -= 1;
@@ -496,13 +540,12 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 		using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
 		using(var pen = new Pen(checkboxForeground, conv.ConvertX(1.7f)))
 		{
-			var path = new Point[]
-				{
+			graphics.DrawLines(pen,
+				[
 					new Point(rc2.X + conv.ConvertX( 3), conv.ConvertY(6) + rc2.Y),
 					new Point(rc2.X + conv.ConvertX( 5), conv.ConvertY(9) + rc2.Y),
 					new Point(rc2.X + conv.ConvertX(10), conv.ConvertY(2) + rc2.Y),
-				};
-			graphics.DrawLines(pen, path);
+				]);
 		}
 	}
 
@@ -511,11 +554,11 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 	{
 		Assert.IsNotNull(e);
 
-		if(e.Item.Enabled)
+		if(e.Item is { Enabled: true })
 		{
 			e.ArrowColor = e.Item.Selected
-				? _colorTable.ArrowHighlight
-				: _colorTable.ArrowNormal;
+				? colorTable.ArrowHighlight
+				: colorTable.ArrowNormal;
 		}
 		else
 		{
@@ -529,7 +572,7 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 	{
 		Assert.IsNotNull(e);
 
-		e.TextColor = _colorTable.Text;
+		e.TextColor = colorTable.Text;
 		base.OnRenderItemText(e);
 	}
 
@@ -558,14 +601,14 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 	{
 		Assert.IsNotNull(e);
 
-		e.Graphics.GdiFill(_colorTable.MenuStripBackground, e.AffectedBounds);
+		e.Graphics.GdiFill(colorTable.MenuStripBackground, e.AffectedBounds);
 	}
 
 	private void RenderStatusStripBackground(ToolStripRenderEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
-		e.Graphics.GdiFill(_colorTable.StatusStripBackground, e.AffectedBounds);
+		e.Graphics.GdiFill(colorTable.StatusStripBackground, e.AffectedBounds);
 	}
 
 	private void RenderDropDownBackground(ToolStripRenderEventArgs e)
@@ -574,14 +617,14 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 
 		var strip = e.ToolStrip;
 		var rc = new Rectangle(1, 1, strip.Width - 2, strip.Height - 2);
-		e.Graphics.GdiFill(_colorTable.DropDownBackground, rc);
+		e.Graphics.GdiFill(colorTable.DropDownBackground, rc);
 	}
 
 	private void RenderToolStripBackgroundInternal(ToolStripRenderEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
-		e.Graphics.GdiFill(_colorTable.MenuStripBackground, e.AffectedBounds);
+		e.Graphics.GdiFill(colorTable.MenuStripBackground, e.AffectedBounds);
 	}
 
 	private void RenderDropDownBorder(ToolStripRenderEventArgs e)
@@ -590,8 +633,8 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 
 		var rc = new Rectangle(0, 0, e.ToolStrip.Width, e.ToolStrip.Height);
 		using var gdi = e.Graphics.AsGdi();
-		gdi.Rectangle(_colorTable.MenuBorder, rc);
-		gdi.Fill(_colorTable.DropDownBackground, e.ConnectedArea);
+		gdi.Rectangle(colorTable.MenuBorder, rc);
+		gdi.Fill(colorTable.DropDownBackground, e.ConnectedArea);
 	}
 
 	private void RenderMenuItemBackgroundInternal(Graphics graphics, int x, int y, int width, int height, bool isPressed, bool isSelected, bool isRoot)
@@ -604,16 +647,16 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 			using var gdi = graphics.AsGdi();
 			if(isRoot)
 			{
-				gdi.Fill(_colorTable.DropDownBackground, rc);
+				gdi.Fill(colorTable.DropDownBackground, rc);
 				rc.Height += 5;
-				gdi.Rectangle(_colorTable.MenuBorder, rc);
+				gdi.Rectangle(colorTable.MenuBorder, rc);
 			}
 			else
 			{
 				rc.Offset(2, 1);
 				rc.Width -= 2;
 				rc.Height -= 1;
-				gdi.Fill(_colorTable.Highlight, rc);
+				gdi.Fill(colorTable.Highlight, rc);
 			}
 		}
 		else if(isSelected)
@@ -629,7 +672,7 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 				rc.Width -= 2;
 			}
 			rc.Height -= 1;
-			graphics.GdiFill(_colorTable.Highlight, rc);
+			graphics.GdiFill(colorTable.Highlight, rc);
 		}
 	}
 
@@ -639,11 +682,11 @@ sealed class MSVS2012StyleToolStripRenderer : ToolStripRenderer
 
 		if(pressed)
 		{
-			graphics.GdiFill(_colorTable.Pressed, new Rectangle(x, y, width, height));
+			graphics.GdiFill(colorTable.Pressed, new Rectangle(x, y, width, height));
 		}
 		else if(selected)
 		{
-			graphics.GdiFill(_colorTable.Highlight, new Rectangle(x, y, width, height));
+			graphics.GdiFill(colorTable.Highlight, new Rectangle(x, y, width, height));
 		}
 	}
 

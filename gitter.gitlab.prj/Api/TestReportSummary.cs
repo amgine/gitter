@@ -22,11 +22,6 @@ namespace gitter.GitLab.Api;
 
 using System;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
-using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 [DataContract]
 internal class TestReportSummary
@@ -38,20 +33,12 @@ internal class TestReportSummary
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Total)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Total)]
-#endif
-	public TestReportSummaryTotal Total { get; set; }
+	public TestReportSummaryTotal? Total { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Suites)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Suites)]
-#endif
-	public TestReportSummarySuite[] Suites { get; set; }
+	public TestReportSummarySuite[]? Suites { get; set; }
 }
 
 [DataContract]
@@ -69,60 +56,32 @@ class TestReportSummaryTotal
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Time)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Time)]
-#endif
 	public double Time { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Count)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Count)]
-#endif
 	public int Count { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Success)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Success)]
-#endif
 	public int Success { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Failed)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Failed)]
-#endif
 	public int Failed { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Skipped)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Skipped)]
-#endif
 	public int Skipped { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Error)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Error)]
-#endif
 	public int Error { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.SuiteError)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.SuiteError)]
-#endif
-	public string SuiteError { get; set; }
+	public string? SuiteError { get; set; }
 }
 
 [DataContract]
@@ -142,74 +101,38 @@ class TestReportSummarySuite
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Name)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Name)]
-#endif
-	public string Name { get; set; }
+	public string Name { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Time)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Time)]
-#endif
 	public double Time { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Count)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Count)]
-#endif
 	public int Count { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Success)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Success)]
-#endif
 	public int Success { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Failed)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Failed)]
-#endif
 	public int Failed { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Skipped)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Skipped)]
-#endif
 	public int Skipped { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Error)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Error)]
-#endif
 	public int Error { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.BuildIds)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.BuildIds)]
-#endif
-	public long[] BuildIds { get; set; }
+	public long[]? BuildIds { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.SuiteError)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.SuiteError)]
-#endif
-	public string SuiteError { get; set; }
+	public string? SuiteError { get; set; }
 }

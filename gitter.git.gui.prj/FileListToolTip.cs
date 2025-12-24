@@ -39,10 +39,10 @@ sealed class FileListToolTip : CustomToolTip
 		public bool IsFile;
 	}
 
-	private List<TextEntry> _textEntries;
+	private List<TextEntry>? _textEntries;
 	private Size _cachedSize;
 	private Dpi  _cachedDpi;
-	private int _rowHeight;
+	private int  _rowHeight;
 
 	private const int MaximumFiles = 10;
 
@@ -75,7 +75,7 @@ sealed class FileListToolTip : CustomToolTip
 					list.Add(new TextEntry { Text = Resources.StrModifiedFiles.AddColon() });
 					break;
 				case FileStatus.Unmerged:
-					if(staged) throw new ArgumentException(nameof(fileStatus));
+					if(staged) throw new ArgumentException($"Cannot have Staged+Unmerged status.", nameof(fileStatus));
 					list.Add(new TextEntry { Text = Resources.StrConflictingFiles.AddColon() });
 					count = status.UnmergedCount;
 					break;
@@ -112,7 +112,7 @@ sealed class FileListToolTip : CustomToolTip
 		return list;
 	}
 
-	public override Size Measure(Control associatedControl)
+	public override Size Measure(Control? associatedControl)
 	{
 		var dpi = associatedControl is not null
 			? Dpi.FromControl(associatedControl)
@@ -178,6 +178,7 @@ sealed class FileListToolTip : CustomToolTip
 		var conv = DpiConverter.FromDefaultTo(dpi);
 		var y    = conv.ConvertY(VerticalMargin);
 		var hmargin = conv.ConvertX(HorizontalMargin);
+		var color   = Style.Colors.WindowText;
 		foreach(var entry in _textEntries)
 		{
 			var x = hmargin;
@@ -191,7 +192,7 @@ sealed class FileListToolTip : CustomToolTip
 				}
 			}
 			GitterApplication.TextRenderer.DrawText(
-				gx, entry.Text, font, SystemBrushes.InfoText, x, y, StringFormat.GenericTypographic);
+				gx, entry.Text, font, color, x, y, StringFormat.GenericTypographic);
 			y += _rowHeight + conv.ConvertY(VerticalSpacing);
 		}
 	}

@@ -30,12 +30,11 @@ static class Program
 {
 	/// <summary>Available updaters.</summary>
 	private static readonly IReadOnlyList<IUpdateDriver> UpdateDrivers =
-		new IUpdateDriver[]
-		{
+		[
 			new GitUpdateDriver(),
 			new DeployDriver(),
 			new DownloadAndUnzipDriver(),
-		};
+		];
 
 	/// <summary>The main entry point for the application.</summary>
 	[STAThread]
@@ -44,34 +43,32 @@ static class Program
 		var cmdline = new CommandLine();
 		bool singleInstance;
 		var s = default(Semaphore);
-		if(!cmdline.IsDefined(@"forcenewinstance"))
-		{
-			s = new Semaphore(0, 1, "gitter-updater", out singleInstance);
-		}
-		else
-		{
-			singleInstance = true;
-		}
 		try
 		{
-			if(singleInstance)
+			if(!cmdline.IsDefined(@"forcenewinstance"))
 			{
-				if(cmdline[@"driver"] is { Length: > 0 } driverName)
-				{
-					var process = UpdateDrivers.FirstOrDefault(d => d.Name == driverName)?.CreateProcess(cmdline);
-					if(process is null) return;
+				s = new Semaphore(0, 1, "gitter-updater", out singleInstance);
+			}
+			else
+			{
+				singleInstance = true;
+			}
+			if(!singleInstance) return;
+			if(cmdline[@"driver"] is { Length: > 0 } driverName)
+			{
+				var process = UpdateDrivers.FirstOrDefault(d => d.Name == driverName)?.CreateProcess(cmdline);
+				if(process is null) return;
 
-					if(cmdline.IsDefined(@"hidden"))
-					{
-						var monitor = new UpdateProcessMonitor();
-						process.Update(monitor);
-					}
-					else
-					{
-						Application.EnableVisualStyles();
-						Application.SetCompatibleTextRenderingDefault(false);
-						Application.Run(new MainForm(process));
-					}
+				if(cmdline.IsDefined(@"hidden"))
+				{
+					var monitor = new UpdateProcessMonitor();
+					process.Update(monitor);
+				}
+				else
+				{
+					Application.EnableVisualStyles();
+					Application.SetCompatibleTextRenderingDefault(false);
+					Application.Run(new MainForm(process));
 				}
 			}
 		}

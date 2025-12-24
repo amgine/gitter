@@ -24,15 +24,13 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 
 partial class RevisionHeaderContent
 {
-	sealed class SubjectElement : TextWithHyperlinksElementBase
+	sealed class SubjectElement(RevisionHeaderContent owner)
+		: TextWithHyperlinksElementBase(owner, Resources.StrSubject.AddColon())
 	{
-		public SubjectElement(RevisionHeaderContent owner)
-			: base(owner, Resources.StrSubject.AddColon())
-		{
-		}
+		public override Element Element
+			=> Element.Subject;
 
-		public override Element Element => Element.Subject;
-
-		protected override string GetText(Revision revision) => revision.Subject;
+		protected override string GetText(Revision revision)
+			=> revision.Subject;
 	}
 }

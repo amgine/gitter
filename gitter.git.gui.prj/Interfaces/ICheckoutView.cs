@@ -24,7 +24,7 @@ using gitter.Framework.Mvc;
 
 interface ICheckoutView : IView
 {
-	IUserInputSource<string> Revision { get; }
+	IUserInputSource<string?> Revision { get; }
 
 	IUserInputErrorNotifier ErrorNotifier { get; }
 }

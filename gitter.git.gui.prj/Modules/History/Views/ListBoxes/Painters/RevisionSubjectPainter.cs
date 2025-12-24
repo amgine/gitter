@@ -23,15 +23,17 @@ namespace gitter.Git.Gui.Controls;
 using System.Collections.Generic;
 
 /// <summary>Paints <see cref="Revision.Subject"/> for the <see cref="SubjectColumn"/>.</summary>
-sealed class RevisionSubjectPainter : RevisionSubjectPainterBase<RevisionListItem>
+sealed class RevisionSubjectPainter(IGraphStyle graphStyle)
+	: RevisionSubjectPainterBase<RevisionListItem>(graphStyle)
 {
-	public RevisionSubjectPainter(IGraphStyle graphStyle)
-		: base(graphStyle)
-	{
-	}
+	protected override void SetDrawnPointers(RevisionListItem item, List<PointerBounds> drawnPointers)
+		=> item.DrawnPointers = drawnPointers;
 
 	/// <inheritdoc/>
-	protected override bool TryGetData(RevisionListItem item, out Revision revision, out GraphCell[] graph, out List<PointerBounds> drawnPointers)
+	protected override bool TryGetData(RevisionListItem item,
+		out Revision revision,
+		out GraphCell[]? graph,
+		out List<PointerBounds>? drawnPointers)
 	{
 		Assert.IsNotNull(item);
 

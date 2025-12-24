@@ -32,14 +32,13 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [DesignerCategory("")]
 public sealed class ConfigParameterMenu : ContextMenuStrip
 {
-	private readonly ConfigParameterListItem _listItem;
-
 	public ConfigParameterMenu(ConfigParameterListItem listItem)
 	{
 		Verify.Argument.IsNotNull(listItem);
 		Verify.Argument.IsValidGitObject(listItem.DataContext);
 
-		_listItem = listItem;
+		Renderer = GitterApplication.Style.ToolStripRenderer;
+
 		ConfigParameter = listItem.DataContext;
 
 		var dpiBindings = new DpiBindings(this);
@@ -59,6 +58,8 @@ public sealed class ConfigParameterMenu : ContextMenuStrip
 	public ConfigParameterMenu(ConfigParameter parameter)
 	{
 		Verify.Argument.IsValidGitObject(parameter, nameof(parameter));
+
+		Renderer = GitterApplication.Style.ToolStripRenderer;
 
 		ConfigParameter = parameter;
 

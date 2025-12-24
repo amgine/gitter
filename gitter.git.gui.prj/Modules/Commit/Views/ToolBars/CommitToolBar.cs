@@ -57,7 +57,7 @@ internal sealed class CommitToolbar : ToolStrip
 		Items.Add(TreeModeButton = new ToolStripButton(Resources.StrShowDirectoryTree, default,
 			(sender, _) =>
 			{
-				var button = (ToolStripButton)sender;
+				var button = (ToolStripButton)sender!;
 				_commitView.TreeMode = button.Checked = !button.Checked;
 			})
 		{
@@ -80,28 +80,46 @@ internal sealed class CommitToolbar : ToolStrip
 				DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
 			});
 
-		_stageAll.ButtonClick += (_, _) => _commitView.Repository.Status.StageAll();
+		_stageAll.ButtonClick += (_, _) =>
+		{
+			if(_commitView.Repository is null) return;
 
-		_stageAll.DropDown.Items.Add(new ToolStripMenuItem(Resources.StrUpdate, null, (_, _) => _commitView.Repository.Status.StageUpdated()));
+			_commitView.Repository.Status.StageAll();
+		};
+
+		_stageAll.DropDown.Items.Add(new ToolStripMenuItem(Resources.StrUpdate, null, (_, _) =>
+		{
+			if(_commitView.Repository is null) return;
+
+			_commitView.Repository.Status.StageUpdated();
+		}));
 		_stageAll.DropDown.Items.Add(new ToolStripSeparator());
 		_stageAll.DropDown.Items.Add(new ToolStripMenuItem(Resources.StrManual.AddEllipsis(), null,
 			(_, _) =>
 			{
-				using var dlg = new StageDialog(_commitView.Repository);
-				dlg.Run(_commitView);
+				if(_commitView.Repository is null) return;
+
+				using var dialog = new StageDialog(_commitView.Repository);
+				dialog.Run(_commitView);
 			}));
 
-		_unstageAll.Click += (_, _) => _commitView.Repository.Status.UnstageAll();
+		_unstageAll.Click += (_, _) =>
+		{
+			if(_commitView.Repository is null) return;
 
-		_btnReset.ButtonClick += (_, _) =>
+			_commitView.Repository.Status.UnstageAll();
+		};
+
+		_btnReset.ButtonClick +=
+			(_, _) =>
 			{
-				using var dlg = new SelectResetModeDialog(ResetMode.Mixed | ResetMode.Hard)
+				using var dialog = new SelectResetModeDialog(ResetMode.Mixed | ResetMode.Hard)
 				{
 					ResetMode = ResetMode.Mixed,
 				};
-				if(dlg.Run(this) == DialogResult.OK)
+				if(dialog.Run(this) == DialogResult.OK)
 				{
-					Reset(dlg.ResetMode);
+					Reset(dialog.ResetMode);
 				}
 			};
 
@@ -133,6 +151,8 @@ internal sealed class CommitToolbar : ToolStrip
 
 	private void Reset(ResetMode mode)
 	{
+		if(_commitView.Repository is null) return;
+
 		try
 		{
 			using(_commitView.ChangeCursor(Cursors.WaitCursor))

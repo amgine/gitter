@@ -26,17 +26,14 @@ using gitter.Framework.Controls;
 
 using gitter.Git.Gui.Controls;
 
-class HistorySearch<T> : ListBoxSearch<T>
+class HistorySearch<T>(CustomListBox listBox) : ListBoxSearch<T>(listBox)
 	where T : HistorySearchOptions
 {
-	public HistorySearch(CustomListBox listBox)
-		: base(listBox)
+	protected static bool TestHash(string? hash, T search)
 	{
-	}
-
-	protected static bool TestHash(string hash, T search)
-	{
-		return hash is not null && hash.StartsWith(search.Text, StringComparison.OrdinalIgnoreCase);
+		return hash is not null
+			&& search.Text is not null
+			&& hash.StartsWith(search.Text, StringComparison.OrdinalIgnoreCase);
 	}
 
 	protected static bool TestRevision(Revision revision, T search)
@@ -64,5 +61,6 @@ class HistorySearch<T> : ListBoxSearch<T>
 	}
 
 	protected override bool TestItem(CustomListBoxItem item, T search)
-		=> item is RevisionListItem rli && TestRevision(rli.DataContext, search);
+		=> item is RevisionListItem rli
+		&& TestRevision(rli.DataContext, search);
 }

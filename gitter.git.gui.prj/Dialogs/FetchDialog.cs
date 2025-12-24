@@ -39,8 +39,6 @@ public partial class FetchDialog : GitDialogBase
 
 		_repository = repository;
 
-		InitializeComponent();
-
 		Text = Resources.StrFetch;
 	}
 

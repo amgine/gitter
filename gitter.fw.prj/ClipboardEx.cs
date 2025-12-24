@@ -27,8 +27,6 @@ using System.Windows.Forms;
 
 using gitter.Framework.Services;
 
-#nullable enable
-
 public static class ClipboardEx
 {
 	static LoggingService Log { get; } = new(@"Clipboard");

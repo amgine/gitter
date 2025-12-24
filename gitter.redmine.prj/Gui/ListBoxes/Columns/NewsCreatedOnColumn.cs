@@ -21,9 +21,6 @@
 namespace gitter.Redmine.Gui;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using gitter.Framework.Controls;
 
@@ -36,13 +33,8 @@ public class NewsCreatedOnColumn : DateColumn
 	{
 	}
 
-	public override string IdentificationString
-	{
-		get { return "CreatedOn"; }
-	}
+	public override string IdentificationString => "CreatedOn";
 
 	protected override Comparison<CustomListBoxItem> SortComparison
-	{
-		get { return NewsListItem.CompareByCreatedOn; }
-	}
+		=> NewsListItem.CompareByCreatedOn;
 }

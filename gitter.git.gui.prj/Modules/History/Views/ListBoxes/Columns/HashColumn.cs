@@ -23,17 +23,8 @@ namespace gitter.Git.Gui.Controls;
 using Resources = gitter.Git.Gui.Properties.Resources;
 
 /// <summary>"Hash" column.</summary>
-public class HashColumn : HashColumnBase
+public class HashColumn() : HashColumnBase((int)ColumnId.Hash, Resources.StrHash, visible: false)
 {
-	/// <summary>Create <see cref="HashColumn"/>.</summary>
-	public HashColumn()
-		: base((int)ColumnId.Hash, Resources.StrHash, visible: false)
-	{
-	}
-
-	/// <inheritdoc/>
-	protected override string GetHash(Revision revision) => revision.HashString;
-
 	/// <inheritdoc/>
 	public override string IdentificationString => "Hash";
 }

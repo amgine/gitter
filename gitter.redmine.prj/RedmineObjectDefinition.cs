@@ -22,6 +22,7 @@ namespace gitter.Redmine;
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Xml;
 
 public abstract class RedmineObjectDefinition<T>
@@ -44,20 +45,20 @@ public abstract class RedmineObjectDefinition<T>
 
 	protected abstract void ResetCore();
 
-	protected abstract void CommitCore();
+	protected abstract Task CommitCore();
 
 	public void Reset()
 	{
-		if(IsCommitted) throw new InvalidOperationException();
+		Verify.State.IsFalse(IsCommitted);
 
 		ResetCore();
 	}
 
-	public void Commit()
+	public async Task CommitAsync()
 	{
-		if(IsCommitted) throw new InvalidOperationException();
+		Verify.State.IsFalse(IsCommitted);
 
-		CommitCore();
+		await CommitCore().ConfigureAwait(continueOnCapturedContext: false);
 		IsCommitted = true;
 	}
 }

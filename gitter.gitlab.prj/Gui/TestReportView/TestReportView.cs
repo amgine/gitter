@@ -37,7 +37,7 @@ partial class TestReportView : GitLabViewBase, ISearchableView<TestReportSearchO
 	private readonly TestCasesListBox _lstTestCases;
 	private readonly TestReportToolBar _toolbar;
 	private ISearchToolBarController _searchToolbar;
-	private TestReportListBinding _dataSource;
+	private TestReportListBinding? _dataSource;
 
 	public TestReportView(IWorkingEnvironment environment)
 		: base(Guids.TestReportViewGuid, environment)
@@ -83,28 +83,27 @@ partial class TestReportView : GitLabViewBase, ISearchableView<TestReportSearchO
 
 	public override IImageProvider ImageProvider { get; } = CommonIcons.Test;
 
-	private TestReportListBinding DataSource
+	private TestReportListBinding? DataSource
 	{
 		get => _dataSource;
 		set
 		{
-			if(_dataSource != value)
+			if(_dataSource == value) return;
+
+			if(_dataSource is not null)
 			{
-				if(_dataSource is not null)
-				{
-					_dataSource.Dispose();
-				}
-				_dataSource = value;
-				if(_dataSource is not null)
-				{
-					_dataSource.DataChanged += OnDataSourceDataChanged;
-					_dataSource.ReloadData();
-				}
+				_dataSource.Dispose();
+			}
+			_dataSource = value;
+			if(_dataSource is not null)
+			{
+				_dataSource.DataChanged += OnDataSourceDataChanged;
+				_dataSource.ReloadData();
 			}
 		}
 	}
 
-	private void OnDataSourceDataChanged(object sender, EventArgs e)
+	private void OnDataSourceDataChanged(object? sender, EventArgs e)
 	{
 		if(sender is not TestReportListBinding binding) return;
 		if(binding != DataSource) return;
@@ -190,7 +189,7 @@ partial class TestReportView : GitLabViewBase, ISearchableView<TestReportSearchO
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 

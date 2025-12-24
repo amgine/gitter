@@ -28,7 +28,7 @@ using gitter.Framework.Controls;
 
 abstract class RepositoryExplorerItemBase : CustomListBoxItem
 {
-	private readonly string _text;
+	private string _text;
 	private IImageProvider _icon;
 
 	protected RepositoryExplorerItemBase(IWorkingEnvironment env, TeamCityGuiProvider guiProvider, IImageProvider icon, string text)
@@ -45,6 +45,30 @@ abstract class RepositoryExplorerItemBase : CustomListBoxItem
 
 	protected TeamCityServiceContext ServiceContext
 		=> GuiProvider.ServiceContext;
+
+	protected IImageProvider Icon
+	{
+		get => _icon;
+		set
+		{
+			if(_icon == value) return;
+
+			_icon = value;
+			InvalidateSafe();
+		}
+	}
+
+	protected string Text
+	{
+		get => _text;
+		set
+		{
+			if(_text == value) return;
+
+			_text = value;
+			InvalidateSafe();
+		}
+	}
 
 	protected void ShowView(Guid guid)
 	{

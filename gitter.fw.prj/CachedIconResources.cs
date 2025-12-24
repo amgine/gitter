@@ -28,7 +28,7 @@ using System.Reflection;
 /// <summary>Provides cached icon resources.</summary>
 public sealed class CachedIconResources
 {
-	private readonly Dictionary<string, Icon> _cache = new();
+	private readonly Dictionary<string, Icon> _cache = [];
 	private readonly Assembly _assembly;
 	private readonly string _prefix;
 
@@ -40,7 +40,7 @@ public sealed class CachedIconResources
 		_prefix   = prefix;
 	}
 
-	public Icon this[string name]
+	public Icon? this[string name]
 	{
 		get
 		{
@@ -50,6 +50,7 @@ public sealed class CachedIconResources
 				{
 					icon = stream is not null ? new Icon(stream) : default;
 				}
+				if(icon is null) return default;
 				_cache.Add(name, icon);
 			}
 			return icon;

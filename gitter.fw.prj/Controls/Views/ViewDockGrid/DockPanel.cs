@@ -292,42 +292,25 @@ public sealed class DockPanel : ContainerControl, IDockHost
 		if(RightSide   is not null) RightSide.Bounds   = GetRightSideBounds(dpi);
 	}
 
-	internal DockPanelSide LeftSide { get; private set; }
+	internal DockPanelSide? LeftSide { get; private set; }
 
-	internal DockPanelSide RightSide { get; private set; }
+	internal DockPanelSide? RightSide { get; private set; }
 
-	internal DockPanelSide TopSide { get; private set; }
+	internal DockPanelSide? TopSide { get; private set; }
 
-	internal DockPanelSide BottomSide { get; private set; }
+	internal DockPanelSide? BottomSide { get; private set; }
 
-	private DockPanelSide GetCreateDockSide(AnchorStyles side)
-	{
-		DockPanelSide viewDockSide;
-		switch(side)
+	private DockPanelSide GetOrCreateDockSide(AnchorStyles side)
+		=> side switch
 		{
-			case AnchorStyles.Left:
-				if(LeftSide is null) SpawnLeftSide();
-				viewDockSide = LeftSide;
-				break;
-			case AnchorStyles.Top:
-				if(TopSide is null) SpawnTopSide();
-				viewDockSide = TopSide;
-				break;
-			case AnchorStyles.Right:
-				if(RightSide is null) SpawnRightSide();
-				viewDockSide = RightSide;
-				break;
-			case AnchorStyles.Bottom:
-				if(BottomSide is null) SpawnBottomSide();
-				viewDockSide = BottomSide;
-				break;
-			default:
-				throw new ArgumentException(
-					"Unknown AnchorStyles value: {0}".UseAsFormat(side),
-					"side");
-		}
-		return viewDockSide;
-	}
+			AnchorStyles.Left   => LeftSide   ?? SpawnLeftSide(),
+			AnchorStyles.Top    => TopSide    ?? SpawnTopSide(),
+			AnchorStyles.Right  => RightSide  ?? SpawnRightSide(),
+			AnchorStyles.Bottom => BottomSide ?? SpawnBottomSide(),
+			_ => throw new ArgumentException(
+				"Unknown AnchorStyles value: {0}".UseAsFormat(side),
+				nameof(side)),
+		};
 
 	public PopupNotificationsStack PopupsStack { get; private set; } = new();
 
@@ -355,7 +338,7 @@ public sealed class DockPanel : ContainerControl, IDockHost
 		}
 	}
 
-	private static ViewBase FindView(Control control, Guid guid, object viewModel, bool considerViewModel)
+	private static ViewBase? FindView(Control control, Guid guid, object? viewModel, bool considerViewModel)
 	{
 		foreach(Control child in control.Controls)
 		{
@@ -389,12 +372,12 @@ public sealed class DockPanel : ContainerControl, IDockHost
 		return null;
 	}
 
-	public ViewBase FindView(Guid guid)
+	public ViewBase? FindView(Guid guid)
 	{
 		return FindView(this, guid, null, false);
 	}
 
-	public ViewBase FindView(Guid guid, IDictionary<string, object> parameters)
+	public ViewBase? FindView(Guid guid, IDictionary<string, object> parameters)
 	{
 		return FindView(this, guid, parameters, true);
 	}
@@ -473,9 +456,9 @@ public sealed class DockPanel : ContainerControl, IDockHost
 			if(PopupsStack is not null)
 			{
 				PopupsStack.Dispose();
-				PopupsStack = null;
+				PopupsStack = null!;
 			}
-			RootControl = null;
+			RootControl = null!;
 		}
 		base.Dispose(disposing);
 	}
@@ -537,16 +520,16 @@ public sealed class DockPanel : ContainerControl, IDockHost
 				viewHost.Status = ViewHostStatus.Docked;
 				break;
 			case DockResult.AutoHideLeft:
-				GetCreateDockSide(AnchorStyles.Left).AddHost(viewHost);
+				GetOrCreateDockSide(AnchorStyles.Left).AddHost(viewHost);
 				break;
 			case DockResult.AutoHideTop:
-				GetCreateDockSide(AnchorStyles.Top).AddHost(viewHost);
+				GetOrCreateDockSide(AnchorStyles.Top).AddHost(viewHost);
 				break;
 			case DockResult.AutoHideRight:
-				GetCreateDockSide(AnchorStyles.Right).AddHost(viewHost);
+				GetOrCreateDockSide(AnchorStyles.Right).AddHost(viewHost);
 				break;
 			case DockResult.AutoHideBottom:
-				GetCreateDockSide(AnchorStyles.Bottom).AddHost(viewHost);
+				GetOrCreateDockSide(AnchorStyles.Bottom).AddHost(viewHost);
 				break;
 			default:
 				throw new ArgumentException(

@@ -46,7 +46,7 @@ public class ConfigParameterListItem : CustomListBoxItem<ConfigParameter>
 		{
 			return CompareByName((ConfigParameterListItem)item1, (ConfigParameterListItem)item2);
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			return 0;
 		}
@@ -65,7 +65,7 @@ public class ConfigParameterListItem : CustomListBoxItem<ConfigParameter>
 		{
 			return CompareByValue((ConfigParameterListItem)item1, (ConfigParameterListItem)item2);
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			return 0;
 		}
@@ -90,7 +90,9 @@ public class ConfigParameterListItem : CustomListBoxItem<ConfigParameter>
 
 	public void StartValueEditor()
 	{
-		var editor = StartTextEditor(ListBox.Columns.GetById((int)ColumnId.Value), DataContext.Value);
+		var column = ListBox?.Columns.GetById((int)ColumnId.Value);
+		if(column is null) return;
+		var editor = StartTextEditor(column, DataContext.Value);
 		editor.Validating += OnEditorValidating;
 	}
 
@@ -98,24 +100,24 @@ public class ConfigParameterListItem : CustomListBoxItem<ConfigParameter>
 
 	#region Event Handlers
 
-	private void OnDeleted(object sender, EventArgs e)
+	private void OnDeleted(object? sender, EventArgs e)
 	{
 		RemoveSafe();
 	}
 
-	private void OnValueChanged(object sender, EventArgs e)
+	private void OnValueChanged(object? sender, EventArgs e)
 	{
 		InvalidateSubItemSafe((int)ColumnId.Value);
 	}
 
-	private void OnEditorValidating(object sender, CancelEventArgs e)
+	private void OnEditorValidating(object? sender, CancelEventArgs e)
 	{
-		var editor = (CustomListBoxTextEditor)sender;
+		var editor = (CustomListBoxTextEditor)sender!;
 		editor.Validating -= OnEditorValidating;
 		DataContext.Value = editor.Text.Trim();
 	}
 
-	private static Image GetIcon(Dpi dpi)
+	private static Image? GetIcon(Dpi dpi)
 		=> Icons.Config.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 
 	#endregion
@@ -123,17 +125,17 @@ public class ConfigParameterListItem : CustomListBoxItem<ConfigParameter>
 	#region Overrides
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		DataContext.Deleted += OnDeleted;
 		DataContext.ValueChanged += OnValueChanged;
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 		DataContext.Deleted -= OnDeleted;
 		DataContext.ValueChanged -= OnValueChanged;
 	}
@@ -142,11 +144,14 @@ public class ConfigParameterListItem : CustomListBoxItem<ConfigParameter>
 	public override void OnDoubleClick(int x, int y)
 	{
 		base.OnDoubleClick(x, y);
-		int cid = ListBox.Columns.GetColumnIndex((int)ColumnId.Value);
-		var column = ListBox.Columns[cid];
-		if(x > column.Left && x < column.Left + column.CurrentWidth)
+		if(ListBox is not null)
 		{
-			StartValueEditor();
+			int cid = ListBox.Columns.GetColumnIndex((int)ColumnId.Value);
+			var column = ListBox.Columns[cid];
+			if(x > column.Left && x < column.Left + column.CurrentWidth)
+			{
+				StartValueEditor();
+			}
 		}
 	}
 

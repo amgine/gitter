@@ -20,6 +20,8 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -39,44 +41,37 @@ public class IssuesCollection : RedmineObjectsCache<Issue>
 	}
 
 	public IssueCreation CreateNew()
-	{
-		return new IssueCreation(Context);
-	}
+		=> new(Context);
 
 	protected override Issue Create(int id)
-	{
-		return new Issue(Context, id);
-	}
+		=> new(Context, id);
 
 	protected override Issue Create(XmlNode node)
-	{
-		return new Issue(Context, node);
-	}
+		=> new(Context, node);
 
-	public LinkedList<Issue> FetchOpen(Project project)
+	public Task<List<Issue>> FetchOpenAsync(Project project, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(project);
 
-		return FetchOpen(project.Id);
+		return FetchOpenAsync(project.Id, cancellationToken);
 	}
 
-	public LinkedList<Issue> FetchOpen(int projectId)
-	{
-		return FetchOpen(projectId.ToString(CultureInfo.InvariantCulture));
-	}
+	public Task<List<Issue>> FetchOpenAsync(int projectId, CancellationToken cancellationToken = default)
+		=> FetchOpenAsync(projectId.ToString(CultureInfo.InvariantCulture), cancellationToken);
 
-	public LinkedList<Issue> FetchOpen(string projectId)
+	public Task<List<Issue>> FetchOpenAsync(string projectId, CancellationToken cancellationToken = default)
 	{
 		var url = string.Format(CultureInfo.InvariantCulture,
 			@"projects/{0}/issues.xml", projectId);
-		return FetchItemsFromAllPages(url);
+		return FetchItemsFromAllPagesAsync(url, cancellationToken);
 	}
 
-	public Task<LinkedList<Issue>> FetchOpenAsync(string projectId, System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	public Task<List<Issue>> FetchOpenAsync(string projectId,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
+		progress?.Report(OperationProgress.Indeterminate(Resources.StrsFetchingIssues.AddEllipsis()));
 		var url = string.Format(CultureInfo.InvariantCulture,
 			@"projects/{0}/issues.xml", projectId);
-		progress?.Report(new OperationProgress(Resources.StrsFetchingIssues.AddEllipsis()));
 		return FetchItemsFromAllPagesAsync(url, cancellationToken);
 	}
 }

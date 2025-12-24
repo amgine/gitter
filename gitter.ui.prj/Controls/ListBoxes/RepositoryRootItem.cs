@@ -36,13 +36,13 @@ public sealed class RepositoryRootItem : CustomListBoxItem
 	#region Data
 
 	private readonly IWorkingEnvironment _environment;
-	private string _repository;
+	private string? _repository;
 
 	#endregion
 
 	#region .ctor
 
-	public RepositoryRootItem(IWorkingEnvironment environment, string repository)
+	public RepositoryRootItem(IWorkingEnvironment environment, string? repository)
 	{
 		Verify.Argument.IsNotNull(environment);
 
@@ -53,7 +53,7 @@ public sealed class RepositoryRootItem : CustomListBoxItem
 
 	#endregion
 
-	public string RepositoryDisplayName
+	public string? RepositoryDisplayName
 	{
 		get => _repository;
 		set
@@ -63,7 +63,7 @@ public sealed class RepositoryRootItem : CustomListBoxItem
 		}
 	}
 
-	private static Image GetImage(Dpi dpi)
+	private static Image? GetImage(Dpi dpi)
 		=> Icons.Repository.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 
 	/// <inheritdoc/>
@@ -99,7 +99,7 @@ public sealed class RepositoryRootItem : CustomListBoxItem
 	}
 
 	/// <inheritdoc/>
-	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	public override ContextMenuStrip? GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
 		Assert.IsNotNull(requestEventArgs);
 
@@ -116,7 +116,7 @@ public sealed class RepositoryRootItem : CustomListBoxItem
 
 	private void ShowAddServiceDialog()
 	{
-		using var d = new AddServiceDialog(_environment);
-		d.Run(ListBox);
+		using var dialog = new AddServiceDialog(_environment);
+		dialog.Run(ListBox);
 	}
 }

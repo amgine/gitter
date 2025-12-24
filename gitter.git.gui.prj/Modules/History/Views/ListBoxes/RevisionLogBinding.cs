@@ -60,24 +60,19 @@ sealed class RevisionLogBinding : AsyncDataBinding<RevisionLog>
 		}
 	}
 
-	private CustomListBoxItem PickDefaultItemToFocus()
+	private CustomListBoxItem? PickDefaultItemToFocus()
 	{
-		CustomListBoxItem itemToFocus = RevisionListBox.HeadItem;
-		if(RevisionListBox.StagedItem != null)
-		{
-			itemToFocus = RevisionListBox.StagedItem;
-		}
-		if(RevisionListBox.UnstagedItem != null)
-		{
-			itemToFocus = RevisionListBox.UnstagedItem;
-		}
-		return itemToFocus;
+		if(RevisionListBox is null) return default;
+
+		return (CustomListBoxItem?)RevisionListBox.UnstagedItem
+			?? (CustomListBoxItem?)RevisionListBox.StagedItem
+			?? (CustomListBoxItem?)RevisionListBox.HeadItem;
 	}
 
 	/// <inheritdoc/>
-	protected override Task<RevisionLog> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	protected override Task<RevisionLog> FetchDataAsync(IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
 	{
-		Verify.State.IsFalse(IsDisposed, "RevisionLogBinding is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		RevisionListBox.Cursor = Cursors.WaitCursor;
 		return LogSource.GetRevisionLogAsync(LogOptions, progress, cancellationToken);

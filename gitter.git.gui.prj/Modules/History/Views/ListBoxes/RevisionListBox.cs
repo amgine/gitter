@@ -22,6 +22,7 @@ namespace gitter.Git.Gui.Controls;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -36,24 +37,24 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 /// <summary><see cref="CustomListBox"/> for displaying <see cref="RevisionListItem"/>.</summary>
 public class RevisionListBox : CustomListBox
 {
-	private static Action<RevisionListBox> _onCreated;
+	private static Action<RevisionListBox>? _onCreated;
 
 	public static void OnCreated(Action<RevisionListBox> onCreated)
 	{
 		_onCreated += onCreated;
 	}
 
-	private Repository _repository;
-	private RevisionListItem _currentRevisionItem;
-	private RevisionLog _revisionLog;
-	private Dictionary<Revision, RevisionListItem> _itemLookupTable;
+	private Repository? _repository;
+	private RevisionListItem? _currentRevisionItem;
+	private RevisionLog? _revisionLog;
+	private Dictionary<Revision, RevisionListItem>? _itemLookupTable;
 	private int _currentIndex;
-	private Branch _currentBranch;
+	private Branch? _currentBranch;
 
 	private bool _showStatusItems;
 
-	private FakeRevisionListItem _unstagedItem;
-	private FakeRevisionListItem _stagedItem;
+	private FakeRevisionListItem? _unstagedItem;
+	private FakeRevisionListItem? _stagedItem;
 
 	public sealed class State
 	{
@@ -61,7 +62,7 @@ public class RevisionListBox : CustomListBox
 
 		public bool StagedSelected { get; set; }
 
-		public IEnumerable<Revision> SelectedRevisions { get; set; }
+		public IEnumerable<Revision>? SelectedRevisions { get; set; }
 
 		public int VScrollPos { get; set; }
 	}
@@ -83,12 +84,12 @@ public class RevisionListBox : CustomListBox
 
 	private IGraphBuilderFactory GraphBuilderFactory { get; }
 
-	private CustomListBoxColumn GraphColumn => Columns.GetById((int)ColumnId.Graph);
+	private CustomListBoxColumn? GraphColumn => Columns.GetById((int)ColumnId.Graph);
 
-	private void DetachFromRepository()
+	private void DetachFromRepository(Repository repository)
 	{
-		_repository.Head.PointerChanged -= OnHeadChanged;
-		_repository.Status.Changed -= OnStatusUpdated;
+		repository.Head.PointerChanged -= OnHeadChanged;
+		repository.Status.Changed -= OnStatusUpdated;
 		if(_currentBranch is not null)
 		{
 			_currentBranch.PositionChanged -= OnCurrentBranchPositionChanged;
@@ -98,20 +99,20 @@ public class RevisionListBox : CustomListBox
 		_currentIndex = -1;
 	}
 
-	private void AttachToRepository()
+	private void AttachToRepository(Repository repository)
 	{
-		_repository.Head.PointerChanged += OnHeadChanged;
-		_repository.Status.Changed += OnStatusUpdated;
-		_currentBranch = _repository.Head.CurrentBranch;
+		repository.Head.PointerChanged += OnHeadChanged;
+		repository.Status.Changed += OnStatusUpdated;
+		_currentBranch = repository.Head.CurrentBranch;
 		if(_currentBranch is not null)
 		{
 			_currentBranch.PositionChanged += OnCurrentBranchPositionChanged;
 		}
 	}
 
-	public State GetState()
+	public State? GetState()
 	{
-		List<Revision> revs;
+		List<Revision>? revs;
 		if(SelectedItems.Count == 0)
 		{
 			revs = null;
@@ -137,7 +138,7 @@ public class RevisionListBox : CustomListBox
 		return state;
 	}
 
-	public void SetState(State state)
+	public void SetState(State? state)
 	{
 		if(state is null)
 		{
@@ -153,7 +154,7 @@ public class RevisionListBox : CustomListBox
 			{
 				_stagedItem.IsSelected = true;
 			}
-			if(state.SelectedRevisions is not null)
+			if(state.SelectedRevisions is not null && _itemLookupTable is not null)
 			{
 				foreach(var item in state.SelectedRevisions)
 				{
@@ -176,7 +177,7 @@ public class RevisionListBox : CustomListBox
 		_repository = value.Repository;
 		_revisionLog = value;
 		var oldLookupTable = _itemLookupTable;
-		_itemLookupTable = new Dictionary<Revision, RevisionListItem>(capacity: value.RevisionsCount);
+		_itemLookupTable = new Dictionary<Revision, RevisionListItem>(capacity: value.Revisions.Count);
 
 		var head = _repository.Head.Revision;
 
@@ -193,7 +194,7 @@ public class RevisionListBox : CustomListBox
 			var currentRevisionItem = default(RevisionListItem);
 			_stagedItem = null;
 			_unstagedItem = null;
-			for(int i = 0; i < value.RevisionsCount; ++i)
+			for(int i = 0, count = value.Revisions.Count; i < count; ++i)
 			{
 				var revision = value.Revisions[i];
 				if(oldLookupTable is null || !oldLookupTable.TryGetValue(revision, out var revisionListItem))
@@ -221,7 +222,7 @@ public class RevisionListBox : CustomListBox
 			{
 				CheckNeedOfFakeItems();
 				ReinsertFakeItems(builder);
-				AttachToRepository();
+				AttachToRepository(value.Repository);
 			}
 		}
 		else
@@ -230,7 +231,7 @@ public class RevisionListBox : CustomListBox
 			var currentRevisionItem = default(RevisionListItem);
 			_stagedItem = null;
 			_unstagedItem = null;
-			for(int i = 0; i < value.RevisionsCount; ++i)
+			for(int i = 0, count = value.Revisions.Count; i < count; ++i)
 			{
 				var revision = value.Revisions[i];
 				if(oldLookupTable is null || !oldLookupTable.TryGetValue(revision, out var revisionListItem))
@@ -253,14 +254,14 @@ public class RevisionListBox : CustomListBox
 		EndUpdate();
 	}
 
-	public RevisionLog RevisionLog
+	public RevisionLog? RevisionLog
 	{
 		get => _revisionLog;
 		set
 		{
 			if(_repository is not null)
 			{
-				DetachFromRepository();
+				DetachFromRepository(_repository);
 			}
 
 			if(_currentBranch is not null)
@@ -286,14 +287,20 @@ public class RevisionListBox : CustomListBox
 		}
 	}
 
-	public RevisionListItem HeadItem => _currentRevisionItem;
+	public RevisionListItem? HeadItem => _currentRevisionItem;
 
-	public FakeRevisionListItem StagedItem => _stagedItem;
+	public FakeRevisionListItem? StagedItem => _stagedItem;
 
-	public FakeRevisionListItem UnstagedItem => _unstagedItem;
+	public FakeRevisionListItem? UnstagedItem => _unstagedItem;
 
-	private void RefreshCurrentRevisionItem(Revision currentRevision)
+	private void RefreshCurrentRevisionItem(Revision? currentRevision)
 	{
+		if(currentRevision is null)
+		{
+			_currentIndex = -1;
+			_currentRevisionItem = default;
+			return;
+		}
 		int id = 0;
 		var currentIndex = -1;
 		var currentRevisionItem = default(RevisionListItem);
@@ -313,36 +320,35 @@ public class RevisionListBox : CustomListBox
 
 	private void RemoveFakeItems(IGraphBuilder<Revision> builder)
 	{
-		if(_showStatusItems)
+		if(!_showStatusItems) return;
+
+		if(_stagedItem is not null)
 		{
-			if(_stagedItem is not null)
+			_stagedItem.Remove();
+			if(_currentIndex != -1)
 			{
-				_stagedItem.Remove();
-				if(_currentIndex != -1)
-				{
-					--_currentIndex;
-				}
+				--_currentIndex;
 			}
-			if(_unstagedItem is not null)
+		}
+		if(_unstagedItem is not null)
+		{
+			_unstagedItem.Remove();
+			if(_currentIndex != -1)
 			{
-				_unstagedItem.Remove();
-				if(_currentIndex != -1)
-				{
-					--_currentIndex;
-				}
+				--_currentIndex;
 			}
-			if(_currentRevisionItem is not null)
+		}
+		if(_currentRevisionItem is not null)
+		{
+			if(_currentIndex == 0)
 			{
-				if(_currentIndex == 0)
-				{
-					builder.CleanGraph(_currentRevisionItem.Graph);
-				}
-				else
-				{
-					var prev = ((RevisionListItem)Items[_currentIndex - 1]).Graph;
-					var next = ((RevisionListItem)Items[_currentIndex]).Graph;
-					builder.CleanGraph(prev, next);
-				}
+				builder.CleanGraph(_currentRevisionItem.Graph);
+			}
+			else
+			{
+				var prev = ((RevisionListItem)Items[_currentIndex - 1]).Graph;
+				var next = ((RevisionListItem)Items[_currentIndex]).Graph;
+				builder.CleanGraph(prev, next);
 			}
 		}
 	}
@@ -362,7 +368,7 @@ public class RevisionListBox : CustomListBox
 		int count = 0;
 		if(needStaged)
 		{
-			_stagedItem ??= new FakeRevisionListItem(_repository, FakeRevisionItemType.StagedChanges);
+			_stagedItem ??= new FakeRevisionListItem(_repository!, FakeRevisionItemType.StagedChanges);
 			++count;
 		}
 		else
@@ -371,7 +377,7 @@ public class RevisionListBox : CustomListBox
 		}
 		if(needUnstaged)
 		{
-			_unstagedItem ??= new FakeRevisionListItem(_repository, FakeRevisionItemType.UnstagedChanges);
+			_unstagedItem ??= new FakeRevisionListItem(_repository!, FakeRevisionItemType.UnstagedChanges);
 			++count;
 		}
 		else
@@ -391,11 +397,11 @@ public class RevisionListBox : CustomListBox
 			{
 				Items.Insert(_currentIndex, _stagedItem);
 				++_currentIndex;
-				_stagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem.Graph);
+				_stagedItem.Graph = builder.AddGraphLineToTop(_currentRevisionItem?.Graph);
 				graphLength = _stagedItem.Graph.Length;
 				++fakeItems;
 			}
-			else if(_repository.IsEmpty)
+			else if(_repository is { IsEmpty: true })
 			{
 				Items.Insert(0, _stagedItem);
 				_stagedItem.Graph = builder.AddGraphLineToTop(null);
@@ -420,7 +426,7 @@ public class RevisionListBox : CustomListBox
 					Items.Insert(_currentIndex, _unstagedItem);
 				}
 				++_currentIndex;
-				if(_unstagedItem is not null && _stagedItem is not null)
+				if(_stagedItem is not null)
 				{
 					_unstagedItem.Graph = builder.AddGraphLineToTop(_stagedItem.Graph);
 				}
@@ -436,10 +442,10 @@ public class RevisionListBox : CustomListBox
 				}
 				++fakeItems;
 			}
-			else if(_repository.IsEmpty)
+			else if(_repository is { IsEmpty: true })
 			{
 				Items.Insert(0, _unstagedItem);
-				if(_unstagedItem is not null && _stagedItem is not null)
+				if(_stagedItem is not null)
 				{
 					_unstagedItem.Graph = builder.AddGraphLineToTop(_stagedItem.Graph);
 				}
@@ -526,8 +532,10 @@ public class RevisionListBox : CustomListBox
 
 	#region Event Handlers
 
-	private void OnHeadChanged(object sender, RevisionPointerChangedEventArgs e)
+	private void OnHeadChanged(object? sender, RevisionPointerChangedEventArgs e)
 	{
+		if(_repository is null) return;
+
 		if(InvokeRequired)
 		{
 			BeginInvoke(new Action<Repository>(RelocateFakeItemsAfterCheckout), _repository);
@@ -538,7 +546,7 @@ public class RevisionListBox : CustomListBox
 		}
 	}
 
-	private void OnCurrentBranchPositionChanged(object sender, RevisionChangedEventArgs e)
+	private void OnCurrentBranchPositionChanged(object? sender, RevisionChangedEventArgs e)
 	{
 		if(InvokeRequired)
 		{
@@ -550,9 +558,9 @@ public class RevisionListBox : CustomListBox
 		}
 	}
 
-	private void OnStatusUpdated(object sender, EventArgs e)
+	private void OnStatusUpdated(object? sender, EventArgs e)
 	{
-		var status = (Status)sender;
+		var status = (Status)sender!;
 		if(InvokeRequired)
 		{
 			try
@@ -572,17 +580,14 @@ public class RevisionListBox : CustomListBox
 
 	#endregion
 
-	private void RelocateFakeItemsAfterHeadReset(Revision revision)
+	private void RelocateFakeItemsAfterHeadReset(Revision? revision)
 	{
 		var builder = GraphBuilderFactory.CreateGraphBuilder<Revision>();
 		BeginUpdate();
 		RemoveFakeItems(builder);
 		RefreshCurrentRevisionItem(revision);
 		ReinsertFakeItems(builder);
-		if(_currentRevisionItem != null)
-		{
-			_currentRevisionItem.InvalidateSafe();
-		}
+		_currentRevisionItem?.InvalidateSafe();
 		EndUpdate();
 	}
 
@@ -602,7 +607,7 @@ public class RevisionListBox : CustomListBox
 			{
 				_currentBranch.PositionChanged -= OnCurrentBranchPositionChanged;
 			}
-			_currentBranch = _repository.Head.Pointer as Branch;
+			_currentBranch = repository.Head.Pointer as Branch;
 			if(_currentBranch is not null)
 			{
 				_currentBranch.PositionChanged += OnCurrentBranchPositionChanged;
@@ -753,12 +758,12 @@ public class RevisionListBox : CustomListBox
 				{
 					if(_currentIndex == fakeitems)
 					{
-						builder.CleanGraph(_currentRevisionItem.Graph);
+						builder.CleanGraph(_currentRevisionItem?.Graph);
 					}
 					else
 					{
-						var prev = ((RevisionListItem)Items[_currentIndex - fakeitems - 1]).Graph;
-						var next = ((RevisionListItem)Items[_currentIndex]).Graph;
+						var prev = ((RevisionListItem)Items[_currentIndex - fakeitems - 1]).Graph ?? [];
+						var next = ((RevisionListItem)Items[_currentIndex]).Graph ?? [];
 						builder.CleanGraph(prev, next);
 					}
 				}
@@ -783,7 +788,7 @@ public class RevisionListBox : CustomListBox
 		}
 	}
 
-	protected override ContextMenuStrip GetMultiselectContextMenu(ItemsContextMenuRequestEventArgs requestEventArgs)
+	protected override ContextMenuStrip? GetMultiselectContextMenu(ItemsContextMenuRequestEventArgs requestEventArgs)
 	{
 		Assert.IsNotNull(requestEventArgs);
 
@@ -815,7 +820,7 @@ public class RevisionListBox : CustomListBox
 			return;
 		}
 		var data = drgevent.Data;
-		if(data.GetDataPresent<Branch>())
+		if(data is not null && data.GetDataPresent<Branch>())
 		{
 			var p = PointToClient(new Point(drgevent.X, drgevent.Y));
 			var htr = HitTest(p.X, p.Y);
@@ -824,7 +829,7 @@ public class RevisionListBox : CustomListBox
 				if(Items[htr.ItemIndex] is RevisionListItem item)
 				{
 					var branch = data.GetData<Branch>();
-					if(branch.Repository == item.DataContext.Repository)
+					if(branch is not null && branch.Repository == item.DataContext.Repository)
 					{
 						drgevent.Effect = DragDropEffects.Move;
 						return;
@@ -856,7 +861,7 @@ public class RevisionListBox : CustomListBox
 	{
 		base.OnDragDrop(drgevent);
 		var data = drgevent.Data;
-		if(data.GetDataPresent<Branch>())
+		if(data is not null && data.GetDataPresent<Branch>())
 		{
 			var p = PointToClient(new Point(drgevent.X, drgevent.Y));
 			var htr = HitTest(p.X, p.Y);
@@ -865,7 +870,7 @@ public class RevisionListBox : CustomListBox
 				if(Items[htr.ItemIndex] is RevisionListItem revItem)
 				{
 					var branch = data.GetData<Branch>();
-					if(branch.Revision != revItem.DataContext)
+					if(branch is not null && branch.Revision != revItem.DataContext)
 					{
 						BeginInvoke(new Action<Branch, Revision>(CompleteBranchDragAndDrop),
 							branch, revItem.DataContext);
@@ -882,16 +887,16 @@ public class RevisionListBox : CustomListBox
 
 		if(branch.IsCurrent)
 		{
-			using var dlg = new SelectResetModeDialog()
+			using var dialog = new SelectResetModeDialog()
 			{
 				ResetMode = ResetMode.Mixed
 			};
-			if(dlg.Run(this) != DialogResult.OK) return;
+			if(dialog.Run(this) != DialogResult.OK) return;
 			try
 			{
 				using(this.ChangeCursor(Cursors.WaitCursor))
 				{
-					revision.ResetHeadHere(dlg.ResetMode);
+					revision.ResetHeadHere(dialog.ResetMode);
 				}
 			}
 			catch(GitException exc)
@@ -937,8 +942,16 @@ public class RevisionListBox : CustomListBox
 		set => _showStatusItems = value;
 	}
 
-	public RevisionListItem this[Revision revision]
-		=> _itemLookupTable[revision];
+	public bool TryFindRevisionItem(Revision revision,
+		[MaybeNullWhen(returnValue: false)] out RevisionListItem item)
+	{
+		if(_itemLookupTable is null)
+		{
+			item = default;
+			return false;
+		}
+		return _itemLookupTable.TryGetValue(revision, out item);
+	}
 
 	#endregion
 
@@ -946,8 +959,10 @@ public class RevisionListBox : CustomListBox
 	{
 		Verify.Argument.IsNotNull(revision);
 
+		if(_itemLookupTable is null) return false;
+
 		var rev = revision.Dereference();
-		if(_itemLookupTable.TryGetValue(rev, out var item))
+		if(rev is not null && _itemLookupTable.TryGetValue(rev, out var item))
 		{
 			item.FocusAndSelect();
 			return true;
@@ -955,7 +970,7 @@ public class RevisionListBox : CustomListBox
 		return false;
 	}
 
-	public RevisionListItem TryGetItem(Revision revision)
+	public RevisionListItem? TryGetItem(Revision revision)
 	{
 		Verify.Argument.IsNotNull(revision);
 
@@ -972,9 +987,11 @@ public class RevisionListBox : CustomListBox
 		var graphColumn = GraphColumn;
 		if(graphColumn is null) return;
 
+		if(_revisionLog is null) return;
+
 		var builder  = GraphBuilderFactory.CreateGraphBuilder<Revision>();
 		int graphLen = 0;
-		if(_itemLookupTable.Count != 0)
+		if(_itemLookupTable is { Count: not 0 })
 		{
 			var graph = builder.BuildGraph(_revisionLog.Revisions, rev => rev.Parents);
 			int id = 0;

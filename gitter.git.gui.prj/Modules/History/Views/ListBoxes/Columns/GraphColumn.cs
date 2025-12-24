@@ -27,6 +27,8 @@ using gitter.Framework.Controls;
 using gitter.Framework.Configuration;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
+using System.Diagnostics.CodeAnalysis;
+using gitter.Framework;
 
 /// <summary>"Graph" column.</summary>
 public sealed class GraphColumn : CustomListBoxColumn
@@ -38,18 +40,18 @@ public sealed class GraphColumn : CustomListBoxColumn
 
 	private bool _showColors;
 	private bool _fillBackground;
-	private GraphColumnExtender _extender;
+	private GraphColumnExtender? _extender;
 
 	#endregion
 
 	#region Events
 
-	public event EventHandler ShowColorsChanged;
+	public event EventHandler? ShowColorsChanged;
 
 	private void OnShowColorsChanged(EventArgs e)
 		=> ShowColorsChanged?.Invoke(this, e);
 
-	public event EventHandler FillBackgroundChanged;
+	public event EventHandler? FillBackgroundChanged;
 
 	private void OnFillBackgroundChanged(EventArgs e)
 		=> FillBackgroundChanged?.Invoke(this, e);
@@ -71,16 +73,16 @@ public sealed class GraphColumn : CustomListBoxColumn
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		GraphStyle.Changed += OnGraphStyleChanged;
 		_extender = new GraphColumnExtender(this);
 		Extender = new Popup(_extender);
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		GraphStyle.Changed -= OnGraphStyleChanged;
 		if(Extender is not null)
@@ -88,12 +90,8 @@ public sealed class GraphColumn : CustomListBoxColumn
 			Extender.Dispose();
 			Extender = null;
 		}
-		if(_extender is not null)
-		{
-			_extender.Dispose();
-			_extender = null;
-		}
-		base.OnListBoxDetached();
+		DisposableUtility.Dispose(ref _extender);
+		base.OnListBoxDetached(listBox);
 	}
 
 	private IGraphStyle GraphStyle { get; }
@@ -126,12 +124,14 @@ public sealed class GraphColumn : CustomListBoxColumn
 		}
 	}
 
-	private void OnGraphStyleChanged(object sender, EventArgs e)
+	private void OnGraphStyleChanged(object? sender, EventArgs e)
 	{
 		InvalidateContent();
 	}
 
-	private static bool TryGetGraph(CustomListBoxItem item, out GraphCell[] graph, out RevisionGraphItemType type)
+	private static bool TryGetGraph(CustomListBoxItem item,
+		[MaybeNullWhen(returnValue: false)] out GraphCell[] graph,
+		out RevisionGraphItemType type)
 	{
 		switch(item)
 		{
@@ -146,6 +146,10 @@ public sealed class GraphColumn : CustomListBoxColumn
 				type  = fakeRevItem.Type == FakeRevisionItemType.StagedChanges
 					? RevisionGraphItemType.Uncommitted
 					: RevisionGraphItemType.Unstaged;
+				return graph is not null;
+			case IRevisionGraphListItem graphItem:
+				graph = graphItem.Graph;
+				type = RevisionGraphItemType.Generic;
 				return graph is not null;
 			default:
 				graph = default;

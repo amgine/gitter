@@ -22,7 +22,6 @@ namespace gitter.GitLab.Gui;
 
 using System;
 using System.Drawing;
-using System.Globalization;
 
 using gitter.Framework.Controls;
 
@@ -36,31 +35,18 @@ sealed class DurationColumn : CustomListBoxColumn
 	private static string DurationToString(double value)
 	{
 		var ts = TimeSpan.FromSeconds(value);
-		if(value < 1)
-		{
-			return $"{(int)ts.TotalMilliseconds} ms";
-		}
-		if(ts.TotalSeconds < 60)
-		{
-			return $"{(int)ts.TotalSeconds} s";
-		}
-		if(ts.TotalMinutes < 60)
-		{
-			return $"{(int)ts.TotalMinutes} m";
-		}
-		return $"{(int)ts.TotalHours} h";
+		if(value < 1)            return $"{(int)ts.TotalMilliseconds} ms";
+		if(ts.TotalSeconds < 60) return $"{(int)ts.TotalSeconds} s";
+		if(ts.TotalMinutes < 60) return $"{(int)ts.TotalMinutes} m";
+		                         return $"{(int)ts.TotalHours} h";
 	}
 
-	private static string TryGetDuration(CustomListBoxItem item)
-	{
-		switch(item)
+	private static string? TryGetDuration(CustomListBoxItem item)
+		=> item switch
 		{
-			case TestCaseListBoxItem testCase:
-				return DurationToString(testCase.DataContext.ExecutionTime);
-			default:
-				return default;
-		}
-	}
+			TestCaseListBoxItem testCase => DurationToString(testCase.DataContext.ExecutionTime),
+			_ => default,
+		};
 
 	/// <inheritdoc/>
 	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)

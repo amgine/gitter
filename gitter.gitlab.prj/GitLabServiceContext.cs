@@ -31,28 +31,27 @@ using gitter.GitLab.Api;
 class GitLabServiceContext
 {
 	private readonly ApiEndpoint _api;
+	private readonly ServerInfo _server;
 
-	public GitLabServiceContext(HttpMessageInvoker httpMessageInvoker, Uri serviceUri, string apiKey)
+	public GitLabServiceContext(HttpMessageInvoker httpMessageInvoker, ServerInfo server)
 	{
 		Verify.Argument.IsNotNull(httpMessageInvoker);
-		Verify.Argument.IsNotNull(serviceUri);
-		Verify.Argument.IsNeitherNullNorWhitespace(apiKey);
+		Verify.Argument.IsNotNull(server);
 
-		ServiceUri = serviceUri;
-
-		_api = new Api.ApiEndpoint(httpMessageInvoker, serviceUri, apiKey);
+		_server = server;
+		_api = new ApiEndpoint(httpMessageInvoker, server);
 	}
 
-	public Task<GitLabVersion> GetVersionAsync()
+	public Task<GitLabVersion?> GetVersionAsync()
 		=> _api.GetVersionAsync();
 
 	public Task<IReadOnlyList<Pipeline>> GetPipelinesAsync(
-		string          sha           = default,
-		string          reference     = default,
+		string?         sha           = default,
+		string?         reference     = default,
 		PipelineScope?  scope         = default,
 		PipelineStatus? status        = default,
 		PipelineSource? source        = default,
-		string          username      = default,
+		string?         username      = default,
 		DateTimeOffset? updatedBefore = default,
 		DateTimeOffset? updatedAfter  = default,
 		PipelineOrder?  orderBy       = default,
@@ -66,10 +65,10 @@ class GitLabServiceContext
 	public Task DeletePipelineAsync(long pipelineId)
 		=> _api.DeletePipelineAsync(DefaultProjectId, pipelineId);
 
-	public Task<TestReport> GetTestReportAsync(long pipelineId, CancellationToken cancellationToken = default)
+	public Task<TestReport?> GetTestReportAsync(long pipelineId, CancellationToken cancellationToken = default)
 		=> _api.GetTestReportAsync(DefaultProjectId, pipelineId, cancellationToken);
 
-	public Task<TestReportSummary> GetTestReportSummaryAsync(long pipelineId, CancellationToken cancellationToken = default)
+	public Task<TestReportSummary?> GetTestReportSummaryAsync(long pipelineId, CancellationToken cancellationToken = default)
 		=> _api.GetTestReportSummaryAsync(DefaultProjectId, pipelineId, cancellationToken);
 
 	public Task<IReadOnlyList<Issue>> GetIssuesAsync(
@@ -87,10 +86,16 @@ class GitLabServiceContext
 	public string FormatCommitUrl(string sha)
 		=> ServiceUri + $@"{DefaultProjectId}/-/commit/{sha}";
 
+	public string FormatPipelinesUrl()
+		=> ServiceUri + $@"{DefaultProjectId}/-/pipelines";
+
+	public string FormatIssuesUrl()
+		=> ServiceUri + $@"{DefaultProjectId}/-/issues";
+
 	public string FormatIssueUrl(int id)
 		=> ServiceUri + $@"{DefaultProjectId}/-/issues/{id}";
 
-	public Uri ServiceUri { get; }
+	public Uri ServiceUri => _server.ServiceUri;
 
 	public NameOrNumericId DefaultProjectId { get; set; }
 }

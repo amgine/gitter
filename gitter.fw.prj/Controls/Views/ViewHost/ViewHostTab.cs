@@ -46,7 +46,7 @@ public sealed class ViewHostTab : ViewTabBase
 		Buttons.ButtonClick += OnButtonClick;
 	}
 
-	private void OnButtonClick(object sender, ViewButtonClickEventArgs e)
+	private void OnButtonClick(object? sender, ViewButtonClickEventArgs e)
 	{
 		Assert.IsNotNull(e);
 

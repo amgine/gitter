@@ -29,7 +29,7 @@ interface IInitView : IView, IRepositoryInitDialog
 
 	IUserInputSource<bool> UseCustomTemplate { get; }
 
-	IUserInputSource<string> Template { get; }
+	IUserInputSource<string?> Template { get; }
 
 	IUserInputErrorNotifier ErrorNotifier { get; }
 }

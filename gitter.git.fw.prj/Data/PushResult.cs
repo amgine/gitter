@@ -23,34 +23,26 @@ namespace gitter.Git.AccessLayer;
 using System;
 
 /// <summary>Results of pushing local reference to remote repository.</summary>
-public sealed class ReferencePushResult
+public sealed class ReferencePushResult(PushResultType type, string localRefName, string remoteRefName, string summary)
 {
-	public ReferencePushResult(PushResultType type, string localRefName, string remoteRefName, string summary)
-	{
-		Type          = type;
-		LocalRefName  = localRefName;
-		RemoteRefName = remoteRefName;
-		Summary       = summary;
-	}
+	public PushResultType Type { get; } = type;
 
-	public PushResultType Type { get; }
+	public string LocalRefName { get; } = localRefName;
 
-	public string LocalRefName { get; }
+	public string RemoteRefName { get; } = remoteRefName;
 
-	public string RemoteRefName { get; }
-
-	public string Summary { get; }
+	public string Summary { get; } = summary;
 
 	private static char TypeToChar(PushResultType type)
 		=> type switch
 		{
-			PushResultType.ForceUpdated => '+',
-			PushResultType.FastForwarded => ' ',
-			PushResultType.Rejected => '!',
-			PushResultType.UpToDate => '=',
+			PushResultType.ForceUpdated     => '+',
+			PushResultType.FastForwarded    => ' ',
+			PushResultType.Rejected         => '!',
+			PushResultType.UpToDate         => '=',
 			PushResultType.DeletedReference => '-',
 			PushResultType.CreatedReference => '*',
-			_ => throw new ArgumentException(nameof(type)),
+			_ => throw new ArgumentException($"Unknown type: {type}", nameof(type)),
 		};
 
 	public override string ToString()

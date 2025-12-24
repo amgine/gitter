@@ -37,13 +37,13 @@ public sealed class SelectableFont : IDpiBoundValue<Font>
 	#region Data
 
 	private Font _font;
-	private IDpiBoundValue<Font> _scalable;
+	private IDpiBoundValue<Font>? _scalable;
 
 	#endregion
 
 	#region Events
 
-	public event EventHandler Changed;
+	public event EventHandler? Changed;
 
 	#endregion
 
@@ -64,12 +64,12 @@ public sealed class SelectableFont : IDpiBoundValue<Font>
 		Verify.Argument.IsNeitherNullNorWhitespace(name);
 		Verify.Argument.IsNotNull(section);
 
-		var fontName = section.GetValue("Name", default(string));
+		var fontName = section.GetValue("Name", default(string)) ?? "";
 		var size     = section.GetValue("Size", 0.0f);
 		var style    = section.GetValue("Style", FontStyle.Regular);
 		var unit     = section.GetValue("Unit", GraphicsUnit.Point);
 
-		Verify.Argument.IsTrue(fontName is not null, nameof(section), "Section does not contain a valid font name.");
+		Verify.Argument.IsFalse(string.IsNullOrWhiteSpace(fontName), nameof(section), "Section does not contain a valid font name.");
 		Verify.Argument.IsTrue(size > 0, nameof(section), "Section contains invalid font size.");
 
 		_font = new Font(fontName, size, style, unit);
@@ -151,7 +151,7 @@ public sealed class SelectableFont : IDpiBoundValue<Font>
 	{
 		Verify.Argument.IsNotNull(section);
 
-		var name  = section.GetValue("Name", default(string));
+		var name  = section.GetValue("Name", default(string)) ?? "";
 		var size  = section.GetValue("Size", 0.0f);
 		var style = section.GetValue("Name", FontStyle.Regular);
 		var unit  = section.GetValue("Unit", GraphicsUnit.Point);
@@ -161,12 +161,12 @@ public sealed class SelectableFont : IDpiBoundValue<Font>
 
 		if(_font.Name != name || _font.Size != size || _font.Style != style)
 		{
-			Font font = null;
+			var font = default(Font);
 			try
 			{
 				font = new Font(name, size, style, unit);
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 			}
 			if(font is not null)

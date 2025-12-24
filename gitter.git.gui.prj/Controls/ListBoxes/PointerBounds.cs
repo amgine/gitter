@@ -31,7 +31,7 @@ public readonly record struct PointerBounds(
 	IRevisionPointer RevisionPointer,
 	Rectangle        Bounds)
 {
-	public static ContextMenuStrip GetContextMenu(IEnumerable<PointerBounds> pointers, int x, int y)
+	public static ContextMenuStrip? GetContextMenu(IEnumerable<PointerBounds>? pointers, int x, int y)
 	{
 		if(pointers is null) return null;
 		foreach(var ptr in pointers)
@@ -44,7 +44,7 @@ public readonly record struct PointerBounds(
 		return null;
 	}
 
-	public ContextMenuStrip GetContextMenu()
+	public ContextMenuStrip? GetContextMenu()
 		=> RevisionPointer switch
 		{
 			Tag          tag    => new TagMenu(tag),

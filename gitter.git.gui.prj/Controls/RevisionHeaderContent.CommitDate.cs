@@ -24,16 +24,13 @@ using System;
 
 partial class RevisionHeaderContent
 {
-	sealed class CommitDateElement : TimestampElement
+	sealed class CommitDateElement(RevisionHeaderContent owner)
+		: TimestampElement(owner)
 	{
-		public CommitDateElement(RevisionHeaderContent owner)
-			: base(owner)
-		{
-		}
-
 		protected override DateTimeOffset GetTimestamp(Revision revision)
 			=> revision.CommitDate;
 
-		public override Element Element => Element.CommitDate;
+		public override Element Element
+			=> Element.CommitDate;
 	}
 }

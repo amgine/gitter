@@ -28,8 +28,8 @@ public abstract class BaseTextSubItem : CustomListBoxSubItem
 {
 	#region Data
 
-	private Font _font;
-	private Brush _textBrush;
+	private Font? _font;
+	private Brush? _textBrush;
 	private StringAlignment? _alignment;
 
 	#endregion
@@ -48,7 +48,7 @@ public abstract class BaseTextSubItem : CustomListBoxSubItem
 	#region Properties
 
 	/// <summary>Subitem font.</summary>
-	public Font Font
+	public Font? Font
 	{
 		get => _font;
 		set
@@ -62,7 +62,7 @@ public abstract class BaseTextSubItem : CustomListBoxSubItem
 	}
 
 	/// <summary>Text brush.</summary>
-	public Brush TextBrush
+	public Brush? TextBrush
 	{
 		get => _textBrush;
 		set
@@ -90,7 +90,7 @@ public abstract class BaseTextSubItem : CustomListBoxSubItem
 	}
 
 	/// <summary>Subitem text.</summary>
-	public abstract string Text { get; set; }
+	public abstract string? Text { get; set; }
 
 	#endregion
 
@@ -100,8 +100,10 @@ public abstract class BaseTextSubItem : CustomListBoxSubItem
 	/// <param name="paintEventArgs">Paint event args.</param>
 	protected override void OnPaint(SubItemPaintEventArgs paintEventArgs)
 	{
-		paintEventArgs.PaintText(Text,
-			_font ?? paintEventArgs.Font,
+		if(Text is not { Length: not 0 } text) return;
+
+		paintEventArgs.PaintText(text,
+			_font      ?? paintEventArgs.Font,
 			_textBrush ?? paintEventArgs.Brush,
 			_alignment ?? paintEventArgs.Alignment);
 	}
@@ -111,12 +113,13 @@ public abstract class BaseTextSubItem : CustomListBoxSubItem
 	/// <returns>Subitem content size.</returns>
 	protected override Size OnMeasure(SubItemMeasureEventArgs measureEventArgs)
 	{
-		return measureEventArgs.MeasureText(Text);
+		if(Text is not { Length: not 0 } text) return Size.Empty;
+
+		return measureEventArgs.MeasureText(text);
 	}
 
-	/// <summary>Returns a <see cref="T:System.String"/> representation of this <see cref="BaseTextSubItem"/>.</summary>
-	/// <returns><see cref="T:System.String"/> representation of this <see cref="BaseTextSubItem"/>.</returns>
-	public override string ToString() => Text;
+	/// <inheritdoc/>
+	public override string? ToString() => Text;
 
 	#endregion
 }

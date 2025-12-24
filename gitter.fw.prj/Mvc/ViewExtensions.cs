@@ -24,14 +24,14 @@ using System;
 
 public static class ViewExtensions
 {
-	public struct CursorChangeToken : IDisposable
+	public readonly struct CursorChangeToken : IDisposable
 	{
 		private readonly IView _view;
 		private readonly MouseCursor _cursor;
 
 		internal CursorChangeToken(IView view, MouseCursor cursor)
 		{
-			_view = view;
+			_view   = view;
 			_cursor = cursor;
 		}
 
@@ -41,12 +41,15 @@ public static class ViewExtensions
 		}
 	}
 
-	public static CursorChangeToken ChangeCursor(this IView view, MouseCursor cursor)
+	extension(IView view)
 	{
-		Verify.Argument.IsNotNull(view);
+		public CursorChangeToken ChangeCursor(MouseCursor cursor)
+		{
+			Verify.Argument.IsNotNull(view);
 
-		var oldCursor = view.MouseCursor;
-		view.MouseCursor = cursor;
-		return new CursorChangeToken(view, oldCursor);
+			var oldCursor = view.MouseCursor;
+			view.MouseCursor = cursor;
+			return new CursorChangeToken(view, oldCursor);
+		}
 	}
 }

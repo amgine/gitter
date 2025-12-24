@@ -26,6 +26,8 @@ using System.Drawing;
 using System.Windows.Forms;
 
 using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Services;
 using gitter.Git.Gui.Controls;
 
@@ -34,27 +36,92 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public partial class ConflictsDialog : GitDialogBase
 {
+	readonly struct DialogControls
+	{
+		public  readonly TreeListBox  _lstConflicts;
+		private readonly LabelControl _lblConflictingFiles;
+
+		public DialogControls(IGitterStyle? style)
+		{
+			style ??= GitterApplication.Style;
+
+			_lstConflicts = new()
+			{
+				Style       = style,
+				HeaderStyle = HeaderStyle.Hidden,
+			};
+			_lstConflicts.Columns.ShowAll(static column => (ColumnId)column.Id == ColumnId.Name);
+			_lstConflicts.Columns[0].SizeMode = ColumnSizeMode.Auto;
+			_lstConflicts.ShowTreeLines = false;
+			_lblConflictingFiles = new();
+		}
+
+		public void Localize()
+		{
+			_lblConflictingFiles.Text = Resources.StrConflictingFiles.AddColon();
+		}
+
+		public void Layout(Control parent)
+		{
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					rows:
+					[
+						LayoutConstants.LabelRowHeight,
+						LayoutConstants.LabelRowSpacing,
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblConflictingFiles, marginOverride: LayoutConstants.NoMargin), row: 0),
+						new GridContent(new ControlContent(_lstConflicts,        marginOverride: LayoutConstants.NoMargin), row: 2),
+					]),
+			};
+
+			_lblConflictingFiles.Parent = parent;
+			_lstConflicts.Parent = parent;
+		}
+	}
+
+	private readonly DialogControls _controls;
 	private Repository _repository;
 
 	public ConflictsDialog(Repository repository)
 	{
 		Verify.Argument.IsNotNull(repository);
 
+		SuspendLayout();
+		AutoScaleMode = AutoScaleMode.Dpi;
+		AutoScaleDimensions = Dpi.Default;
+		Size = ScalableSize.GetValue(Dpi.Default);
+		Name = nameof(ConflictsDialog);
 		_repository = repository;
-
-		InitializeComponent();
+		_controls = new(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
 
 		Text = Resources.StrConflicts;
 
-		_lblConflictingFiles.Text = Resources.StrConflictingFiles.AddColon();
-
-		_lstConflicts.Style = GitterApplication.DefaultStyle;
-		_lstConflicts.Columns.ShowAll(column => (ColumnId)column.Id == ColumnId.Name);
-		_lstConflicts.Columns[0].SizeMode = Framework.Controls.ColumnSizeMode.Auto;
-		_lstConflicts.ShowTreeLines = false;
-		_lstConflicts.ItemActivated += OnItemActivated;
+		_controls._lstConflicts.ItemActivated += OnItemActivated;
 
 		AttachToReposotory();
+	}
+
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
+
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(_repository is not null)
+		{
+			DetachFromRepository();
+			_repository = null!;
+		}
+		base.Dispose(disposing);
 	}
 
 	private void AttachToReposotory()
@@ -65,7 +132,7 @@ public partial class ConflictsDialog : GitDialogBase
 			{
 				if(item.Status == FileStatus.Unmerged)
 				{
-					_lstConflicts.Items.Add(new WorktreeConflictedFileItem(item, true));
+					_controls._lstConflicts.Items.Add(new WorktreeConflictedFileItem(item, true));
 				}
 			}
 			_repository.Status.NewUnstagedFile += OnNewConflictFound;
@@ -77,20 +144,20 @@ public partial class ConflictsDialog : GitDialogBase
 	{
 		_repository.Status.NewUnstagedFile -= OnNewConflictFound;
 		_repository.Status.RemovedUnstagedFile -= OnConflictResolved;
-		_lstConflicts.Items.Clear();
+		_controls._lstConflicts.Items.Clear();
 	}
 
-	private void OnConflictResolved(object sender, TreeFileEventArgs e)
+	private void OnConflictResolved(object? sender, TreeFileEventArgs e)
 	{
 		if(e.File.Status == FileStatus.Unmerged)
 		{
-			_lstConflicts.BeginInvoke(new Action<TreeFile>(RemoveTreeItem), new object[] { e.File });
+			_controls._lstConflicts.BeginInvoke(new Action<TreeFile>(RemoveTreeItem), [e.File]);
 		}
 	}
 
 	private void RemoveTreeItem(TreeFile file)
 	{
-		foreach(WorktreeConflictedFileItem item in _lstConflicts.Items)
+		foreach(WorktreeConflictedFileItem item in _controls._lstConflicts.Items)
 		{
 			if(item.DataContext.RelativePath == file.RelativePath)
 			{
@@ -98,21 +165,21 @@ public partial class ConflictsDialog : GitDialogBase
 				break;
 			}
 		}
-		if(_lstConflicts.Items.Count == 0)
+		if(_controls._lstConflicts.Items.Count == 0)
 		{
 			ClickOk();
 		}
 	}
 
-	private void OnNewConflictFound(object sender, TreeFileEventArgs e)
+	private void OnNewConflictFound(object? sender, TreeFileEventArgs e)
 	{
 		if(e.File.Status == FileStatus.Unmerged)
 		{
-			_lstConflicts.Items.AddSafe(new WorktreeConflictedFileItem(e.File, true));
+			_controls._lstConflicts.Items.AddSafe(new WorktreeConflictedFileItem(e.File, true));
 		}
 	}
 
-	private void OnItemActivated(object sender, gitter.Framework.Controls.ItemEventArgs e)
+	private void OnItemActivated(object? sender, ItemEventArgs e)
 	{
 		if(e.Item is TreeFileListItem item)
 		{
@@ -122,12 +189,12 @@ public partial class ConflictsDialog : GitDialogBase
 				switch(file.ConflictType)
 				{
 					case ConflictType.DeletedByThem:
-						using(var dlg = new ConflictResolutionDialog(file.RelativePath, FileStatus.Modified, FileStatus.Removed,
+						using(var dialog = new ConflictResolutionDialog(file.RelativePath, FileStatus.Modified, FileStatus.Removed,
 							ConflictResolution.KeepModifiedFile, ConflictResolution.DeleteFile))
 						{
 							try
 							{
-								file.ResolveConflict(dlg.ConflictResolution);
+								file.ResolveConflict(dialog.ConflictResolution);
 							}
 							catch(GitException exc)
 							{
@@ -141,14 +208,14 @@ public partial class ConflictsDialog : GitDialogBase
 						}
 						break;
 					case ConflictType.DeletedByUs:
-						using(var dlg = new ConflictResolutionDialog(file.RelativePath, FileStatus.Removed, FileStatus.Modified,
+						using(var dialog = new ConflictResolutionDialog(file.RelativePath, FileStatus.Removed, FileStatus.Modified,
 							ConflictResolution.KeepModifiedFile, ConflictResolution.DeleteFile))
 						{
-							if(dlg.Run(this) == DialogResult.OK)
+							if(dialog.Run(this) == DialogResult.OK)
 							{
 								try
 								{
-									file.ResolveConflict(dlg.ConflictResolution);
+									file.ResolveConflict(dialog.ConflictResolution);
 								}
 								catch(GitException exc)
 								{

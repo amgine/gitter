@@ -27,6 +27,7 @@ using System.Windows.Forms;
 
 using gitter.Framework;
 using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Services;
 
 using gitter.Git.Gui.Controls;
@@ -36,36 +37,170 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public partial class CherryPickDialog : GitDialogBase, IExecutableDialog
 {
-	#region .ctor
+	readonly struct DialogControls
+	{
+		public  readonly TextBox           _txtRevision;
+		private readonly LabelControl      _lblRevision;
+		private readonly GroupSeparator    _grpMainlineParentCommit;
+		public  readonly FlowLayoutControl _lstCommits;
+		public  readonly ICheckBoxWidget   _chkNoCommit;
+		private readonly GroupSeparator    _grpOptions;
+		private readonly bool _showCommitSelector;
+
+		public DialogControls(IGitterStyle? style, bool showCommitSelector)
+		{
+			style ??= GitterApplication.Style;
+
+			_showCommitSelector = showCommitSelector;
+
+			_txtRevision = new() { ReadOnly = true };
+			_lblRevision = new();
+			if(_showCommitSelector)
+			{
+				_grpMainlineParentCommit = new();
+				_lstCommits = new() { Style = style };
+			}
+			else
+			{
+				_grpMainlineParentCommit = default!;
+				_lstCommits = default!;
+			}
+			_chkNoCommit = style.CheckBoxFactory.Create();
+			_grpOptions  = new();
+		}
+
+		public void Localize()
+		{
+			if(_showCommitSelector)
+			{
+				_grpMainlineParentCommit.Text = Resources.StrMainlineParentCommit;
+			}
+			_lblRevision.Text = Resources.StrRevision.AddColon();
+			_grpOptions.Text = Resources.StrOptions;
+			_chkNoCommit.Text = Resources.StrsNoCommit;
+		}
+
+		public void Layout(Control parent)
+		{
+			var decRevision = new TextBoxDecorator(_txtRevision);
+
+			if(_showCommitSelector)
+			{
+				_ = new ControlLayout(parent)
+				{
+					Content = new Grid(
+						rows:
+						[
+							LayoutConstants.TextInputRowHeight,
+							LayoutConstants.GroupSeparatorRowHeight,
+							SizeSpec.Everything(),
+							LayoutConstants.GroupSeparatorRowHeight,
+							LayoutConstants.CheckBoxRowHeight,
+						],
+						content:
+						[
+							new GridContent(new Grid(
+							columns:
+							[
+								SizeSpec.Absolute(100),
+								SizeSpec.Everything(),
+							],
+							content:
+							[
+								new GridContent(new ControlContent(_lblRevision, marginOverride: LayoutConstants.TextBoxLabelMargin), column: 0),
+								new GridContent(new ControlContent(decRevision,  marginOverride: LayoutConstants.TextBoxMargin),      column: 1),
+							]), row: 0),
+							new GridContent(new ControlContent(_grpMainlineParentCommit, marginOverride: LayoutConstants.NoMargin), row: 1),
+							new GridContent(new ControlContent(_lstCommits,  marginOverride: LayoutConstants.GroupPadding), row: 2),
+							new GridContent(new ControlContent(_grpOptions,  marginOverride: LayoutConstants.NoMargin),     row: 3),
+							new GridContent(new WidgetContent (_chkNoCommit, marginOverride: LayoutConstants.GroupPadding), row: 4),
+						]),
+				};
+			}
+			else
+			{
+				_ = new ControlLayout(parent)
+				{
+					Content = new Grid(
+						rows:
+						[
+							LayoutConstants.TextInputRowHeight,
+							LayoutConstants.GroupSeparatorRowHeight,
+							LayoutConstants.CheckBoxRowHeight,
+						],
+						content:
+						[
+							new GridContent(new Grid(
+							columns:
+							[
+								SizeSpec.Absolute(100),
+								SizeSpec.Everything(),
+							],
+							content:
+							[
+								new GridContent(new ControlContent(_lblRevision, marginOverride: LayoutConstants.TextBoxLabelMargin), column: 0),
+								new GridContent(new ControlContent(decRevision,  marginOverride: LayoutConstants.TextBoxMargin),      column: 1),
+							]), row: 0),
+							new GridContent(new ControlContent(_grpOptions,  marginOverride: LayoutConstants.NoMargin),     row: 1),
+							new GridContent(new WidgetContent (_chkNoCommit, marginOverride: LayoutConstants.GroupPadding), row: 2),
+						]),
+				};
+			}
+
+			decRevision.Parent = parent;
+			_lblRevision.Parent = parent;
+			if(_showCommitSelector)
+			{
+				_grpMainlineParentCommit.Parent = parent;
+				_lstCommits.Parent = parent;
+			}
+			_chkNoCommit.Parent = parent;
+			_grpOptions.Parent = parent;
+		}
+	}
+
+	private static readonly IDpiBoundValue<Size> _sizeWithCommitSelector    = DpiBoundValue.Size(new(480, 327));
+	private static readonly IDpiBoundValue<Size> _sizeWithoutCommitSelector = DpiBoundValue.Size(new(385, 78));
+
+	private readonly DialogControls _controls;
+	private readonly bool _showCommitSelector;
+
+	private static Revision GetRevision(IRevisionPointer revisionPointer)
+	{
+		var revision = revisionPointer.Dereference()
+			?? throw new ArgumentException($"Unable to dereference '{revisionPointer.Pointer}'", nameof(revisionPointer));
+		if(!revision.IsLoaded) revision.Load();
+		return revision;
+	}
 
 	public CherryPickDialog(IRevisionPointer revisionPointer)
 	{
-		Verify.Argument.IsValidRevisionPointer(revisionPointer, nameof(revisionPointer));
-
-		InitializeComponent();
+		Verify.Argument.IsValidRevisionPointer(revisionPointer);
 
 		RevisionPointer = revisionPointer;
+		var revision = GetRevision(revisionPointer);
+		_showCommitSelector = revision.Parents.Count > 1;
 
+		SuspendLayout();
+		AutoScaleMode = AutoScaleMode.Dpi;
+		AutoScaleDimensions = Dpi.Default;
+		Name = nameof(RevertDialog);
 		Text = Resources.StrCherryPickCommit;
+		Size = ScalableSize.GetValue(Dpi.Default);
+		_controls = new(GitterApplication.Style, _showCommitSelector);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
 
-		_lblRevision.Text = Resources.StrRevision.AddColon();
-		_grpMainlineParentCommit.Text = Resources.StrMainlineParentCommit;
-		_grpOptions.Text = Resources.StrOptions;
-		_chkNoCommit.Text = Resources.StrsNoCommit;
-		ToolTipService.Register(_chkNoCommit, Resources.TipCherryPickNoCommit);
+		ToolTipService.Register(_controls._chkNoCommit.Control, Resources.TipRevertNoCommit);
 
-		_txtRevision.Text = revisionPointer.Pointer;
+		_controls._txtRevision.Text = revisionPointer.Pointer;
 
-		GitterApplication.FontManager.InputFont.Apply(_txtRevision);
+		GitterApplication.FontManager.InputFont.Apply(_controls._txtRevision);
 
-		var revision = revisionPointer.Dereference();
-		if(!revision.IsLoaded)
+		if(_showCommitSelector)
 		{
-			revision.Load();
-		}
-		if(revision.Parents.Count > 1)
-		{
-			_lstCommits.Style = GitterApplication.DefaultStyle;
 			bool first = true;
 			foreach(var parent in revision.Parents)
 			{
@@ -79,49 +214,47 @@ public partial class CherryPickDialog : GitDialogBase, IExecutableDialog
 				}
 				else
 				{
-					_lstCommits.Panels.Add(new FlowPanelSeparator() { Height = 10 });
+					_controls._lstCommits.Panels.Add(new FlowPanelSeparator() { Height = 10 });
 				}
-				_lstCommits.Panels.Add(
+				_controls._lstCommits.Panels.Add(
 					new RevisionHeaderPanel()
 					{
 						Revision = parent,
 						IsSelectable = true,
-						IsSelected = _lstCommits.Panels.Count == 0,
+						IsSelected = _controls._lstCommits.Panels.Count == 0,
 					});
 			}
 		}
-		else
-		{
-			_pnlMainlineParentCommit.Visible = false;
-			Height -= _pnlMainlineParentCommit.Height + _pnlOptions.Margin.Top;
-			Width = 385;
-		}
 	}
 
-	#endregion
-
-	#region Properties
-
-	public IRevisionPointer RevisionPointer { get; }
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
 
 	/// <inheritdoc/>
-	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(480, 327));
+	public override IDpiBoundValue<Size> ScalableSize
+		=> _showCommitSelector
+			? _sizeWithCommitSelector
+			: _sizeWithoutCommitSelector;
 
 	/// <inheritdoc/>
 	protected override string ActionVerb => Resources.StrCherryPick;
 
+	public IRevisionPointer RevisionPointer { get; }
+
 	public bool NoCommit
 	{
-		get => _chkNoCommit.Checked;
-		set => _chkNoCommit.Checked = value;
+		get => _controls._chkNoCommit.IsChecked;
+		set => _controls._chkNoCommit.IsChecked = value;
 	}
 
 	public int MainlineParentCommit
 	{
 		get
 		{
+			if(!_showCommitSelector) return 0;
+
 			int index = 0;
-			foreach(var p in _lstCommits.Panels)
+			foreach(var p in _controls._lstCommits.Panels)
 			{
 				if(p is RevisionHeaderPanel rhp)
 				{
@@ -137,10 +270,11 @@ public partial class CherryPickDialog : GitDialogBase, IExecutableDialog
 		set
 		{
 			Verify.Argument.IsNotNegative(value);
+			Verify.State.IsTrue(_showCommitSelector);
 
 			if(value == 0)
 			{
-				foreach(var p in _lstCommits.Panels)
+				foreach(var p in _controls._lstCommits.Panels)
 				{
 					if(p is RevisionHeaderPanel rhp)
 					{
@@ -151,7 +285,7 @@ public partial class CherryPickDialog : GitDialogBase, IExecutableDialog
 			else
 			{
 				int index = 0;
-				foreach(var p in _lstCommits.Panels)
+				foreach(var p in _controls._lstCommits.Panels)
 				{
 					if(p is RevisionHeaderPanel rhp)
 					{
@@ -167,14 +301,10 @@ public partial class CherryPickDialog : GitDialogBase, IExecutableDialog
 		}
 	}
 
-	#endregion
-
-	#region IExecutableDialog
-
 	public bool Execute()
 	{
-		int mainline	= MainlineParentCommit;
-		bool noCommit	= NoCommit;
+		int mainline  = MainlineParentCommit;
+		bool noCommit = NoCommit;
 		try
 		{
 			using(this.ChangeCursor(Cursors.WaitCursor))
@@ -205,8 +335,8 @@ public partial class CherryPickDialog : GitDialogBase, IExecutableDialog
 			BeginInvoke(new Action(
 				() =>
 				{
-					using var dlg = new ConflictsDialog(RevisionPointer.Repository);
-					dlg.Run(GitterApplication.MainForm);
+					using var dialog = new ConflictsDialog(RevisionPointer.Repository);
+					dialog.Run(GitterApplication.MainForm);
 				}));
 		}
 		catch(GitException exc)
@@ -220,6 +350,4 @@ public partial class CherryPickDialog : GitDialogBase, IExecutableDialog
 		}
 		return true;
 	}
-
-	#endregion
 }

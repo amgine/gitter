@@ -29,29 +29,28 @@ using gitter.Framework.Controls;
 [DesignerCategory("")]
 abstract class GitLabViewBase : ViewBase
 {
-	private GitLabServiceContext _serviceContext;
+	private GitLabServiceContext? _serviceContext;
 
 	protected GitLabViewBase(Guid guid, IWorkingEnvironment environment)
 		: base(guid, environment)
 	{
 	}
 
-	public GitLabServiceContext ServiceContext
+	public GitLabServiceContext? ServiceContext
 	{
 		get => _serviceContext;
 		set
 		{
-			if(value != _serviceContext)
+			if(_serviceContext == value) return;
+
+			if(_serviceContext is not null)
 			{
-				if(_serviceContext is not null)
-				{
-					OnContextDetached(_serviceContext);
-				}
-				_serviceContext = value;
-				if(_serviceContext is not null)
-				{
-					OnContextAttached(_serviceContext);
-				}
+				OnContextDetached(_serviceContext);
+			}
+			_serviceContext = value;
+			if(_serviceContext is not null)
+			{
+				OnContextAttached(_serviceContext);
 			}
 		}
 	}
@@ -68,7 +67,7 @@ abstract class GitLabViewBase : ViewBase
 		where TItem    : CustomListBoxItem
 		where TOptions : SearchOptions
 	{
-		if(search.Text.Length == 0) return true;
+		if(search.Text is not { Length:not 0 }) return true;
 		int count = items.Count;
 		if(count == 0) return false;
 		int end;

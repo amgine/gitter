@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git.AccessLayer.CLI;
@@ -63,33 +63,40 @@ public sealed class MergeCommand : Command
 		=> new CommandFlag("--no-ff");
 
 	public static ICommandArgument Message(string msg)
-		=> new CommandParameterValue("-m", "\"" + msg + "\"", ' ');
+		=> new CommandParameterQuotedValue("-m", msg, ' ');
 
 	public static ICommandArgument File(string file)
-		=> new CommandParameterValue("--file", file.AssureDoubleQuotes());
+		=> new CommandParameterPathValue("--file", file);
 
 	public static ICommandArgument Strategy(string strategy)
-		=> new CommandParameterValue("--strategy", strategy, '=');
+		=> new CommandParameterValue("--strategy", strategy);
 
-	public static ICommandArgument Strategy(MergeStrategy strategy)
+	private static ICommandArgument OctopusStrategy   { get; } = Strategy("octopus");
+	private static ICommandArgument OursStrategy      { get; } = Strategy("ours");
+	private static ICommandArgument RecursiveStrategy { get; } = Strategy("recursive");
+	private static ICommandArgument ResolveStrategy   { get; } = Strategy("resolve");
+	private static ICommandArgument SubtreeStrategy   { get; } = Strategy("subtree");
+
+	public static ICommandArgument? Strategy(MergeStrategy strategy)
 		=> strategy switch
 		{
-			MergeStrategy.Octopus   => new CommandParameterValue("--strategy", "octopus", '='),
-			MergeStrategy.Ours      => new CommandParameterValue("--strategy", "ours", '='),
-			MergeStrategy.Recursive => new CommandParameterValue("--strategy", "recursive", '='),
-			MergeStrategy.Resolve   => new CommandParameterValue("--strategy", "resolve", '='),
-			MergeStrategy.Subtree   => new CommandParameterValue("--strategy", "subtree", '='),
-			_ => null,
+			MergeStrategy.Octopus   => OctopusStrategy,
+			MergeStrategy.Ours      => OursStrategy,
+			MergeStrategy.Recursive => RecursiveStrategy,
+			MergeStrategy.Resolve   => ResolveStrategy,
+			MergeStrategy.Subtree   => SubtreeStrategy,
+			MergeStrategy.Default   => null,
+			_ => throw new ArgumentException($"Unknown merge strategy: {strategy}", nameof(strategy)),
 		};
 
 	public static ICommandArgument StrategyOption(string option)
-		=> new CommandParameterValue("--strategy-option", option, '=');
+		=> new CommandParameterValue("--strategy-option", option);
 
 	public static ICommandArgument Quiet()
-		=> new CommandFlag("--quiet");
+		=> CommandFlag.Quiet;
 
 	public static ICommandArgument Verbose()
-		=> new CommandFlag("--verbose");
+		=> CommandFlag.Verbose;
 
 	public MergeCommand()
 		: base("merge")

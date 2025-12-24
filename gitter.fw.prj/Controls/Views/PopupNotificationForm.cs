@@ -32,7 +32,7 @@ public sealed class PopupNotificationForm : Form
 {
 	private readonly NotificationContent _content;
 	private readonly PopupNotificationHeader _header;
-	private Timer _timer;
+	private Timer? _timer;
 
 	public PopupNotificationForm(NotificationContent content)
 	{
@@ -176,9 +176,11 @@ public sealed class PopupNotificationForm : Form
 		base.DefWndProc(ref m);
 	}
 
-	private void OnTimerTick(object sender, EventArgs e)
+	private void OnTimerTick(object? sender, EventArgs e)
 	{
-		_timer.Enabled = false;
+		if(sender is not Timer timer) return;
+
+		timer.Enabled = false;
 		Close();
 	}
 
@@ -214,7 +216,7 @@ public sealed class PopupNotificationForm : Form
 	{
 		if(disposing)
 		{
-			if(_timer != null)
+			if(_timer is not null)
 			{
 				_timer.Dispose();
 				_timer = null;

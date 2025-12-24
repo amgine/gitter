@@ -20,20 +20,18 @@
 
 namespace gitter.Git;
 
-using System;
-
 using gitter.Framework;
 
 public abstract class TreeContentData : INamedObject
 {
-	internal TreeContentData(string hash, int mode, string name)
+	internal TreeContentData(Sha1Hash hash, int mode, string name)
 	{
-		SHA1 = hash;
+		Hash = hash;
 		Name = name;
 		Mode = mode;
 	}
 
-	public string SHA1 { get; }
+	public Sha1Hash Hash { get; }
 
 	public string Name { get; }
 

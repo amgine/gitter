@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2019  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2019  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git.AccessLayer.CLI;
@@ -29,31 +29,18 @@ using System.Threading.Tasks;
 using gitter.Framework;
 using gitter.Framework.CLI;
 
-abstract class CommandExecutorBase : ICommandExecutor
+abstract class CommandExecutorBase(ICliOptionsProvider cliOptionsProvider) : ICommandExecutor
 {
-	#region .ctor
+	protected ICliOptionsProvider CliOptionsProvider { get; } = cliOptionsProvider;
 
-	protected CommandExecutorBase(ICliOptionsProvider cliOptionsProvider)
-	{
-		Verify.Argument.IsNotNull(cliOptionsProvider);
-
-		CliOptionsProvider = cliOptionsProvider;
-	}
-
-	#endregion
-
-	#region Properties
-
-	protected ICliOptionsProvider CliOptionsProvider { get; }
-
-	#endregion
-
-	#region Methods
-
-	protected abstract GitInput PrepareInput(Command command, Encoding encoding);
+	protected abstract GitInput PrepareInput(Command command, Encoding? encoding);
 
 	protected virtual ProcessExecutor<GitInput> CreateProcessExecutor()
-		=> new GitProcessExecutor(CliOptionsProvider.GitExecutablePath);
+	{
+		var path = CliOptionsProvider.GitExecutablePath
+			?? throw new ApplicationException("Git executable path is not configured.");
+		return new GitProcessExecutor(path);
+	}
 
 	protected virtual void OnCommandExecuting(Command command)
 	{
@@ -76,7 +63,7 @@ abstract class CommandExecutorBase : ICommandExecutor
 		return new GitOutput(stdOutReceiver.GetText(), stdErrReceiver.GetText(), exitCode);
 	}
 
-	public GitOutput ExecuteCommand(Command command, Encoding encoding, CommandExecutionFlags flags)
+	public GitOutput ExecuteCommand(Command command, Encoding? encoding, CommandExecutionFlags flags)
 	{
 		OnCommandExecuting(command);
 
@@ -96,7 +83,7 @@ abstract class CommandExecutorBase : ICommandExecutor
 		return exitCode;
 	}
 
-	public int ExecuteCommand(Command command, Encoding encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags)
+	public int ExecuteCommand(Command command, Encoding? encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags)
 	{
 		OnCommandExecuting(command);
 
@@ -105,7 +92,7 @@ abstract class CommandExecutorBase : ICommandExecutor
 		return exitCode;
 	}
 
-	private Task<int> ExecuteCommandAsyncCore(Command command, Encoding encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags, CancellationToken cancellationToken = default)
+	private Task<int> ExecuteCommandAsyncCore(Command command, Encoding? encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags, CancellationToken cancellationToken = default)
 	{
 		OnCommandExecuting(command);
 
@@ -120,7 +107,7 @@ abstract class CommandExecutorBase : ICommandExecutor
 			cancellationToken);
 	}
 
-	private async Task<GitOutput> ExecuteCommandAsyncCore(Command command, Encoding encoding, CommandExecutionFlags flags, CancellationToken cancellationToken = default)
+	private async Task<GitOutput> ExecuteCommandAsyncCore(Command command, Encoding? encoding, CommandExecutionFlags flags, CancellationToken cancellationToken = default)
 	{
 		Assert.IsNotNull(command);
 
@@ -151,7 +138,7 @@ abstract class CommandExecutorBase : ICommandExecutor
 		return ExecuteCommandAsyncCore(command, GitProcess.DefaultEncoding, flags, cancellationToken);
 	}
 
-	public Task<GitOutput> ExecuteCommandAsync(Command command, Encoding encoding, CommandExecutionFlags flags, CancellationToken cancellationToken = default)
+	public Task<GitOutput> ExecuteCommandAsync(Command command, Encoding? encoding, CommandExecutionFlags flags, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(command);
 
@@ -165,12 +152,10 @@ abstract class CommandExecutorBase : ICommandExecutor
 		return ExecuteCommandAsyncCore(command, GitProcess.DefaultEncoding, stdOutReceiver, stdErrReceiver, flags, cancellationToken);
 	}
 
-	public Task<int> ExecuteCommandAsync(Command command, Encoding encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags, CancellationToken cancellationToken = default)
+	public Task<int> ExecuteCommandAsync(Command command, Encoding? encoding, IOutputReceiver stdOutReceiver, IOutputReceiver stdErrReceiver, CommandExecutionFlags flags, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(command);
 
 		return ExecuteCommandAsyncCore(command, encoding, stdOutReceiver, stdErrReceiver, flags, cancellationToken);
 	}
-
-	#endregion
 }

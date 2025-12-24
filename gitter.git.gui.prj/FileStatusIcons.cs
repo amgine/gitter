@@ -24,7 +24,7 @@ using gitter.Framework;
 
 static class FileStatusIcons
 {
-	public static IImageProvider GetOverlay(FileStatus fileStatus)
+	public static IImageProvider? GetOverlay(FileStatus fileStatus)
 		=> fileStatus switch
 		{
 			FileStatus.Removed     => Icons.Overlays.Delete,

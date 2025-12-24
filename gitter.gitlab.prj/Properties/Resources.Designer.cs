@@ -61,7 +61,7 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to API key cannot be empty.
+        ///   Looks up a localized string similar to Access token cannot be empty.
         /// </summary>
         internal static string ErrAPIKeyCannotBeEmpty {
             get {
@@ -70,7 +70,7 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid API key.
+        ///   Looks up a localized string similar to Invalid access token.
         /// </summary>
         internal static string ErrApiKeyIsInvalid {
             get {
@@ -97,7 +97,7 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No API key specified.
+        ///   Looks up a localized string similar to No access token specified.
         /// </summary>
         internal static string ErrNoAPIKeySpecified {
             get {
@@ -223,7 +223,7 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to API Key.
+        ///   Looks up a localized string similar to Access Token.
         /// </summary>
         internal static string StrAPIKey {
             get {
@@ -547,6 +547,15 @@ namespace gitter.GitLab.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Set Access Token.
+        /// </summary>
+        internal static string StrSetApiKey {
+            get {
+                return ResourceManager.GetString("StrSetApiKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to fetch issues.
         /// </summary>
         internal static string StrsFailedToFetchIssues {
@@ -579,6 +588,15 @@ namespace gitter.GitLab.Properties {
         internal static string StrSkippedTests {
             get {
                 return ResourceManager.GetString("StrSkippedTests", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Manage access tokens.
+        /// </summary>
+        internal static string StrsManageAccessTokens {
+            get {
+                return ResourceManager.GetString("StrsManageAccessTokens", resourceCulture);
             }
         }
         

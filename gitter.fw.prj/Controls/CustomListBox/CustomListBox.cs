@@ -54,7 +54,7 @@ public class CustomListBox : ScrollableControl
 	}
 
 	protected virtual void OnItemActivated(CustomListBoxItem item)
-		=> ((EventHandler<ItemEventArgs>)Events[ItemActivatedEvent])?.Invoke(this, new ItemEventArgs(item));
+		=> ((EventHandler<ItemEventArgs>?)Events[ItemActivatedEvent])?.Invoke(this, new ItemEventArgs(item));
 
 	private static readonly object ItemCheckedChangedEvent = new();
 	/// <summary>Item checked status is changed.</summary>
@@ -65,7 +65,7 @@ public class CustomListBox : ScrollableControl
 	}
 
 	protected virtual void OnItemCheckedChanged(CustomListBoxItem item)
-		=> ((EventHandler<ItemEventArgs>)Events[ItemCheckedChangedEvent])?.Invoke(this, new ItemEventArgs(item));
+		=> ((EventHandler<ItemEventArgs>?)Events[ItemCheckedChangedEvent])?.Invoke(this, new ItemEventArgs(item));
 
 	private static readonly object SelectionChangedEvent = new();
 	/// <summary>Selection is changed.</summary>
@@ -76,7 +76,7 @@ public class CustomListBox : ScrollableControl
 	}
 
 	protected virtual void OnSelectionChanged()
-		=> ((EventHandler)Events[SelectionChangedEvent])?.Invoke(this, EventArgs.Empty);
+		=> ((EventHandler?)Events[SelectionChangedEvent])?.Invoke(this, EventArgs.Empty);
 
 	private static readonly object ContextMenuRequestedEvent = new();
 	/// <summary>Context menu for free space is requested.</summary>
@@ -102,12 +102,23 @@ public class CustomListBox : ScrollableControl
 		remove => Events.RemoveHandler (ItemsContextMenuRequestedEvent, value);
 	}
 
+	private static readonly object DisplayedItemsCountChangedEvent = new();
+	/// <summary><see cref="DisplayedItemsCount"/> changed.</summary>
+	public event EventHandler DisplayedItemsCountChanged
+	{
+		add    => Events.AddHandler    (DisplayedItemsCountChangedEvent, value);
+		remove => Events.RemoveHandler (DisplayedItemsCountChangedEvent, value);
+	}
+
+	protected virtual void OnDisplayedItemsCountChanged(EventArgs e)
+		=> ((EventHandler?)Events[DisplayedItemsCountChangedEvent])?.Invoke(this, EventArgs.Empty);
+
 	#endregion
 
 	#region Data
 
 	private readonly ToolTip _tooltip;
-	private TextBox _textEditor;
+	private TextBox? _textEditor;
 	private CustomListBoxRenderer _renderer;
 
 	private int _baseColumnHeaderHeight;
@@ -140,14 +151,14 @@ public class CustomListBox : ScrollableControl
 
 	private HeaderStyle _headerStyle;
 	private bool _allowColumnReorder;
-	private CustomListBoxColumn _draggedHeader;
+	private CustomListBoxColumn? _draggedHeader;
 	private int _draggedHeaderIndex;
 	private int _draggedHeaderPositionIndex;
 	private int _draggedHeaderPosition;
 	private DragHelper _headerDragHelper;
 	private bool _haveAutoSizeColumns;
 
-	private ColumnResizeProcess _columnResizeProcess;
+	private ColumnResizeProcess? _columnResizeProcess;
 
 	private readonly TrackingService<CustomListBoxItem> _itemHover;
 	private readonly TrackingService<CustomListBoxItem> _itemFocus;
@@ -162,23 +173,16 @@ public class CustomListBox : ScrollableControl
 	#region Helper Structs
 
 	/// <summary>Result of hit-testing.</summary>
-	protected struct HitTestResult
+	protected struct HitTestResult(HitTestArea area, int itemIndex, int itemPart)
 	{
-		public HitTestArea Area;
-		public int ItemIndex;
-		public int ItemPart;
+		public HitTestArea Area = area;
+		public int ItemIndex = itemIndex;
+		public int ItemPart = itemPart;
 
-		public HitTestResult(HitTestArea area, int itemIndex, int itemPart)
-		{
-			Area      = area;
-			ItemIndex = itemIndex;
-			ItemPart  = itemPart;
-		}
-
-		public bool Check(HitTestArea area, int itemIndex, int itemPart)
+		public readonly bool Check(HitTestArea area, int itemIndex, int itemPart)
 			=> ItemIndex == itemIndex && Area == area && ItemPart == itemPart;
 
-		public bool Check(HitTestArea area, int itemPart)
+		public readonly bool Check(HitTestArea area, int itemPart)
 			=> Area == area && ItemPart == itemPart;
 	}
 
@@ -205,7 +209,7 @@ public class CustomListBox : ScrollableControl
 		_selectedItems = new CustomListBoxSelectedItemsCollection(this);
 		_selectedItems.Changed += OnSelectedItemsChanged;
 
-		_itemPlainList = new List<CustomListBoxItem>();
+		_itemPlainList = [];
 
 		_processOverlay = new ProcessOverlay(this);
 		_processOverlay.Renderer = Style.OverlayRenderer;
@@ -259,33 +263,33 @@ public class CustomListBox : ScrollableControl
 		_currentColumnHeaderHeight = _baseColumnHeaderHeight * dpi / 96;
 	}
 
-	private void OnItemHoverChanged(object sender, TrackingEventArgs<CustomListBoxItem> e)
+	private void OnItemHoverChanged(object? sender, TrackingEventArgs<CustomListBoxItem> e)
 	{
 		InvalidateItem(e.Index);
 	}
 
-	private void OnItemFocusChanged(object sender, TrackingEventArgs<CustomListBoxItem> e)
+	private void OnItemFocusChanged(object? sender, TrackingEventArgs<CustomListBoxItem> e)
 	{
 		InvalidateItem(e.Index);
 	}
 
-	private void OnHeaderHoverChanged(object sender, TrackingEventArgs<CustomListBoxColumn> e)
+	private void OnHeaderHoverChanged(object? sender, TrackingEventArgs<CustomListBoxColumn> e)
 	{
 		InvalidateColumn(e.Index);
 	}
 
-	private void OnSelectedItemsChanged(object sender, NotifyCollectionEventArgs e)
+	private void OnSelectedItemsChanged(object? sender, NotifyCollectionEventArgs e)
 	{
 		OnSelectionChanged();
 	}
 
 	private int _setItemPos = -1;
-	private CustomListBoxItem _oldItem;
+	private CustomListBoxItem? _oldItem;
 
-	internal void OnItemsChanging(object sender, NotifyCollectionEventArgs e)
+	internal void OnItemsChanging(object? sender, NotifyCollectionEventArgs e)
 	{
 		bool plainListChanged = false;
-		var items = (CustomListBoxItemsCollection)sender;
+		var items = (CustomListBoxItemsCollection)sender!;
 		var item = items.Parent;
 		switch(e.Event)
 		{
@@ -304,6 +308,7 @@ public class CustomListBox : ScrollableControl
 						{
 							NotifyContentSizeChanged();
 						}
+						OnDisplayedItemsCountChanged(EventArgs.Empty);
 					}
 				}
 				else
@@ -350,10 +355,10 @@ public class CustomListBox : ScrollableControl
 		}
 	}
 
-	internal void OnItemsChanged(object sender, NotifyCollectionEventArgs e)
+	internal void OnItemsChanged(object? sender, NotifyCollectionEventArgs e)
 	{
 		bool plainListChanged = false;
-		var items = (CustomListBoxItemsCollection)sender;
+		var items = (CustomListBoxItemsCollection)sender!;
 		var item = items.Parent;
 		switch(e.Event)
 		{
@@ -371,9 +376,9 @@ public class CustomListBox : ScrollableControl
 				{
 					var newitem = items[e.StartIndex];
 					_itemPlainList[_setItemPos] = newitem;
-					var y1 = GetItemY1Offset(_setItemPos);
+					//var y1 = GetItemY1Offset(_setItemPos);
 					int id = _setItemPos + 1;
-					if(_oldItem.IsExpanded && _oldItem.Items.Count != 0)
+					if(_oldItem is { IsExpanded: true, Items.Count: not 0 })
 					{
 						int level = _oldItem.Level;
 						int end = id + 1;
@@ -503,6 +508,10 @@ public class CustomListBox : ScrollableControl
 		{
 			InvalidateAutoSizeColumns();
 		}
+		if(plainListChanged)
+		{
+			OnDisplayedItemsCountChanged(EventArgs.Empty);
+		}
 	}
 
 	private void InvalidateAutoSizeColumns()
@@ -523,7 +532,7 @@ public class CustomListBox : ScrollableControl
 		return FindLastVisibleItem(item.Items[item.Items.Count - 1]);
 	}
 
-	private void OnColumnsChanged(object sender, NotifyCollectionEventArgs e)
+	private void OnColumnsChanged(object? sender, NotifyCollectionEventArgs e)
 	{
 		UpdateAutoSizeColumnsContentWidth();
 		NotifyContentSizeChanged();
@@ -547,7 +556,7 @@ public class CustomListBox : ScrollableControl
 	{
 		if(x < ClientRectangle.X || x >= ClientRectangle.Right)
 		{
-			collection = null;
+			collection = null!;
 			return - 1;
 		}
 		y -= ClientRectangle.Y;
@@ -814,8 +823,12 @@ public class CustomListBox : ScrollableControl
 				}
 			}
 		}
-		_itemPlainList.RemoveRange(start, end - start);
-		NotifyContentSizeChanged();
+		if(end > start)
+		{
+			_itemPlainList.RemoveRange(start, end - start);
+			NotifyContentSizeChanged();
+			OnDisplayedItemsCountChanged(EventArgs.Empty);
+		}
 	}
 
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -944,6 +957,10 @@ public class CustomListBox : ScrollableControl
 		}
 	}
 
+	/// <summary>Exposed items count.</summary>
+	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+	public int DisplayedItemsCount => _itemPlainList.Count;
+
 	/// <summary>Column collection.</summary>
 	[MergableProperty(false)]
 	[Browsable(false)]
@@ -964,7 +981,7 @@ public class CustomListBox : ScrollableControl
 	/// <summary>Returns currently focused item.</summary>
 	[Browsable(false)]
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-	public CustomListBoxItem FocusedItem => _itemFocus.Item;
+	public CustomListBoxItem? FocusedItem => _itemFocus.Item;
 
 	/// <summary>Progress monitor for actions which update list contents.</summary>
 	public IProgress<OperationProgress> ProgressMonitor => _processOverlay;
@@ -1008,6 +1025,7 @@ public class CustomListBox : ScrollableControl
 		{
 			InvalidateAutoSizeColumns();
 		}
+		OnDisplayedItemsCountChanged(EventArgs.Empty);
 	}
 
 	internal void CollapseItem(CustomListBoxItem item)
@@ -1067,6 +1085,7 @@ public class CustomListBox : ScrollableControl
 		{
 			InvalidateAutoSizeColumns();
 		}
+		OnDisplayedItemsCountChanged(EventArgs.Empty);
 	}
 
 	protected int GetItemY1Offset(int itemIndex)
@@ -1137,7 +1156,7 @@ public class CustomListBox : ScrollableControl
 		Verify.Argument.IsTrue(item.ListBox == this, nameof(item), "This item is not owned by this list box.");
 
 		var parent = item.Parent;
-		while(parent != null)
+		while(parent is not null)
 		{
 			parent.IsExpanded = true;
 			parent = parent.Parent;
@@ -1200,7 +1219,7 @@ public class CustomListBox : ScrollableControl
 		return maxw;
 	}
 
-	public CustomListBoxColumn GetPrevVisibleColumn(int index)
+	public CustomListBoxColumn? GetPrevVisibleColumn(int index)
 	{
 		--index;
 		while(index >= 0)
@@ -1222,7 +1241,7 @@ public class CustomListBox : ScrollableControl
 		return -1;
 	}
 
-	public CustomListBoxColumn GetNextVisibleColumn(int index)
+	public CustomListBoxColumn? GetNextVisibleColumn(int index)
 	{
 		++index;
 		while(index < _columns.Count)
@@ -1231,6 +1250,17 @@ public class CustomListBox : ScrollableControl
 			++index;
 		}
 		return null;
+	}
+
+	public int GetHeightToFitItems(int count, Dpi dpi)
+	{
+		var h = BorderThickness.GetValue(dpi) * 2 + 2;
+		h += count * (_baseItemHeight * dpi.Y / 96);
+		if(HeaderStyle != HeaderStyle.Hidden)
+		{
+			h += _baseColumnHeaderHeight * dpi.Y / 96;
+		}
+		return h;
 	}
 
 	protected HitTestResult HitTest(int x, int y)
@@ -1391,19 +1421,12 @@ public class CustomListBox : ScrollableControl
 		e.IsInputKey = true;
 		switch(e.KeyCode)
 		{
-			case Keys.Enter:
-				if(_itemFocus.IsTracked)
-				{
-					var item = _itemFocus.Item;
-					item.Activate();
-				}
+			case Keys.Enter when _itemFocus.IsTracked:
+				_itemFocus.Item?.Activate();
 				break;
-			case Keys.Escape:
-				if(_columnResizeProcess != null)
-				{
-					_columnResizeProcess.Cancel();
-					_columnResizeProcess = null;
-				}
+			case Keys.Escape when _columnResizeProcess is not null:
+				_columnResizeProcess.Cancel();
+				_columnResizeProcess = null;
 				break;
 			case Keys.Right:
 				if(_itemPlainList.Count == 0) return;
@@ -1501,10 +1524,10 @@ public class CustomListBox : ScrollableControl
 				}
 				break;
 			case Keys.Up:
-				if(_itemPlainList.Count == 0) return;
-				if(_itemFocus.Index > 0)
+				if(_itemPlainList.Count != 0)
 		        {
 					int index = _itemFocus.Index - 1;
+					if(index < 0) index = 0;
 					if(Control.ModifierKeys == Keys.Control)
 					{
 						FocusItem(index);
@@ -1516,10 +1539,10 @@ public class CustomListBox : ScrollableControl
 				}
 		        break;
 		    case Keys.Down:
-				if(_itemPlainList.Count == 0) return;
-				if(_itemFocus.Index < _itemPlainList.Count - 1)
+				if(_itemPlainList.Count != 0)
 				{
 					int index = _itemFocus.Index + 1;
+					if(index >= _itemPlainList.Count) index = _itemPlainList.Count - 1;
 					if(Control.ModifierKeys == Keys.Control)
 					{
 						FocusItem(index);
@@ -1594,36 +1617,21 @@ public class CustomListBox : ScrollableControl
 					}
 				}
 				break;
-			case (Keys)0x5D:
+			case (Keys)0x5D when !DisableContextMenus:
 				{
-					ToolStripDropDown menu;
+					ToolStripDropDown? menu;
 					var p = _itemsArea.Location;
 					p.X += CurrentItemHeight / 2;
-					int columnIndex = -1;
-					CustomListBoxColumn column = null;
-					for(int i = 0; i < _columns.Count; ++i)
-					{
-						if(_columns[i].IsVisible)
-						{
-							columnIndex = i;
-							column = _columns[i];
-							break;
-						}
-					}
+					var column = FindFirstVisibleColumn(out var columnIndex);
 					switch(_selectedItems.Count)
 					{
 						case 0:
 							{
 								var args = new ContextMenuRequestEventArgs(column, columnIndex, p.X, p.Y);
 								Events.Raise(ContextMenuRequestedEvent, this, args);
-								if(args.OverrideDefaultMenu)
-								{
-									menu = args.ContextMenu;
-								}
-								else
-								{
-									menu = GetFreeSpaceContextMenu(args);
-								}
+								menu = args.OverrideDefaultMenu
+									? args.ContextMenu
+									: GetFreeSpaceContextMenu(args);
 							}
 							break;
 						case 1:
@@ -1635,28 +1643,18 @@ public class CustomListBox : ScrollableControl
 								var args = new ItemContextMenuRequestEventArgs(_selectedItems[0], column,
 									new Rectangle(_itemsArea.X, y1, _itemsArea.Width, CurrentItemHeight), columnIndex, p.X, p.Y);
 								Events.Raise(ItemContextMenuRequestedEvent, this, args);
-								if(args.OverrideDefaultMenu)
-								{
-									menu = args.ContextMenu;
-								}
-								else
-								{
-									menu = _selectedItems[0].GetContextMenu(args);
-								}
+								menu = args.OverrideDefaultMenu
+									? args.ContextMenu
+									: _selectedItems[0].GetContextMenu(args);
 							}
 							break;
 						default:
 							{
 								var args = new ItemsContextMenuRequestEventArgs(_selectedItems, column, columnIndex, p.X, p.Y);
 								Events.Raise(ItemsContextMenuRequestedEvent, this, args);
-								if(args.OverrideDefaultMenu)
-								{
-									menu = args.ContextMenu;
-								}
-								else
-								{
-									menu = GetMultiselectContextMenu(args);
-								}
+								menu = args.OverrideDefaultMenu
+									? args.ContextMenu
+									: GetMultiselectContextMenu(args);
 							}
 							break;
 					}
@@ -1672,6 +1670,20 @@ public class CustomListBox : ScrollableControl
 				break;
 		}
 		base.OnPreviewKeyDown(e);
+	}
+
+	private CustomListBoxColumn? FindFirstVisibleColumn(out int index)
+	{
+		for(int i = 0; i < _columns.Count; ++i)
+		{
+			if(_columns[i].IsVisible)
+			{
+				index = i;
+				return _columns[i];
+			}
+		}
+		index = -1;
+		return default;
 	}
 
 	protected override void UpdateHover(int x, int y)
@@ -1737,6 +1749,8 @@ public class CustomListBox : ScrollableControl
 
 	private void PerformHeaderDrag(MouseEventArgs e)
 	{
+		if(_draggedHeader is null) return;
+
 		int dx = e.X - _mouseDownX;
 		if(dx != 0)
 		{
@@ -1831,7 +1845,7 @@ public class CustomListBox : ScrollableControl
 	{
 		if(_draggedHeaderIndex != -1)
 		{
-			if(_headerDragHelper.IsDragging)
+			if(_headerDragHelper.IsDragging && _draggedHeader is not null)
 			{
 				if(_draggedHeaderPositionIndex != _draggedHeaderIndex)
 				{
@@ -1964,7 +1978,10 @@ public class CustomListBox : ScrollableControl
 				break;
 			case MouseButtons.Right:
 				{
-					var menu = new ContextMenuStrip();
+					var menu = new ContextMenuStrip
+					{
+						Renderer = Style.ToolStripRenderer,
+					};
 					foreach(var c in Columns)
 					{
 						var item = new ToolStripMenuItem(c.Name, null)
@@ -1974,7 +1991,7 @@ public class CustomListBox : ScrollableControl
 						};
 						item.Click += (s, args) =>
 						{
-							var h = (CustomListBoxColumn)((ToolStripMenuItem)s).Tag;
+							var h = (CustomListBoxColumn)((ToolStripMenuItem)s!).Tag!;
 							h.IsVisible = !h.IsVisible;
 						};
 						menu.Items.Add(item);
@@ -1983,16 +2000,15 @@ public class CustomListBox : ScrollableControl
 					menu.Items.Add(new ToolStripMenuItem(
 						Resources.StrColumns.AddEllipsis(), null, (s, args) => StartColumnsDialog()));
 					Utility.MarkDropDownForAutoDispose(menu);
-					menu.Renderer = Style.ToolStripRenderer;
 					menu.Show(this, e.Location, ToolStripDropDownDirection.Default);
 				}
 				break;
 		}
 	}
 
-	private void OnExtenderClosed(object sender, EventArgs e)
+	private void OnExtenderClosed(object? sender, EventArgs e)
 	{
-		var extender = (ToolStripDropDown)sender;
+		var extender = (ToolStripDropDown)sender!;
 		_extenderVisible = false;
 		extender.Closed -= OnExtenderClosed;
 		_headerHover.Drop();
@@ -2169,12 +2185,13 @@ public class CustomListBox : ScrollableControl
 						}
 						break;
 					case MouseButtons.Right:
-						if(!_disableContextMenus)
+						if(!DisableContextMenus)
 						{
 							var x = e.X;
 							var y = e.Y;
 							var cid = GetColumnIndex(ref x, y);
 							var col = (cid != -1) ? (_columns[cid]) : null;
+							var menu = default(ContextMenuStrip);
 							switch(_selectedItems.Count)
 							{
 								case 1:
@@ -2185,14 +2202,9 @@ public class CustomListBox : ScrollableControl
 											new Rectangle(0, itemIndex * CurrentItemHeight - VScrollPos, _itemsArea.Width, CurrentItemHeight),
 											cid, cmnuX, cmnuY);
 										Events.Raise(ItemContextMenuRequestedEvent, this, args);
-										var menu = args.OverrideDefaultMenu ?
-											args.ContextMenu :
-											item.GetContextMenu(args);
-										if(menu is not null)
-										{
-											menu.Renderer = Style.ToolStripRenderer;
-											menu.Show(this, e.Location);
-										}
+										menu = args.OverrideDefaultMenu
+											? args.ContextMenu
+											: item.GetContextMenu(args);
 									}
 									break;
 								default:
@@ -2201,16 +2213,16 @@ public class CustomListBox : ScrollableControl
 										int cmnuY = e.Y - _itemsArea.Y;
 										var args = new ItemsContextMenuRequestEventArgs(_selectedItems, col, cid, cmnuX, cmnuY);
 										Events.Raise(ItemsContextMenuRequestedEvent, this, args);
-										var menu = args.OverrideDefaultMenu ?
-											args.ContextMenu :
-											GetMultiselectContextMenu(args);
-										if(menu != null)
-										{
-											menu.Renderer = Style.ToolStripRenderer;
-											menu.Show(this, e.Location);
-										}
+										menu = args.OverrideDefaultMenu
+											? args.ContextMenu
+											: GetMultiselectContextMenu(args);
 									}
 									break;
+							}
+							if(menu is not null)
+							{
+								menu.Renderer = Style.ToolStripRenderer;
+								menu.Show(this, e.Location);
 							}
 						}
 						break;
@@ -2296,7 +2308,7 @@ public class CustomListBox : ScrollableControl
 
 				var args = new ContextMenuRequestEventArgs(col, cid, x, y);
 				Events.Raise(ContextMenuRequestedEvent, this, args);
-				ContextMenuStrip menu;
+				ContextMenuStrip? menu;
 				if(args.OverrideDefaultMenu)
 				{
 					menu = args.ContextMenu;
@@ -2305,7 +2317,7 @@ public class CustomListBox : ScrollableControl
 				{
 					menu = GetFreeSpaceContextMenu(args);
 				}
-				if(menu != null)
+				if(menu is not null)
 				{
 					menu.Renderer = Style.ToolStripRenderer;
 					menu.Show(this, e.Location);
@@ -2351,22 +2363,22 @@ public class CustomListBox : ScrollableControl
 		}
 	}
 
-	protected virtual ContextMenuStrip GetMultiselectContextMenu(ItemsContextMenuRequestEventArgs requestEventArgs)
+	protected virtual ContextMenuStrip? GetMultiselectContextMenu(ItemsContextMenuRequestEventArgs requestEventArgs)
 	{
 		return null;
 	}
 
-	protected virtual ContextMenuStrip GetFreeSpaceContextMenu(ContextMenuRequestEventArgs requestEventArgs)
+	protected virtual ContextMenuStrip? GetFreeSpaceContextMenu(ContextMenuRequestEventArgs requestEventArgs)
 	{
 		return null;
 	}
 
-	protected override void OnDoubleClick(EventArgs e)
+	protected override void OnMouseDoubleClick(MouseEventArgs e)
 	{
 		_columnResizeProcess = null;
 		switch(_oldHitTestResult.Area)
 		{
-			case HitTestArea.Item:
+			case HitTestArea.Item when e.Button == MouseButtons.Left:
 				if(_oldHitTestResult.ItemPart >= 0 && _itemFocus.IsTracked && _itemFocus.Index >= 0 && _itemFocus.Index < _itemPlainList.Count)
 				{
 					var item = _itemPlainList[_itemFocus.Index];
@@ -2377,7 +2389,7 @@ public class CustomListBox : ScrollableControl
 					}
 				}
 				break;
-			case HitTestArea.Header:
+			case HitTestArea.Header when e.Button == MouseButtons.Left:
 				bool isOverLeftResizeGrip  = _oldHitTestResult.ItemPart == ColumnHitTestResults.LeftResizer;
 				bool isOverRightResizeGrip = _oldHitTestResult.ItemPart == ColumnHitTestResults.RightResizer;
 				if(isOverLeftResizeGrip || isOverRightResizeGrip)
@@ -2413,7 +2425,7 @@ public class CustomListBox : ScrollableControl
 				}
 				break;
 		}
-		base.OnDoubleClick(e);
+		base.OnMouseDoubleClick(e);
 	}
 
 	public override void Refresh()
@@ -2502,32 +2514,31 @@ public class CustomListBox : ScrollableControl
 		_itemWidth = 0;
 		foreach(var c in _columns)
 		{
-			if(c.IsVisible)
+			if(!c.IsVisible || !c.IsAvailable) continue;
+
+			switch(c.SizeMode)
 			{
-				switch(c.SizeMode)
-				{
-					case ColumnSizeMode.Fill:
-						++nfill;
-						break;
-					case ColumnSizeMode.Auto:
+				case ColumnSizeMode.Fill:
+					++nfill;
+					break;
+				case ColumnSizeMode.Auto:
+					{
+						if(c.ContentWidth >= 0)
 						{
-							if(c.ContentWidth >= 0)
-							{
-								c.SetWidth(new(c.ContentWidth, Dpi.FromControl(this)));
-							}
-							var cw = c.CurrentWidth;
-							_itemWidth += cw;
-							free       -= cw;
+							c.SetWidth(new(c.ContentWidth, Dpi.FromControl(this)));
 						}
-						break;
-					default:
-						{
-							var cw = c.CurrentWidth;
-							_itemWidth += cw;
-							free       -= cw;
-						}
-						break;
-				}
+						var cw = c.CurrentWidth;
+						_itemWidth += cw;
+						free       -= cw;
+					}
+					break;
+				default:
+					{
+						var cw = c.CurrentWidth;
+						_itemWidth += cw;
+						free       -= cw;
+					}
+					break;
 			}
 		}
 		int offset = 0;
@@ -2535,37 +2546,36 @@ public class CustomListBox : ScrollableControl
 		if(w < 10) w = 10;
 		foreach(var c in _columns)
 		{
-			if(c.IsVisible)
+			if(!c.IsVisible || !c.IsAvailable) continue;
+
+			switch(c.SizeMode)
 			{
-				switch(c.SizeMode)
-				{
-					case ColumnSizeMode.Fill:
-						--nfill;
-						if(nfill == 0)
-						{
-							if(free < 10) free = 10;
-							c.SetWidth(new(free, Dpi.FromControl(this)));
-							_itemWidth += free;
-						}
-						else
-						{
-							c.SetWidth(new(w, Dpi.FromControl(this)));
-							_itemWidth += w;
-							free -= w;
-						}
-						break;
-					case ColumnSizeMode.Auto:
-						if(nfill == 0 && free > 0)
-						{
-							_itemWidth += free;
-							c.SetWidth(new(c.CurrentWidth + free, Dpi.FromControl(this)));
-							free = 0;
-						}
-						break;
-				}
-				c.Left = offset;
-				offset += c.CurrentWidth;
+				case ColumnSizeMode.Fill:
+					--nfill;
+					if(nfill == 0)
+					{
+						if(free < 10) free = 10;
+						c.SetWidth(new(free, Dpi.FromControl(this)));
+						_itemWidth += free;
+					}
+					else
+					{
+						c.SetWidth(new(w, Dpi.FromControl(this)));
+						_itemWidth += w;
+						free -= w;
+					}
+					break;
+				case ColumnSizeMode.Auto:
+					if(nfill == 0 && free > 0)
+					{
+						_itemWidth += free;
+						c.SetWidth(new(c.CurrentWidth + free, Dpi.FromControl(this)));
+						free = 0;
+					}
+					break;
 			}
+			c.Left = offset;
+			offset += c.CurrentWidth;
 		}
 	}
 

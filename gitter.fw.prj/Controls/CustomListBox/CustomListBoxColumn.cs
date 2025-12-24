@@ -38,27 +38,27 @@ public class CustomListBoxColumn : CustomListBoxHostedItem
 	private ColumnSizeMode _sizeMode;
 	private bool _isAvailable = true;
 	private bool _isVisible;
-	private IDpiBoundValue<Font> _contentFont;
-	private Brush _contentBrush;
+	private IDpiBoundValue<Font>? _contentFont;
+	private Brush? _contentBrush;
 	private StringAlignment _contentAlignment;
 		
-	private IDpiBoundValue<Font> _headerFont;
-	private Brush _headerBrush;
+	private IDpiBoundValue<Font>? _headerFont;
+	private Brush? _headerBrush;
 	private StringAlignment _headerAlignment;
 
 	#endregion
 
 	#region Events
 
-	public event EventHandler SizeModeChanged;
+	public event EventHandler? SizeModeChanged;
 
-	public event EventHandler WidthChanged;
+	public event EventHandler? WidthChanged;
 
-	public event EventHandler ContentFontChanged;
+	public event EventHandler? ContentFontChanged;
 
-	public event EventHandler HeaderFontChanged;
+	public event EventHandler? HeaderFontChanged;
 
-	public event EventHandler StyleChanged;
+	public event EventHandler? StyleChanged;
 
 	protected virtual void OnStyleChanged(EventArgs e)
 		=> StyleChanged?.Invoke(this, e);
@@ -98,18 +98,17 @@ public class CustomListBoxColumn : CustomListBoxHostedItem
 
 	public IGitterStyle Style => ListBox?.Style ?? GitterApplication.Style;
 
-	public ToolStripDropDown Extender { get; set; }
+	public ToolStripDropDown? Extender { get; set; }
 
 	public string Name
 	{
 		get => _name;
 		set
 		{
-			if(_name != value)
-			{
-				_name = value;
-				Invalidate();
-			}
+			if(_name == value) return;
+
+			_name = value;
+			Invalidate();
 		}
 	}
 
@@ -138,9 +137,7 @@ public class CustomListBoxColumn : CustomListBoxHostedItem
 		get
 		{
 			var font = _contentFont ?? GitterApplication.FontManager.UIFont;
-			return ListBox is not null
-				? font.GetValue(Dpi.FromControl(ListBox))
-				: font.GetValue(Dpi.System);
+			return font.GetValue(Dpi.FromControlOrSystem(ListBox));
 		}
 	}
 
@@ -175,9 +172,7 @@ public class CustomListBoxColumn : CustomListBoxHostedItem
 		get
 		{
 			var font = _headerFont ?? GitterApplication.FontManager.UIFont;
-			return ListBox is not null
-				? font.GetValue(Dpi.FromControl(ListBox))
-				: font.GetValue(Dpi.System);
+			return font.GetValue(Dpi.FromControlOrSystem(ListBox));
 		}
 	}
 
@@ -186,7 +181,7 @@ public class CustomListBoxColumn : CustomListBoxHostedItem
 		get
 		{
 			if(_headerBrush is not null) return _headerBrush;
-			if(IsAttachedToListBox)  return ListBox.Renderer.ColumnHeaderForegroundBrush;
+			if(ListBox is not null) return ListBox.Renderer.ColumnHeaderForegroundBrush;
 			return CustomListBoxManager.Renderer.ColumnHeaderForegroundBrush;
 		}
 		set
@@ -212,25 +207,25 @@ public class CustomListBoxColumn : CustomListBoxHostedItem
 		}
 	}
 
-	public int Index => IsAttachedToListBox
+	public int Index => ListBox is not null
 		? ListBox.Columns.IndexOf(this)
 		: -1;
 
-	public CustomListBoxColumn PreviousVisibleColumn
+	public CustomListBoxColumn? PreviousVisibleColumn
 	{
 		get
 		{
-			if(!IsAttachedToListBox) return null;
+			if(ListBox is null) return null;
 			var index = ListBox.Columns.IndexOf(this);
 			return ListBox.GetPrevVisibleColumn(index);
 		}
 	}
 
-	public CustomListBoxColumn NextVisibleColumn
+	public CustomListBoxColumn? NextVisibleColumn
 	{
 		get
 		{
-			if(!IsAttachedToListBox) return null;
+			if(ListBox is null) return null;
 			var index = ListBox.Columns.IndexOf(this);
 			return ListBox.GetNextVisibleColumn(index);
 		}
@@ -249,15 +244,11 @@ public class CustomListBoxColumn : CustomListBoxHostedItem
 		get => _sizeMode;
 		set
 		{
-			if(_sizeMode != value)
-			{
-				_sizeMode = value;
-				if(IsAttachedToListBox)
-				{
-					ListBox.NotifyColumnLayoutChanged();
-				}
-				SizeModeChanged?.Invoke(this, EventArgs.Empty);
-			}
+			if(_sizeMode == value) return;
+
+			_sizeMode = value;
+			ListBox?.NotifyColumnLayoutChanged();
+			SizeModeChanged?.Invoke(this, EventArgs.Empty);
 		}
 	}
 
@@ -266,13 +257,12 @@ public class CustomListBoxColumn : CustomListBoxHostedItem
 		get => _isAvailable;
 		set
 		{
-			if(_isAvailable != value)
+			if(_isAvailable == value) return;
+
+			_isAvailable = value;
+			if(IsVisible)
 			{
-				_isAvailable = value;
-				if(IsAttachedToListBox && IsVisible)
-				{
-					ListBox.NotifyColumnLayoutChanged();
-				}
+				ListBox?.NotifyColumnLayoutChanged();
 			}
 		}
 	}
@@ -282,13 +272,12 @@ public class CustomListBoxColumn : CustomListBoxHostedItem
 		get => _isVisible;
 		set
 		{
-			if(_isVisible != value)
+			if(_isVisible == value) return;
+
+			_isVisible = value;
+			if(IsAvailable)
 			{
-				_isVisible = value;
-				if(IsAttachedToListBox && IsAvailable)
-				{
-					ListBox.NotifyColumnLayoutChanged();
-				}
+				ListBox?.NotifyColumnLayoutChanged();
 			}
 		}
 	}
@@ -301,10 +290,7 @@ public class CustomListBoxColumn : CustomListBoxHostedItem
 			Verify.State.IsTrue(SizeMode != ColumnSizeMode.Fill);
 
 			_width = value;
-			if(IsAttachedToListBox)
-			{
-				ListBox.NotifyColumnLayoutChanged();
-			}
+			ListBox?.NotifyColumnLayoutChanged();
 			WidthChanged?.Invoke(this, EventArgs.Empty);
 		}
 	}
@@ -322,28 +308,35 @@ public class CustomListBoxColumn : CustomListBoxHostedItem
 
 	#endregion
 
-	protected virtual Comparison<CustomListBoxItem> SortComparison => null;
+	protected virtual Comparison<CustomListBoxItem>? SortComparison => null;
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
-		ListBox.StyleChanged += OnListBoxStyleChanged;
-		if(ListBox.Style != GitterApplication.Style)
+		base.OnListBoxAttached(listBox);
+		listBox.StyleChanged += OnListBoxStyleChanged;
+		if(listBox.Style != GitterApplication.Style)
 		{
 			OnStyleChanged(EventArgs.Empty);
 		}
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
-		ListBox.StyleChanged -= OnListBoxStyleChanged;
+		listBox.StyleChanged -= OnListBoxStyleChanged;
 		ContentWidth = -1;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
-	private void OnListBoxStyleChanged(object sender, EventArgs e)
+	protected void DisposeExtender()
+	{
+		if(Extender is null) return;
+		Extender.Dispose();
+		Extender = null;
+	}
+
+	private void OnListBoxStyleChanged(object? sender, EventArgs e)
 		=> OnStyleChanged(EventArgs.Empty);
 
 	public virtual void AutoSize()
@@ -353,7 +346,7 @@ public class CustomListBoxColumn : CustomListBoxHostedItem
 
 	public virtual void AutoSize(int minWidth)
 	{
-		if(!IsAttachedToListBox) return;
+		if(ListBox is null) return;
 		Verify.State.IsTrue(SizeMode != ColumnSizeMode.Fill);
 
 		if(ListBox.Items.Count == 0)
@@ -372,28 +365,28 @@ public class CustomListBoxColumn : CustomListBoxHostedItem
 
 	public void Invalidate()
 	{
-		if(IsAttachedToListBox && _isVisible)
+		if(_isVisible)
 		{
-			ListBox.InvalidateColumn(this);
+			ListBox?.InvalidateColumn(this);
 		}
 	}
 
 	public void InvalidateContent()
 	{
-		if(IsAttachedToListBox && _isVisible)
+		if(_isVisible)
 		{
-			ListBox.InvalidateColumnContent(this);
+			ListBox?.InvalidateColumnContent(this);
 		}
 	}
 
 	protected override void OnPaintBackground(ItemPaintEventArgs paintEventArgs)
 	{
-		ListBox.Renderer.OnPaintColumnBackground(this, paintEventArgs);
+		ListBox?.Renderer.OnPaintColumnBackground(this, paintEventArgs);
 	}
 
 	protected override void OnPaintContent(ItemPaintEventArgs paintEventArgs)
 	{
-		ListBox.Renderer.OnPaintColumnContent(this, paintEventArgs);
+		ListBox?.Renderer.OnPaintColumnContent(this, paintEventArgs);
 	}
 
 	protected virtual void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
@@ -418,8 +411,10 @@ public class CustomListBoxColumn : CustomListBoxHostedItem
 	/// <inheritdoc/>
 	protected override int OnHitTest(int x, int y)
 	{
+		if(ListBox is null) return ColumnHitTestResults.Default;
+
 		var dpi       = Dpi.FromControl(ListBox);
-		var width     = _width.Value * ListBox.DeviceDpi / _width.Dpi.X;
+		var width     = _width.Value * dpi.X / _width.Dpi.X;
 		var proximity = ResizerProximity.GetValue(dpi);
 		if(x < proximity)
 		{
@@ -509,6 +504,8 @@ public class CustomListBoxColumn : CustomListBoxHostedItem
 
 	protected virtual void OnClick()
 	{
+		if(ListBox is null) return;
+
 		var comparison = SortComparison;
 		if(comparison is null) return;
 		if(ListBox.Items.Comparison == comparison)

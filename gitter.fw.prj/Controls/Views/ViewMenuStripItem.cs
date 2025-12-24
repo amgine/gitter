@@ -27,7 +27,7 @@ using System.Windows.Forms;
 [DesignerCategory("")]
 public class ViewMenuItem : ToolStripMenuItem
 {
-	private ToolStrip _owner;
+	private ToolStrip? _owner;
 
 	public ViewMenuItem(IViewFactory factory)
 		: base(factory.Name, null, OnClick)
@@ -37,7 +37,7 @@ public class ViewMenuItem : ToolStripMenuItem
 
 	public IViewFactory Factory { get; }
 
-	public IWorkingEnvironment Environment { get; set; }
+	public IWorkingEnvironment? Environment { get; set; }
 
 	/// <inheritdoc/>
 	protected override void OnOwnerChanged(EventArgs e)
@@ -63,21 +63,21 @@ public class ViewMenuItem : ToolStripMenuItem
 		base.OnOwnerChanged(e);
 	}
 
-	private void OnOwnerDpiChangedAfterParent(object sender, EventArgs e) => UpdateImage();
+	private void OnOwnerDpiChangedAfterParent(object? sender, EventArgs e) => UpdateImage();
 
 	private void UpdateImage()
 	{
-		var iconSize = new DpiConverter(Owner).ConvertX(16);
+		var conv = Owner is not null
+			? DpiConverter.FromDefaultTo(Owner)
+			: DpiConverter.Identity;
+		var iconSize = conv.ConvertX(16);
 		Image = Factory.ImageProvider.GetImage(iconSize);
 	}
 
-	private static void OnClick(object sender, EventArgs e)
+	private static void OnClick(object? sender, EventArgs e)
 	{
-		var item = (ViewMenuItem)sender;
-		var environment = item.Environment;
-		if(environment is not null)
-		{
-			environment.ViewDockService.ShowView(item.Factory.Guid, activate: true);
-		}
+		if(sender is not ViewMenuItem item) return;
+
+		item.Environment?.ViewDockService.ShowView(item.Factory.Guid, activate: true);
 	}
 }

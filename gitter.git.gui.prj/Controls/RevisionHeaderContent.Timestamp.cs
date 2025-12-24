@@ -30,19 +30,16 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 
 partial class RevisionHeaderContent
 {
-	abstract class TimestampElement : BaseElement
+	abstract class TimestampElement(RevisionHeaderContent owner) : BaseElement(owner)
 	{
-		protected TimestampElement(RevisionHeaderContent owner)
-			: base(owner)
-		{
-			DateFormat = DateFormat.ISO8601;
-		}
-
 		public override ContextMenuStrip CreateContextMenu(Revision revision)
 		{
 			Assert.IsNotNull(revision);
 
-			var menu        = new ContextMenuStrip();
+			var menu = new ContextMenuStrip
+			{
+				Renderer = GitterApplication.Style.ToolStripRenderer,
+			};
 			var dpiBindings = new DpiBindings(menu);
 			var factory     = new GuiItemFactory(dpiBindings);
 
@@ -53,7 +50,9 @@ partial class RevisionHeaderContent
 			return menu;
 		}
 
-		public DateFormat DateFormat { get; set; }
+		public DateFormat DateFormat { get; set; } = DateFormat.ISO8601;
+
+		public bool IncludeUtcOffset { get; set; } = true;
 
 		protected abstract DateTimeOffset GetTimestamp(Revision revision);
 
@@ -66,7 +65,15 @@ partial class RevisionHeaderContent
 
 			var timestamp = GetTimestamp(revision);
 			var font      = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi);
-			var text      = Utility.FormatDate(timestamp, DateFormat);
+
+#if NETCOREAPP
+			Span<char> chars = stackalloc char[64];
+			if(Utility.TryFormatDate(timestamp, chars, out var written, DateFormat, IncludeUtcOffset))
+			{
+				return Measure(graphics, dpi, font, chars[..written], width);
+			}
+#endif
+			var text  = Utility.FormatDate(timestamp, DateFormat, IncludeUtcOffset);
 			return Measure(graphics, dpi, font, text, width);
 		}
 
@@ -77,8 +84,16 @@ partial class RevisionHeaderContent
 
 			var timestamp = GetTimestamp(revision);
 			var font      = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi);
-			var text      = Utility.FormatDate(timestamp, DateFormat);
 
+#if NETCOREAPP
+			Span<char> chars = stackalloc char[64];
+			if(Utility.TryFormatDate(timestamp, chars, out var written, DateFormat, IncludeUtcOffset))
+			{
+				DefaultPaint(graphics, dpi, font, HeaderText, chars[..written], rect);
+				return;
+			}
+#endif
+			var text = Utility.FormatDate(timestamp, DateFormat, IncludeUtcOffset);
 			DefaultPaint(graphics, dpi, font, HeaderText, text, rect);
 		}
 	}

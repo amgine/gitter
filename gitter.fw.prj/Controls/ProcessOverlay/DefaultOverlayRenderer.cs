@@ -103,7 +103,7 @@ sealed class DefaultOverlayRenderer : ProcessOverlayRenderer
 	{
 		const int spacing = 10;
 
-		var dpi  = Dpi.FromControl(processOverlay.HostControl);
+		var dpi  = processOverlay.HostControl is not null ? Dpi.FromControl(processOverlay.HostControl) : Dpi.Default;
 		var conv = DpiConverter.FromDefaultTo(dpi);
 		var size = conv.Convert(new Size(14, 14));
 
@@ -152,8 +152,10 @@ sealed class DefaultOverlayRenderer : ProcessOverlayRenderer
 
 	public override void PaintMessage(ProcessOverlay processOverlay, Graphics graphics, Rectangle bounds, string status)
 	{
-		var conv = DpiConverter.FromDefaultTo(Dpi.FromControl(processOverlay.HostControl));
-		var size = conv.Convert(new Size(14, 14));
+		var conv = processOverlay.HostControl is not null
+			? DpiConverter.FromDefaultTo(processOverlay.HostControl)
+			: DpiConverter.Identity;
+		//var size = conv.Convert(new Size(14, 14));
 
 		using(var path = GraphicsUtility.GetRoundedRectangle(bounds, processOverlay.Rounding))
 		using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))

@@ -21,10 +21,6 @@
 namespace gitter.Redmine.Gui;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
 
 using gitter.Framework.Controls;
 
@@ -38,13 +34,8 @@ public sealed class VersionDescriptionColumn : CustomListBoxColumn
 		SizeMode = ColumnSizeMode.Fill;
 	}
 
-	public override string IdentificationString
-	{
-		get { return "Description"; }
-	}
+	public override string IdentificationString => "Description";
 
 	protected override Comparison<CustomListBoxItem> SortComparison
-	{
-		get { return VersionListItem.CompareByDescription; }
-	}
+		=> VersionListItem.CompareByDescription;
 }

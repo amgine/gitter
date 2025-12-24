@@ -27,70 +27,102 @@ using System.Windows.Forms;
 using gitter.Framework;
 using gitter.Framework.Mvc;
 using gitter.Framework.Services;
-
+using gitter.Git.AccessLayer;
 using gitter.Git.Gui.Dialogs;
 using gitter.Git.Gui.Interfaces;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class CreateBranchController : ViewControllerBase<ICreateBranchView>, ICreateBranchController
+sealed class CreateBranchController(Repository repository)
+	: ViewControllerBase<ICreateBranchView>, ICreateBranchController
 {
-	public CreateBranchController(Repository repository)
-	{
-		Verify.Argument.IsNotNull(repository);
+	readonly record struct UserInput(
+		string BranchName,
+		string Refspec,
+		bool   Checkout,
+		bool   Orphan,
+		bool   CreateReflog,
+		BranchTrackingMode TrackingMode);
 
-		Repository = repository;
+	private bool TryCollectUserInput(out UserInput input)
+	{
+		var view = RequireView();
+		var branchName = view.BranchName.Value?.Trim();
+		if(!GitControllerUtility.ValidateBranchName(branchName, view.BranchName, view.ErrorNotifier))
+		{
+			goto fail;
+		}
+		var refspec = view.StartingRevision.Value.Trim();
+		if(!GitControllerUtility.ValidateRefspec(refspec, view.StartingRevision, view.ErrorNotifier))
+		{
+			goto fail;
+		}
+		var checkout = view.Checkout.Value;
+
+		input = new(
+			BranchName:   branchName!,
+			Refspec:      refspec,
+			Checkout:     checkout,
+			Orphan:       checkout && view.Orphan.Value && GitFeatures.CheckoutOrphan.IsAvailableFor(repository),
+			CreateReflog: view.CreateReflog.Value,
+			TrackingMode: view.TrackingMode.Value);
+		return true;
+
+	fail:
+		input = default;
+		return false;
 	}
 
-	private Repository Repository { get; }
-
-	protected override void OnViewAttached()
+	/// <inheritdoc/>
+	protected override void OnViewAttached(ICreateBranchView view)
 	{
-		base.OnViewAttached();
-		var logallrefupdates = Repository.Configuration.TryGetParameterValue(GitConstants.CoreLogAllRefUpdatesParameter);
+		base.OnViewAttached(view);
+
+		var logallrefupdates = repository.Configuration.TryGetParameterValue(GitConstants.CoreLogAllRefUpdatesParameter);
 		if(logallrefupdates is not null && logallrefupdates == "true")
 		{
-			View.CreateReflog.Value      = true;
-			View.CreateReflog.IsReadOnly = true;
+			view.CreateReflog.Value      = true;
+			view.CreateReflog.IsReadOnly = true;
 		}
 	}
 
-	private async Task<bool> TryResetExistingBranchAsync(string branchName, string refspec, bool checkout, Branch existing)
+	private async Task<bool> TryResetExistingBranchAsync(UserInput input, Branch existing)
 	{
+		var view = RequireView();
 		if(GitterApplication.MessageBoxService.Show(
-			View as IWin32Window,
-			Resources.StrAskBranchExists.UseAsFormat(branchName),
+			view as IWin32Window,
+			Resources.StrAskBranchExists.UseAsFormat(input.BranchName),
 			Resources.StrBranch,
 			MessageBoxButtons.YesNo,
 			MessageBoxIcon.Question) != DialogResult.Yes)
 		{
 			return false;
 		}
-		var ptr = Repository.GetRevisionPointer(refspec);
+		var ptr = repository.GetRevisionPointer(input.Refspec);
 		try
 		{
 			if(existing.IsCurrent)
 			{
 				ResetMode mode;
-				using(var dlg = new SelectResetModeDialog())
+				using(var dialog = new SelectResetModeDialog())
 				{
-					if(dlg.Run(View as IWin32Window) != DialogResult.OK)
+					if(dialog.Run(view as IWin32Window) != DialogResult.OK)
 					{
 						return false;
 					}
-					mode = dlg.ResetMode;
+					mode = dialog.ResetMode;
 				}
-				using(View.ChangeCursor(MouseCursor.WaitCursor))
+				using(view.ChangeCursor(MouseCursor.WaitCursor))
 				{
-					await Repository.Head.ResetAsync(ptr, mode);
+					await repository.Head.ResetAsync(ptr, mode);
 				}
 			}
 			else
 			{
-				using(View.ChangeCursor(MouseCursor.WaitCursor))
+				using(view.ChangeCursor(MouseCursor.WaitCursor))
 				{
 					existing.Reset(ptr);
-					if(checkout)
+					if(input.Checkout)
 					{
 						await existing.CheckoutAsync(true);
 					}
@@ -99,7 +131,7 @@ sealed class CreateBranchController : ViewControllerBase<ICreateBranchView>, ICr
 		}
 		catch(UnknownRevisionException)
 		{
-			View.ErrorNotifier.NotifyError(View.StartingRevision,
+			view.ErrorNotifier.NotifyError(view.StartingRevision,
 				new UserInputError(
 					Resources.ErrInvalidRevisionExpression,
 					Resources.ErrRevisionIsUnknown));
@@ -108,7 +140,7 @@ sealed class CreateBranchController : ViewControllerBase<ICreateBranchView>, ICr
 		catch(GitException exc)
 		{
 			GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
+				view as IWin32Window,
 				exc.Message,
 				Resources.ErrFailedToReset,
 				MessageBoxButton.Close,
@@ -118,36 +150,36 @@ sealed class CreateBranchController : ViewControllerBase<ICreateBranchView>, ICr
 		return true;
 	}
 
-	private async Task<bool> TryCreateNewBranchAsync(string branchName, string refspec, bool checkout, bool orphan, bool reflog)
+	private async Task<bool> TryCreateNewBranchAsync(UserInput input)
 	{
-		var trackingMode = View.TrackingMode.Value;
+		var view = RequireView();
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				var ptr = Repository.GetRevisionPointer(refspec);
-				if(orphan)
+				var ptr = repository.GetRevisionPointer(input.Refspec);
+				if(input.Orphan)
 				{
-					await Repository.Refs.Heads.CreateOrphanAsync(
-						branchName,
+					await repository.Refs.Heads.CreateOrphanAsync(
+						input.BranchName,
 						ptr,
-						trackingMode,
-						reflog);
+						input.TrackingMode,
+						input.CreateReflog);
 				}
 				else
 				{
-					await Repository.Refs.Heads.CreateAsync(
-						branchName,
+					await repository.Refs.Heads.CreateAsync(
+						input.BranchName,
 						ptr,
-						trackingMode,
-						checkout,
-						reflog);
+						input.TrackingMode,
+						input.Checkout,
+						input.CreateReflog);
 				}
 			}
 		}
 		catch(UnknownRevisionException)
 		{
-			View.ErrorNotifier.NotifyError(View.StartingRevision,
+			view.ErrorNotifier.NotifyError(view.StartingRevision,
 				new UserInputError(
 					Resources.ErrInvalidRevisionExpression,
 					Resources.ErrRevisionIsUnknown));
@@ -155,7 +187,7 @@ sealed class CreateBranchController : ViewControllerBase<ICreateBranchView>, ICr
 		}
 		catch(BranchAlreadyExistsException)
 		{
-			View.ErrorNotifier.NotifyError(View.BranchName,
+			view.ErrorNotifier.NotifyError(view.BranchName,
 				new UserInputError(
 					Resources.ErrInvalidBranchName,
 					Resources.ErrBranchAlreadyExists));
@@ -163,7 +195,7 @@ sealed class CreateBranchController : ViewControllerBase<ICreateBranchView>, ICr
 		}
 		catch(InvalidBranchNameException exc)
 		{
-			View.ErrorNotifier.NotifyError(View.BranchName,
+			view.ErrorNotifier.NotifyError(view.BranchName,
 				new UserInputError(
 					Resources.ErrInvalidBranchName,
 					exc.Message));
@@ -172,9 +204,9 @@ sealed class CreateBranchController : ViewControllerBase<ICreateBranchView>, ICr
 		catch(GitException exc)
 		{
 			GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
+				view as IWin32Window,
 				exc.Message,
-				string.Format(Resources.ErrFailedToCreateBranch, branchName),
+				string.Format(Resources.ErrFailedToCreateBranch, input.BranchName),
 				MessageBoxButton.Close,
 				MessageBoxIcon.Error);
 			return false;
@@ -184,32 +216,10 @@ sealed class CreateBranchController : ViewControllerBase<ICreateBranchView>, ICr
 
 	public Task<bool> TryCreateBranchAsync()
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+		if(!TryCollectUserInput(out var input)) return Task.FromResult(false);
 
-		var branchName = View.BranchName.Value.Trim();
-		if(!GitControllerUtility.ValidateBranchName(branchName, View.BranchName, View.ErrorNotifier))
-		{
-			return Task.FromResult(false);
-		}
-		var refspec = View.StartingRevision.Value.Trim();
-		if(!GitControllerUtility.ValidateRefspec(refspec, View.StartingRevision, View.ErrorNotifier))
-		{
-			return Task.FromResult(false);
-		}
-
-		var checkout = View.Checkout.Value;
-		var existing = Repository.Refs.Heads.TryGetItem(branchName);
-
-		if(existing is not null)
-		{
-			return TryResetExistingBranchAsync(branchName, refspec, checkout, existing);
-		}
-		else
-		{
-			var orphan = checkout && View.Orphan.Value && GitFeatures.CheckoutOrphan.IsAvailableFor(Repository);
-			var reflog = View.CreateReflog.Value;
-
-			return TryCreateNewBranchAsync(branchName, refspec, checkout, orphan, reflog);
-		}
+		return repository.Refs.Heads.TryGetItem(input.BranchName, out var existing)
+			? TryResetExistingBranchAsync(input, existing)
+			: TryCreateNewBranchAsync(input);
 	}
 }

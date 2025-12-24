@@ -62,8 +62,7 @@ internal sealed class HistoryToolbar : ToolStrip
 		var factory = new GuiItemFactory(_dpiBindings);
 
 		Items.AddRange(
-			new ToolStripItem[]
-			{
+			[
 				// left-aligned
 				RefreshButton = factory.CreateRefreshContentButton(view),
 				new ToolStripSeparator(),
@@ -92,15 +91,14 @@ internal sealed class HistoryToolbar : ToolStrip
 						ToolTipText = Resources.StrFilter,
 					},
 				_btnLimit = new ToolStripDropDownButton(string.Empty, null,
-					new ToolStripItem[]
-					{
+					[
 						new ToolStripMenuItem(Resources.StrlUnlimited, null, OnLimitOptionClick) { Tag = 0 },
 						new ToolStripMenuItem( "100 " + Resources.StrlCommits, null, OnLimitOptionClick) { Tag =  100 },
 						new ToolStripMenuItem( "500 " + Resources.StrlCommits, null, OnLimitOptionClick) { Tag =  500 },
 						new ToolStripMenuItem("1000 " + Resources.StrlCommits, null, OnLimitOptionClick) { Tag = 1000 },
 						new ToolStripMenuItem("2000 " + Resources.StrlCommits, null, OnLimitOptionClick) { Tag = 2000 },
 						new ToolStripMenuItem("5000 " + Resources.StrlCommits, null, OnLimitOptionClick) { Tag = 5000 },
-					})
+					])
 					{
 						ToolTipText = Resources.StrsCommitLimit,
 					},
@@ -111,7 +109,7 @@ internal sealed class HistoryToolbar : ToolStrip
 						DisplayStyle = ToolStripItemDisplayStyle.ImageAndText,
 						Alignment = ToolStripItemAlignment.Right,
 					}
-			});
+			]);
 
 		_dpiBindings.BindImage(_btnDateOrder,   Icons.OrderDate);
 		_dpiBindings.BindImage(_btnTopoOrder,   Icons.OrderTopo);
@@ -121,34 +119,34 @@ internal sealed class HistoryToolbar : ToolStrip
 		UpdateLimitButtonText();
 	}
 
-	private void OnRefreshButtonClick(object sender, EventArgs e)
+	private void OnRefreshButtonClick(object? sender, EventArgs e)
 	{
 		_view.RefreshContent();
 	}
 
-	private void OnDateOrderButtonClick(object sender, EventArgs e)
+	private void OnDateOrderButtonClick(object? sender, EventArgs e)
 	{
 		_view.LogOptions.Order = RevisionQueryOrder.DateOrder;
 	}
 
-	private void OnTopoOrderButtonClick(object sender, EventArgs e)
+	private void OnTopoOrderButtonClick(object? sender, EventArgs e)
 	{
 		_view.LogOptions.Order = RevisionQueryOrder.TopoOrder;
 	}
 
-	private void OnShowDetailsButtonClick(object sender, EventArgs e)
+	private void OnShowDetailsButtonClick(object? sender, EventArgs e)
 	{
-		var button = (ToolStripButton)sender;
+		var button = (ToolStripButton)sender!;
 		button.Checked = !button.Checked;
 		_view.ShowDetails = button.Checked;
 	}
 
-	private void OnRepositoryChanged(object sender, EventArgs e)
+	private void OnRepositoryChanged(object? sender, EventArgs e)
 	{
 		_filterDropDown.Repository = _view.Repository;
 	}
 
-	private void OnLogOptionsChanged(object sender, EventArgs e)
+	private void OnLogOptionsChanged(object? sender, EventArgs e)
 	{
 		_filterDropDown.LogOptions = _view.LogOptions;
 		_btnDateOrder.Checked = _view.LogOptions.Order == RevisionQueryOrder.DateOrder;
@@ -157,9 +155,9 @@ internal sealed class HistoryToolbar : ToolStrip
 		_btnFilter.Text = GetFilterButtonText();
 	}
 
-	private void OnLimitOptionClick(object sender, EventArgs e)
+	private void OnLimitOptionClick(object? sender, EventArgs e)
 	{
-		_view.LogOptions.MaxCount = (int)((ToolStripItem)sender).Tag;
+		_view.LogOptions.MaxCount = (int)((ToolStripItem)sender!).Tag!;
 	}
 
 	private string GetFilterButtonText()
@@ -171,15 +169,15 @@ internal sealed class HistoryToolbar : ToolStrip
 			case LogReferenceFilter.HEAD:
 				return GitConstants.HEAD;
 			case LogReferenceFilter.Allowed:
-				StringBuilder sb = null;
+				var sb = default(StringBuilder);
 				if(_view.LogOptions.AllowedReferences != null)
 				{
 					int count = 0;
 					foreach(var reference in _view.LogOptions.AllowedReferences)
 					{
-						if(sb == null)
+						if(sb is null)
 						{
-							sb = new StringBuilder(reference.Name);
+							sb = new(reference.Name);
 						}
 						else
 						{
@@ -197,14 +195,9 @@ internal sealed class HistoryToolbar : ToolStrip
 						++count;
 					}
 				}
-				if(sb == null)
-				{
-					return GitConstants.HEAD;
-				}
-				else
-				{
-					return sb.ToString();
-				}
+				return sb is null
+					? GitConstants.HEAD
+					: sb.ToString();
 			default:
 				return Resources.StrFilter;
 		}

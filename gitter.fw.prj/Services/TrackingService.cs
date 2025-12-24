@@ -34,7 +34,7 @@ public class TrackingService
 	#region Events
 
 	/// <summary>Tracking changed.</summary>
-	public event EventHandler<TrackingEventArgs> Changed;
+	public event EventHandler<TrackingEventArgs>? Changed;
 
 	#endregion
 
@@ -121,7 +121,7 @@ public class TrackingService<T>
 {
 	#region Data
 
-	private T _item;
+	private T? _item;
 	private int _index;
 	private int _partId;
 
@@ -130,26 +130,26 @@ public class TrackingService<T>
 	#region Events
 
 	/// <summary>Tracking changed.</summary>
-	public event EventHandler<TrackingEventArgs<T>> Changed;
+	public event EventHandler<TrackingEventArgs<T>>? Changed;
 
 	#endregion
 
 	#region .ctor
 
-	/// <summary>Create <see cref="TrackingService&lt;T&gt;"/>.</summary>
+	/// <summary>Create <see cref="TrackingService{T}"/>.</summary>
 	public TrackingService()
 	{
 		_index = -1;
 	}
 
-	/// <summary>Create <see cref="TrackingService&lt;T&gt;"/>.</summary>
+	/// <summary>Create <see cref="TrackingService{T}"/>.</summary>
 	public TrackingService(Action<TrackingEventArgs<T>> onChanged)
 		: this()
 	{
 		Changed += (sender, e) => onChanged(e);
 	}
 
-	/// <summary>Create <see cref="TrackingService&lt;T&gt;"/>.</summary>
+	/// <summary>Create <see cref="TrackingService{T}"/>.</summary>
 	public TrackingService(EventHandler<TrackingEventArgs<T>> onChanged)
 		: this()
 	{
@@ -164,7 +164,7 @@ public class TrackingService<T>
 	public int Index =>  _index;
 
 	/// <summary>Currently tracked item.</summary>
-	public T Item => _item;
+	public T? Item => _item;
 
 	/// <summary>Tracked item part id.</summary>
 	public int PartId => _partId;
@@ -179,7 +179,7 @@ public class TrackingService<T>
 	/// <summary>Track element.</summary>
 	/// <param name="index">Tracked element index.</param>
 	/// <param name="element">Tracked element.</param>
-	public void Track(int index, T element)
+	public void Track(int index, T? element)
 	{
 		Track(index, element, 0);
 	}
@@ -188,7 +188,7 @@ public class TrackingService<T>
 	/// <param name="index">Tracked element index.</param>
 	/// <param name="element">Tracked element.</param>
 	/// <param name="partId">Tracked part id.</param>
-	public void Track(int index, T element, int partId)
+	public void Track(int index, T? element, int partId)
 	{
 		if(_index != index || _partId != partId)
 		{
@@ -197,7 +197,7 @@ public class TrackingService<T>
 				var args = new TrackingEventArgs<T>(false, _index, _item);
 				_index = -1;
 				_partId = 0;
-				_item = default(T);
+				_item = default;
 				Changed?.Invoke(this, args);
 			}
 			if(index != -1)
@@ -214,7 +214,7 @@ public class TrackingService<T>
 	/// <summary>Notify about item change.</summary>
 	/// <param name="index">New tracked item index.</param>
 	/// <param name="item">New tracked item.</param>
-	public void Reset(int index, T item)
+	public void Reset(int index, T? item)
 	{
 		_index = index;
 		_item = item;

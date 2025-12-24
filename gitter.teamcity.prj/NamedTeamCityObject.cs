@@ -25,23 +25,14 @@ using System.Xml;
 
 public abstract class NamedTeamCityObject : TeamCityObject
 {
-	#region Static
-
 	public static readonly TeamCityObjectProperty<string> NameProperty = new("name", nameof(Name));
 
-	#endregion
-
-	#region Data
-
 	private string _name;
-
-	#endregion
-
-	#region .ctor
 
 	protected NamedTeamCityObject(TeamCityServiceContext context, string id)
 		: base(context, id)
 	{
+		_name = "";
 	}
 
 	protected NamedTeamCityObject(TeamCityServiceContext context, string id, string name)
@@ -53,12 +44,8 @@ public abstract class NamedTeamCityObject : TeamCityObject
 	protected NamedTeamCityObject(TeamCityServiceContext context, XmlNode node)
 		: base(context, node)
 	{
-		_name = TeamCityUtility.LoadString(node.Attributes[NameProperty.XmlNodeName]);
+		_name = TeamCityUtility.LoadString(node.Attributes?[NameProperty.XmlNodeName]) ?? "";
 	}
-
-	#endregion
-
-	#region Properties
 
 	public string Name
 	{
@@ -66,18 +53,12 @@ public abstract class NamedTeamCityObject : TeamCityObject
 		internal set => UpdatePropertyValue(ref _name, value, NameProperty);
 	}
 
-	#endregion
-
-	#region Methods
-
 	internal override void Update(XmlNode node)
 	{
 		base.Update(node);
-		Name = TeamCityUtility.LoadString(node.Attributes[NameProperty.XmlNodeName]);
+		Name = TeamCityUtility.LoadString(node.Attributes?[NameProperty.XmlNodeName]) ?? "";
 	}
 
 	/// <inheritdoc/>
 	public override string ToString() => Name;
-
-	#endregion
 }

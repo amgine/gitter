@@ -63,9 +63,9 @@ sealed class PipelinesListBinding : AsyncDataBinding<IReadOnlyList<Pipeline>>
 	}
 
 	protected override Task<IReadOnlyList<Pipeline>> FetchDataAsync(
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
-		Verify.State.IsFalse(IsDisposed, "PipelinesListBinding is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		progress?.Report(new("Fetching pipelines..."));
 		PipelinesListBox.Cursor = Cursors.WaitCursor;

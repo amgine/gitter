@@ -23,18 +23,20 @@ namespace gitter.Git.Gui;
 using System;
 using System.Collections.Generic;
 
+using gitter.Framework;
+
 /// <summary>Interface for graph builder.</summary>
 /// <typeparam name="T">Type of graph nodes.</typeparam>
 public interface IGraphBuilder<T>
 	where T : class
 {
-	GraphCell[][] BuildGraph(IReadOnlyList<T> items, Func<T, IReadOnlyList<T>> getParents);
+	GraphCell[][] BuildGraph(IReadOnlyList<T> items, Func<T, Many<T>> getParents);
 
-	GraphCell[] AddGraphLineToTop(GraphCell[] topLine);
+	GraphCell[] AddGraphLineToTop(GraphCell[]? topLine);
 
-	void CleanGraph(GraphCell[] graph);
+	void CleanGraph(GraphCell[]? graph);
 
-	void CleanGraph(GraphCell[] prev, GraphCell[] next);
+	void CleanGraph(GraphCell[]? prev, GraphCell[]? next);
 }
 
 /// <summary>Factory for <see cref="IGraphBuilder{T}"/></summary>

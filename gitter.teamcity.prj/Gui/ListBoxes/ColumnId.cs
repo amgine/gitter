@@ -30,4 +30,5 @@ enum ColumnId
 	Status,
 	BuildType,
 	Project,
+	BranchName,
 }

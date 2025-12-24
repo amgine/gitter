@@ -23,16 +23,11 @@ namespace gitter.Git.Gui.Controls;
 using Resources = gitter.Git.Gui.Properties.Resources;
 
 /// <summary>"Tree Hash" column.</summary>
-public sealed class TreeHashColumn : HashColumnBase
+public sealed class TreeHashColumn() : HashColumnBase((int)ColumnId.TreeHash, Resources.StrTreeHash, visible: false)
 {
-	/// <summary>Create <see cref="TreeHashColumn"/>.</summary>
-	public TreeHashColumn()
-		: base((int)ColumnId.TreeHash, Resources.StrTreeHash, visible: false)
-	{
-	}
-
 	/// <inheritdoc/>
-	protected override string GetHash(Revision revision) => revision.TreeHashString;
+	protected override string GetHash(Revision revision)
+		=> revision.TreeHashString;
 
 	/// <inheritdoc/>
 	public override string IdentificationString => "TreeHash";

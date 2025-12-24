@@ -27,11 +27,18 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
+#if NETCOREAPP
+using System.Runtime.Intrinsics.X86;
+#endif
+
+#if NETCOREAPP
+using gitter.Framework.Intrinsics;
+#endif
 
 /// <summary>Service for requesting global avatars.</summary>
 public static class GravatarService
 {
-	private static readonly char[] Alphabet = { '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f' };
+	private static readonly char[] Alphabet = ['0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'];
 
 	private const string URL = "https://www.gravatar.com/avatar/{0}?d={1}&s={2}&r={3}";
 
@@ -69,6 +76,16 @@ public static class GravatarService
 	{
 		var len   = bytes.Length * 2;
 		var chars = stackalloc char[len];
+#if NETCOREAPP
+		if(Avx2.IsSupported)
+		{
+			fixed(byte* src = bytes)
+			{
+				Avx2HashHelper.ToHexStringFrom16Bytes(src, chars);
+			}
+			return new(chars, 0, 32);
+		}
+#endif
 		for(int i = 0; i < bytes.Length; ++i)
 		{
 			int h = bytes[i];

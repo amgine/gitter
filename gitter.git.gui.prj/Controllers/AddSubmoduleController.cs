@@ -32,40 +32,43 @@ using gitter.Git.Gui.Interfaces;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class AddSubmoduleController : ViewControllerBase<IAddSubmoduleView>, IAddSubmoduleController
+sealed class AddSubmoduleController(Repository repository)
+	: ViewControllerBase<IAddSubmoduleView>, IAddSubmoduleController
 {
-	public AddSubmoduleController(Repository repository)
+	readonly record struct UserInput(
+		string  Path,
+		string  Url,
+		string? Branch);
+
+	private bool TryCollectUserInput(out UserInput input)
 	{
-		Verify.Argument.IsNotNull(repository);
+		var view   = RequireView();
+		var path   = view.Path.Value?.Trim();
+		var url    = view.Url.Value?.Trim();
+		var branch = default(string);
 
-		Repository = repository;
-	}
-
-	private Repository Repository { get; }
-
-	private bool ValidateInput(out string path, out string url, out string branch)
-	{
-		path   = View.Path.Value.Trim();
-		url    = View.Url.Value.Trim();
-		branch = default;
-
-		if(!GitControllerUtility.ValidateRelativePath(path, View.Path, View.ErrorNotifier))
+		if(!GitControllerUtility.ValidateRelativePath(path, view.Path, view.ErrorNotifier))
 		{
-			return false;
+			goto fail;
 		}
-		if(!GitControllerUtility.ValidateUrl(url, View.Url, View.ErrorNotifier))
+		if(!GitControllerUtility.ValidateUrl(url, view.Url, view.ErrorNotifier))
 		{
-			return false;
+			goto fail;
 		}
-		if(View.UseCustomBranch.Value)
+		if(view.UseCustomBranch.Value)
 		{
-			branch = View.BranchName.Value.Trim();
-			if(!GitControllerUtility.ValidateBranchName(branch, View.BranchName, View.ErrorNotifier))
+			branch = view.BranchName.Value?.Trim();
+			if(!GitControllerUtility.ValidateBranchName(branch, view.BranchName, view.ErrorNotifier))
 			{
-				return false;
+				goto fail;
 			}
 		}
+		input = new(path!, url!, branch);
 		return true;
+
+	fail:
+		input = default;
+		return false;
 	}
 
 	private void OnCreateFailed(Exception exc, string path)
@@ -78,20 +81,19 @@ sealed class AddSubmoduleController : ViewControllerBase<IAddSubmoduleView>, IAd
 
 	public bool TryAddSubmodule()
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+		if(!TryCollectUserInput(out var input)) return false;
 
-		if(!ValidateInput(out var path, out var url, out var branch)) return false;
-
+		var view = RequireView();
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				Repository.Submodules.Add(path, url, branch);
+				repository.Submodules.Add(input.Path, input.Url, input.Branch);
 			}
 		}
 		catch(GitException exc)
 		{
-			OnCreateFailed(exc, path);
+			OnCreateFailed(exc, input.Path);
 			return false;
 		}
 		return true;
@@ -99,22 +101,21 @@ sealed class AddSubmoduleController : ViewControllerBase<IAddSubmoduleView>, IAd
 
 	public async Task<bool> TryAddSubmoduleAsync()
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+		if(!TryCollectUserInput(out var input)) return false;
 
-		if(!ValidateInput(out var path, out var url, out var branch)) return false;
-
+		var view = RequireView();
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				await Repository.Submodules
-					.AddAsync(path, url, branch)
+				await repository.Submodules
+					.AddAsync(input.Path, input.Url, input.Branch)
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 		}
 		catch(GitException exc)
 		{
-			OnCreateFailed(exc, path);
+			OnCreateFailed(exc, input.Path);
 			return false;
 		}
 		return true;

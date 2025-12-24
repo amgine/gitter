@@ -46,8 +46,11 @@ public sealed class Module : Autofac.Module
 			.WithParameter(TypedParameter.From(GraphStyleOptions.Default))
 			.OnActivating(static c =>
 			{
-				var section = c.Context.Resolve<RepositoryProvider>().ConfigSection.GetCreateSection("GraphStyle");
-				c.Instance.Value = GraphStyleOptions.LoadFrom(section);
+				var section = c.Context.Resolve<RepositoryProvider>().ConfigSection?.GetCreateSection("GraphStyle");
+				if(section is not null)
+				{
+					c.Instance.Value = GraphStyleOptions.LoadFrom(section);
+				}
 			})
 			.As<IValueProvider<GraphStyleOptions>>()
 			.As<IValueSource<GraphStyleOptions>>()
@@ -89,15 +92,16 @@ public sealed class Module : Autofac.Module
 			.SingleInstance();
 
 		builder
-			.RegisterTypes(new[]
-			{
+			.RegisterTypes(
+			[
 				typeof(GitOptionsPage),
-				typeof(ConfigurationPage),
+				typeof(CurrentUserConfigurationPage),
+				typeof(LocalSystemConfigurationPage),
 				typeof(GraphStylePage),
 				typeof(VersionCheckDialog),
 				typeof(InitDialog),
 				typeof(CloneDialog),
-			})
+			])
 			.AsSelf()
 			.ExternallyOwned();
 
@@ -117,12 +121,25 @@ public sealed class Module : Autofac.Module
 		builder
 			.Register(static c =>
 			{
-				return new PropertyPageFactory<ConfigurationPage>(
-					ConfigurationPage.Guid,
-					Resources.StrConfig,
+				return new PropertyPageFactory<CurrentUserConfigurationPage>(
+					CurrentUserConfigurationPage.Guid,
+					Resources.StrCurrentUser,
 					null,
 					GitOptionsPage.Guid,
-					c.Resolve<IFactory<ConfigurationPage>>());
+					c.Resolve<IFactory<CurrentUserConfigurationPage>>());
+			})
+			.As<IPropertyPageFactory>()
+			.SingleInstance();
+
+		builder
+			.Register(static c =>
+			{
+				return new PropertyPageFactory<LocalSystemConfigurationPage>(
+					LocalSystemConfigurationPage.Guid,
+					Resources.StrLocalSystem,
+					null,
+					GitOptionsPage.Guid,
+					c.Resolve<IFactory<LocalSystemConfigurationPage>>());
 			})
 			.As<IPropertyPageFactory>()
 			.SingleInstance();

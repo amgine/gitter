@@ -39,7 +39,7 @@ public sealed class RemoteBranchListItem : ReferenceListItemBase<RemoteBranch>
 		Verify.Argument.IsNotNull(branch);
 	}
 
-	protected override Image GetImage(Dpi dpi)
+	protected override Image? GetImage(Dpi dpi)
 		=> Icons.RemoteBranch.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 
 	/// <inheritdoc/>

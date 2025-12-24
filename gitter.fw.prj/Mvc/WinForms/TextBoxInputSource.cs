@@ -20,33 +20,26 @@
 
 namespace gitter.Framework.Mvc.WinForms;
 
-using System;
 using System.Windows.Forms;
 
-public class TextBoxInputSource : ControlInputSource<TextBoxBase, string>
+public class TextBoxInputSource(TextBoxBase textBox)
+	: ControlInputSource<TextBoxBase, string>(textBox)
 {
-	public TextBoxInputSource(TextBoxBase textBox)
-		: base(textBox)
-	{
-	}
-
 	public override bool IsReadOnly
 	{
 		get => Control.ReadOnly;
 		set => Control.ReadOnly = value;
 	}
 
-	protected override string FetchValue() => Control.Text;
+	protected override string FetchValue()
+		=> Control.Text;
 
-	protected override void SetValue(string value) => Control.Text = value;
+	protected override void SetValue(string? value)
+		=> Control.Text = value;
 
 	protected override void SubscribeToValueChangeEvent()
-	{
-		Control.TextChanged += OnControlValueChanged;
-	}
+		=> Control.TextChanged += OnControlValueChanged;
 
-	protected override void UnsubscribeToValueChangeEvent()
-	{
-		Control.TextChanged -= OnControlValueChanged;
-	}
+	protected override void UnsubscribeFromValueChangeEvent()
+		=> Control.TextChanged -= OnControlValueChanged;
 }

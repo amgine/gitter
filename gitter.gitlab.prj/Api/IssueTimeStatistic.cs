@@ -22,11 +22,6 @@ namespace gitter.GitLab.Api;
 
 using System;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
-using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 [DataContract]
 class IssueTimeStatistic
@@ -40,34 +35,18 @@ class IssueTimeStatistic
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.TimeEstimate)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.TimeEstimate)]
-#endif
 	public int TimeEstimate { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.TotalTimeSpent)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.TotalTimeSpent)]
-#endif
 	public int TotalTimeSpent { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.HumanTimeEstimate)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.HumanTimeEstimate)]
-#endif
-	public string HumanTimeEstimate { get; set; }
+	public string? HumanTimeEstimate { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.HumanTotalTimeSpent)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.HumanTotalTimeSpent)]
-#endif
-	public string HumanTotalTimeSpent { get; set; }
+	public string? HumanTotalTimeSpent { get; set; }
 }

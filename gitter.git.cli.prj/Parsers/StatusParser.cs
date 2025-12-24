@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git.AccessLayer.CLI;
@@ -63,7 +63,7 @@ sealed class StatusParser : ITextParser<StatusData>
 			if(terminator == -1)
 			{
 				stringBuilder.Append(text);
-				text = ReadOnlySpan<char>.Empty;
+				text = [];
 			}
 			else
 			{
@@ -215,9 +215,9 @@ sealed class StatusParser : ITextParser<StatusData>
 
 	#region Data
 
-	private readonly StatusLine _line;
-	private readonly Dictionary<string, TreeFileData> _stagedFiles;
-	private readonly Dictionary<string, TreeFileData> _unstagedFiles;
+	private readonly StatusLine _line = new();
+	private readonly Dictionary<string, TreeFileData> _stagedFiles   = [];
+	private readonly Dictionary<string, TreeFileData> _unstagedFiles = [];
 	private int _unstagedUntrackedCount;
 	private int _unstagedRemovedCount;
 	private int _unstagedModifiedCount;
@@ -225,17 +225,6 @@ sealed class StatusParser : ITextParser<StatusData>
 	private int _stagedAddedCount;
 	private int _stagedModifiedCount;
 	private int _stagedRemovedCount;
-
-	#endregion
-
-	#region .ctor
-
-	public StatusParser()
-	{
-		_line          = new StatusLine();
-		_stagedFiles   = new Dictionary<string, TreeFileData>();
-		_unstagedFiles = new Dictionary<string, TreeFileData>();
-	}
 
 	#endregion
 
@@ -274,41 +263,27 @@ sealed class StatusParser : ITextParser<StatusData>
 	}
 
 	private static bool IsUnmergedState(char x, char y)
-	{
-		return (x == 'U' || y == 'U')
-			|| (x == 'A' && y == 'A')
-			|| (x == 'D' && y == 'D');
-	}
+		=> (x == 'U' || y == 'U')
+		|| (x == 'A' && y == 'A')
+		|| (x == 'D' && y == 'D');
 
-	private void AddUnstagedStats(FileStatus fileStatus, int count)
+	private void AddUnstagedStats(FileStatus fileStatus, int count = 1)
 	{
 		switch(fileStatus)
 		{
-			case FileStatus.Added:
-				_unstagedUntrackedCount += count;
-				break;
-			case FileStatus.Removed:
-				_unstagedRemovedCount += count;
-				break;
-			case FileStatus.Modified:
-				_unstagedModifiedCount += count;
-				break;
+			case FileStatus.Added:    _unstagedUntrackedCount += count; break;
+			case FileStatus.Removed:  _unstagedRemovedCount   += count; break;
+			case FileStatus.Modified: _unstagedModifiedCount  += count; break;
 		}
 	}
 
-	private void AddStagedStats(FileStatus fileStatus, int count)
+	private void AddStagedStats(FileStatus fileStatus, int count = 1)
 	{
 		switch(fileStatus)
 		{
-			case FileStatus.Added:
-				_stagedAddedCount += count;
-				break;
-			case FileStatus.Removed:
-				_stagedRemovedCount += count;
-				break;
-			case FileStatus.Modified:
-				_stagedModifiedCount += count;
-				break;
+			case FileStatus.Added:    _stagedAddedCount    += count; break;
+			case FileStatus.Removed:  _stagedRemovedCount  += count; break;
+			case FileStatus.Modified: _stagedModifiedCount += count; break;
 		}
 	}
 
@@ -385,13 +360,13 @@ sealed class StatusParser : ITextParser<StatusData>
 				{
 					staged = true;
 					stagedFileStatus = CharToFileStatus(x);
-					AddStagedStats(stagedFileStatus, 1);
+					AddStagedStats(stagedFileStatus);
 				}
 				if(y is not ' ')
 				{
 					unstaged = true;
 					unstagedFileStatus = CharToFileStatus(y);
-					AddUnstagedStats(unstagedFileStatus, 1);
+					AddUnstagedStats(unstagedFileStatus);
 				}
 			}
 		}

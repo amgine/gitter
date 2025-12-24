@@ -31,6 +31,6 @@ public sealed record class ReferenceChange(
 	ReferenceType       ReferenceType,
 	string              FullName,
 	string              Name,
-	Hash                OldHash,
-	Hash                NewHash,
+	Sha1Hash            OldHash,
+	Sha1Hash            NewHash,
 	ReferenceChangeType ChangeType);

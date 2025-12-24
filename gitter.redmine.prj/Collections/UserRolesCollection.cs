@@ -20,10 +20,12 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 public sealed class UserRolesCollection : NamedRedmineObjectsCache<UserRole>
@@ -34,18 +36,14 @@ public sealed class UserRolesCollection : NamedRedmineObjectsCache<UserRole>
 	}
 
 	protected override UserRole Create(int id, string name)
-	{
-		return new UserRole(Context, id, name);
-	}
+		=> new(Context, id, name);
 
 	protected override UserRole Create(XmlNode node)
-	{
-		return new UserRole(Context, node);
-	}
+		=> new(Context, node);
 
-	public LinkedList<UserRole> Fetch()
+	public Task<List<UserRole>> FetchAsync(CancellationToken cancellationToken = default)
 	{
 		const string url = "roles.xml";
-		return FetchItemsFromSinglePage(url);
+		return FetchItemsFromSinglePageAsync(url, cancellationToken);
 	}
 }

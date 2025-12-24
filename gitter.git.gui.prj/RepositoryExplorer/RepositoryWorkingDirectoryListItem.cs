@@ -38,13 +38,9 @@ sealed class RepositoryWorkingDirectoryListItem : RepositoryExplorerItemBase
 {
 	private sealed class AsyncTreeDataSource : AsyncDataBinding<Tree>
 	{
-		#region Data
-
 		private readonly EventHandler<BoundItemActivatedEventArgs<TreeItem>> _onItemActivated;
 		private readonly EventHandler<ItemContextMenuRequestEventArgs> _onItemContextMenuRequested;
-		private TreeBinding _binding;
-
-		#endregion
+		private TreeBinding? _binding;
 
 		public AsyncTreeDataSource(IRevisionPointer revision, CustomListBoxItemsCollection items,
 			EventHandler<BoundItemActivatedEventArgs<TreeItem>> onItemActivated,
@@ -64,15 +60,9 @@ sealed class RepositoryWorkingDirectoryListItem : RepositoryExplorerItemBase
 
 		public CustomListBoxItemsCollection Items { get; }
 
-		protected override Task<Tree> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		protected override Task<Tree> FetchDataAsync(IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
 		{
-			if(_binding is not null)
-			{
-				_binding.ItemActivated -= _onItemActivated;
-				_binding.ItemContextMenuRequested -= _onItemContextMenuRequested;
-				_binding.Dispose();
-				_binding = null;
-			}
+			DisposeBinding();
 			return Revision.GetTreeAsync(progress, cancellationToken);
 		}
 
@@ -91,90 +81,81 @@ sealed class RepositoryWorkingDirectoryListItem : RepositoryExplorerItemBase
 			LoggingService.Global.Warning(exception, "Failed to fetch HEAD tree: " + exception.Message);
 		}
 
+		private void DisposeBinding()
+		{
+			if(_binding is null) return;
+
+			_binding.ItemActivated -= _onItemActivated;
+			_binding.ItemContextMenuRequested -= _onItemContextMenuRequested;
+			_binding.Dispose();
+			_binding = null;
+		}
+
 		protected override void Dispose(bool disposing)
 		{
 			if(disposing)
 			{
-				if(_binding is not null)
-				{
-					_binding.ItemActivated -= _onItemActivated;
-					_binding.ItemContextMenuRequested -= _onItemContextMenuRequested;
-					_binding.Dispose();
-					_binding = null;
-				}
+				DisposeBinding();
 			}
 			base.Dispose(disposing);
 		}
 	}
 
-	private AsyncTreeDataSource _dataSource;
+	private AsyncTreeDataSource? _dataSource;
 
 	public RepositoryWorkingDirectoryListItem()
 		: base(Icons.Folder, Resources.StrWorkingDirectory)
 	{
 	}
 
-	private AsyncTreeDataSource DataSource
+	private AsyncTreeDataSource? DataSource
 	{
 		get => _dataSource;
 		set
 		{
-			if(_dataSource != value)
-			{
-				if(_dataSource != null)
-				{
-					_dataSource.Dispose();
-				}
-				_dataSource = value;
-				if(_dataSource != null)
-				{
-					_dataSource.ReloadData();
-				}
-			}
+			if(_dataSource == value) return;
+
+			_dataSource?.Dispose();
+			_dataSource = value;
+			_dataSource?.ReloadData();
 		}
 	}
 
-	/// <summary>Called when item is attached to listbox.</summary>
-	protected override void OnListBoxAttached()
+	/// <inheritdoc/>
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
-		if(Repository != null)
+		base.OnListBoxAttached(listBox);
+		if(Repository is not null)
 		{
 			DataSource = new AsyncTreeDataSource(Repository.Head, Items, OnItemActivated, OnItemContextMenuRequested);
 		}
 	}
 
-	/// <summary>Called when item is detached from listbox.</summary>
-	protected override void OnListBoxDetached()
+	/// <inheritdoc/>
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataSource = null;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
-	protected override void DetachFromRepository()
-	{
-		DataSource = null;
-		Repository.Head.PositionChanged -= OnHeadPositionChanged;
-	}
-
-	protected override void AttachToRepository()
+	protected override void AttachToRepository(Repository repository)
 	{
 		if(IsAttachedToListBox)
 		{
-			DataSource = new AsyncTreeDataSource(Repository.Head, Items, OnItemActivated, OnItemContextMenuRequested);
+			DataSource = new AsyncTreeDataSource(repository.Head, Items, OnItemActivated, OnItemContextMenuRequested);
 		}
-		Repository.Head.PositionChanged += OnHeadPositionChanged;
+		repository.Head.PositionChanged += OnHeadPositionChanged;
 	}
 
-	private void Refresh()
+	protected override void DetachFromRepository(Repository repository)
 	{
-		if(DataSource != null)
-		{
-			DataSource.ReloadData();
-		}
+		DataSource = null;
+		repository.Head.PositionChanged -= OnHeadPositionChanged;
 	}
 
-	private void OnHeadPositionChanged(object sender, RevisionChangedEventArgs e)
+	private void Refresh() => DataSource?.ReloadData();
+
+	private void OnHeadPositionChanged(object? sender, RevisionChangedEventArgs e)
 	{
 		var listBox = ListBox;
 		if(listBox is not null && listBox.InvokeRequired)
@@ -187,7 +168,7 @@ sealed class RepositoryWorkingDirectoryListItem : RepositoryExplorerItemBase
 		}
 	}
 
-	private static void OnItemActivated(object sender, BoundItemActivatedEventArgs<TreeItem> e)
+	private static void OnItemActivated(object? sender, BoundItemActivatedEventArgs<TreeItem> e)
 	{
 		var item = e.Object;
 		if(item.ItemType == TreeItemType.Blob)
@@ -196,88 +177,91 @@ sealed class RepositoryWorkingDirectoryListItem : RepositoryExplorerItemBase
 		}
 	}
 
-	private ContextMenuStrip CreateFileContextMenu(TreeFile file)
+	private static ContextMenuStrip CreateFileContextMenu(TreeFile file)
 	{
 		Assert.IsNotNull(file);
 
-		var menu        = new ContextMenuStrip();
+		var menu = new ContextMenuStrip
+		{
+			Renderer = GitterApplication.Style.ToolStripRenderer,
+		};
 		var dpiBindings = new DpiBindings(menu);
 		var factory     = new GuiItemFactory(dpiBindings);
 		menu.Items.AddRange(
-			new ToolStripItem[]
-			{
+			[
 				GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpen, null, file.FullPath),
 				GuiItemFactory.GetOpenUrlWithItem<ToolStripMenuItem>(Resources.StrOpenWith.AddEllipsis(), null, file.FullPath),
-				GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenContainingFolder, null, Path.GetDirectoryName(file.FullPath)),
+				GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenContainingFolder, null, Path.GetDirectoryName(file.FullPath)!),
 				new ToolStripSeparator(),
 				new ToolStripMenuItem(Resources.StrCopyToClipboard, null,
-					new ToolStripItem[]
-					{
+					[
 						factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFileName, file.Name),
 						factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrRelativePath, file.RelativePath),
 						factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrFullPath, file.FullPath),
-					}),
+					]),
 				new ToolStripSeparator(),
-				factory.GetBlameItem<ToolStripMenuItem>(Repository.Head, file.RelativePath),
-				factory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, file.RelativePath),
-			});
+				factory.GetBlameItem<ToolStripMenuItem>(file.Repository.Head, file.RelativePath),
+				factory.GetPathHistoryItem<ToolStripMenuItem>(file.Repository.Head, file.RelativePath),
+			]);
 		return menu;
 	}
 
-	private ContextMenuStrip CreateDirectoryContextMenu(CustomListBoxItem item, TreeDirectory directory)
+	private static ContextMenuStrip CreateDirectoryContextMenu(CustomListBoxItem item, TreeDirectory directory)
 	{
 		Assert.IsNotNull(item);
 		Assert.IsNotNull(directory);
 
-		var menu        = new ContextMenuStrip();
+		var menu = new ContextMenuStrip
+		{
+			Renderer = GitterApplication.Style.ToolStripRenderer,
+		};
 		var dpiBindings = new DpiBindings(menu);
 		var factory     = new GuiItemFactory(dpiBindings);
 		menu.Items.AddRange(
-			new ToolStripItem[]
-			{
+			[
 				GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, directory.FullPath),
 				GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, directory.FullPath),
-			});
+			]);
 		if(item.Items.Count > 0)
 		{
 			menu.Items.AddRange(
-				new ToolStripItem[]
-				{
+				[
 					new ToolStripSeparator(),
 					GuiItemFactory.GetExpandAllItem<ToolStripMenuItem>(item),
 					GuiItemFactory.GetCollapseAllItem<ToolStripMenuItem>(item),
-				});
+				]);
 		}
 		menu.Items.AddRange(
-			new ToolStripItem[]
-			{
+			[
 				new ToolStripSeparator(),
-				factory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, directory.RelativePath + "/"),
-			});
+				factory.GetPathHistoryItem<ToolStripMenuItem>(directory.Repository.Head, directory.RelativePath + "/"),
+			]);
 		return menu;
 	}
 
-	private ContextMenuStrip CreateCommitContextMenu(TreeCommit commit)
+	private static ContextMenuStrip CreateCommitContextMenu(TreeCommit commit)
 	{
 		Assert.IsNotNull(commit);
 
-		var menu        = new ContextMenuStrip();
+		var menu = new ContextMenuStrip
+		{
+			Renderer = GitterApplication.Style.ToolStripRenderer,
+		};
 		var dpiBindings = new DpiBindings(menu);
 		var factory     = new GuiItemFactory(dpiBindings);
 		menu.Items.AddRange(
-			new ToolStripItem[]
-			{
+			[
 				GuiItemFactory.GetOpenAppItem<ToolStripMenuItem>(
 					Resources.StrOpenWithGitter, null, Application.ExecutablePath, commit.FullPath.SurroundWithDoubleQuotes()),
 				GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, commit.FullPath),
 				GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, commit.FullPath),
 				new ToolStripSeparator(),
-				factory.GetPathHistoryItem<ToolStripMenuItem>(Repository.Head, commit.RelativePath),
-			});
+				factory.GetPathHistoryItem<ToolStripMenuItem>(commit.Repository.Head, commit.RelativePath),
+			]);
 		return menu;
 	}
 
-	private void OnItemContextMenuRequested(object sender, ItemContextMenuRequestEventArgs e)
+	private void OnItemContextMenuRequested(object? sender, ItemContextMenuRequestEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
@@ -298,7 +282,7 @@ sealed class RepositoryWorkingDirectoryListItem : RepositoryExplorerItemBase
 	}
 
 	/// <inheritdoc/>
-	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	public override ContextMenuStrip? GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
 		Assert.IsNotNull(requestEventArgs);
 
@@ -306,14 +290,13 @@ sealed class RepositoryWorkingDirectoryListItem : RepositoryExplorerItemBase
 
 		var menu = new ContextMenuStrip();
 		menu.Items.AddRange(
-			new ToolStripItem[]
-			{
+			[
 				GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(Resources.StrOpenInWindowsExplorer, null, Repository.WorkingDirectory),
 				GuiItemFactory.GetOpenCmdAtItem<ToolStripMenuItem>(Resources.StrOpenCommandLine, null, Repository.WorkingDirectory),
 				new ToolStripSeparator(),
 				GuiItemFactory.GetExpandAllItem<ToolStripMenuItem>(requestEventArgs.Item),
 				GuiItemFactory.GetCollapseAllItem<ToolStripMenuItem>(requestEventArgs.Item),
-			});
+			]);
 		Utility.MarkDropDownForAutoDispose(menu);
 		return menu;
 	}

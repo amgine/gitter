@@ -22,7 +22,7 @@ namespace gitter.Framework;
 
 public interface IImageController
 {
-	IImageProvider Image { get; set; }
+	IImageProvider? Image { get; set; }
 
 	void UpdateImage(Dpi dpi);
 

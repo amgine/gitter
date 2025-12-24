@@ -21,6 +21,7 @@
 namespace gitter.GitLab.Gui;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using gitter.Framework.Controls;
 
@@ -38,12 +39,13 @@ sealed class IssueClosedByColumn : CustomListBoxColumn
 
 	protected override Comparison<CustomListBoxItem> SortComparison => IssueListItem.CompareByClosedBy;
 
-	private static bool TryGetContent(CustomListBoxItem item, out string value)
+	private static bool TryGetContent(CustomListBoxItem item,
+		[MaybeNullWhen(returnValue: false)] out string value)
 	{
 		if(item is IssueListItem issue)
 		{
 			value = issue.DataContext.ClosedBy?.Name;
-			return value != null;
+			return value is not null;
 		}
 		value = default;
 		return false;

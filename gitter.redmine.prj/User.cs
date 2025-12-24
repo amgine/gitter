@@ -24,29 +24,25 @@ using System;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Xml;
+using System.Threading.Tasks;
+using System.Threading;
 
 public sealed class User : NamedRedmineObject
 {
 	#region Static
 
-	public static RedmineObjectProperty<string> LoginProperty =
-		new RedmineObjectProperty<string>("login", "Login");
-	public static RedmineObjectProperty<string> FirstNameProperty =
-		new RedmineObjectProperty<string>("firstname", "FirstName");
-	public static RedmineObjectProperty<string> LastNameProperty =
-		new RedmineObjectProperty<string>("lastname", "LastName");
-	public static RedmineObjectProperty<string> MailProperty =
-		new RedmineObjectProperty<string>("mail", "Mail");
-	public static RedmineObjectProperty<DateTime> CreatedOnProperty =
-		new RedmineObjectProperty<DateTime>("created_on", "CreatedOn");
-	public static RedmineObjectProperty<DateTime?> LastLoginOnProperty =
-		new RedmineObjectProperty<DateTime?>("last_login_on", "LastLoginOn");
+	public static readonly RedmineObjectProperty<string>    LoginProperty       = new("login",         nameof(Login));
+	public static readonly RedmineObjectProperty<string>    FirstNameProperty   = new("firstname",     nameof(FirstName));
+	public static readonly RedmineObjectProperty<string>    LastNameProperty    = new("lastname",      nameof(LastName));
+	public static readonly RedmineObjectProperty<string>    MailProperty        = new("mail",          nameof(Mail));
+	public static readonly RedmineObjectProperty<DateTime>  CreatedOnProperty   = new("created_on",    nameof(CreatedOn));
+	public static readonly RedmineObjectProperty<DateTime?> LastLoginOnProperty = new("last_login_on", nameof(LastLoginOn));
 
 	#endregion
 
 	#region Data
 
-	private readonly Dictionary<int, UserMembership> _memberships;
+	private readonly Dictionary<int, UserMembership> _memberships = [];
 	private string _login;
 	private string _firstName;
 	private string _lastName;
@@ -61,7 +57,6 @@ public sealed class User : NamedRedmineObject
 	internal User(RedmineServiceContext context, int id, string name)
 		: base(context, id, name)
 	{
-		_memberships = new Dictionary<int, UserMembership>();
 	}
 
 	internal User(RedmineServiceContext context, XmlNode node)
@@ -73,7 +68,7 @@ public sealed class User : NamedRedmineObject
 		_firstName		= RedmineUtility.LoadString(node[FirstNameProperty.XmlNodeName]);
 		_lastName		= RedmineUtility.LoadString(node[LastNameProperty.XmlNodeName]);
 		_mail			= RedmineUtility.LoadString(node[MailProperty.XmlNodeName]);
-		_createdOn		= RedmineUtility.LoadDateForSure(node[CreatedOnProperty.XmlNodeName]);
+		_createdOn		= RedmineUtility.LoadDateRequired(node[CreatedOnProperty.XmlNodeName]);
 		_lastLoginOn	= RedmineUtility.LoadDate(node[LastLoginOnProperty.XmlNodeName]);
 		LoadMemberships(node["memberships"]);
 	}
@@ -89,32 +84,32 @@ public sealed class User : NamedRedmineObject
 		LastName	= RedmineUtility.LoadString(node[LastNameProperty.XmlNodeName]);
 		Name		= FirstName + " " + LastName;
 		Mail		= RedmineUtility.LoadString(node[MailProperty.XmlNodeName]);
-		CreatedOn	= RedmineUtility.LoadDateForSure(node[CreatedOnProperty.XmlNodeName]);
+		CreatedOn	= RedmineUtility.LoadDateRequired(node[CreatedOnProperty.XmlNodeName]);
 		LastLoginOn	= RedmineUtility.LoadDate(node[LastLoginOnProperty.XmlNodeName]);
 		LoadMemberships(node["memberships"]);
 	}
 
-	public override void Update()
+	public override Task UpdateAsync(CancellationToken cancellationToken = default)
 	{
 		var url = string.Format(CultureInfo.InvariantCulture,
 			@"users/{0}.xml?include=memberships", Id);
-		Context.Users.FetchSingleItem(url);
+		return Context.Users.FetchSingleItemAsync(url, cancellationToken);
 	}
 
-	private void LoadMemberships(XmlNode node)
+	private void LoadMemberships(XmlElement element)
 	{
 		var res = _memberships;
-		if(node != null)
+		if(element is not null)
 		{
-			if(node.ChildNodes.Count != 0)
+			if(element.ChildNodes.Count != 0)
 			{
-				foreach(XmlNode childNode in node.ChildNodes)
+				foreach(XmlNode childNode in element.ChildNodes)
 				{
 					var project = RedmineUtility.LoadNamedObject(childNode["project"], Context.Projects.Lookup);
 					var id = project.Id;
 					var roles = new List<UserRole>();
 					var rolesNode = childNode["roles"];
-					if(rolesNode != null)
+					if(rolesNode is not null)
 					{
 						foreach(XmlNode roleNode in rolesNode.ChildNodes)
 						{
@@ -122,16 +117,13 @@ public sealed class User : NamedRedmineObject
 							roles.Add(role);
 						}
 					}
-					UserMembership membership;
-					if(res.TryGetValue(id, out membership))
+					if(res.TryGetValue(id, out var membership))
 					{
-						membership = new UserMembership(this, project, roles);
-						res[id] = membership;
+						res[id] = membership = new(this, project, roles);
 					}
 					else
 					{
-						membership = new UserMembership(this, project, roles);
-						res.Add(id, membership);
+						res.Add(id, membership = new(this, project, roles));
 					}
 				}
 			}
@@ -150,38 +142,38 @@ public sealed class User : NamedRedmineObject
 
 	public string Login
 	{
-		get { return _login; }
-		private set { UpdatePropertyValue(ref _login, value, LoginProperty); }
+		get => _login;
+		private set => UpdatePropertyValue(ref _login, value, LoginProperty);
 	}
 
 	public string FirstName
 	{
-		get { return _firstName; }
-		private set { UpdatePropertyValue(ref _firstName, value, FirstNameProperty); }
+		get => _firstName;
+		private set => UpdatePropertyValue(ref _firstName, value, FirstNameProperty);
 	}
 
 	public string LastName
 	{
-		get { return _lastName; }
-		private set { UpdatePropertyValue(ref _lastName, value, LastNameProperty); }
+		get => _lastName;
+		private set => UpdatePropertyValue(ref _lastName, value, LastNameProperty);
 	}
 
 	public string Mail
 	{
-		get { return _mail; }
-		private set { UpdatePropertyValue(ref _mail, value, MailProperty); }
+		get => _mail;
+		private set => UpdatePropertyValue(ref _mail, value, MailProperty);
 	}
 
 	public DateTime CreatedOn
 	{
-		get { return _createdOn; }
-		private set { UpdatePropertyValue(ref _createdOn, value, CreatedOnProperty); }
+		get => _createdOn;
+		private set => UpdatePropertyValue(ref _createdOn, value, CreatedOnProperty);
 	}
 
 	public DateTime? LastLoginOn
 	{
-		get { return _lastLoginOn; }
-		private set { UpdatePropertyValue(ref _lastLoginOn, value, LastLoginOnProperty); }
+		get => _lastLoginOn;
+		private set => UpdatePropertyValue(ref _lastLoginOn, value, LastLoginOnProperty);
 	}
 
 	#endregion

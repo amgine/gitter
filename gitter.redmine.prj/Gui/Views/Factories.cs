@@ -20,7 +20,7 @@
 
 namespace gitter.Redmine.Gui;
 
-using System;
+#nullable enable
 
 using gitter.Framework;
 using gitter.Framework.Controls;

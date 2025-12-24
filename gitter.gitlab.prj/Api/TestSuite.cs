@@ -22,11 +22,6 @@ namespace gitter.GitLab.Api;
 
 using System;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
-using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 [DataContract]
 class TestSuite
@@ -45,74 +40,38 @@ class TestSuite
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Name)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Name)]
-#endif
-	public string Name { get; set; }
+	public string Name { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.TotalTime)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.TotalTime)]
-#endif
 	public double TotalTime { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.TotalCount)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.TotalCount)]
-#endif
 	public int TotalCount { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.SuccessCount)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Name)]
-#endif
 	public int SuccessCount { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.FailedCount)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.FailedCount)]
-#endif
 	public int FailedCount { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.SkippedCount)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.SkippedCount)]
-#endif
 	public int SkippedCount { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.ErrorCount)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.ErrorCount)]
-#endif
 	public int ErrorCount { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.SuiteError)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.SuiteError)]
-#endif
-	public string SuiteError { get; set; }
+	public string? SuiteError { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.TestCases)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.TestCases)]
-#endif
-	public TestCase[] TsstCases { get; set; }
+	public TestCase[]? TestCases { get; set; }
 }

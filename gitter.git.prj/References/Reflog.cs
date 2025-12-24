@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git;
@@ -31,9 +31,9 @@ public sealed class Reflog : GitObject, IEnumerable<ReflogRecord>
 {
 	#region Static
 
-	private static readonly Dictionary<Reflog, Delegate> _recordAddedHandlers = new();
+	private static readonly Dictionary<Reflog, Delegate> _recordAddedHandlers = [];
 
-	private static readonly Dictionary<Reflog, Delegate> _recordRemovedHandlers = new();
+	private static readonly Dictionary<Reflog, Delegate> _recordRemovedHandlers = [];
 
 	#endregion
 
@@ -69,7 +69,7 @@ public sealed class Reflog : GitObject, IEnumerable<ReflogRecord>
 				if(_recordAddedHandlers.TryGetValue(this, out var handler))
 				{
 					handler = Delegate.Remove(handler, value);
-					if(handler == null || handler.GetInvocationList().Length == 0)
+					if(handler is null || handler.GetInvocationList().Length == 0)
 					{
 						_recordAddedHandlers.Remove(this);
 					}
@@ -88,7 +88,7 @@ public sealed class Reflog : GitObject, IEnumerable<ReflogRecord>
 		{
 			lock(_recordRemovedHandlers)
 			{
-				Delegate handler;
+				Delegate? handler;
 				if(_recordRemovedHandlers.TryGetValue(this, out handler))
 				{
 					handler = Delegate.Combine(handler, value);
@@ -122,7 +122,7 @@ public sealed class Reflog : GitObject, IEnumerable<ReflogRecord>
 
 	private void InvokeRecordAdded(ReflogRecord record)
 	{
-		EventHandler<ReflogRecordEventArgs> handler;
+		EventHandler<ReflogRecordEventArgs>? handler;
 		lock(_recordAddedHandlers)
 		{
 			if(_recordAddedHandlers.TryGetValue(this, out var handlerDelegate))
@@ -139,7 +139,7 @@ public sealed class Reflog : GitObject, IEnumerable<ReflogRecord>
 
 	private void InvokeRecordRemoved(ReflogRecord record)
 	{
-		EventHandler<ReflogRecordEventArgs> handler;
+		EventHandler<ReflogRecordEventArgs>? handler;
 		lock(_recordRemovedHandlers)
 		{
 			if(_recordRemovedHandlers.TryGetValue(this, out var handlerDelegate))
@@ -208,14 +208,14 @@ public sealed class Reflog : GitObject, IEnumerable<ReflogRecord>
 	public void Refresh()
 	{
 		var reflog = Repository.Accessor.QueryReflog
-			.Invoke(new QueryReflogParameters(Reference.FullName));
+			.Invoke(new QueryReflogRequest(Reference.FullName));
 		Refresh(reflog);
 	}
 
 	public async Task RefreshAsync()
 	{
 		var reflog = await Repository.Accessor.QueryReflog
-			.InvokeAsync(new QueryReflogParameters(Reference.FullName))
+			.InvokeAsync(new QueryReflogRequest(Reference.FullName))
 			.ConfigureAwait(continueOnCapturedContext: false);
 		Refresh(reflog);
 	}
@@ -223,7 +223,7 @@ public sealed class Reflog : GitObject, IEnumerable<ReflogRecord>
 	internal void NotifyRecordAdded()
 	{
 		var data = Repository.Accessor.QueryReflog.Invoke(
-			new QueryReflogParameters(Reference.FullName)
+			new QueryReflogRequest(Reference.FullName)
 			{
 				MaxCount = 1,
 			});

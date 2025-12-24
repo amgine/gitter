@@ -35,7 +35,7 @@ public class FlowLayoutControl : ScrollableControl
 {
 	private readonly Dictionary<FlowPanel, Size> _sizes;
 	private readonly TrackingService<FlowPanel> _panelHover;
-	private FlowPanel _mouseDownPanel;
+	private FlowPanel? _mouseDownPanel;
 
 	/// <summary>Create <see cref="FlowLayoutControl"/>.</summary>
 	public FlowLayoutControl()
@@ -202,19 +202,19 @@ public class FlowLayoutControl : ScrollableControl
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 	public FlowPanelCollection Panels { get; }
 
-	private void OnPanelHoverChanged(object sender, TrackingEventArgs<FlowPanel> e)
+	private void OnPanelHoverChanged(object? sender, TrackingEventArgs<FlowPanel> e)
 	{
 		if(e.IsTracked)
 		{
-			e.Item.MouseEnter();
+			e.Item?.MouseEnter();
 		}
 		else
 		{
-			e.Item.MouseLeave();
+			e.Item?.MouseLeave();
 		}
 	}
 
-	private void OnPanelsChanging(object sender, NotifyCollectionEventArgs e)
+	private void OnPanelsChanging(object? sender, NotifyCollectionEventArgs e)
 	{
 		switch(e.Event)
 		{
@@ -250,7 +250,7 @@ public class FlowLayoutControl : ScrollableControl
 		}
 	}
 
-	private void OnPanelsChanged(object sender, NotifyCollectionEventArgs e)
+	private void OnPanelsChanged(object? sender, NotifyCollectionEventArgs e)
 	{
 		_sizes.Clear();
 		if(!IsUpdating)
@@ -360,7 +360,7 @@ public class FlowLayoutControl : ScrollableControl
 			if(x >= ClientArea.X && x < ClientArea.Right)
 			{
 				bool hover = false;
-				Graphics graphics = null;
+				var graphics = default(Graphics);
 				int panelY = ClientArea.Y - VScrollPos;
 				for(int i = 0; i < Panels.Count; ++i)
 				{
@@ -384,10 +384,7 @@ public class FlowLayoutControl : ScrollableControl
 				{
 					_panelHover.Drop();
 				}
-				if(graphics != null)
-				{
-					graphics.Dispose();
-				}
+				graphics?.Dispose();
 			}
 			else
 			{

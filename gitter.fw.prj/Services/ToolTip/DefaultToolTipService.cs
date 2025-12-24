@@ -21,6 +21,7 @@
 namespace gitter.Framework.Services;
 
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 public sealed class DefaultToolTipService : IToolTipService, IDisposable
@@ -33,6 +34,25 @@ public sealed class DefaultToolTipService : IToolTipService, IDisposable
 		{
 			/*IsBalloon = true,*/
 		};
+		var style = GitterApplication.Style;
+		if(style.Type == GitterStyleType.DarkBackground)
+		{
+			_toolTip.BackColor = Color.FromArgb( 46,  47,  47);
+			_toolTip.ForeColor = Color.FromArgb(255, 255, 255);
+			_toolTip.Draw += OnToolTipDraw;
+			_toolTip.OwnerDraw = true;
+		}
+	}
+
+	private void OnToolTipDraw(object? sender, DrawToolTipEventArgs e)
+	{
+		e.DrawBackground();
+		const TextFormatFlags textFlags =
+			TextFormatFlags.VerticalCenter |
+			TextFormatFlags.HidePrefix |
+			TextFormatFlags.Left;
+		TextRenderer.DrawText(e.Graphics, e.ToolTipText, e.Font, e.Bounds, _toolTip.ForeColor, textFlags);
+		e.DrawBorder();
 	}
 
 	public void Register(Control control, string text)
@@ -51,7 +71,7 @@ public sealed class DefaultToolTipService : IToolTipService, IDisposable
 			{
 				_toolTip.RemoveAll();
 				_toolTip.Dispose();
-				_toolTip = null;
+				_toolTip = null!;
 			}
 		}
 	}

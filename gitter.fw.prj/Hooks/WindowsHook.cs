@@ -59,7 +59,7 @@ public abstract class WindowsHook : IDisposable
 	public void Activate(int threadId)
 	{
 		Verify.State.IsFalse(IsActive, "Hook is already active.");
-		Verify.State.IsFalse(IsDisposed, "Hook is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		var module = typeof(WindowsHook).Module;
 		var hInstance = Kernel32.GetModuleHandle(module.Name);

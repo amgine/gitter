@@ -21,13 +21,15 @@
 namespace gitter;
 
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
+[DesignerCategory("")]
 public partial class MainForm : Form
 {
-	static Icon LoadWindowIcon()
+	static Icon? LoadWindowIcon()
 	{
 		using var stream = typeof(MainForm)
 			.Assembly
@@ -36,7 +38,7 @@ public partial class MainForm : Form
 		return new Icon(stream);
 	}
 
-	static Bitmap LoadLockIcon()
+	static Bitmap? LoadLockIcon()
 	{
 		using var stream = typeof(MainForm)
 			.Assembly

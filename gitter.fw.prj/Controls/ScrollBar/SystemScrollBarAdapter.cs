@@ -33,8 +33,8 @@ public sealed class SystemScrollBarAdapter : IScrollBarWidget
 
 	#region Events
 
-	public event EventHandler<ScrollEventArgs> Scroll;
-	public event EventHandler ValueChanged;
+	public event EventHandler<ScrollEventArgs>? Scroll;
+	public event EventHandler? ValueChanged;
 
 	#endregion
 
@@ -57,10 +57,10 @@ public sealed class SystemScrollBarAdapter : IScrollBarWidget
 
 	#region Event Handlers
 
-	private void OnScrollBarScroll(object sender, ScrollEventArgs e)
+	private void OnScrollBarScroll(object? sender, ScrollEventArgs e)
 		=> Scroll?.Invoke(this, e);
 
-	private void OnScrollBarValueChanged(object sender, EventArgs e)
+	private void OnScrollBarValueChanged(object? sender, EventArgs e)
 		=> ValueChanged?.Invoke(this, e);
 
 	#endregion

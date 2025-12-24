@@ -23,8 +23,11 @@ namespace gitter.Git.Gui.Dialogs;
 using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Windows.Forms;
 
 using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Mvc;
 using gitter.Framework.Mvc.WinForms;
 
@@ -36,6 +39,73 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public partial class RenameRemoteDialog : GitDialogBase, IExecutableDialog, IRenameRemoteView
 {
+	readonly struct DialogControls
+	{
+		public readonly TextBox _txtOldName;
+		public readonly TextBox _txtNewName;
+		public readonly LabelControl _lblOldName;
+		public readonly LabelControl _lblNewName;
+
+		public DialogControls(IGitterStyle style)
+		{
+			style ??= GitterApplication.Style;
+
+			_txtOldName = new() { ReadOnly = true };
+			_txtNewName = new();
+			_lblOldName = new();
+			_lblNewName = new();
+
+			GitterApplication.FontManager.InputFont.Apply(_txtNewName, _txtOldName);
+		}
+
+		public void Localize()
+		{
+			_lblOldName.Text = Resources.StrRemote.AddColon();
+			_lblNewName.Text = Resources.StrNewName.AddColon();
+		}
+
+		public void Layout(Control parent)
+		{
+			var oldNameDec = new TextBoxDecorator(_txtOldName);
+			var newNameDec = new TextBoxDecorator(_txtNewName);
+
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					columns:
+					[
+						SizeSpec.Absolute(94),
+						SizeSpec.Everything(),
+					],
+					rows:
+					[
+						LayoutConstants.TextInputRowHeight,
+						LayoutConstants.TextInputRowHeight,
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblOldName, marginOverride: LayoutConstants.NoMargin), column: 0, row: 0),
+						new GridContent(new ControlContent(oldNameDec, marginOverride: LayoutConstants.TextBoxMargin), column: 1, row: 0),
+						new GridContent(new ControlContent(_lblNewName, marginOverride: LayoutConstants.NoMargin), column: 0, row: 1),
+						new GridContent(new ControlContent(newNameDec, marginOverride: LayoutConstants.TextBoxMargin), column: 1, row: 1),
+					]),
+			};
+
+			var tabIndex = 0;
+			_lblOldName.TabIndex = tabIndex++;
+			oldNameDec.TabIndex = tabIndex++;
+			_lblNewName.TabIndex = tabIndex++;
+			newNameDec.TabIndex = tabIndex++;
+
+			_lblOldName.Parent = parent;
+			oldNameDec.Parent = parent;
+			_lblNewName.Parent = parent;
+			newNameDec.Parent = parent;
+		}
+	}
+
+	private readonly DialogControls _controls;
 	private readonly IRenameRemoteController _controller;
 
 	public RenameRemoteDialog(Remote remote)
@@ -46,25 +116,36 @@ public partial class RenameRemoteDialog : GitDialogBase, IExecutableDialog, IRen
 
 		Remote = remote;
 
-		InitializeComponent();
-		Localize();
+		Name = nameof(RenameRemoteDialog);
+		Text = Resources.StrRenameRemote;
 
-		SetupReferenceNameInputBox(_txtNewName, ReferenceType.Remote);
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		Size                = ScalableSize.GetValue(Dpi.Default);
+		_controls = new(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
 
-		_txtOldName.Text = remote.Name;
-		_txtNewName.Text = remote.Name;
-		_txtNewName.SelectAll();
+		SetupReferenceNameInputBox(_controls._txtNewName, ReferenceType.Remote);
+
+		_controls._txtOldName.Text = remote.Name;
+		_controls._txtNewName.Text = remote.Name;
+		_controls._txtNewName.SelectAll();
 
 		var inputs = new IUserInputSource[]
 		{
-			NewName = new TextBoxInputSource(_txtNewName),
+			NewName = new TextBoxInputSource(_controls._txtNewName),
 		};
 		ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
-		GitterApplication.FontManager.InputFont.Apply(_txtNewName, _txtOldName);
-
 		_controller = new RenameRemoteController(remote) { View = this };
 	}
+
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
 
 	/// <inheritdoc/>
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 53));
@@ -74,7 +155,7 @@ public partial class RenameRemoteDialog : GitDialogBase, IExecutableDialog, IRen
 
 	public Remote Remote { get; }
 
-	public IUserInputSource<string> NewName { get; }
+	public IUserInputSource<string?> NewName { get; }
 
 	public IUserInputErrorNotifier ErrorNotifier { get; }
 
@@ -82,16 +163,9 @@ public partial class RenameRemoteDialog : GitDialogBase, IExecutableDialog, IRen
 	protected override void OnLoad(EventArgs e)
 	{
 		base.OnLoad(e);
-		BeginInvoke(_txtNewName.Focus);
+		BeginInvoke(_controls._txtNewName.Focus);
 	}
 
-	private void Localize()
-	{
-		Text = Resources.StrRenameRemote;
-
-		_lblOldName.Text = Resources.StrRemote.AddColon();
-		_lblNewName.Text = Resources.StrNewName.AddColon();
-	}
-
+	/// <inheritdoc/>
 	public bool Execute() => _controller.TryRename();
 }

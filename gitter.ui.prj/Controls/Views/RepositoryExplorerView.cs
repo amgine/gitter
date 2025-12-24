@@ -31,18 +31,36 @@ using Resources = gitter.Properties.Resources;
 [System.ComponentModel.DesignerCategory("")]
 public partial class RepositoryExplorerView : ViewBase
 {
+	private readonly RepositoryExplorerListBox _lstRepositoryExplorer;
+
 	public RepositoryExplorerView(IWorkingEnvironment environment)
 		: base(Guids.RepositoryExplorerView, environment)
 	{
-		InitializeComponent();
-
+		SuspendLayout();
+		Name = nameof(RepositoryExplorerView);
 		Text = Resources.StrRepositoryExplorer;
+		_lstRepositoryExplorer = new()
+		{
+			BorderStyle   = System.Windows.Forms.BorderStyle.None,
+			Dock          = System.Windows.Forms.DockStyle.Fill,
+			HeaderStyle   = HeaderStyle.Hidden,
+			ShowTreeLines = true,
+			TabIndex      = 0,
+			Parent        = this,
+		};
+		Size = new Size(153, 449);
+		ResumeLayout(performLayout: false);
+
+		_lstRepositoryExplorer.ItemActivated += OnItemActivated;
 	}
+
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
 
 	/// <inheritdoc/>
 	public override IImageProvider ImageProvider => Icons.RepositoryExplorer;
 
-	private void OnItemActivated(object sender, ItemEventArgs e)
+	private void OnItemActivated(object? sender, ItemEventArgs e)
 	{
 		Assert.IsNotNull(e);
 

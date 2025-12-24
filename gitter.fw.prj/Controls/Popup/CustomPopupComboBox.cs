@@ -33,8 +33,8 @@ public partial class CustomPopupComboBox : ComboBox
 {
 	#region Data
 
-	private Popup _dropDown;
-	private Control _dropDownControl;
+	private Popup? _dropDown;
+	private Control? _dropDownControl;
 	private DateTime _dropDownHideTime;
 
 	#endregion
@@ -64,7 +64,7 @@ public partial class CustomPopupComboBox : ComboBox
 		base.OnHandleCreated(e);
 		var x = new COMBOBOXINFO
 		{
-			cbSize = (uint)Marshal.SizeOf(typeof(COMBOBOXINFO))
+			cbSize = (uint)Marshal.SizeOf<COMBOBOXINFO>()
 		};
 		var b = User32.GetComboBoxInfo(Handle, ref x);
 		_listBoxDefaultWndProc = NativeUtility.SetWindowProc(x.hwndList, _listBoxWndProc);
@@ -85,9 +85,9 @@ public partial class CustomPopupComboBox : ComboBox
 	{
 		if(disposing)
 		{
-			if(_dropDown != null)
+			if(_dropDown is not null)
 			{
-				_dropDown.Closed -= dropDown_Closed;
+				_dropDown.Closed -= OnDropDownClosed;
 				_dropDown.Dispose();
 				_dropDown = null;
 			}
@@ -129,31 +129,34 @@ public partial class CustomPopupComboBox : ComboBox
 
 	#endregion
 
-	protected new Popup DropDown => _dropDown;
+	protected new Popup? DropDown => _dropDown;
 
-	public Control DropDownControl
+	public Control? DropDownControl
 	{
 		get => _dropDownControl;
 		set
 		{
-			if(_dropDownControl != value)
+			if(_dropDownControl == value) return;
+
+			_dropDownControl = value;
+			if(_dropDown is not null)
 			{
-				_dropDownControl = value;
-				if(_dropDown != null)
-				{
-					_dropDown.Closed -= dropDown_Closed;
-					_dropDown.Dispose();
-				}
+				_dropDown.Closed -= OnDropDownClosed;
+				_dropDown.Dispose();
+				_dropDown = default;
+			}
+			if(value is not null)
+			{
 				_dropDown = new Popup(value)
 				{
 					PopupAnimation = PopupAnimations.Slide | PopupAnimations.TopToBottom,
 				};
-				_dropDown.Closed += dropDown_Closed;
+				_dropDown.Closed += OnDropDownClosed;
 			}
 		}
 	}
 
-	private void dropDown_Closed(object sender, ToolStripDropDownClosedEventArgs e)
+	private void OnDropDownClosed(object? sender, ToolStripDropDownClosedEventArgs e)
 	{
 		_dropDownHideTime = DateTime.UtcNow;
 		NativeUtility.ShowDropDown(Handle, false);
@@ -161,7 +164,7 @@ public partial class CustomPopupComboBox : ComboBox
 
 	public new bool DroppedDown
 	{
-		get => _dropDown is not null ? _dropDown.Visible : false;
+		get => _dropDown is { Visible: true };
 		set
 		{
 			if(value)

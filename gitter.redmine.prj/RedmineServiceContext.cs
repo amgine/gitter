@@ -20,12 +20,14 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-using System.Net;
+using System.Net.Http;
 
 public sealed class RedmineServiceContext
 {
@@ -45,10 +47,13 @@ public sealed class RedmineServiceContext
 
 	#endregion
 
-	public RedmineServiceContext(Uri serviceUri, string apiKey)
+	public RedmineServiceContext(HttpMessageInvoker httpMessageInvoker, Uri serviceUri, string apiKey)
 	{
-		ServiceUri		= serviceUri;
-		_apiKey			= apiKey;
+		Verify.Argument.IsNotNull(httpMessageInvoker);
+
+		HttpMessageInvoker = httpMessageInvoker;
+		ServiceUri         = serviceUri;
+		_apiKey            = apiKey;
 
 		News            = new NewsCollection(this);
 		Projects        = new ProjectsCollection(this);
@@ -64,119 +69,106 @@ public sealed class RedmineServiceContext
 		Attachments     = new AttachmentsCollection(this);
 		CustomFields    = new CustomFieldsCollection(this);
 		Queries         = new QueriesCollection(this);
-
-		SyncRoot        = new object();
 	}
+
+	private HttpMessageInvoker HttpMessageInvoker { get; }
 
 	public Uri ServiceUri { get; }
 
-	public string DefaultProjectId { get; set; }
+	public string? DefaultProjectId { get; set; }
 
-	public object SyncRoot { get; }
+	public LockType SyncRoot { get; } = new();
 
-	internal XmlDocument GetXml(string url)
+	internal async Task<XmlDocument?> GetXmlAsync(string url, CancellationToken cancellationToken = default)
 	{
-		var request = WebRequest.Create(ServiceUri + url);
+		using var request = new HttpRequestMessage(HttpMethod.Get, ServiceUri + url);
 		request.Headers.Add(apiKeyHeader, _apiKey);
-		request.Timeout = 10000;
-		string xml = string.Empty;
+
 		try
 		{
-			using(var response = request.GetResponse())
-			using(var stream = response.GetResponseStream())
-			using(var reader = new StreamReader(stream))
-			{
-				xml = reader.ReadToEnd();
-			}
+			using var response = await HttpMessageInvoker
+				.SendAsync(request, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
+
+			response.EnsureSuccessStatusCode();
+
+			using var stream = await response.Content
+				.ReadAsStreamAsync(cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
+
+			var xmldoc = new XmlDocument();
+			xmldoc.Load(stream);
+			return xmldoc;
 		}
-		catch(WebException)
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			return null;
 		}
-		var xmldoc = new XmlDocument();
-		xmldoc.LoadXml(xml);
-		return xmldoc;
 	}
 
-	private void SendData(string relativeUrl, string httpMethod, Action<Stream> send)
+	private async Task SendDataAsync(string relativeUrl, HttpMethod httpMethod, Action<Stream> send, CancellationToken cancellationToken = default)
 	{
-		var request = WebRequest.Create(ServiceUri + relativeUrl);
+		using var ms = new MemoryStream();
+		send(ms);
+		ms.Seek(0, SeekOrigin.Begin);
+
+		using var request = new HttpRequestMessage(httpMethod, ServiceUri + relativeUrl);
 		request.Headers.Add(apiKeyHeader, _apiKey);
-		request.Method = httpMethod;
-		using(var stream = request.GetRequestStream())
-		{
-			send(stream);
-		}
+		request.Content = new StreamContent(ms);
+
+		using var response = await HttpMessageInvoker
+			.SendAsync(request, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+
+		response.EnsureSuccessStatusCode();
 	}
 
-	internal void PostXml(string url, XmlDocument doc)
-	{
-		SendData(url, "POST", doc.Save);
-	}
+	internal Task PostXmlAsync(string url, XmlDocument doc)
+		=> SendDataAsync(url, HttpMethod.Post, doc.Save);
 
-	internal void PutXml(string url, XmlDocument doc)
-	{
-		SendData(url, "PUT", doc.Save);
-	}
+	internal Task PutXmlAsync(string url, XmlDocument doc)
+		=> SendDataAsync(url, HttpMethod.Put, doc.Save);
 
-	internal void GetAllDataPages(string url, Action<XmlDocument> processing)
+	internal async Task GetAllDataPagesAsync(string url, Action<XmlDocument> processing, CancellationToken cancellationToken = default)
 	{
 		const int maxlimit = 100;
 
 		string suff = "?limit=" + maxlimit;
 		while(true)
 		{
-			var xml = GetXml(url + suff);
-			if(xml != null)
+			var xml = await GetXmlAsync(url + suff, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
+			if(xml is null) break;
+
+			var e = xml.DocumentElement;
+			if(e is null) break;
+
+			int total_count = 0;
+			int offset = 0;
+			int count = e.ChildNodes.Count;
+			var totalCountAttr = e.Attributes["total_count"];
+			if(totalCountAttr != null)
 			{
-				var e = xml.DocumentElement;
-				if(e != null)
-				{
-					int total_count = 0;
-					int offset = 0;
-					int count = e.ChildNodes.Count;
-					var totalCountAttr = e.Attributes["total_count"];
-					if(totalCountAttr != null)
-					{
-						total_count = int.Parse(totalCountAttr.Value);
-					}
-					var offsetAttr = e.Attributes["offset"];
-					if(offsetAttr != null)
-					{
-						offset = int.Parse(offsetAttr.Value);
-					}
-					if(count != 0)
-					{
-						processing(xml);
-					}
-					if(offset + count < total_count)
-					{
-						suff = "?limit=" + maxlimit + "&offset=" + (offset + count);
-					}
-					else
-					{
-						break;
-					}
-				}
-				else
-				{
-					break;
-				}
+				total_count = int.Parse(totalCountAttr.Value);
+			}
+			var offsetAttr = e.Attributes["offset"];
+			if(offsetAttr is not null)
+			{
+				offset = int.Parse(offsetAttr.Value);
+			}
+			if(count != 0)
+			{
+				processing(xml);
+			}
+			if(offset + count < total_count)
+			{
+				suff = "?limit=" + maxlimit + "&offset=" + (offset + count);
 			}
 			else
 			{
 				break;
 			}
 		}
-	}
-
-	internal Task GetAllDataPagesAsync(string url, Action<XmlDocument> processing, CancellationToken cancellationToken)
-	{
-		return Task.Factory.StartNew(
-			() => GetAllDataPages(url, processing),
-			cancellationToken,
-			TaskCreationOptions.None,
-			TaskScheduler.Default);
 	}
 
 	public NewsCollection News { get; }

@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git;
@@ -25,7 +25,7 @@ using System.Collections.Generic;
 
 public sealed class KnownConfigParameter
 {
-	internal KnownConfigParameter(string name, string defaultValue, string[] validValues, string description)
+	internal KnownConfigParameter(string name, string defaultValue, string[]? validValues, string description)
 	{
 		Name         = name;
 		DefaultValue = defaultValue;
@@ -37,16 +37,16 @@ public sealed class KnownConfigParameter
 
 	public string DefaultValue { get; }
 
-	public string[] ValidValues { get; }
+	public string[]? ValidValues { get; }
 
 	public string Description { get; }
 }
 
 public static class KnownConfigParameters
 {
-	private static readonly Dictionary<string, KnownConfigParameter> _knownParameters = new();
-	private static readonly string[] _booleanValues = new string[] { "true", "false" };
-	private static readonly string[] _compressionLevels = new string[] { "-1", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+	private static readonly Dictionary<string, KnownConfigParameter> _knownParameters = [];
+	private static readonly string[] _booleanValues = ["true", "false"];
+	private static readonly string[] _compressionLevels = ["-1", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
 	private static void AddParameter(KnownConfigParameter parameter)
 	{
@@ -69,9 +69,9 @@ public static class KnownConfigParameters
 		AddParameter(new KnownConfigParameter("core.ignorecase", "false", _booleanValues, @""));
 		AddParameter(new KnownConfigParameter("core.trustctime", "true", _booleanValues, @""));
 		AddParameter(new KnownConfigParameter("core.quotepath", "true", _booleanValues, @""));
-		AddParameter(new KnownConfigParameter("core.eol", "native", new[]{"lf", "crlf", "native"}, @""));
+		AddParameter(new KnownConfigParameter("core.eol", "native", ["lf", "crlf", "native"], @""));
 		AddParameter(new KnownConfigParameter("core.safecrlf", "true", _booleanValues, @""));
-		AddParameter(new KnownConfigParameter("core.autocrlf", "true", new[]{"true", "false", "input"}, @""));
+		AddParameter(new KnownConfigParameter("core.autocrlf", "true", ["true", "false", "input"], @""));
 		AddParameter(new KnownConfigParameter("core.symlinks", "true", _booleanValues, @""));
 		AddParameter(new KnownConfigParameter("core.gitProxy", "", null, @""));
 		AddParameter(new KnownConfigParameter("core.ignoreStat", "false", _booleanValues, @""));
@@ -80,7 +80,7 @@ public static class KnownConfigParameters
 		AddParameter(new KnownConfigParameter("core.worktree", "", null, @""));
 		AddParameter(new KnownConfigParameter("core.logallrefupdates", "true", _booleanValues, @""));
 		AddParameter(new KnownConfigParameter("core.repositoryformatversion", "", null, @""));
-		AddParameter(new KnownConfigParameter("core.sharedRepository", "false", new[] {"group", "true", "world", "everybody", "umask", "false"}, @""));
+		AddParameter(new KnownConfigParameter("core.sharedRepository", "false", ["group", "true", "world", "everybody", "umask", "false"], @""));
 		AddParameter(new KnownConfigParameter("core.warnambiguousrefs", "true", _booleanValues, @""));
 		AddParameter(new KnownConfigParameter("core.compression", "-1", _compressionLevels, @""));
 		AddParameter(new KnownConfigParameter("core.packedGitWindowSize", "32m", null, @""));
@@ -93,7 +93,7 @@ public static class KnownConfigParameters
 		AddParameter(new KnownConfigParameter("core.whitespace", "", null, @""));
 		AddParameter(new KnownConfigParameter("core.fsyncobjectfiles", "false", _booleanValues, @""));
 		AddParameter(new KnownConfigParameter("core.preloadindex", "false", _booleanValues, @""));
-		AddParameter(new KnownConfigParameter("core.createObject", "link", new[]{"link", "rename"}, @""));
+		AddParameter(new KnownConfigParameter("core.createObject", "link", ["link", "rename"], @""));
 		AddParameter(new KnownConfigParameter("core.notesRef", "refs/notes/commits", null, @""));
 		AddParameter(new KnownConfigParameter("core.sparseCheckout", "false", _booleanValues, @""));
 		#endregion

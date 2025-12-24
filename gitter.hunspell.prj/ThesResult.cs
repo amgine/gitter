@@ -22,17 +22,11 @@ using System.Collections.Generic;
 
 namespace NHunspell;
 
-public class ThesResult
+public class ThesResult(List<ThesMeaning> meanings, bool generatedByStem)
 {
-	public ThesResult(List<ThesMeaning> meanings, bool generatedByStem)
-	{
-		Meanings    = meanings;
-		IsGenerated = generatedByStem;
-	}
+	public bool IsGenerated { get; } = generatedByStem;
 
-	public bool IsGenerated { get; }
-
-	public List<ThesMeaning> Meanings { get; }
+	public List<ThesMeaning> Meanings { get; } = meanings;
 
 	public Dictionary<string, List<ThesMeaning>> GetSynonyms()
 	{

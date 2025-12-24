@@ -1,24 +1,22 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
-
-#nullable enable
 
 namespace gitter.Git.AccessLayer.CLI;
 
@@ -33,42 +31,30 @@ using gitter.Framework.CLI;
 
 using Resources = gitter.Git.AccessLayer.CLI.Properties.Resources;
 
-sealed class PushFunction : IGitFunction<PushParameters, IList<ReferencePushResult>>
+sealed class PushFunction(
+	ICommandExecutor                        commandExecutor,
+	Func<PushRequest, bool, Command>        commandFactory,
+	Func<string, Many<ReferencePushResult>> resultsParser)
+	: IGitFunction<PushRequest, Many<ReferencePushResult>>
 {
-	private readonly ICommandExecutor _commandExecutor;
-	private readonly Func<PushParameters, bool, Command> _commandFactory;
-	private readonly Func<string, IList<ReferencePushResult>> _resultsParser;
-
-	public PushFunction(
-		ICommandExecutor commandExecutor,
-		Func<PushParameters, bool, Command> commandFactory,
-		Func<string, IList<ReferencePushResult>> resultsParser)
+	public Many<ReferencePushResult> Invoke(PushRequest request)
 	{
-		Assert.IsNotNull(commandExecutor);
-		Assert.IsNotNull(commandFactory);
-		Assert.IsNotNull(resultsParser);
+		Verify.Argument.IsNotNull(request);
 
-		_commandExecutor = commandExecutor;
-		_commandFactory  = commandFactory;
-		_resultsParser   = resultsParser;
-	}
-
-	public IList<ReferencePushResult> Invoke(PushParameters parameters)
-	{
-		Verify.Argument.IsNotNull(parameters);
-
-		var command = _commandFactory(parameters, false);
-		var output = _commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
+		var command = commandFactory(request, false);
+		var output  = commandExecutor.ExecuteCommand(command, CommandExecutionFlags.None);
 		output.ThrowOnBadReturnCode();
-		return _resultsParser(output.Output);
+		return resultsParser(output.Output);
 	}
 
-	public async Task<IList<ReferencePushResult>> InvokeAsync(PushParameters parameters,
-		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
+	public async Task<Many<ReferencePushResult>> InvokeAsync(
+		PushRequest                   request,
+		IProgress<OperationProgress>? progress          = default,
+		CancellationToken             cancellationToken = default)
 	{
-		Verify.Argument.IsNotNull(parameters);
+		Verify.Argument.IsNotNull(request);
 
-		var command = _commandFactory(parameters, true);
+		var command = commandFactory(request, true);
 
 		progress?.Report(new OperationProgress(Resources.StrsConnectingToRemoteHost.AddEllipsis()));
 		var errorMessages  = default(List<string>);
@@ -76,24 +62,23 @@ sealed class PushFunction : IGitFunction<PushParameters, IList<ReferencePushResu
 		var stdErrReceiver = new NotifyingAsyncTextReader();
 		stdErrReceiver.TextLineReceived += (_, e) =>
 		{
-			if(!string.IsNullOrWhiteSpace(e.Text))
+			if(string.IsNullOrWhiteSpace(e.Text)) return;
+
+			var parser = new GitParser(e.Text);
+			var operationProgress = parser.ParseProgress();
+			progress?.Report(operationProgress);
+			if(operationProgress.IsIndeterminate)
 			{
-				var parser = new GitParser(e.Text);
-				var operationProgress = parser.ParseProgress();
-				progress?.Report(operationProgress);
-				if(operationProgress.IsIndeterminate)
-				{
-					errorMessages ??= new List<string>();
-					errorMessages.Add(operationProgress.ActionName);
-				}
-				else
-				{
-					errorMessages?.Clear();
-				}
+				errorMessages ??= [];
+				errorMessages.Add(operationProgress.ActionName);
+			}
+			else
+			{
+				errorMessages?.Clear();
 			}
 		};
 
-		var processExitCode = await _commandExecutor
+		var processExitCode = await commandExecutor
 			.ExecuteCommandAsync(
 				command,
 				stdOutReceiver,
@@ -108,6 +93,6 @@ sealed class PushFunction : IGitFunction<PushParameters, IList<ReferencePushResu
 				: string.Format(CultureInfo.InvariantCulture, "git process exited with code {0}", processExitCode);
 			throw new GitException(errorMessage);
 		}
-		return _resultsParser(stdOutReceiver.GetText());
+		return resultsParser(stdOutReceiver.GetText());
 	}
 }

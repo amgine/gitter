@@ -21,13 +21,10 @@
 namespace gitter.Redmine.Gui;
 
 using System;
-using System.Globalization;
 using System.ComponentModel;
 using System.Windows.Forms;
 
 using gitter.Framework;
-
-using Resources = gitter.Redmine.Properties.Resources;
 
 [ToolboxItem(false)]
 [DesignerCategory("")]
@@ -41,6 +38,8 @@ sealed class RedmineMenu : ContextMenuStrip
 		Verify.Argument.IsNotNull(environment);
 		Verify.Argument.IsNotNull(guiProvider);
 
+		Renderer = GitterApplication.Style.ToolStripRenderer;
+
 		_workingEnvironment = environment;
 		_guiProvider = guiProvider;
 
@@ -49,7 +48,7 @@ sealed class RedmineMenu : ContextMenuStrip
 
 	private void OnSetupClick(object sender, EventArgs e)
 	{
-		using var dlg = new ProviderSetupControl(_guiProvider.Repository);
-		dlg.Run(GitterApplication.MainForm);
+		using var dialog = new ProviderSetupControl(_guiProvider.Repository);
+		dialog.Run(GitterApplication.MainForm);
 	}
 }

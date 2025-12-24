@@ -21,11 +21,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
-using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 namespace gitter.GitLab.Api;
 
@@ -64,218 +59,110 @@ sealed class User
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Id)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Id)]
-#endif
 	public long Id { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Username)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Username)]
-#endif
-	public string Username { get; set; }
+	public string Username { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Name)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Name)]
-#endif
-	public string Name { get; set; }
+	public string? Name { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.CurrentSignInAt)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.CurrentSignInAt)]
-#endif
-	public string CurrentSignInAt { get; set; }
+	public string? CurrentSignInAt { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Linkedin)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Linkedin)]
-#endif
-	public string Linkedin { get; set; }
+	public string? Linkedin { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.CanCreateProject)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.CanCreateProject)]
-#endif
 	public bool CanCreateProject { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Bio)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Bio)]
-#endif
-	public string Bio { get; set; }
+	public string? Bio { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.AvatarUrl)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.AvatarUrl)]
-#endif
-	public string AvatarUrl { get; set; }
+	public string? AvatarUrl { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.CanCreateGroup)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.CanCreateGroup)]
-#endif
 	public bool CanCreateGroup { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.ConfirmedAt)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.ConfirmedAt)]
-#endif
-	public string ConfirmedAt { get; set; }
+	public string? ConfirmedAt { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.ColorSchemeId)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.ColorSchemeId)]
-#endif
 	public int ColorSchemeId { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.CreatedAt)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.CreatedAt)]
-#endif
-	public string CreatedAt { get; set; }
+	public string? CreatedAt { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Identities)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Identities)]
-#endif
-	public Identity[] Identities { get; set; }
+	public Identity[]? Identities { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.External)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.External)]
-#endif
 	public bool External { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Email)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Email)]
-#endif
-	public string Email { get; set; }
+	public string? Email { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.LastActivityOn)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.LastActivityOn)]
-#endif
-	public string LastActivityOn { get; set; }
+	public string? LastActivityOn { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.IsAdmin)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.IsAdmin)]
-#endif
 	public bool IsAdmin { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.LastSignInAt)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.LastSignInAt)]
-#endif
-	public string LastSignInAt { get; set; }
+	public string? LastSignInAt { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.ProjectsLimit)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.ProjectsLimit)]
-#endif
 	public int ProjectsLimit { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.TwoFactorEnabled)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.TwoFactorEnabled)]
-#endif
 	public bool TwoFactorEnabled { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Location)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Location)]
-#endif
-	public string Location { get; set; }
+	public string? Location { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Organization)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Organization)]
-#endif
-	public string Organization { get; set; }
+	public string? Organization { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.State)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.State)]
-#endif
-	public string State { get; set; }
+	public string? State { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Skype)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Skype)]
-#endif
-	public string Skype { get; set; }
+	public string? Skype { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Twitter)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Twitter)]
-#endif
-	public string Twitter { get; set; }
+	public string? Twitter { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.WebUrl)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.WebUrl)]
-#endif
-	public string WebUrl { get; set; }
+	public string? WebUrl { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.WebsiteUrl)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.WebsiteUrl)]
-#endif
-	public string WebsiteUrl { get; set; }
+	public string? WebsiteUrl { get; set; }
 }

@@ -21,9 +21,7 @@
 namespace gitter.Framework;
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Drawing;
 using System.Runtime.InteropServices;
 
@@ -33,7 +31,7 @@ using gitter.Native;
 
 public static class ShellUtility
 {
-	public static Icon ExtractAssociatedFileIcon16ByExt(string fileName)
+	public static Icon? ExtractAssociatedFileIcon16ByExt(string fileName)
 	{
 		const int SHGFI_ICON = 0x100;
 		const int SHGFI_SMALLICON = 0x1;
@@ -53,7 +51,7 @@ public static class ShellUtility
 		}
 	}
 
-	public static Icon ExtractAssociatedFileIcon16(string fileName)
+	public static Icon? ExtractAssociatedFileIcon16(string fileName)
 	{
 		const int SHGFI_ICON = 0x100;
 		const int SHGFI_SMALLICON = 0x1;
@@ -81,7 +79,7 @@ public static class ShellUtility
 		}
 	}
 
-	public static Icon ExtractAssociatedFolderIcon16(string fileName)
+	public static Icon? ExtractAssociatedFolderIcon16(string fileName)
 	{
 		const int SHGFI_ICON = 0x100;
 		const int SHGFI_SMALLICON = 0x1;
@@ -110,7 +108,7 @@ public static class ShellUtility
 		}
 	}
 
-	public static Icon ExtractAssociatedFolderIcon16ByType(string fileName)
+	public static Icon? ExtractAssociatedFolderIcon16ByType(string fileName)
 	{
 		const int SHGFI_ICON = 0x100;
 		const int SHGFI_SMALLICON = 0x1;
@@ -131,7 +129,7 @@ public static class ShellUtility
 		}
 	}
 
-	public static Icon ExtractAssociatedIcon16(string fileName)
+	public static Icon? ExtractAssociatedIcon16(string fileName)
 	{
 		var pos1 = fileName.LastIndexOf(Path.DirectorySeparatorChar);
 		var pos2 = fileName.LastIndexOf('.');
@@ -150,36 +148,40 @@ public static class ShellUtility
 		}
 		try
 		{
-			using(var key = Registry.ClassesRoot.OpenSubKey(ext, writable: false))
+			using var key = Registry.ClassesRoot.OpenSubKey(ext, writable: false);
+			if(key is null) return default;
+
+			var alias = (string?)key.GetValue(null);
+			key.Close();
+			using var aliasKey = Registry.ClassesRoot.OpenSubKey(alias + @"\DefaultIcon", writable: false);
+			if(aliasKey is null) return default;
+
+			var desc = (string?)aliasKey.GetValue(null) ?? "";
+			var file = desc;
+			var id = 0;
+			var pos = desc.LastIndexOf(',');
+			if(pos != -1)
 			{
-				var alias = (string)key.GetValue(null);
-				key.Close();
-				using(var aliasKey = Registry.ClassesRoot.OpenSubKey(alias + @"\DefaultIcon"))
+				#if NETCOREAPP
+				if(int.TryParse(desc.AsSpan(pos + 1), out id))
+				#else
+				if(int.TryParse(desc.Substring(pos + 1), out id))
+				#endif
 				{
-					var desc = (string)aliasKey.GetValue(null);
-					var file = desc;
-					var id = 0;
-					var pos = desc.LastIndexOf(',');
-					if(pos != -1)
-					{
-						if(int.TryParse(desc.Substring(pos + 1), out id))
-						{
-							file = desc.Substring(0, pos);
-						}
-					}
-					aliasKey.Close();
-					if(file == "%1") file = fileName;
-					var icons = new IntPtr[1];
-					var c = Shell32.ExtractIconEx(file, id, null, icons, 1);
-					if(c == 1)
-					{
-						return Icon.FromHandle(icons[0]);
-					}
-					else
-					{
-						return null;
-					}
+					file = desc.Substring(0, pos);
 				}
+			}
+			aliasKey.Close();
+			if(file == "%1") file = fileName;
+			var icons = new IntPtr[1];
+			var c = Shell32.ExtractIconEx(file, id, null, icons, 1);
+			if(c == 1)
+			{
+				return Icon.FromHandle(icons[0]);
+			}
+			else
+			{
+				return null;
 			}
 		}
 		catch

@@ -22,49 +22,40 @@ namespace gitter.Git;
 
 using System;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 
+using gitter.Framework;
 using gitter.Git.AccessLayer;
 
 public sealed partial class Revision : GitObject, IRevisionPointer
 {
-	#region Data
+	private Sha1Hash _treeHash;
 
-	private Hash _treeHash;
-
-	#endregion
-
-	#region .ctor
-
-	internal Revision(Repository repository, Hash hash)
+	internal Revision(Repository repository, Sha1Hash hash)
 		: base(repository)
 	{
-		Parents    = new RevisionParentsCollection();
-		References = new RevisionReferencesCollection();
+		References = [];
 		Hash       = hash;
 		HashString = hash.ToString();
 	}
 
-	#endregion
-
 	public void Load()
 	{
 		var revisionData = Repository.Accessor.QueryRevision
-			.Invoke(new QueryRevisionParameters(Hash));
+			.Invoke(new QueryRevisionRequest(Hash));
 		ObjectFactories.UpdateRevision(this, revisionData);
 	}
 
-	public async Task LoadAsync()
+	public async Task LoadAsync(CancellationToken cancellationToken = default)
 	{
 		var revisionData = await Repository.Accessor.QueryRevision
-			.InvokeAsync(new QueryRevisionParameters(Hash))
+			.InvokeAsync(new QueryRevisionRequest(Hash), cancellationToken: cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 		ObjectFactories.UpdateRevision(this, revisionData);
 	}
 
-	#region Properties
-
-	public RevisionParentsCollection Parents { get; }
+	public Many<Revision> Parents { get; internal set; }
 
 	public RevisionReferencesCollection References { get; }
 
@@ -72,15 +63,11 @@ public sealed partial class Revision : GitObject, IRevisionPointer
 
 	public bool IsLoaded { get; internal set; }
 
-	#endregion
+	public Sha1Hash Hash { get; }
 
-	#region Commit Attributes
+	public string HashString { get; } = default!;
 
-	public Hash Hash { get; }
-
-	public string HashString { get; }
-
-	public Hash TreeHash
+	public Sha1Hash TreeHash
 	{
 		get => _treeHash;
 		internal set
@@ -101,23 +88,19 @@ public sealed partial class Revision : GitObject, IRevisionPointer
 		}
 	}
 
-	public string TreeHashString { get; private set; }
+	public string TreeHashString { get; private set; } = default!;
 
-	public User Author { get; internal set; }
+	public User Author { get; internal set; } = default!;
 
 	public DateTimeOffset AuthorDate { get; internal set; }
 
-	public User Committer { get; internal set; }
+	public User Committer { get; internal set; } = default!;
 
 	public DateTimeOffset CommitDate { get; internal set; }
 
-	public string Subject { get; internal set; }
+	public string Subject { get; internal set; } = default!;
 
-	public string Body { get; internal set; }
-
-	#endregion
-
-	#region IRevisionPointer Members
+	public string Body { get; internal set; } = default!;
 
 	ReferenceType IRevisionPointer.Type => ReferenceType.Revision;
 
@@ -129,9 +112,7 @@ public sealed partial class Revision : GitObject, IRevisionPointer
 
 	Revision IRevisionPointer.Dereference() => this;
 
-	ValueTask<Revision> IRevisionPointer.DereferenceAsync() => new(this);
-
-	#endregion
+	ValueTask<Revision?> IRevisionPointer.DereferenceAsync(CancellationToken cancellationToken) => new(this);
 
 	/// <inheritdoc/>
 	public override string ToString()

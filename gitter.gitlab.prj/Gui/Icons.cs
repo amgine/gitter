@@ -35,7 +35,7 @@ static class Icons
 	public static readonly IImageProvider TestSkipped = CreateProvider(@"test.skipped");
 	public static readonly IImageProvider TestError   = CreateProvider(@"test.error");
 
-	public static readonly IImageProvider PipelineCanceled = CreateProvider(@"pipeline.status.canceled");
+	public static readonly IImageProvider PipelineCanceled  = CreateProvider(@"pipeline.status.canceled");
 	public static readonly IImageProvider PipelineCreated   = CreateProvider(@"pipeline.status.created");
 	public static readonly IImageProvider PipelineFailed    = CreateProvider(@"pipeline.status.failed");
 	public static readonly IImageProvider PipelineManual    = CreateProvider(@"pipeline.status.manual");

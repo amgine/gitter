@@ -31,108 +31,110 @@ using gitter.Git.Gui.Interfaces;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class CreateTagController : ViewControllerBase<ICreateTagView>, ICreateTagController
+sealed class CreateTagController(Repository repository)
+	: ViewControllerBase<ICreateTagView>, ICreateTagController
 {
-	#region .ctor
+	readonly record struct UserInput(
+		string  TagName,
+		string  Refspec,
+		bool    Annotated,
+		bool    Signed,
+		string? Message,
+		string? KeyId);
 
-	public CreateTagController(Repository repository)
+	private bool TryCollectUserInput(out UserInput input)
 	{
-		Verify.Argument.IsNotNull(repository);
+		var view    = RequireView();
+		var tagName = view.TagName.Value?.Trim();
+		var refspec = view.Revision.Value.Trim();
 
-		Repository = repository;
-	}
-
-	#endregion
-
-	#region Properties
-
-	private Repository Repository { get; }
-
-	#endregion
-
-	#region ICreateTagController Members
-
-	public bool TryCreateTag()
-	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
-
-		var tagName = View.TagName.Value.Trim();
-		var refspec = View.Revision.Value.Trim();
-
-		if(!GitControllerUtility.ValidateNewTagName(tagName, Repository, View.TagName, View.ErrorNotifier))
+		if(!GitControllerUtility.ValidateNewTagName(tagName, repository, view.TagName, view.ErrorNotifier))
 		{
-			return false;
+			goto fail;
 		}
-		if(!GitControllerUtility.ValidateRefspec(refspec, View.Revision, View.ErrorNotifier))
+		if(!GitControllerUtility.ValidateRefspec(refspec, view.Revision, view.ErrorNotifier))
 		{
-			return false;
+			goto fail;
 		}
 
-		string message = null;
-		bool signed    = View.Signed.Value;
-		bool annotated = signed || View.Annotated.Value;
+		var message   = default(string);
+		var signed    = view.Signed.Value;
+		var annotated = signed || view.Annotated.Value;
 		if(annotated)
 		{
-			message = View.Message.Value;
+			message = view.Message.Value;
 			if(string.IsNullOrWhiteSpace(message))
 			{
-				View.ErrorNotifier.NotifyError(View.Message,
+				view.ErrorNotifier.NotifyError(view.Message,
 					new UserInputError(
 						Resources.ErrNoMessageSpecified,
 						Resources.ErrMessageCannotBeEmpty));
-				return false;
+				goto fail;
 			}
-			message = message.Trim();
+			message = message!.Trim();
 		}
-		string keyId = null;
+		var keyId = default(string);
 		if(signed)
 		{
-			if(View.UseKeyId.Value)
+			if(view.UseKeyId.Value)
 			{
-				keyId = View.KeyId.Value;
+				keyId = view.KeyId.Value;
 				if(string.IsNullOrWhiteSpace(keyId))
 				{
-					View.ErrorNotifier.NotifyError(View.KeyId,
+					view.ErrorNotifier.NotifyError(view.KeyId,
 						new UserInputError(
 							Resources.ErrNoKeyIdSpecified,
 							Resources.ErrKeyIdCannotBeEmpty));
-					return false;
+					goto fail;
 				}
-				keyId = keyId.Trim();
+				keyId = keyId!.Trim();
 			}
 		}
+		input = new(tagName!, refspec, annotated, signed, message, keyId);
+		return true;
+	fail:
+		input = default;
+		return false;
+	}
+
+	private Tag CreateTag(in UserInput input)
+	{
+		var ptr = repository.GetRevisionPointer(input.Refspec);
+		if(input.Annotated)
+		{
+			if(input.Signed)
+			{
+				return input.KeyId is null
+					? repository.Refs.Tags.Create(input.TagName, ptr, input.Message!, sign: true)
+					: repository.Refs.Tags.Create(input.TagName, ptr, input.Message!, input.KeyId);
+			}
+			else
+			{
+				return repository.Refs.Tags.Create(input.TagName, ptr, input.Message!, sign: false);
+			}
+		}
+		else
+		{
+			return repository.Refs.Tags.Create(input.TagName, ptr);
+		}
+	}
+
+	public bool TryCreateTag()
+	{
+		var view = RequireView();
+
+		if(!TryCollectUserInput(out var input)) return false;
+
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				var ptr = Repository.GetRevisionPointer(refspec);
-				if(annotated)
-				{
-					if(signed)
-					{
-						if(keyId == null)
-						{
-							Repository.Refs.Tags.Create(tagName, ptr, message, true);
-						}
-						else
-						{
-							Repository.Refs.Tags.Create(tagName, ptr, message, keyId);
-						}
-					}
-					else
-					{
-						Repository.Refs.Tags.Create(tagName, ptr, message, false);
-					}
-				}
-				else
-				{
-					Repository.Refs.Tags.Create(tagName, ptr);
-				}
+				_ = CreateTag(in input);
 			}
 		}
 		catch(TagAlreadyExistsException)
 		{
-			View.ErrorNotifier.NotifyError(View.TagName,
+			view.ErrorNotifier.NotifyError(view.TagName,
 				new UserInputError(
 					Resources.ErrInvalidTagName,
 					Resources.ErrTagAlreadyExists));
@@ -140,7 +142,7 @@ sealed class CreateTagController : ViewControllerBase<ICreateTagView>, ICreateTa
 		}
 		catch(UnknownRevisionException)
 		{
-			View.ErrorNotifier.NotifyError(View.Revision,
+			view.ErrorNotifier.NotifyError(view.Revision,
 				new UserInputError(
 					Resources.ErrInvalidRevisionExpression,
 					Resources.ErrRevisionIsUnknown));
@@ -148,7 +150,7 @@ sealed class CreateTagController : ViewControllerBase<ICreateTagView>, ICreateTa
 		}
 		catch(InvalidTagNameException exc)
 		{
-			View.ErrorNotifier.NotifyError(View.TagName,
+			view.ErrorNotifier.NotifyError(view.TagName,
 				new UserInputError(
 					Resources.ErrInvalidTagName,
 					exc.Message));
@@ -157,15 +159,13 @@ sealed class CreateTagController : ViewControllerBase<ICreateTagView>, ICreateTa
 		catch(GitException exc)
 		{
 			GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
+				view as IWin32Window,
 				exc.Message,
-				string.Format(Resources.ErrFailedToCreateTag, tagName),
+				string.Format(Resources.ErrFailedToCreateTag, input.TagName),
 				MessageBoxButton.Close,
 				MessageBoxIcon.Error);
 			return false;
 		}
 		return true;
 	}
-
-	#endregion
 }

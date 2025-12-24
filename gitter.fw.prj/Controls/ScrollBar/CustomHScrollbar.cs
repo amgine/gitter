@@ -56,10 +56,8 @@ public class CustomHScrollbar : CustomScrollBar
 
 	private void EnsureArranged()
 	{
-		if(!_isArranged)
-		{
-			Arrange();
-		}
+		if(_isArranged) return;
+		Arrange();
 	}
 
 	private void Arrange()
@@ -110,7 +108,7 @@ public class CustomHScrollbar : CustomScrollBar
 
 	#region Event Handlers
 
-	private void OnScrollHereClick(object sender, EventArgs e)
+	private void OnScrollHereClick(object? sender, EventArgs e)
 	{
 		EnsureArranged();
 		var x = _mouseDownLocation.X - _decreaseButtonBounds.Width;
@@ -118,35 +116,23 @@ public class CustomHScrollbar : CustomScrollBar
 		Value = ClampValue(ThumbPositionToValue(thumbPosition));
 	}
 
-	private void OnLeftEdgeClick(object sender, EventArgs e)
-	{
-		Value = ClampValue(Minimum);
-	}
+	private void OnLeftEdgeClick(object? sender, EventArgs e)
+		=> Value = ClampValue(Minimum);
 
-	private void OnRightEdgeClick(object sender, EventArgs e)
-	{
-		Value = ClampValue(Maximum);
-	}
+	private void OnRightEdgeClick(object? sender, EventArgs e)
+		=> Value = ClampValue(Maximum);
 
-	private void OnScrollLeftClick(object sender, EventArgs e)
-	{
-		Value = ClampValue(Value - SmallChange);
-	}
+	private void OnScrollLeftClick(object? sender, EventArgs e)
+		=> Value = ClampValue(Value - SmallChange);
 
-	private void OnScrollRightClick(object sender, EventArgs e)
-	{
-		Value = ClampValue(Value + SmallChange);
-	}
+	private void OnScrollRightClick(object? sender, EventArgs e)
+		=> Value = ClampValue(Value + SmallChange);
 
-	private void OnPageLeftClick(object sender, EventArgs e)
-	{
-		Value = ClampValue(Value - LargeChange);
-	}
+	private void OnPageLeftClick(object? sender, EventArgs e)
+		=> Value = ClampValue(Value - LargeChange);
 
-	private void OnPageRightClick(object sender, EventArgs e)
-	{
-		Value = ClampValue(Value + LargeChange);
-	}
+	private void OnPageRightClick(object? sender, EventArgs e)
+		=> Value = ClampValue(Value + LargeChange);
 
 	#endregion
 
@@ -160,7 +146,10 @@ public class CustomHScrollbar : CustomScrollBar
 		switch(e.Button)
 		{
 			case MouseButtons.Right:
-				var menu = new ContextMenuStrip();
+				var menu = new ContextMenuStrip
+				{
+					Renderer = GitterApplication.Style.ToolStripRenderer,
+				};
 				menu.Items.Add(new ToolStripMenuItem(Resources.StrScrollHere, null, OnScrollHereClick));
 				menu.Items.Add(new ToolStripSeparator());
 				menu.Items.Add(new ToolStripMenuItem(Resources.StrLeftEdge, null, OnLeftEdgeClick));

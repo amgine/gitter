@@ -24,7 +24,7 @@ using gitter.Framework.Mvc;
 
 interface IRenameRemoteView : IView
 {
-	IUserInputSource<string> NewName { get; }
+	IUserInputSource<string?> NewName { get; }
 
 	IUserInputErrorNotifier ErrorNotifier { get; }
 }

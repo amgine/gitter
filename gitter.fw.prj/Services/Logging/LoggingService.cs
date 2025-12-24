@@ -29,7 +29,7 @@ public class LoggingService
 	public static LoggingService Global { get; } = new("global");
 
 	private static readonly LogEvent[] _log = new LogEvent[1000];
-	private static readonly List<ILogAppender> _appenders = new();
+	private static readonly List<ILogAppender> _appenders = [];
 	private static int _start;
 	private static int _count;
 
@@ -45,7 +45,7 @@ public class LoggingService
 
 	public string Source { get; }
 
-	private void LogCore(LogEventType type, Exception exc, string @event)
+	private void LogCore(LogEventType type, Exception? exc, string @event)
 	{
 		Assert.IsNotNull(type);
 
@@ -113,35 +113,35 @@ public class LoggingService
 		LogCore(type, null, @event);
 	}
 
-	public void Log(LogEventType type, string @event, object arg0)
+	public void Log(LogEventType type, string @event, object? arg0)
 	{
 		Verify.Argument.IsNotNull(type);
 
 		LogCore(type, null, string.Format(@event, arg0));
 	}
 
-	public void Log(LogEventType type, string @event, params object[] args)
+	public void Log(LogEventType type, string @event, params object?[] args)
 	{
 		Verify.Argument.IsNotNull(type);
 
 		LogCore(type, null, string.Format(@event, args));
 	}
 
-	public void Log(LogEventType type, Exception exc, string @event)
+	public void Log(LogEventType type, Exception? exc, string @event)
 	{
 		Verify.Argument.IsNotNull(type);
 
 		LogCore(type, exc, @event);
 	}
 
-	public void Log(LogEventType type, Exception exc, string @event, object arg0)
+	public void Log(LogEventType type, Exception? exc, string @event, object? arg0)
 	{
 		Verify.Argument.IsNotNull(type);
 
 		LogCore(type, exc, string.Format(@event, arg0));
 	}
 
-	public void Log(LogEventType type, Exception exc, string @event, params object[] args)
+	public void Log(LogEventType type, Exception? exc, string @event, params object?[] args)
 	{
 		Verify.Argument.IsNotNull(type);
 
@@ -154,162 +154,106 @@ public class LoggingService
 
 	[Conditional("DEBUG")]
 	public void Debug(string @event)
-	{
-		LogCore(LogEventType.Debug, null, @event);
-	}
+		=> LogCore(LogEventType.Debug, null, @event);
 
 	[Conditional("DEBUG")]
-	public void Debug(string @event, params object[] args)
-	{
-		LogCore(LogEventType.Debug, null, string.Format(@event, args));
-	}
+	public void Debug(string @event, params object?[] args)
+		=> LogCore(LogEventType.Debug, null, string.Format(@event, args));
 
 	[Conditional("DEBUG")]
-	public void Debug(string @event, object arg0)
-	{
-		LogCore(LogEventType.Debug, null, string.Format(@event, arg0));
-	}
+	public void Debug(string @event, object? arg0)
+		=> LogCore(LogEventType.Debug, null, string.Format(@event, arg0));
 
 	[Conditional("DEBUG")]
-	public void Debug(Exception exc)
-	{
-		LogCore(LogEventType.Debug, exc, exc?.Message);
-	}
+	public void Debug(Exception? exc)
+		=> LogCore(LogEventType.Debug, exc, exc?.Message ?? "");
 
 	[Conditional("DEBUG")]
-	public void Debug(Exception exc, string @event)
-	{
-		LogCore(LogEventType.Debug, exc, @event);
-	}
+	public void Debug(Exception? exc, string @event)
+		=> LogCore(LogEventType.Debug, exc, @event);
 
 	[Conditional("DEBUG")]
-	public void Debug(Exception exc, string @event, object arg0)
-	{
-		LogCore(LogEventType.Debug, exc, string.Format(@event, arg0));
-	}
+	public void Debug(Exception? exc, string @event, object? arg0)
+		=> LogCore(LogEventType.Debug, exc, string.Format(@event, arg0));
 
 	[Conditional("DEBUG")]
-	public void Debug(Exception exc, string @event, params object[] args)
-	{
-		LogCore(LogEventType.Debug, exc, string.Format(@event, args));
-	}
+	public void Debug(Exception? exc, string @event, params object?[] args)
+		=> LogCore(LogEventType.Debug, exc, string.Format(@event, args));
 
 	#endregion
 
 	#region Information
 
 	public void Info(string @event)
-	{
-		LogCore(LogEventType.Information, null, @event);
-	}
+		=> LogCore(LogEventType.Information, null, @event);
 
-	public void Info(string @event, params object[] args)
-	{
-		LogCore(LogEventType.Information, null, string.Format(@event, args));
-	}
+	public void Info(string @event, params object?[] args)
+		=> LogCore(LogEventType.Information, null, string.Format(@event, args));
 
-	public void Info(string @event, object arg0)
-	{
-		LogCore(LogEventType.Information, null, string.Format(@event, arg0));
-	}
+	public void Info(string @event, object? arg0)
+		=> LogCore(LogEventType.Information, null, string.Format(@event, arg0));
 
-	public void Info(Exception exc)
-	{
-		LogCore(LogEventType.Information, exc, exc?.Message);
-	}
+	public void Info(Exception? exc)
+		=> LogCore(LogEventType.Information, exc, exc?.Message ?? "");
 
-	public void Info(Exception exc, string @event)
-	{
-		LogCore(LogEventType.Information, exc, @event);
-	}
+	public void Info(Exception? exc, string @event)
+		=> LogCore(LogEventType.Information, exc, @event);
 
-	public void Info(Exception exc, string @event, object arg0)
-	{
-		LogCore(LogEventType.Information, exc, string.Format(@event, arg0));
-	}
+	public void Info(Exception? exc, string @event, object? arg0)
+		=> LogCore(LogEventType.Information, exc, string.Format(@event, arg0));
 
-	public void Info(Exception exc, string @event, params object[] args)
-	{
-		LogCore(LogEventType.Information, exc, string.Format(@event, args));
-	}
+	public void Info(Exception? exc, string @event, params object?[] args)
+		=> LogCore(LogEventType.Information, exc, string.Format(@event, args));
 
 	#endregion
 
 	#region Warning
 
 	public void Warning(string @event)
-	{
-		LogCore(LogEventType.Warning, null, @event);
-	}
+		=> LogCore(LogEventType.Warning, null, @event);
 
-	public void Warning(string @event, params object[] args)
-	{
-		LogCore(LogEventType.Warning, null, string.Format(@event, args));
-	}
+	public void Warning(string @event, params object?[] args)
+		=> LogCore(LogEventType.Warning, null, string.Format(@event, args));
 
-	public void Warning(string @event, object arg0)
-	{
-		LogCore(LogEventType.Warning, null, string.Format(@event, arg0));
-	}
+	public void Warning(string @event, object? arg0)
+		=> LogCore(LogEventType.Warning, null, string.Format(@event, arg0));
 
-	public void Warning(Exception exc)
-	{
-		LogCore(LogEventType.Warning, exc, exc?.Message);
-	}
+	public void Warning(Exception? exc)
+		=> LogCore(LogEventType.Warning, exc, exc?.Message ?? "");
 
-	public void Warning(Exception exc, string @event)
-	{
-		LogCore(LogEventType.Warning, exc, @event);
-	}
+	public void Warning(Exception? exc, string @event)
+		=> LogCore(LogEventType.Warning, exc, @event);
 
-	public void Warning(Exception exc, string @event, object arg0)
-	{
-		LogCore(LogEventType.Warning, exc, string.Format(@event, arg0));
-	}
+	public void Warning(Exception? exc, string @event, object? arg0)
+		=> LogCore(LogEventType.Warning, exc, string.Format(@event, arg0));
 
-	public void Warning(Exception exc, string @event, params object[] args)
-	{
-		LogCore(LogEventType.Warning, exc, string.Format(@event, args));
-	}
+	public void Warning(Exception? exc, string @event, params object?[] args)
+		=> LogCore(LogEventType.Warning, exc, string.Format(@event, args));
 
 	#endregion
 
 	#region Error
 
 	public void Error(string @event)
-	{
-		LogCore(LogEventType.Error, null, @event);
-	}
+		=> LogCore(LogEventType.Error, null, @event);
 
-	public void Error(string @event, params object[] args)
-	{
-		LogCore(LogEventType.Error, null, string.Format(@event, args));
-	}
+	public void Error(string @event, params object?[] args)
+		=> LogCore(LogEventType.Error, null, string.Format(@event, args));
 
-	public void Error(string @event, object arg0)
-	{
-		LogCore(LogEventType.Error, null, string.Format(@event, arg0));
-	}
+	public void Error(string @event, object? arg0)
+		=> LogCore(LogEventType.Error, null, string.Format(@event, arg0));
 
-	public void Error(Exception exc)
-	{
-		LogCore(LogEventType.Error, exc, exc?.Message);
-	}
+	public void Error(Exception? exc)
+		=> LogCore(LogEventType.Error, exc, exc?.Message ?? "");
 
-	public void Error(Exception exc, string @event)
-	{
-		LogCore(LogEventType.Error, exc, @event);
-	}
+	public void Error(Exception? exc, string @event)
+		=> LogCore(LogEventType.Error, exc, @event);
 
-	public void Error(Exception exc, string @event, object arg0)
-	{
-		LogCore(LogEventType.Error, exc, string.Format(@event, arg0));
-	}
+	public void Error(Exception? exc, string @event, object? arg0)
+		=> LogCore(LogEventType.Error, exc, string.Format(@event, arg0));
 
-	public void Error(Exception exc, string @event, params object[] args)
-	{
-		LogCore(LogEventType.Error, exc, string.Format(@event, args));
-	}
+	public void Error(Exception? exc, string @event, params object?[] args)
+		=> LogCore(LogEventType.Error, exc, string.Format(@event, args));
 
 	#endregion
 }

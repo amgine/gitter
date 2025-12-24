@@ -40,17 +40,8 @@ using gitter.Git.Gui.Views;
 using Resources = gitter.Git.Gui.Properties.Resources;
 
 /// <summary>Factory for creating buttons or menu items.</summary>
-public class GuiItemFactory
+public class GuiItemFactory(DpiBindings dpiBindings)
 {
-	private readonly DpiBindings _dpiBindings;
-
-	public GuiItemFactory(DpiBindings dpiBindings)
-	{
-		Verify.Argument.IsNotNull(dpiBindings);
-
-		_dpiBindings = dpiBindings;
-	}
-
 	#region Universal Items
 
 	internal ToolStripButton CreateRefreshContentButton(GitViewBase view)
@@ -60,8 +51,9 @@ public class GuiItemFactory
 		var button = new ToolStripButton(Resources.StrRefresh, default, (_, _) => view.RefreshContent())
 		{
 			DisplayStyle = ToolStripItemDisplayStyle.Image,
-		};
-		_dpiBindings.BindImage(button, Icons.Refresh);
+            ImageScaling = ToolStripItemImageScaling.None,
+        };
+		dpiBindings.BindImage(button, Icons.Refresh);
 		return button;
 	}
 
@@ -75,7 +67,7 @@ public class GuiItemFactory
 			Text = Resources.StrViewReflog,
 			Tag  = reference,
 		};
-		_dpiBindings.BindImage(item, reference.Type == ReferenceType.RemoteBranch
+		dpiBindings.BindImage(item, reference.Type == ReferenceType.RemoteBranch
 			? Icons.RemoteBranchReflog
 			: Icons.BranchReflog);
 		item.Click += OnViewReflogClick;
@@ -117,7 +109,7 @@ public class GuiItemFactory
 			Text = Resources.StrCheckout,
 			Tag  = Tuple.Create(revision, path),
 		};
-		_dpiBindings.BindImage(item, Icons.Checkout);
+		dpiBindings.BindImage(item, Icons.Checkout);
 		item.Click += OnCheckoutPathClick;
 		return item;
 	}
@@ -135,7 +127,7 @@ public class GuiItemFactory
 			Text = text,
 			Tag  = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.Checkout);
+		dpiBindings.BindImage(item, Icons.Checkout);
 		item.Click += OnCheckoutClick;
 		return item;
 	}
@@ -171,7 +163,7 @@ public class GuiItemFactory
 			Tag     = revision,
 			Enabled = enabled,
 		};
-		_dpiBindings.BindImage(item, Icons.Checkout);
+		dpiBindings.BindImage(item, Icons.Checkout);
 		item.Click += OnCheckoutRevisionClick;
 		return item;
 	}
@@ -182,7 +174,7 @@ public class GuiItemFactory
 		Verify.Argument.IsValidRevisionPointer(revision);
 
 		bool isEnabled	= !revision.Repository.IsEmpty;
-		bool isMerge	= revision.Dereference().Parents.Count > 1;
+		bool isMerge	= revision.Dereference() is { Parents.Count: > 1 };
 
 		var item = new T()
 		{
@@ -190,7 +182,7 @@ public class GuiItemFactory
 			Enabled	= isEnabled,
 			Tag		= revision,
 		};
-		_dpiBindings.BindImage(item, Icons.Revert);
+		dpiBindings.BindImage(item, Icons.Revert);
 		item.Click += isMerge ? OnRevertMergeClick : OnRevertClick;
 		return item;
 	}
@@ -205,7 +197,7 @@ public class GuiItemFactory
 			Text = Resources.StrRevert,
 			Tag  = revisions,
 		};
-		_dpiBindings.BindImage(item, Icons.Revert);
+		dpiBindings.BindImage(item, Icons.Revert);
 		item.Click += OnMultipleRevertClick;
 		return item;
 	}
@@ -220,7 +212,7 @@ public class GuiItemFactory
 			Text  = Resources.StrReset.AddEllipsis(),
 			Tag   = Tuple.Create(repository, resetModes),
 		};
-		_dpiBindings.BindImage(item, Icons.Delete);
+		dpiBindings.BindImage(item, Icons.Delete);
 		item.Click += OnResetClick;
 		return item;
 	}
@@ -238,7 +230,7 @@ public class GuiItemFactory
 				Resources.StrResetHere.AddEllipsis(),
 			Tag = revision,
 		};
-		_dpiBindings.BindImage(item, Icons.Reset);
+		dpiBindings.BindImage(item, Icons.Reset);
 		item.Click += OnResetHeadClick;
 		return item;
 	}
@@ -256,7 +248,7 @@ public class GuiItemFactory
 			Enabled = revision.Dereference() != revision.Repository.Head.Revision,
 			Tag = revision,
 		};
-		_dpiBindings.BindImage(item, Icons.Rebase);
+		dpiBindings.BindImage(item, Icons.Rebase);
 		item.Click += OnRebaseHeadHereClick;
 		return item;
 	}
@@ -267,7 +259,7 @@ public class GuiItemFactory
 		Verify.Argument.IsValidRevisionPointer(revision);
 
 		bool isEnabled	= !revision.Repository.IsEmpty;
-		bool isMerge	= revision.Dereference().Parents.Count > 1;
+		bool isMerge	= revision.Dereference() is { Parents.Count: > 1 };
 
 		var item = new T()
 		{
@@ -275,7 +267,7 @@ public class GuiItemFactory
 			Tag		= revision,
 			Enabled	= isEnabled,
 		};
-		_dpiBindings.BindImage(item, Icons.CherryPick);
+		dpiBindings.BindImage(item, Icons.CherryPick);
 		item.Click += isMerge ? OnCherryPickMergeClick : OnCherryPickClick;
 		return item;
 	}
@@ -283,14 +275,14 @@ public class GuiItemFactory
 	public T GetCherryPickItem<T>(IEnumerable<IRevisionPointer> revisions)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidRevisionPointerSequence(revisions, nameof(revisions));
+		Verify.Argument.IsValidRevisionPointerSequence(revisions);
 
 		var item = new T()
 		{
 			Text = Resources.StrCherryPick,
 			Tag = revisions,
 		};
-		_dpiBindings.BindImage(item, Icons.CherryPick);
+		dpiBindings.BindImage(item, Icons.CherryPick);
 		item.Click += OnMultipleCherryPickClick;
 		return item;
 	}
@@ -305,7 +297,7 @@ public class GuiItemFactory
 			Text	= Resources.StrSavePatch.AddEllipsis(),
 			Tag		= revision,
 		};
-		_dpiBindings.BindImage(item, Icons.PatchSave);
+		dpiBindings.BindImage(item, Icons.PatchSave);
 		item.Click += OnSaveRevisionPatchClick;
 		return item;
 	}
@@ -320,7 +312,7 @@ public class GuiItemFactory
 			Text = Resources.StrArchive.AddEllipsis(),
 			Tag  = revision,
 		};
-		_dpiBindings.BindImage(item, Icons.Archive);
+		dpiBindings.BindImage(item, Icons.Archive);
 		item.Click += OnArchiveClick;
 		return item;
 	}
@@ -335,16 +327,15 @@ public class GuiItemFactory
 			Text = Resources.StrCompare.AddEllipsis(),
 			Tag  = Tuple.Create(revision1, revision2),
 		};
-		_dpiBindings.BindImage(item, Icons.Diff);
+		dpiBindings.BindImage(item, Icons.Diff);
 		item.Click += OnCompareWithClick;
 		return item;
 	}
 
-	private static void OnCompareWithClick(object sender, EventArgs e)
+	private static void OnCompareWithClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var items = (Tuple<IRevisionPointer, IRevisionPointer>)item.Tag;
-		var parent = Utility.GetParentControl(item);
+		var item   = (ToolStripItem)sender!;
+		var items  = (Tuple<IRevisionPointer, IRevisionPointer>)item.Tag!;
 
 		var rev1 = items.Item1;
 		var rev2 = items.Item2;
@@ -354,64 +345,61 @@ public class GuiItemFactory
 			new Views.DiffViewModel(rev1.GetCompareDiffSource(rev2), null));
 	}
 
-	private static void OnViewReflogClick(object sender, EventArgs e)
+	private static void OnViewReflogClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var reference = (Reference)item.Tag;
+		var item      = (ToolStripItem)sender!;
+		var reference = (Reference)item.Tag!;
 		GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 			Views.Guids.ReflogViewGuid,
 			new Views.ReflogViewModel(reference.Reflog));
 	}
 	
-	private static void OnArchiveClick(object sender, EventArgs e)
+	private static void OnArchiveClick(object? sender, EventArgs e)
 	{
-		var item     = (ToolStripItem)sender;
-		var revision = (IRevisionPointer)item.Tag;
+		var item     = (ToolStripItem)sender!;
+		var revision = (IRevisionPointer)item.Tag!;
 		var parent   = Utility.GetParentControl(item);
 
 		GuiCommands.Archive(parent, revision, null, null);
 	}
 
-	private static void OnSaveRevisionPatchClick(object sender, EventArgs e)
+	private static void OnSaveRevisionPatchClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var revision   = (IRevisionPointer)item.Tag;
-		var repository = revision.Repository;
-		var parent     = Utility.GetParentControl(item);
-		var fileName   = revision.Dereference().Hash;
+		var item     = (ToolStripItem)sender!;
+		var revision = (IRevisionPointer)item.Tag!;
+		var parent   = Utility.GetParentControl(item);
 
 		GuiCommands.FormatPatch(parent, revision);
 	}
 
-	private static void OnShowViewItemClick(object sender, EventArgs e)
+	private static void OnShowViewItemClick(object? sender, EventArgs e)
 	{
-		var item     = (ToolStripItem)sender;
-		var viewGuid = (Guid)item.Tag;
+		var item     = (ToolStripItem)sender!;
+		var viewGuid = (Guid)item.Tag!;
 
-		GitterApplication.WorkingEnvironment
-			                .ViewDockService
-			                .ShowView(viewGuid, true);
+		GitterApplication
+			.WorkingEnvironment
+			.ViewDockService
+			.ShowView(viewGuid, true);
 	}
 
-	private static void OnCheckoutClick(object sender, EventArgs e)
+	private static void OnCheckoutClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
-		if(repository is { IsEmpty: false })
+		var item = (ToolStripItem)sender!;
+
+		if(item.Tag is Repository { IsEmpty: false } repository)
 		{
 			var parent = Utility.GetParentControl(item);
-			using(var dlg = new CheckoutDialog(repository))
-			{
-				dlg.Run(parent);
-			}
+			using var dialog = new CheckoutDialog(repository);
+			dialog.Run(parent);
 		}
 	}
 
-	private static void OnCheckoutPathClick(object sender, EventArgs e)
+	private static void OnCheckoutPathClick(object? sender, EventArgs e)
 	{
-		var item		= (ToolStripItem)sender;
-		var parent		= Utility.GetParentControl(item);
-		var data		= (Tuple<IRevisionPointer, string>)item.Tag;
+		var item		= (ToolStripItem)sender!;
+		var parent		= Utility.GetParentControl(item)!;
+		var data		= (Tuple<IRevisionPointer, string>)item.Tag!;
 		var revision	= data.Item1;
 		var path		= data.Item2;
 		var repository	= revision.Repository;
@@ -454,28 +442,26 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnCheckoutRevisionClick(object sender, EventArgs e)
+	private static void OnCheckoutRevisionClick(object? sender, EventArgs e)
 	{
-		var item     = (ToolStripItem)sender;
-		var revision = (IRevisionPointer)item.Tag;
+		var item     = (ToolStripItem)sender!;
+		var revision = (IRevisionPointer)item.Tag!;
 		var parent   = Utility.GetParentControl(item);
 		var force    = Control.ModifierKeys == Keys.Shift;
 
 		if(GlobalBehavior.AskOnCommitCheckouts)
 		{
-			bool revIsLocalBranch = (revision is Branch branch) && !branch.IsRemote;
-			if(!revIsLocalBranch)
+			if(revision is not Branch { IsRemote: false }
+				&& revision.Dereference() is { } rev)
 			{
-				var rev = revision.Dereference();
 				var branches = rev.References.GetBranches();
-				if(branches.Count != 0 && branches.Any(b => !b.IsCurrent))
+				if(!branches.IsEmpty && branches.Any(static b => !b.IsCurrent))
 				{
-					using var dlg = new ResolveCheckoutDialog();
-					dlg.SetAvailableBranches(branches);
-					if(dlg.Run(parent) == DialogResult.Cancel) return;
-					if(!dlg.CheckoutCommit)
+					using var dialog = new ResolveCheckoutDialog(branches);
+					if(dialog.Run(parent) == DialogResult.Cancel) return;
+					if(!dialog.CheckoutCommit)
 					{
-						revision = dlg.SelectedBranch;
+						revision = dialog.SelectedBranch ?? revision;
 					}
 					if(!force)
 					{
@@ -538,7 +524,7 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void ProceedCheckout(Control parent, IRevisionPointer revision)
+	private static void ProceedCheckout(Control? parent, IRevisionPointer revision)
 	{
 		try
 		{
@@ -558,52 +544,50 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnRevertClick(object sender, EventArgs e)
+	private static void OnRevertClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var revision = (IRevisionPointer)item.Tag;
-		var parent = Utility.GetParentControl(item);
+		var item     = (ToolStripItem)sender!;
+		var revision = (IRevisionPointer)item.Tag!;
+		var parent   = Utility.GetParentControl(item);
 		if(Control.ModifierKeys == Keys.Shift)
 		{
-			using var dlg = new RevertDialog(revision);
-			dlg.Run(parent);
+			using var dialog = new RevertDialog(revision);
+			dialog.Run(parent);
+			return;
 		}
-		else
+		try
 		{
-			try
+			using(parent.ChangeCursor(Cursors.WaitCursor))
 			{
-				using(parent.ChangeCursor(Cursors.WaitCursor))
-				{
-					revision.Revert();
-				}
+				revision.Revert();
 			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToRevert,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-			}
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToRevert,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
 		}
 	}
 
-	private static void OnRevertMergeClick(object sender, EventArgs e)
+	private static void OnRevertMergeClick(object? sender, EventArgs e)
 	{
-		var item     = (ToolStripItem)sender;
-		var revision = (IRevisionPointer)item.Tag;
+		var item     = (ToolStripItem)sender!;
+		var revision = (IRevisionPointer)item.Tag!;
 		var parent   = Utility.GetParentControl(item);
 
-		using var dlg = new RevertDialog(revision);
-		dlg.Run(parent);
+		using var dialog = new RevertDialog(revision);
+		dialog.Run(parent);
 	}
 
-	private static void OnMultipleRevertClick(object sender, EventArgs e)
+	private static void OnMultipleRevertClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var revisions = (IEnumerable<IRevisionPointer>)item.Tag;
-		var parent = Utility.GetParentControl(item);
+		var item      = (ToolStripItem)sender!;
+		var revisions = (IEnumerable<IRevisionPointer>)item.Tag!;
+		var parent    = Utility.GetParentControl(item);
 		try
 		{
 			using(parent.ChangeCursor(Cursors.WaitCursor))
@@ -622,86 +606,82 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnResetClick(object sender, EventArgs e)
+	private static void OnResetClick(object? sender, EventArgs e)
 	{
-		var item   = (ToolStripItem)sender;
-		var data   = (Tuple<Repository, ResetMode>)item.Tag;
+		var item   = (ToolStripItem)sender!;
+		var data   = (Tuple<Repository, ResetMode>)item.Tag!;
 		var parent = Utility.GetParentControl(item);
 
-		using var dlg = new SelectResetModeDialog(data.Item2);
-		if(dlg.Run(parent) == DialogResult.OK)
+		using var dialog = new SelectResetModeDialog(data.Item2);
+		if(dialog.Run(parent) != DialogResult.OK) return;
+
+		try
 		{
-			try
+			using(parent.ChangeCursor(Cursors.WaitCursor))
 			{
-				using(parent.ChangeCursor(Cursors.WaitCursor))
-				{
-					data.Item1.Status.Reset(dlg.ResetMode);
-				}
+				data.Item1.Status.Reset(dialog.ResetMode);
 			}
-			catch(GitException exc)
-			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToReset,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
-			}
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToReset,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
 		}
 	}
 
-	private static void OnResetHeadClick(object sender, EventArgs e)
+	private static void OnResetHeadClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var revision = (IRevisionPointer)item.Tag;
-		var parent = Utility.GetParentControl(item);
+		var item     = (ToolStripItem)sender!;
+		var revision = (IRevisionPointer)item.Tag!;
+		var parent   = Utility.GetParentControl(item);
 
-		using(var dlg = new SelectResetModeDialog()
+		using var dialog = new SelectResetModeDialog()
 		{
 			ResetMode = ResetMode.Mixed
-		})
+		};
+		if(dialog.Run(parent) != DialogResult.OK) return;
+
+		try
 		{
-			if(dlg.Run(parent) == DialogResult.OK)
+			using(parent.ChangeCursor(Cursors.WaitCursor))
 			{
-				try
-				{
-					using(parent.ChangeCursor(Cursors.WaitCursor))
-					{
-						revision.ResetHeadHere(dlg.ResetMode);
-					}
-				}
-				catch(GitException exc)
-				{
-					GitterApplication.MessageBoxService.Show(
-						parent,
-						exc.Message,
-						Resources.ErrFailedToReset,
-						MessageBoxButton.Close,
-						MessageBoxIcon.Error);
-				}
+				revision.ResetHeadHere(dialog.ResetMode);
 			}
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToReset,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
 		}
 	}
 
-	private static void OnRebaseHeadHereClick(object sender, EventArgs e)
+	private static void OnRebaseHeadHereClick(object? sender, EventArgs e)
 	{
-		var item     = (ToolStripItem)sender;
-		var revision = (IRevisionPointer)item.Tag;
+		var item     = (ToolStripItem)sender!;
+		var revision = (IRevisionPointer)item.Tag!;
 		var parent   = Utility.GetParentControl(item);
 
 		GuiCommands.RebaseHeadTo(parent, revision);
 	}
 
-	private static void OnCherryPickClick(object sender, EventArgs e)
+	private static void OnCherryPickClick(object? sender, EventArgs e)
 	{
-		var item     = (ToolStripItem)sender;
-		var revision = (IRevisionPointer)item.Tag;
+		var item     = (ToolStripItem)sender!;
+		var revision = (IRevisionPointer)item.Tag!;
 		var parent   = Utility.GetParentControl(item);
 
 		if(Control.ModifierKeys == Keys.Shift)
 		{
-			using var dlg = new CherryPickDialog(revision);
-			dlg.Run(parent);
+			using var dialog = new CherryPickDialog(revision);
+			dialog.Run(parent);
 		}
 		else
 		{
@@ -732,8 +712,8 @@ public class GuiItemFactory
 			}
 			catch(AutomaticCherryPickFailedException)
 			{
-				using var dlg = new ConflictsDialog(revision.Repository);
-				dlg.Run(parent);
+				using var dialog = new ConflictsDialog(revision.Repository);
+				dialog.Run(parent);
 			}
 			catch(GitException exc)
 			{
@@ -747,20 +727,20 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnCherryPickMergeClick(object sender, EventArgs e)
+	private static void OnCherryPickMergeClick(object? sender, EventArgs e)
 	{
-		var item     = (ToolStripItem)sender;
-		var revision = (IRevisionPointer)item.Tag;
+		var item     = (ToolStripItem)sender!;
+		var revision = (IRevisionPointer)item.Tag!;
 		var parent   = Utility.GetParentControl(item);
 
-		using var dlg = new CherryPickDialog(revision);
-		dlg.Run(parent);
+		using var dialog = new CherryPickDialog(revision);
+		dialog.Run(parent);
 	}
 
-	private static void OnMultipleCherryPickClick(object sender, EventArgs e)
+	private static void OnMultipleCherryPickClick(object? sender, EventArgs e)
 	{
-		var item      = (ToolStripItem)sender;
-		var revisions = (IEnumerable<IRevisionPointer>)item.Tag;
+		var item      = (ToolStripItem)sender!;
+		var revisions = (IEnumerable<IRevisionPointer>)item.Tag!;
 		var parent    = Utility.GetParentControl(item);
 		try
 		{
@@ -833,7 +813,7 @@ public class GuiItemFactory
 			Text = Resources.StrRefresh,
 			Tag  = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.Refresh);
+		dpiBindings.BindImage(item, Icons.Refresh);
 		item.Click += OnRefreshStashClick;
 		return item;
 	}
@@ -848,7 +828,7 @@ public class GuiItemFactory
 			Text = Resources.StrClear,
 			Tag = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.StashClear);
+		dpiBindings.BindImage(item, Icons.StashClear);
 		item.Click += OnStashClearClick;
 		return item;
 	}
@@ -863,7 +843,7 @@ public class GuiItemFactory
 			Text = Resources.StrPop,
 			Tag = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.StashPop);
+		dpiBindings.BindImage(item, Icons.StashPop);
 		item.Click += OnStashPopClick;
 		return item;
 	}
@@ -871,14 +851,14 @@ public class GuiItemFactory
 	public T GetStashPopItem<T>(StashedState stashedState)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(stashedState, nameof(stashedState));
+		Verify.Argument.IsValidGitObject(stashedState);
 
 		var item = new T()
 		{
 			Text = Resources.StrPop,
 			Tag = stashedState,
 		};
-		_dpiBindings.BindImage(item, Icons.StashPop);
+		dpiBindings.BindImage(item, Icons.StashPop);
 		item.Click += OnStashPopStateClick;
 		return item;
 	}
@@ -893,7 +873,7 @@ public class GuiItemFactory
 			Text = Resources.StrApply,
 			Tag = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.StashApply);
+		dpiBindings.BindImage(item, Icons.StashApply);
 		item.Click += OnStashApplyClick;
 		return item;
 	}
@@ -908,7 +888,7 @@ public class GuiItemFactory
 			Text = Resources.StrApply,
 			Tag = stashedState,
 		};
-		_dpiBindings.BindImage(item, Icons.StashApply);
+		dpiBindings.BindImage(item, Icons.StashApply);
 		item.Click += OnStashApplyStateClick;
 		return item;
 	}
@@ -923,7 +903,7 @@ public class GuiItemFactory
 			Text = Resources.StrDrop,
 			Tag = stashedState,
 		};
-		_dpiBindings.BindImage(item, Icons.StashDrop);
+		dpiBindings.BindImage(item, Icons.StashDrop);
 		item.Click += OnStashDropStateClick;
 		return item;
 	}
@@ -938,7 +918,7 @@ public class GuiItemFactory
 			Text = Resources.StrDrop,
 			Tag = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.StashDrop);
+		dpiBindings.BindImage(item, Icons.StashDrop);
 		item.Click += OnStashDropClick;
 		return item;
 	}
@@ -953,7 +933,7 @@ public class GuiItemFactory
 			Text = Resources.StrToBranch.AddEllipsis(),
 			Tag = stashedState,
 		};
-		_dpiBindings.BindImage(item, Icons.Branch);
+		dpiBindings.BindImage(item, Icons.Branch);
 		item.Click += OnStashToBranchClick;
 		return item;
 	}
@@ -969,7 +949,7 @@ public class GuiItemFactory
 			Tag  = repository,
 			Enabled = !repository.IsEmpty && repository.Status.UnmergedCount == 0,
 		};
-		_dpiBindings.BindImage(item, Icons.StashSave);
+		dpiBindings.BindImage(item, Icons.StashSave);
 		item.Click += OnStashSaveKeepIndexItemClick;
 		return item;
 	}
@@ -985,116 +965,116 @@ public class GuiItemFactory
 			Tag     = repository,
 			Enabled = !repository.IsEmpty && repository.Status.UnmergedCount == 0,
 		};
-		_dpiBindings.BindImage(item, Icons.StashSave);
+		dpiBindings.BindImage(item, Icons.StashSave);
 		item.Click += OnStashSaveItemClick;
 		return item;
 	}
 
-	private static void OnRefreshStashClick(object sender, EventArgs e)
+	private static void OnRefreshStashClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 
 		repository.Stash.Refresh();
 	}
 
-	private static void OnStashClearClick(object sender, EventArgs e)
+	private static void OnStashClearClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 		var parent     = Utility.GetParentControl(item);
 
 		GuiCommands.ClearStash(parent, repository.Stash);
 	}
 
-	private static void OnStashSaveItemClick(object sender, EventArgs e)
+	private static void OnStashSaveItemClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 		var parent     = Utility.GetParentControl(item);
 
-		using var dlg = new StashSaveDialog(repository);
-		dlg.Run(parent);
+		using var dialog = new StashSaveDialog(repository);
+		dialog.Run(parent);
 	}
 
-	private static void OnStashSaveKeepIndexItemClick(object sender, EventArgs e)
+	private static void OnStashSaveKeepIndexItemClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 		var parent     = Utility.GetParentControl(item);
 
-		using var dlg = new StashSaveDialog(repository)
+		using var dialog = new StashSaveDialog(repository)
 		{
 			KeepIndex = true,
 		};
-		dlg.Run(parent);
+		dialog.Run(parent);
 	}
 
-	private static void OnStashPopClick(object sender, EventArgs e)
+	private static void OnStashPopClick(object? sender, EventArgs e)
 	{
-		var item         = (ToolStripItem)sender;
-		var repository   = (Repository)item.Tag;
+		var item         = (ToolStripItem)sender!;
+		var repository   = (Repository)item.Tag!;
 		var parent       = Utility.GetParentControl(item);
 		var restoreIndex = Control.ModifierKeys == Keys.Shift;
 
 		GuiCommands.PopStashedState(parent, repository.Stash, restoreIndex);
 	}
 
-	private static void OnStashPopStateClick(object sender, EventArgs e)
+	private static void OnStashPopStateClick(object? sender, EventArgs e)
 	{
-		var item         = (ToolStripItem)sender;
-		var stashedState = (StashedState)item.Tag;
+		var item         = (ToolStripItem)sender!;
+		var stashedState = (StashedState)item.Tag!;
 		var parent       = Utility.GetParentControl(item);
 		var restoreIndex = Control.ModifierKeys == Keys.Shift;
 
 		GuiCommands.PopStashedState(parent, stashedState, restoreIndex);
 	}
 
-	private static void OnStashApplyClick(object sender, EventArgs e)
+	private static void OnStashApplyClick(object? sender, EventArgs e)
 	{
-		var item         = (ToolStripItem)sender;
-		var repository   = (Repository)item.Tag;
+		var item         = (ToolStripItem)sender!;
+		var repository   = (Repository)item.Tag!;
 		var parent       = Utility.GetParentControl(item);
 		var restoreIndex = Control.ModifierKeys == Keys.Shift;
 
 		GuiCommands.ApplyStashedState(parent, repository.Stash, restoreIndex);
 	}
 
-	private static void OnStashApplyStateClick(object sender, EventArgs e)
+	private static void OnStashApplyStateClick(object? sender, EventArgs e)
 	{
-		var item         = (ToolStripItem)sender;
-		var stashedState = (StashedState)item.Tag;
+		var item         = (ToolStripItem)sender!;
+		var stashedState = (StashedState)item.Tag!;
 		var parent       = Utility.GetParentControl(item);
 		var restoreIndex = Control.ModifierKeys == Keys.Shift;
 
 		GuiCommands.ApplyStashedState(parent, stashedState, restoreIndex);
 	}
 
-	private static void OnStashDropStateClick(object sender, EventArgs e)
+	private static void OnStashDropStateClick(object? sender, EventArgs e)
 	{
-		var item         = (ToolStripItem)sender;
-		var stashedState = (StashedState)item.Tag;
+		var item         = (ToolStripItem)sender!;
+		var stashedState = (StashedState)item.Tag!;
 		var parent       = Utility.GetParentControl(item);
 
 		GuiCommands.DropStashedState(parent, stashedState);
 	}
 
-	private static void OnStashDropClick(object sender, EventArgs e)
+	private static void OnStashDropClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 		var parent     = Utility.GetParentControl(item);
 
 		GuiCommands.DropStashedState(parent, repository.Stash);
 	}
 
-	private static void OnStashToBranchClick(object sender, EventArgs e)
+	private static void OnStashToBranchClick(object? sender, EventArgs e)
 	{
-		var item         = (ToolStripItem)sender;
-		var stashedState = (StashedState)item.Tag;
+		var item         = (ToolStripItem)sender!;
+		var stashedState = (StashedState)item.Tag!;
 
-		using var dlg = new StashToBranchDialog(stashedState);
-		dlg.Run(Utility.GetParentControl(item));
+		using var dialog = new StashToBranchDialog(stashedState);
+		dialog.Run(Utility.GetParentControl(item));
 	}
 
 	#endregion
@@ -1111,20 +1091,20 @@ public class GuiItemFactory
 			Text = Resources.StrAddNote.AddEllipsis(),
 			Tag  = revision,
 		};
-		_dpiBindings.BindImage(item, Icons.NoteAdd);
+		dpiBindings.BindImage(item, Icons.NoteAdd);
 		item.Click += OnAddNoteClick;
 		return item;
 	}
 
-	private static void OnAddNoteClick(object sender, EventArgs e)
+	private static void OnAddNoteClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var revision = (IRevisionPointer)item.Tag;
-		var parent = Utility.GetParentControl(item);
+		var item     = (ToolStripItem)sender!;
+		var revision = (IRevisionPointer)item.Tag!;
+		var parent   = Utility.GetParentControl(item);
 
-		using var dlg = new AddNoteDialog(revision.Repository);
-		dlg.Revision.Value = revision.Pointer;
-		dlg.Run(parent);
+		using var dialog = new AddNoteDialog(revision.Repository);
+		dialog.Revision.Value = revision.Pointer;
+		dialog.Run(parent);
 	}
 
 	#endregion
@@ -1141,7 +1121,7 @@ public class GuiItemFactory
 			Text = Resources.StrCreateBranch.AddEllipsis(),
 			Tag  = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.BranchAdd);
+		dpiBindings.BindImage(item, Icons.BranchAdd);
 		item.Click += OnCreateBranchClick;
 		return item;
 	}
@@ -1149,17 +1129,14 @@ public class GuiItemFactory
 	public T GetCreateBranchItem<T>(IRevisionPointer revision)
 		where T : ToolStripItem, new()
 	{
-		if(revision != null)
-		{
-			Verify.Argument.IsValidRevisionPointer(revision);
-		}
+		Verify.Argument.IsValidRevisionPointer(revision);
 
 		var item = new T()
 		{
 			Text = Resources.StrCreateBranch.AddEllipsis(),
 			Tag  = revision,
 		};
-		_dpiBindings.BindImage(item, Icons.BranchAdd);
+		dpiBindings.BindImage(item, Icons.BranchAdd);
 		item.Click += OnCreateBranchAtClick;
 		return item;
 	}
@@ -1181,7 +1158,7 @@ public class GuiItemFactory
 			Tag     = branch,
 			Enabled = !branch.IsCurrent,
 		};
-		_dpiBindings.BindImage(item, branch.IsRemote ? Icons.RemoteBranchDelete : Icons.BranchDelete);
+		dpiBindings.BindImage(item, branch.IsRemote ? Icons.RemoteBranchDelete : Icons.BranchDelete);
 		item.Click += OnRemoveBranchClick;
 		return item;
 	}
@@ -1196,7 +1173,7 @@ public class GuiItemFactory
 			Text = string.Format(nameFormat, Resources.StrRename.AddEllipsis(), branch.Name),
 			Tag  = branch,
 		};
-		_dpiBindings.BindImage(item, Icons.BranchRename);
+		dpiBindings.BindImage(item, Icons.BranchRename);
 		item.Click += OnRenameBranchClick;
 		return item;
 	}
@@ -1212,7 +1189,7 @@ public class GuiItemFactory
 			Tag		= revision,
 			Enabled	= revision != revision.Repository.Head.Pointer,
 		};
-		_dpiBindings.BindImage(item, Icons.Merge);
+		dpiBindings.BindImage(item, Icons.Merge);
 		item.Click += OnMergeBranchClick;
 		return item;
 	}
@@ -1228,180 +1205,159 @@ public class GuiItemFactory
 			Text = remote.Name,
 			Tag  = Tuple.Create(branch, remote),
 		};
-		_dpiBindings.BindImage(item, Icons.Remote);
+		dpiBindings.BindImage(item, Icons.Remote);
 		item.Click += new EventHandler(OnPushBranchToRemoteClick);
 		return item;
 	}
 
-	private static void OnPushBranchToRemoteClick(object sender, EventArgs e)
+	private static void OnPushBranchToRemoteClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
+		var item   = (ToolStripItem)sender!;
+		var data   = (Tuple<Branch, Remote>)item.Tag!;
 		var parent = Utility.GetParentControl(item);
-		var data = (Tuple<Branch, Remote>)item.Tag;
 		var branch = data.Item1;
 		var remote = data.Item2;
 
-		GuiCommands.Push(parent, remote, new Branch[] { branch }, false, true, false);
+		GuiCommands.Push(parent, remote, branch, false, true, false);
 	}
 
-	private static void OnCreateBranchClick(object sender, EventArgs e)
+	private static void OnCreateBranchClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 
-		using var dlg = new CreateBranchDialog(repository);
-		dlg.StartingRevision.Value = GitConstants.HEAD;
-		dlg.Run(Utility.GetParentControl(item));
+		using var dialog = new CreateBranchDialog(repository);
+		dialog.StartingRevision.Value = GitConstants.HEAD;
+		dialog.Run(Utility.GetParentControl(item));
 	}
 
-	private static void OnCreateBranchAtClick(object sender, EventArgs e)
+	private static void OnCreateBranchAtClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var revision = (IRevisionPointer)item.Tag;
-		string startingRevision;
-		string defaultBranchName;
-		if(revision != null)
-		{
-			startingRevision  = revision.Pointer;
-			defaultBranchName = BranchHelper.TryFormatDefaultLocalBranchName(revision);
-		}
-		else
-		{
-			startingRevision  = string.Empty;
-			defaultBranchName = string.Empty;
-		}
+		var item     = (ToolStripItem)sender!;
+		var revision = (IRevisionPointer)item.Tag!;
+		var startingRevision  = revision.Pointer;
+		var defaultBranchName = BranchHelper.TryFormatDefaultLocalBranchName(revision);
 
-		using var dlg = new CreateBranchDialog(revision.Repository);
-		dlg.StartingRevision.Value = startingRevision;
+		using var dialog = new CreateBranchDialog(revision.Repository);
+		dialog.StartingRevision.Value = startingRevision;
 		if(!string.IsNullOrWhiteSpace(defaultBranchName))
 		{
-			dlg.BranchName.Value = defaultBranchName;
+			dialog.BranchName.Value = defaultBranchName;
 		}
-		dlg.Run(Utility.GetParentControl(item));
+		dialog.Run(Utility.GetParentControl(item));
 	}
 
-	private static void OnRemoveBranchClick(object sender, EventArgs e)
+	private static void OnRemoveBranchClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var branch = (BranchBase)item.Tag;
+		var item   = (ToolStripItem)sender!;
 		var parent = Utility.GetParentControl(item);
-		if(branch != null)
+		if(item.Tag is not BranchBase branch) return;
+
+		if(branch is RemoteBranch remoteBranch)
 		{
-			if(branch.IsRemote)
+			if(remoteBranch.Remote is not null)
 			{
-				var remoteBranch = (RemoteBranch)branch;
-				if(remoteBranch.Remote != null)
-				{
-					using(var dlg = new RemoveRemoteBranchDialog(remoteBranch))
-					{
-						dlg.Run(parent);
-					}
-				}
-				else
-				{
-					if(GitterApplication.MessageBoxService.Show(
-						parent,
-						Resources.StrAskRemoteBranchRemove.UseAsFormat(remoteBranch.Name),
-						Resources.StrRemoveBranch,
-						MessageBoxButton.YesNo,
-						MessageBoxIcon.Question) == DialogResult.Yes)
-					{
-						try
-						{
-							using(parent.ChangeCursor(Cursors.WaitCursor))
-							{
-								remoteBranch.Delete();
-							}
-						}
-						catch(GitException exc)
-						{
-							GitterApplication.MessageBoxService.Show(
-								parent,
-								exc.Message,
-								Resources.ErrFailedToRemoveBranch.UseAsFormat(branch.Name),
-								MessageBoxButton.Close,
-								MessageBoxIcon.Error);
-						}
-					}
-				}
+				using var dialog = new RemoveRemoteBranchDialog(remoteBranch);
+				dialog.Run(parent);
 			}
 			else
 			{
-				try
+				if(GitterApplication.MessageBoxService.Show(
+					parent,
+					Resources.StrAskRemoteBranchRemove.UseAsFormat(remoteBranch.Name),
+					Resources.StrRemoveBranch,
+					MessageBoxButton.YesNo,
+					MessageBoxIcon.Question) == DialogResult.Yes)
 				{
-					bool force = Control.ModifierKeys == Keys.Shift;
-					using(parent.ChangeCursor(Cursors.WaitCursor))
+					try
 					{
-						branch.Delete(force);
-					}
-				}
-				catch(BranchIsNotFullyMergedException)
-				{
-					if(GitterApplication.MessageBoxService.Show(
-						parent,
-						Resources.StrAskBranchIsNotFullyMerged.UseAsFormat(branch.Name),
-						Resources.StrDeleteBranch,
-						MessageBoxButtons.YesNo,
-						MessageBoxIcon.Question) == DialogResult.Yes)
-					{
-						try
+						using(parent.ChangeCursor(Cursors.WaitCursor))
 						{
-							using(parent.ChangeCursor(Cursors.WaitCursor))
-							{
-								branch.Delete(true);
-							}
-						}
-						catch(GitException exc)
-						{
-							GitterApplication.MessageBoxService.Show(
-								parent,
-								exc.Message,
-								Resources.ErrFailedToRemoveBranch.UseAsFormat(branch.Name),
-								MessageBoxButton.Close,
-								MessageBoxIcon.Error);
+							remoteBranch.Delete();
 						}
 					}
-				}
-				catch(GitException exc)
-				{
-					GitterApplication.MessageBoxService.Show(
-						parent,
-						exc.Message,
-						string.Format(Resources.ErrFailedToRemoveBranch, branch.Name),
-						MessageBoxButton.Close,
-						MessageBoxIcon.Error);
+					catch(GitException exc)
+					{
+						GitterApplication.MessageBoxService.Show(
+							parent,
+							exc.Message,
+							Resources.ErrFailedToRemoveBranch.UseAsFormat(branch.Name),
+							MessageBoxButton.Close,
+							MessageBoxIcon.Error);
+					}
 				}
 			}
 		}
-	}
-
-	private static void OnRenameBranchClick(object sender, EventArgs e)
-	{
-		var item = (ToolStripItem)sender;
-		var branch = (Branch)item.Tag;
-		if(branch != null)
+		else
 		{
-			using(var dlg = new RenameBranchDialog(branch))
+			try
 			{
-				dlg.Run(Utility.GetParentControl(item));
+				bool force = Control.ModifierKeys == Keys.Shift;
+				using(parent.ChangeCursor(Cursors.WaitCursor))
+				{
+					branch.Delete(force);
+				}
+			}
+			catch(BranchIsNotFullyMergedException)
+			{
+				if(GitterApplication.MessageBoxService.Show(
+					parent,
+					Resources.StrAskBranchIsNotFullyMerged.UseAsFormat(branch.Name),
+					Resources.StrDeleteBranch,
+					MessageBoxButtons.YesNo,
+					MessageBoxIcon.Question) == DialogResult.Yes)
+				{
+					try
+					{
+						using(parent.ChangeCursor(Cursors.WaitCursor))
+						{
+							branch.Delete(true);
+						}
+					}
+					catch(GitException exc)
+					{
+						GitterApplication.MessageBoxService.Show(
+							parent,
+							exc.Message,
+							Resources.ErrFailedToRemoveBranch.UseAsFormat(branch.Name),
+							MessageBoxButton.Close,
+							MessageBoxIcon.Error);
+					}
+				}
+			}
+			catch(GitException exc)
+			{
+				GitterApplication.MessageBoxService.Show(
+					parent,
+					exc.Message,
+					string.Format(Resources.ErrFailedToRemoveBranch, branch.Name),
+					MessageBoxButton.Close,
+					MessageBoxIcon.Error);
 			}
 		}
 	}
 
-	private static void OnMergeBranchClick(object sender, EventArgs e)
+	private static void OnRenameBranchClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var revision = (IRevisionPointer)item.Tag;
-		var parent = Utility.GetParentControl(item);
+		var item = (ToolStripItem)sender!;
+		if(item.Tag is not Branch branch) return;
+
+		using var dialog = new RenameBranchDialog(branch);
+		dialog.Run(Utility.GetParentControl(item));
+	}
+
+	private static void OnMergeBranchClick(object? sender, EventArgs e)
+	{
+		var item     = (ToolStripItem)sender!;
+		var revision = (IRevisionPointer)item.Tag!;
+		var parent   = Utility.GetParentControl(item);
 		if(revision != null)
 		{
 			if(Control.ModifierKeys == Keys.Shift)
 			{
-				using(var dlg = new MergeDialog(revision.Repository))
-				{
-					dlg.Revisions.Value = new[] { revision };
-					dlg.Run(parent);
-				}
+				using var dialog = new MergeDialog(revision.Repository);
+				dialog.Revisions.Value = new[] { revision };
+				dialog.Run(parent);
 			}
 			else
 			{
@@ -1414,10 +1370,8 @@ public class GuiItemFactory
 				}
 				catch(AutomaticMergeFailedException)
 				{
-					using(var dlg = new ConflictsDialog(revision.Repository))
-					{
-						dlg.Run(parent);
-					}
+					using var dialog = new ConflictsDialog(revision.Repository);
+					dialog.Run(parent);
 				}
 				catch(GitException exc)
 				{
@@ -1446,7 +1400,7 @@ public class GuiItemFactory
 			Text = Resources.StrCreateTag.AddEllipsis(),
 			Tag = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.TagAdd);
+		dpiBindings.BindImage(item, Icons.TagAdd);
 		item.Click += OnCreateTagClick;
 		return item;
 	}
@@ -1464,7 +1418,7 @@ public class GuiItemFactory
 			Text = Resources.StrCreateTag.AddEllipsis(),
 			Tag  = revision,
 		};
-		_dpiBindings.BindImage(item, Icons.TagAdd);
+		dpiBindings.BindImage(item, Icons.TagAdd);
 		item.Click += OnCreateTagAtClick;
 		return item;
 	}
@@ -1472,42 +1426,42 @@ public class GuiItemFactory
 	public T GetRemoveTagItem<T>(Tag tag, string nameFormat)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(tag, nameof(tag));
+		Verify.Argument.IsValidGitObject(tag);
 
 		var item = new T()
 		{
 			Text = string.Format(nameFormat, Resources.StrRemoveTag, tag.Name),
 			Tag  = tag,
 		};
-		_dpiBindings.BindImage(item, Icons.TagDelete);
+		dpiBindings.BindImage(item, Icons.TagDelete);
 		item.Click += OnRemoveTagClick;
 		return item;
 	}
 
-	private static void OnCreateTagClick(object sender, EventArgs e)
+	private static void OnCreateTagClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 
-		using var dlg = new CreateTagDialog(repository);
-		dlg.Revision.Value = GitConstants.HEAD;
-		dlg.Run(Utility.GetParentControl(item));
+		using var dialog = new CreateTagDialog(repository);
+		dialog.Revision.Value = GitConstants.HEAD;
+		dialog.Run(Utility.GetParentControl(item));
 	}
 
-	private static void OnCreateTagAtClick(object sender, EventArgs e)
+	private static void OnCreateTagAtClick(object? sender, EventArgs e)
 	{
-		var item     = (ToolStripItem)sender;
-		var revision = (IRevisionPointer)item.Tag;
+		var item     = (ToolStripItem)sender!;
+		var revision = (IRevisionPointer)item.Tag!;
 
-		using var dlg = new CreateTagDialog(revision.Repository);
-		dlg.Revision.Value = (revision != null) ? revision.Pointer : GitConstants.HEAD;
-		dlg.Run(Utility.GetParentControl(item));
+		using var dialog = new CreateTagDialog(revision.Repository);
+		dialog.Revision.Value = revision.Pointer;
+		dialog.Run(Utility.GetParentControl(item));
 	}
 
-	private static void OnRemoveTagClick(object sender, EventArgs e)
+	private static void OnRemoveTagClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var tag = (Tag)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var tag  = (Tag)item.Tag!;
 		var parent = Utility.GetParentControl(item);
 		if(tag != null)
 		{
@@ -1537,14 +1491,14 @@ public class GuiItemFactory
 	public T GetEditRemotePropertiesItem<T>(Remote remote)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(remote, nameof(remote));
+		Verify.Argument.IsValidGitObject(remote);
 
 		var item = new T()
 		{
 			Text = Resources.StrProperties.AddEllipsis(),
 			Tag = remote,
 		};
-		_dpiBindings.BindImage(item, Icons.RemoteProperties);
+		dpiBindings.BindImage(item, Icons.RemoteProperties);
 		item.Click += OnEditRemotePropertiesClick;
 		return item;
 	}
@@ -1552,14 +1506,14 @@ public class GuiItemFactory
 	public T GetShowRemoteItem<T>(Remote remote)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(remote, nameof(remote));
+		Verify.Argument.IsValidGitObject(remote);
 
 		var item = new T()
 		{
 			Text = Resources.StrBrowse,
 			Tag = remote,
 		};
-		_dpiBindings.BindImage(item, Icons.Search);
+		dpiBindings.BindImage(item, Icons.Search);
 		item.Click += OnShowRemoteClick;
 		return item;
 	}
@@ -1575,7 +1529,7 @@ public class GuiItemFactory
 			Tag     = repository,
 			Enabled = repository.Remotes.Count != 0,
 		};
-		_dpiBindings.BindImage(item, Icons.Fetch);
+		dpiBindings.BindImage(item, Icons.Fetch);
 		item.Click += OnFetchClick;
 		return item;
 	}
@@ -1583,14 +1537,14 @@ public class GuiItemFactory
 	public T GetFetchFromItem<T>(Remote remote, string nameFormat)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(remote, nameof(remote));
+		Verify.Argument.IsValidGitObject(remote);
 			
 		var item = new T()
 		{
 			Text = string.Format(nameFormat, Resources.StrFetch, remote.Name),
 			Tag  = remote,
 		};
-		_dpiBindings.BindImage(item, nameFormat == "{1}"
+		dpiBindings.BindImage(item, nameFormat == "{1}"
 			? Icons.Remote
 			: Icons.Fetch);
 		item.Click += OnFetchFromClick;
@@ -1608,7 +1562,7 @@ public class GuiItemFactory
 			Tag     = repository,
 			Enabled = repository.Remotes.Count != 0,
 		};
-		_dpiBindings.BindImage(item, Icons.Pull);
+		dpiBindings.BindImage(item, Icons.Pull);
 		item.Click += OnPullClick;
 		return item;
 	}
@@ -1616,7 +1570,7 @@ public class GuiItemFactory
 	public T GetPullFromItem<T>(Remote remote, string nameFormat)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(remote, nameof(remote));
+		Verify.Argument.IsValidGitObject(remote);
 		Verify.Argument.IsNotNull(nameFormat);
 
 		var item = new T()
@@ -1624,7 +1578,7 @@ public class GuiItemFactory
 			Text = string.Format(nameFormat, Resources.StrPull, remote.Name),
 			Tag  = remote,
 		};
-		_dpiBindings.BindImage(item, nameFormat == "{1}"
+		dpiBindings.BindImage(item, nameFormat == "{1}"
 			? Icons.Remote
 			: Icons.Pull);
 		item.Click += OnPullFromClick;
@@ -1641,7 +1595,7 @@ public class GuiItemFactory
 			Text = Resources.StrRefresh,
 			Tag  = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.Refresh);
+		dpiBindings.BindImage(item, Icons.Refresh);
 		item.Click += OnRefreshRemotesClick;
 		return item;
 	}
@@ -1668,7 +1622,7 @@ public class GuiItemFactory
 			Text = Resources.StrAddRemote.AddEllipsis(),
 			Tag  = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.RemoteAdd);
+		dpiBindings.BindImage(item, Icons.RemoteAdd);
 		item.Click += OnAddRemoteClick;
 		return item;
 	}
@@ -1676,7 +1630,7 @@ public class GuiItemFactory
 	public T GetRemoveRemoteItem<T>(Remote remote, string nameFormat)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(remote, nameof(remote));
+		Verify.Argument.IsValidGitObject(remote);
 		Verify.Argument.IsNotNull(nameFormat);
 
 		var item = new T()
@@ -1684,7 +1638,7 @@ public class GuiItemFactory
 			Text = string.Format(nameFormat, Resources.StrRemove, remote.Name),
 			Tag  = remote,
 		};
-		_dpiBindings.BindImage(item, Icons.RemoteDelete);
+		dpiBindings.BindImage(item, Icons.RemoteDelete);
 		item.Click += OnRemoveRemoteClick;
 		return item;
 	}
@@ -1692,14 +1646,14 @@ public class GuiItemFactory
 	public T GetRenameRemoteItem<T>(Remote remote, string nameFormat)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(remote, nameof(remote));
+		Verify.Argument.IsValidGitObject(remote);
 
 		var item = new T()
 		{
 			Text = string.Format(nameFormat, Resources.StrRename.AddEllipsis(), remote.Name),
 			Tag  = remote,
 		};
-		_dpiBindings.BindImage(item, Icons.RemoteRename);
+		dpiBindings.BindImage(item, Icons.RemoteRename);
 		item.Click += OnRenameRemoteClick;
 		return item;
 	}
@@ -1707,7 +1661,7 @@ public class GuiItemFactory
 	public T GetPruneRemoteItem<T>(Remote remote, string nameFormat)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(remote, nameof(remote));
+		Verify.Argument.IsValidGitObject(remote);
 		Verify.Argument.IsNotNull(nameFormat);
 
 		var item = new T()
@@ -1715,7 +1669,7 @@ public class GuiItemFactory
 			Text = string.Format(nameFormat, Resources.StrPruneRemote, remote.Name),
 			Tag  = remote,
 		};
-		_dpiBindings.BindImage(item, Icons.Prune);
+		dpiBindings.BindImage(item, Icons.Prune);
 		item.Click += OnPruneRemoteClick;
 		return item;
 	}
@@ -1732,7 +1686,7 @@ public class GuiItemFactory
 			Text = string.Format(nameFormat, Resources.StrRemoveBranch, remoteBranch.Name),
 			Tag = remoteBranch,
 		};
-		_dpiBindings.BindImage(item, Icons.RemoteBranchDelete);
+		dpiBindings.BindImage(item, Icons.RemoteBranchDelete);
 		item.Click += OnRemoveRemoteReferenceClick;
 		return item;
 	}
@@ -1749,25 +1703,25 @@ public class GuiItemFactory
 			Text = string.Format(nameFormat, Resources.StrRemoveTag, remoteTag.Name),
 			Tag = remoteTag,
 		};
-		_dpiBindings.BindImage(item, Icons.TagDelete);
+		dpiBindings.BindImage(item, Icons.TagDelete);
 		item.Click += OnRemoveRemoteReferenceClick;
 		return item;
 	}
 
-	private static void OnEditRemotePropertiesClick(object sender, EventArgs e)
+	private static void OnEditRemotePropertiesClick(object? sender, EventArgs e)
 	{
-		var item   = (ToolStripItem)sender;
-		var remote = (Remote)item.Tag;
+		var item   = (ToolStripItem)sender!;
+		var remote = (Remote)item.Tag!;
 		var parent = Utility.GetParentControl(item);
 
 		using var d = new RemotePropertiesDialog(remote);
 		d.Run(parent);
 	}
 
-	private static void OnShowRemoteClick(object sender, EventArgs e)
+	private static void OnShowRemoteClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var remote = (Remote)item.Tag;
+		var item   = (ToolStripItem)sender!;
+		var remote = (Remote)item.Tag!;
 		var viewModel = new Views.RemoteViewModel(remote);
 		GitterApplication
 			.WorkingEnvironment
@@ -1775,10 +1729,10 @@ public class GuiItemFactory
 			.ShowView(Views.Guids.RemoteViewGuid, viewModel);
 	}
 
-	private static void OnRemoveRemoteReferenceClick(object sender, EventArgs e)
+	private static void OnRemoveRemoteReferenceClick(object? sender, EventArgs e)
 	{
-		var item      = (ToolStripItem)sender;
-		var reference = (IRemoteReference)item.Tag;
+		var item      = (ToolStripItem)sender!;
+		var reference = (IRemoteReference)item.Tag!;
 		var parent    = Utility.GetParentControl(item);
 
 		if(GitterApplication.MessageBoxService.Show(
@@ -1808,37 +1762,37 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnPruneRemoteClick(object sender, EventArgs e)
+	private static void OnPruneRemoteClick(object? sender, EventArgs e)
 	{
-		var item   = (ToolStripItem)sender;
-		var remote = (Remote)item.Tag;
+		var item   = (ToolStripItem)sender!;
+		var remote = (Remote)item.Tag!;
 		var parent = Utility.GetParentControl(item);
 
 		GuiCommands.Prune(parent, remote);
 	}
 
-	private static void OnFetchClick(object sender, EventArgs e)
+	private static void OnFetchClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 		var parent     = Utility.GetParentControl(item);
 
 		GuiCommands.Fetch(parent, repository);
 	}
 
-	private static void OnPullClick(object sender, EventArgs e)
+	private static void OnPullClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 		var parent     = Utility.GetParentControl(item);
 
 		GuiCommands.Pull(parent, repository);
 	}
 
-	private static void OnFetchFromClick(object sender, EventArgs e)
+	private static void OnFetchFromClick(object? sender, EventArgs e)
 	{
-		var item   = (ToolStripItem)sender;
-		var remote = (Remote)item.Tag;
+		var item   = (ToolStripItem)sender!;
+		var remote = (Remote)item.Tag!;
 		var parent = Utility.GetParentControl(item);
 
 		if(!remote.IsDeleted)
@@ -1847,10 +1801,10 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnPullFromClick(object sender, EventArgs e)
+	private static void OnPullFromClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var remote     = (Remote)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var remote     = (Remote)item.Tag!;
 		var parent     = Utility.GetParentControl(item);
 
 		if(!remote.IsDeleted)
@@ -1859,33 +1813,33 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnRefreshRemotesClick(object sender, EventArgs e)
+	private static void OnRefreshRemotesClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 		repository.Remotes.Refresh();
 	}
 
-	private static void OnAddRemoteClick(object sender, EventArgs e)
+	private static void OnAddRemoteClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
-		using var dlg = new AddRemoteDialog(repository);
-		dlg.Run(Utility.GetParentControl(item));
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
+		using var dialog = new AddRemoteDialog(repository);
+		dialog.Run(Utility.GetParentControl(item));
 	}
 
-	private static void OnRenameRemoteClick(object sender, EventArgs e)
+	private static void OnRenameRemoteClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var remote = (Remote)item.Tag;
-		using var dlg = new RenameRemoteDialog(remote);
-		dlg.Run(Utility.GetParentControl(item));
+		var item   = (ToolStripItem)sender!;
+		var remote = (Remote)item.Tag!;
+		using var dialog = new RenameRemoteDialog(remote);
+		dialog.Run(Utility.GetParentControl(item));
 	}
 
-	private static void OnRemoveRemoteClick(object sender, EventArgs e)
+	private static void OnRemoveRemoteClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var remote = (Remote)item.Tag;
+		var item   = (ToolStripItem)sender!;
+		var remote = (Remote)item.Tag!;
 		var parent = Utility.GetParentControl(item);
 		if(remote != null)
 		{
@@ -1934,7 +1888,7 @@ public class GuiItemFactory
 			Text = Resources.StrRefresh,
 			Tag = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.Refresh);
+		dpiBindings.BindImage(item, Icons.Refresh);
 		item.Click += OnRefreshSubmodulesClick;
 		return item;
 	}
@@ -1949,7 +1903,7 @@ public class GuiItemFactory
 			Text = Resources.StrAddSubmodule.AddEllipsis(),
 			Tag = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.SubmoduleAdd);
+		dpiBindings.BindImage(item, Icons.SubmoduleAdd);
 		item.Click += OnAddSubmoduleClick;
 		return item;
 	}
@@ -1957,14 +1911,14 @@ public class GuiItemFactory
 	public T GetUpdateSubmoduleItem<T>(Submodule submodule)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(submodule, nameof(submodule));
+		Verify.Argument.IsValidGitObject(submodule);
 
 		var item = new T()
 		{
 			Text = Resources.StrUpdate,
 			Tag  = submodule,
 		};
-		_dpiBindings.BindImage(item, Icons.Pull);
+		dpiBindings.BindImage(item, Icons.Pull);
 		item.Click += OnUpdateSubmoduleClick;
 		return item;
 	}
@@ -1972,14 +1926,14 @@ public class GuiItemFactory
 	public T GetSyncSubmoduleItem<T>(Submodule submodule)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(submodule, nameof(submodule));
+		Verify.Argument.IsValidGitObject(submodule);
 
 		var item = new T()
 		{
-			Text  = Resources.StrSync,
-			Tag   = submodule,
+			Text = Resources.StrSync,
+			Tag  = submodule,
 		};
-		_dpiBindings.BindImage(item, Icons.SubmoduleSync);
+		dpiBindings.BindImage(item, Icons.SubmoduleSync);
 		item.Click += OnSyncSubmoduleClick;
 		return item;
 	}
@@ -1995,7 +1949,7 @@ public class GuiItemFactory
 			Tag     = submodules,
 			Enabled = submodules.Count != 0,
 		};
-		_dpiBindings.BindImage(item, Icons.SubmoduleSync);
+		dpiBindings.BindImage(item, Icons.SubmoduleSync);
 		item.Click += OnSyncSubmodulesClick;
 		return item;
 	}
@@ -2011,60 +1965,60 @@ public class GuiItemFactory
 			Tag = submodules,
 			Enabled = submodules.Count != 0,
 		};
-		_dpiBindings.BindImage(item, Icons.Pull);
+		dpiBindings.BindImage(item, Icons.Pull);
 		item.Click += OnUpdateSubmodulesClick;
 		return item;
 	}
 
-	static void OnRefreshSubmodulesClick(object sender, EventArgs e)
+	static void OnRefreshSubmodulesClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 
 		repository.Submodules.Refresh();
 	}
 
-	static void OnAddSubmoduleClick(object sender, EventArgs e)
+	static void OnAddSubmoduleClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 		var parent = Utility.GetParentControl(item);
 
-		using var dlg = new AddSubmoduleDialog(repository);
-		dlg.Run(parent);
+		using var dialog = new AddSubmoduleDialog(repository);
+		dialog.Run(parent);
 	}
 
-	static void OnUpdateSubmoduleClick(object sender, EventArgs e)
+	static void OnUpdateSubmoduleClick(object? sender, EventArgs e)
 	{
-		var item      = (ToolStripItem)sender;
-		var submodule = (Submodule)item.Tag;
+		var item      = (ToolStripItem)sender!;
+		var submodule = (Submodule)item.Tag!;
 		var parent    = Utility.GetParentControl(item);
 
 		GuiCommands.UpdateSubmodule(parent, submodule);
 	}
 
-	static void OnSyncSubmoduleClick(object sender, EventArgs e)
+	static void OnSyncSubmoduleClick(object? sender, EventArgs e)
 	{
-		var item      = (ToolStripItem)sender;
-		var submodule = (Submodule)item.Tag;
+		var item      = (ToolStripItem)sender!;
+		var submodule = (Submodule)item.Tag!;
 		var parent    = Utility.GetParentControl(item);
 
 		GuiCommands.SyncSubmodule(parent, submodule);
 	}
 
-	static void OnUpdateSubmodulesClick(object sender, EventArgs e)
+	static void OnUpdateSubmodulesClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var submodules = (SubmodulesCollection)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var submodules = (SubmodulesCollection)item.Tag!;
 		var parent     = Utility.GetParentControl(item);
 
 		GuiCommands.UpdateSubmodules(parent, submodules);
 	}
 
-	static void OnSyncSubmodulesClick(object sender, EventArgs e)
+	static void OnSyncSubmodulesClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var submodules = (SubmodulesCollection)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var submodules = (SubmodulesCollection)item.Tag!;
 		var parent     = Utility.GetParentControl(item);
 
 		GuiCommands.SyncSubmodules(parent, submodules);
@@ -2077,14 +2031,14 @@ public class GuiItemFactory
 	public T GetMarkAsResolvedItem<T>(TreeItem treeItem)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(treeItem, nameof(treeItem));
+		Verify.Argument.IsValidGitObject(treeItem);
 
 		var item = new T()
 		{
 			Text = Resources.StrMarkAsResolved,
 			Tag  = treeItem,
 		};
-		_dpiBindings.BindImage(item, Icons.MarkResolved);
+		dpiBindings.BindImage(item, Icons.MarkResolved);
 		item.Click += OnStageClick;
 		return item;
 	}
@@ -2092,14 +2046,14 @@ public class GuiItemFactory
 	public T GetStageItem<T>(TreeItem treeItem)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(treeItem, nameof(treeItem));
+		Verify.Argument.IsValidGitObject(treeItem);
 
 		var item = new T()
 		{
 			Text = Resources.StrStage,
 			Tag  = treeItem,
 		};
-		_dpiBindings.BindImage(item, Icons.Stage);
+		dpiBindings.BindImage(item, Icons.Stage);
 		item.Click += OnStageClick;
 		return item;
 	}
@@ -2115,7 +2069,7 @@ public class GuiItemFactory
 			Text = Resources.StrStage,
 			Tag  = Tuple.Create(repository, treeItems),
 		};
-		_dpiBindings.BindImage(item, Icons.Stage);
+		dpiBindings.BindImage(item, Icons.Stage);
 		item.Click += OnStageSeveralClick;
 		return item;
 	}
@@ -2150,7 +2104,7 @@ public class GuiItemFactory
 			Text = name,
 			Tag  = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.StageAll);
+		dpiBindings.BindImage(item, Icons.StageAll);
 		item.Click += OnStageAllClick;
 		return item;
 	}
@@ -2179,7 +2133,7 @@ public class GuiItemFactory
 			Text = Resources.StrCommit.AddEllipsis(),
 			Tag  = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.Commit);
+		dpiBindings.BindImage(item, Icons.Commit);
 		item.Click += OnCommitClick;
 		return item;
 	}
@@ -2187,14 +2141,14 @@ public class GuiItemFactory
 	public T GetUnstageItem<T>(TreeItem treeItem)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(treeItem, nameof(treeItem));
+		Verify.Argument.IsValidGitObject(treeItem);
 
 		var item = new T()
 		{
 			Text = Resources.StrUnstage,
 			Tag  = treeItem,
 		};
-		_dpiBindings.BindImage(item, Icons.Unstage);
+		dpiBindings.BindImage(item, Icons.Unstage);
 		item.Click += OnUnstageClick;
 		return item;
 	}
@@ -2210,7 +2164,7 @@ public class GuiItemFactory
 			Text = Resources.StrUnstage,
 			Tag  = Tuple.Create(repository, treeItems),
 		};
-		_dpiBindings.BindImage(item, Icons.Unstage);
+		dpiBindings.BindImage(item, Icons.Unstage);
 		item.Click += OnUnstageSeveralClick;
 		return item;
 	}
@@ -2231,15 +2185,15 @@ public class GuiItemFactory
 			Text = name,
 			Tag  = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.UnstageAll);
+		dpiBindings.BindImage(item, Icons.UnstageAll);
 		item.Click += OnUnstageAllClick;
 		return item;
 	}
 
-	public T GetMergeToolItem<T>(TreeFile file, MergeTool mergeTool = null)
+	public T GetMergeToolItem<T>(TreeFile file, MergeTool? mergeTool = null)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(file, nameof(file));
+		Verify.Argument.IsValidGitObject(file);
 
 		string text;
 		switch(file.ConflictType)
@@ -2270,7 +2224,7 @@ public class GuiItemFactory
 	public T GetResolveConflictItem<T>(TreeFile file, ConflictResolution resolution)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(file, nameof(file));
+		Verify.Argument.IsValidGitObject(file);
 
 		var text = resolution switch
 		{
@@ -2278,7 +2232,7 @@ public class GuiItemFactory
 			ConflictResolution.KeepModifiedFile => Resources.StrKeepFile,
 			ConflictResolution.UseOurs          => Resources.StrUseOurs,
 			ConflictResolution.UseTheirs        => Resources.StrUseTheirs,
-			_ => throw new ArgumentException("Unknown conflict resolution.", nameof(resolution)),
+			_ => throw new ArgumentException($"Unknown conflict resolution: {resolution}.", nameof(resolution)),
 		};
 		var item = new T()
 		{
@@ -2292,14 +2246,14 @@ public class GuiItemFactory
 	public T GetRevertPathItem<T>(TreeItem treeItem)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(treeItem, nameof(treeItem));
+		Verify.Argument.IsValidGitObject(treeItem);
 
 		var item = new T()
 		{
 			Text = Resources.StrRevert,
 			Tag  = treeItem,
 		};
-		_dpiBindings.BindImage(item, Icons.Revert);
+		dpiBindings.BindImage(item, Icons.Revert);
 		item.Click += OnRevertPathClick;
 		return item;
 	}
@@ -2314,7 +2268,7 @@ public class GuiItemFactory
 			Text = Resources.StrRevert,
 			Tag  = treeItems,
 		};
-		_dpiBindings.BindImage(item, Icons.Revert);
+		dpiBindings.BindImage(item, Icons.Revert);
 		item.Click += OnRevertPathsClick;
 		return item;
 	}
@@ -2322,14 +2276,14 @@ public class GuiItemFactory
 	public T GetRemovePathItem<T>(TreeItem treeItem)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(treeItem, nameof(treeItem));
+		Verify.Argument.IsValidGitObject(treeItem);
 
 		var item = new T()
 		{
 			Text = Resources.StrDelete,
 			Tag  = treeItem,
 		};
-		_dpiBindings.BindImage(item, Icons.Delete);
+		dpiBindings.BindImage(item, Icons.Delete);
 		item.Click += OnDeletePathClick;
 		return item;
 	}
@@ -2338,14 +2292,14 @@ public class GuiItemFactory
 		where T : ToolStripItem, new()
 	{
 		Verify.Argument.IsValidRevisionPointer(revision);
-		Verify.Argument.IsValidGitObject(file, nameof(file));
+		Verify.Argument.IsValidGitObject(file);
 
 		var item = new T()
 		{
 			Text = Resources.StrBlame,
 			Tag  = revision.GetBlameSource(file.RelativePath),
 		};
-		_dpiBindings.BindImage(item, Icons.Blame);
+		dpiBindings.BindImage(item, Icons.Blame);
 		item.Click += OnBlameClick;
 		return item;
 	}
@@ -2361,7 +2315,7 @@ public class GuiItemFactory
 			Text = Resources.StrBlame,
 			Tag  = revision.GetBlameSource(fileName),
 		};
-		_dpiBindings.BindImage(item, Icons.Blame);
+		dpiBindings.BindImage(item, Icons.Blame);
 		item.Click += OnBlameClick;
 		return item;
 	}
@@ -2369,7 +2323,7 @@ public class GuiItemFactory
 	public T GetPathHistoryItem<T>(IRevisionPointer revision, TreeFile file)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(file, nameof(file));
+		Verify.Argument.IsValidGitObject(file);
 
 		return GetPathHistoryItem<T>(revision, file.RelativePath);
 	}
@@ -2377,7 +2331,7 @@ public class GuiItemFactory
 	public T GetPathHistoryItem<T>(IRevisionPointer revision, TreeCommit commit)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(commit, nameof(commit));
+		Verify.Argument.IsValidGitObject(commit);
 
 		return GetPathHistoryItem<T>(revision, commit.RelativePath);
 	}
@@ -2385,7 +2339,7 @@ public class GuiItemFactory
 	public T GetPathHistoryItem<T>(IRevisionPointer revision, TreeDirectory directory)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(directory, nameof(directory));
+		Verify.Argument.IsValidGitObject(directory);
 
 		return GetPathHistoryItem<T>(revision, directory.RelativePath + "/");
 	}
@@ -2401,36 +2355,36 @@ public class GuiItemFactory
 			Text = Resources.StrHistory,
 			Tag  = new PathLogSource(revision, path),
 		};
-		_dpiBindings.BindImage(item, path.EndsWith('/') ? Icons.FolderHistory : Icons.FileHistory);
+		dpiBindings.BindImage(item, path.EndsWith('/') ? Icons.FolderHistory : Icons.FileHistory);
 		item.Click += OnPathHistoryClick;
 		return item;
 	}
 
-	private static void OnBlameClick(object sender, EventArgs e)
+	private static void OnBlameClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var data = (IBlameSource)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var data = (IBlameSource)item.Tag!;
 
 		GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 			Views.Guids.BlameViewGuid,
 			new Views.BlameViewModel(data));
 	}
 
-	private static void OnPathHistoryClick(object sender, EventArgs e)
+	private static void OnPathHistoryClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var data = (ILogSource)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var data = (ILogSource)item.Tag!;
 
 		GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 			Views.Guids.PathHistoryViewGuid,
 			new Views.HistoryViewModel(data));
 	}
 
-	private static void OnResolveConflictItemClick(object sender, EventArgs e)
+	private static void OnResolveConflictItemClick(object? sender, EventArgs e)
 	{
-		var item   = (ToolStripItem)sender;
+		var item   = (ToolStripItem)sender!;
+		var data   = (Tuple<TreeFile, ConflictResolution>)item.Tag!;
 		var parent = Utility.GetParentControl(item);
-		var data   = (Tuple<TreeFile, ConflictResolution>)item.Tag;
 		try
 		{
 			using(parent.ChangeCursor(Cursors.WaitCursor))
@@ -2449,22 +2403,22 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnCommitClick(object sender, EventArgs e)
+	private static void OnCommitClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
-		var parent = Utility.GetParentControl(item);
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
+		var parent     = Utility.GetParentControl(item);
 
-		using(var dlg = new CommitDialog(repository))
+		using(var dialog = new CommitDialog(repository))
 		{
-			dlg.Run(parent);
+			dialog.Run(parent);
 		}
 	}
 
-	private static void OnUnstageAllClick(object sender, EventArgs e)
+	private static void OnUnstageAllClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 		var parent     = Utility.GetParentControl(item);
 		try
 		{
@@ -2484,10 +2438,10 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnDeletePathClick(object sender, EventArgs e)
+	private static void OnDeletePathClick(object? sender, EventArgs e)
 	{
-		var item     = (ToolStripItem)sender;
-		var treeItem = (TreeItem)item.Tag;
+		var item     = (ToolStripItem)sender!;
+		var treeItem = (TreeItem)item.Tag!;
 		var parent   = Utility.GetParentControl(item);
 		try
 		{
@@ -2516,61 +2470,60 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnRevertPathsClick(object sender, EventArgs e)
+	private static void OnRevertPathsClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var treeItems = (IEnumerable<TreeItem>)item.Tag;
-		var parent = Utility.GetParentControl(item);
+		var item      = (ToolStripItem)sender!;
+		var treeItems = (IEnumerable<TreeItem>)item.Tag!;
+		var parent    = Utility.GetParentControl(item);
 
-		Repository repository = null;
+		var repository = default(Repository);
 		foreach(var treeItem in treeItems)
 		{
 			repository = treeItem.Repository;
 			break;
 		}
 
-		if(repository != null)
+		if(repository is null) return;
+
+		try
 		{
-			try
+			if(GitterApplication.MessageBoxService.Show(
+				parent,
+				Resources.StrAskRevertPaths,
+				Resources.StrRevert,
+				MessageBoxButtons.YesNo,
+				MessageBoxIcon.Warning) == DialogResult.No)
 			{
-				if(GitterApplication.MessageBoxService.Show(
-					parent,
-					Resources.StrAskRevertPaths,
-					Resources.StrRevert,
-					MessageBoxButtons.YesNo,
-					MessageBoxIcon.Warning) == DialogResult.No)
-				{
-					return;
-				}
-
-				var paths = new List<string>();
-				foreach(var treeItem in treeItems)
-				{
-					paths.Add(treeItem.RelativePath);
-				}
-
-				using(parent.ChangeCursor(Cursors.WaitCursor))
-				{
-					repository.Status.RevertPaths(paths);
-				}
+				return;
 			}
-			catch(GitException exc)
+
+			var paths = new List<string>();
+			foreach(var treeItem in treeItems)
 			{
-				GitterApplication.MessageBoxService.Show(
-					parent,
-					exc.Message,
-					Resources.ErrFailedToRevertPaths,
-					MessageBoxButton.Close,
-					MessageBoxIcon.Error);
+				paths.Add(treeItem.RelativePath);
 			}
+
+			using(parent.ChangeCursor(Cursors.WaitCursor))
+			{
+				repository.Status.RevertPaths(paths);
+			}
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				exc.Message,
+				Resources.ErrFailedToRevertPaths,
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
 		}
 	}
 
-	private static void OnRevertPathClick(object sender, EventArgs e)
+	private static void OnRevertPathClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var treeItem = (TreeItem)item.Tag;
-		var parent = Utility.GetParentControl(item);
+		var item     = (ToolStripItem)sender!;
+		var treeItem = (TreeItem)item.Tag!;
+		var parent   = Utility.GetParentControl(item);
 		try
 		{
 			if(treeItem.ItemType == TreeItemType.Tree || treeItem.Status == FileStatus.Modified)
@@ -2601,10 +2554,10 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnMergeToolClick(object sender, EventArgs e)
+	private static void OnMergeToolClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var data = (Tuple<TreeFile, MergeTool>)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var data = (Tuple<TreeFile, MergeTool>)item.Tag!;
 		var file = data.Item1;
 		var tool = data.Item2;
 		var parent = Utility.GetParentControl(item);
@@ -2613,42 +2566,42 @@ public class GuiItemFactory
 			switch(file.ConflictType)
 			{
 				case ConflictType.DeletedByThem:
-					using(var dlg = new ConflictResolutionDialog(file.RelativePath, FileStatus.Modified, FileStatus.Removed,
+					using(var dialog = new ConflictResolutionDialog(file.RelativePath, FileStatus.Modified, FileStatus.Removed,
 						ConflictResolution.KeepModifiedFile, ConflictResolution.DeleteFile))
 					{
-						if(dlg.Run(parent) == DialogResult.OK)
+						if(dialog.Run(parent) == DialogResult.OK)
 						{
-							file.ResolveConflict(dlg.ConflictResolution);
+							file.ResolveConflict(dialog.ConflictResolution);
 						}
 					}
 					break;
 				case ConflictType.DeletedByUs:
-					using(var dlg = new ConflictResolutionDialog(file.RelativePath, FileStatus.Removed, FileStatus.Modified,
+					using(var dialog = new ConflictResolutionDialog(file.RelativePath, FileStatus.Removed, FileStatus.Modified,
 						ConflictResolution.KeepModifiedFile, ConflictResolution.DeleteFile))
 					{
-						if(dlg.Run(parent) == DialogResult.OK)
+						if(dialog.Run(parent) == DialogResult.OK)
 						{
-							file.ResolveConflict(dlg.ConflictResolution);
+							file.ResolveConflict(dialog.ConflictResolution);
 						}
 					}
 					break;
 				case ConflictType.AddedByThem:
-					using(var dlg = new ConflictResolutionDialog(file.RelativePath, FileStatus.Removed, FileStatus.Added,
+					using(var dialog = new ConflictResolutionDialog(file.RelativePath, FileStatus.Removed, FileStatus.Added,
 						ConflictResolution.KeepModifiedFile, ConflictResolution.DeleteFile))
 					{
-						if(dlg.Run(parent) == DialogResult.OK)
+						if(dialog.Run(parent) == DialogResult.OK)
 						{
-							file.ResolveConflict(dlg.ConflictResolution);
+							file.ResolveConflict(dialog.ConflictResolution);
 						}
 					}
 					break;
 				case ConflictType.AddedByUs:
-					using(var dlg = new ConflictResolutionDialog(file.RelativePath, FileStatus.Added, FileStatus.Removed,
+					using(var dialog = new ConflictResolutionDialog(file.RelativePath, FileStatus.Added, FileStatus.Removed,
 						ConflictResolution.KeepModifiedFile, ConflictResolution.DeleteFile))
 					{
-						if(dlg.Run(parent) == DialogResult.OK)
+						if(dialog.Run(parent) == DialogResult.OK)
 						{
-							file.ResolveConflict(dlg.ConflictResolution);
+							file.ResolveConflict(dialog.ConflictResolution);
 						}
 					}
 					break;
@@ -2669,11 +2622,11 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnStageClick(object sender, EventArgs e)
+	private static void OnStageClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var treeItem = (TreeItem)item.Tag;
-		var parent = Utility.GetParentControl(item);
+		var item     = (ToolStripItem)sender!;
+		var treeItem = (TreeItem)item.Tag!;
+		var parent   = Utility.GetParentControl(item);
 		try
 		{
 			using(parent.ChangeCursor(Cursors.WaitCursor))
@@ -2692,10 +2645,10 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnStageSeveralClick(object sender, EventArgs e)
+	private static void OnStageSeveralClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var data = (Tuple<Repository, TreeItem[]>)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var data = (Tuple<Repository, TreeItem[]>)item.Tag!;
 		var repository = data.Item1;
 		var treeItems = data.Item2;
 		var parent = Utility.GetParentControl(item);
@@ -2717,11 +2670,11 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnStageAllClick(object sender, EventArgs e)
+	private static void OnStageAllClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
-		var parent = Utility.GetParentControl(item);
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
+		var parent     = Utility.GetParentControl(item);
 		try
 		{
 			using(parent.ChangeCursor(Cursors.WaitCursor))
@@ -2740,11 +2693,11 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnUpdateClick(object sender, EventArgs e)
+	private static void OnUpdateClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
-		var parent = Utility.GetParentControl(item);
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
+		var parent     = Utility.GetParentControl(item);
 		try
 		{
 			using(parent.ChangeCursor(Cursors.WaitCursor))
@@ -2763,20 +2716,20 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnManualStageClick(object sender, EventArgs e)
+	private static void OnManualStageClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
-		using(var dlg = new StageDialog(repository))
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
+		using(var dialog = new StageDialog(repository))
 		{
-			dlg.Run(Utility.GetParentControl(item));
+			dialog.Run(Utility.GetParentControl(item));
 		}
 	}
 
-	private static void OnUnstageClick(object sender, EventArgs e)
+	private static void OnUnstageClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var treeItem = (TreeItem)item.Tag;
+		var item     = (ToolStripItem)sender!;
+		var treeItem = (TreeItem)item.Tag!;
 		var parent = Utility.GetParentControl(item);
 		try
 		{
@@ -2796,10 +2749,10 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnUnstageSeveralClick(object sender, EventArgs e)
+	private static void OnUnstageSeveralClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var data = (Tuple<Repository, TreeItem[]>)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var data = (Tuple<Repository, TreeItem[]>)item.Tag!;
 		var repository = data.Item1;
 		var treeItems = data.Item2;
 		var parent = Utility.GetParentControl(item);
@@ -2847,7 +2800,7 @@ public class GuiItemFactory
 			Text = Resources.StrRefresh,
 			Tag = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.Refresh);
+		dpiBindings.BindImage(item, Icons.Refresh);
 		item.Click += OnRefreshConfigurationClick;
 		return item;
 	}
@@ -2855,29 +2808,29 @@ public class GuiItemFactory
 	public T GetUnsetParameterItem<T>(ConfigParameter configParameter)
 		where T : ToolStripItem, new()
 	{
-		Verify.Argument.IsValidGitObject(configParameter, nameof(configParameter));
+		Verify.Argument.IsValidGitObject(configParameter);
 
 		var item = new T()
 		{
 			Text = Resources.StrUnset,
 			Tag = configParameter,
 		};
-		_dpiBindings.BindImage(item, Icons.ConfigUnset);
+		dpiBindings.BindImage(item, Icons.ConfigUnset);
 		item.Click += OnUnsetParameterClick;
 		return item;
 	}
 
-	private static void OnRefreshConfigurationClick(object sender, EventArgs e)
+	private static void OnRefreshConfigurationClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 		repository.Configuration.Refresh();
 	}
 
-	private static void OnUnsetParameterClick(object sender, EventArgs e)
+	private static void OnUnsetParameterClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var parameter = (ConfigParameter)item.Tag;
+		var item      = (ToolStripItem)sender!;
+		var parameter = (ConfigParameter)item.Tag!;
 		var parent = Utility.GetParentControl(item);
 
 		try
@@ -2898,29 +2851,29 @@ public class GuiItemFactory
 					MessageBoxButtons.YesNo,
 					MessageBoxIcon.Question) == DialogResult.Yes)
 				{
-					var gitAccessor = ((IGitRepository)parameter.Repository).Accessor.GitAccessor;
+					var gitAccessor = parameter.Repository.Accessor.GitAccessor;
 					try
 					{
 						gitAccessor.UnsetConfigValue.Invoke(
-							new UnsetConfigValueParameters()
+							new UnsetConfigValueRequest()
 							{
-								ConfigFile = Git.ConfigFile.User,
+								ConfigFile = Git.ConfigFile.CurrentUser,
 								ParameterName = parameter.Name,
 							});
 					}
-					catch(Exception exception) when(!exception.IsCritical())
+					catch(Exception exception) when(!exception.IsCritical)
 					{
 					}
 					try
 					{
 						gitAccessor.UnsetConfigValue.Invoke(
-							new UnsetConfigValueParameters()
+							new UnsetConfigValueRequest()
 							{
-								ConfigFile = Git.ConfigFile.System,
+								ConfigFile = Git.ConfigFile.LocalSystem,
 								ParameterName = parameter.Name,
 							});
 					}
-					catch(Exception exception) when(!exception.IsCritical())
+					catch(Exception exception) when(!exception.IsCritical)
 					{
 					}
 					parameter.Refresh();
@@ -2974,7 +2927,7 @@ public class GuiItemFactory
 			Tag = Tuple.Create(lines, copyAsPatch, state),
 			Enabled = enabled,
 		};
-		_dpiBindings.BindImage(item, CommonIcons.ClipboardCopy);
+		dpiBindings.BindImage(item, CommonIcons.ClipboardCopy);
 		item.Click += OnCopyDiffLinesCick;
 		return item;
 	}
@@ -2986,10 +2939,10 @@ public class GuiItemFactory
 			DiffLineState.Added | DiffLineState.Context | DiffLineState.Header | DiffLineState.NotPresent | DiffLineState.Removed);
 	}
 
-	private static void OnCopyDiffLinesCick(object sender, EventArgs e)
+	private static void OnCopyDiffLinesCick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var data = (Tuple<IEnumerable<DiffLine>, bool, DiffLineState>)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var data = (Tuple<IEnumerable<DiffLine>, bool, DiffLineState>)item.Tag!;
 		var lines = data.Item1;
 		var copyAsPatch = data.Item2;
 		var state = data.Item3;
@@ -3047,7 +3000,7 @@ public class GuiItemFactory
 			Text = Resources.StrRefresh,
 			Tag  = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.Refresh);
+		dpiBindings.BindImage(item, Icons.Refresh);
 		item.Click += OnRefreshContributorsClick;
 		return item;
 	}
@@ -3097,7 +3050,7 @@ public class GuiItemFactory
 		return item;
 	}
 
-	public static T GetOpenUrlItem<T>(string name, Image image, string url)
+	public static T GetOpenUrlItem<T>(string name, Image? image, string url)
 		where T : ToolStripItem, new()
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(url);
@@ -3112,7 +3065,7 @@ public class GuiItemFactory
 		return item;
 	}
 
-	public static T GetOpenAppItem<T>(string name, Image image, string app, string cmdLine)
+	public static T GetOpenAppItem<T>(string name, Image? image, string app, string cmdLine)
 		where T : ToolStripItem, new()
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(app);
@@ -3127,7 +3080,7 @@ public class GuiItemFactory
 		return item;
 	}
 
-	public static T GetOpenUrlWithItem<T>(string name, Image image, string url)
+	public static T GetOpenUrlWithItem<T>(string name, Image? image, string url)
 		where T : ToolStripItem, new()
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(url);
@@ -3142,7 +3095,7 @@ public class GuiItemFactory
 		return item;
 	}
 
-	public static T GetOpenCmdAtItem<T>(string name, Image image, string path)
+	public static T GetOpenCmdAtItem<T>(string name, Image? image, string path)
 		where T : ToolStripItem, new()
 	{
 		Verify.Argument.IsNotNull(path);
@@ -3167,7 +3120,7 @@ public class GuiItemFactory
 			Text = Resources.StrClean.AddEllipsis(),
 			Tag  = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.Clean);
+		dpiBindings.BindImage(item, Icons.Clean);
 		item.Click += OnCleanClick;
 		return item;
 	}
@@ -3182,7 +3135,7 @@ public class GuiItemFactory
 			Text = Resources.StrViewDiff,
 			Tag  = diffSource,
 		};
-		_dpiBindings.BindImage(item, Icons.Diff);
+		dpiBindings.BindImage(item, Icons.Diff);
 		item.Click += OnViewDiffItemClick;
 		return item;
 	}
@@ -3197,7 +3150,7 @@ public class GuiItemFactory
 			Text = Resources.StrViewTree,
 			Tag  = revision,
 		};
-		_dpiBindings.BindImage(item, Icons.FolderTree);
+		dpiBindings.BindImage(item, Icons.FolderTree);
 		item.Click += OnViewTreeItemClick;
 		return item;
 	}
@@ -3224,7 +3177,7 @@ public class GuiItemFactory
 			Text = Resources.StrRefresh,
 			Tag  = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.Refresh);
+		dpiBindings.BindImage(item, Icons.Refresh);
 		item.Click += OnRefreshAllReferencesClick;
 		return item;
 	}
@@ -3239,7 +3192,7 @@ public class GuiItemFactory
 			Text = name,
 			Tag = text,
 		};
-		_dpiBindings.BindImage(item, Icons.ClipboardCopy);
+		dpiBindings.BindImage(item, Icons.ClipboardCopy);
 		item.Click += OnCopyToClipboardClick;
 		return item;
 	}
@@ -3253,7 +3206,7 @@ public class GuiItemFactory
 			Tag  = text,
 		};
 		if(enableToolTip && name != text) item.ToolTipText = text;
-		_dpiBindings.BindImage(item, Icons.ClipboardCopy);
+		dpiBindings.BindImage(item, Icons.ClipboardCopy);
 		item.Click += OnCopyToClipboardClick;
 		return item;
 	}
@@ -3267,7 +3220,7 @@ public class GuiItemFactory
 			Tag  = text,
 		};
 		if(enableToolTip && name != text) item.ToolTipText = text;
-		_dpiBindings.BindImage(item, Icons.ClipboardCopy);
+		dpiBindings.BindImage(item, Icons.ClipboardCopy);
 		item.Click += OnCopyHashToClipboardClick;
 		return item;
 	}
@@ -3282,7 +3235,7 @@ public class GuiItemFactory
 			Text = name,
 			Tag  = Tuple.Create(repository, referenceTypes),
 		};
-		_dpiBindings.BindImage(item, Icons.Refresh);
+		dpiBindings.BindImage(item, Icons.Refresh);
 		item.Click += OnRefreshReferencesClick;
 		return item;
 	}
@@ -3345,7 +3298,7 @@ public class GuiItemFactory
 			ToolTipText = email,
 			Enabled = email.Length != 0,
 		};
-		_dpiBindings.BindImage(item, Icons.MailSend);
+		dpiBindings.BindImage(item, Icons.MailSend);
 		item.Click += OnSendEmailClick;
 		return item;
 	}
@@ -3360,36 +3313,36 @@ public class GuiItemFactory
 			Text = Resources.StrCompressRepository,
 			Tag  = repository,
 		};
-		_dpiBindings.BindImage(item, Icons.GarbageCollect);
+		dpiBindings.BindImage(item, Icons.GarbageCollect);
 		item.Click += OnCompressRepositoryClick;
 		return item;
 	}
 
-	private static void OnRefreshContributorsClick(object sender, EventArgs e)
+	private static void OnRefreshContributorsClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 		repository.Users.Refresh();
 	}
 
-	private static void OnSaveAsItemClick(object sender, EventArgs e)
+	private static void OnSaveAsItemClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var data = (Tuple<Tree, string>)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var data = (Tuple<Tree, string>)item.Tag!;
 
 		data.Item1.ExtractBlobToFile(data.Item2);
 	}
 
-	private static void OnExtractFileItemClick(object sender, EventArgs e)
+	private static void OnExtractFileItemClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var data = (Tuple<Tree, string, bool>)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var data = (Tuple<Tree, string, bool>)item.Tag!;
 		var tree = data.Item1;
 		var path = data.Item2;
 		var openas = data.Item3;
 
 		var fileName = tree.ExtractBlobToTemporaryFile(path);
-		if(!string.IsNullOrWhiteSpace(fileName))
+		if(fileName is { Length: not 0 })
 		{
 			if(openas)
 			{
@@ -3405,10 +3358,10 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnFileViewerProcessExited(object sender, EventArgs e)
+	private static void OnFileViewerProcessExited(object? sender, EventArgs e)
 	{
-		var process = (Process)sender;
-		var path = process.StartInfo.FileName;
+		var process = (Process)sender!;
+		var path    = process.StartInfo.FileName;
 		try
 		{
 			if(File.Exists(path))
@@ -3436,25 +3389,25 @@ public class GuiItemFactory
 				}
 			}
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 		}
 		process.Dispose();
 	}
 
-	private static void OnCompressRepositoryClick(object sender, EventArgs e)
+	private static void OnCompressRepositoryClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
 		var parent     = Utility.GetParentControl(item);
 
 		GuiCommands.GarbageCollect(parent, repository);
 	}
 
-	private static void OnOpenCmdAtItemClick(object sender, EventArgs e)
+	private static void OnOpenCmdAtItemClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var path = (string)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var path = (string)item.Tag!;
 
 		var psi = new ProcessStartInfo(@"cmd")
 		{
@@ -3464,10 +3417,10 @@ public class GuiItemFactory
 		p.Start();
 	}
 
-	private static void OnSendEmailClick(object sender, EventArgs e)
+	private static void OnSendEmailClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var email = (string)item.Tag;
+		var item  = (ToolStripItem)sender!;
+		var email = (string)item.Tag!;
 		if(!email.StartsWith(@"mailto://"))
 		{
 			email = @"mailto://" + email;
@@ -3475,60 +3428,60 @@ public class GuiItemFactory
 		Utility.OpenUrl(email);
 	}
 
-	private static void OnViewDiffItemClick(object sender, EventArgs e)
+	private static void OnViewDiffItemClick(object? sender, EventArgs e)
 	{
-		var item       = (ToolStripItem)sender;
-		var diffSource = (IDiffSource)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var diffSource = (IDiffSource)item.Tag!;
 
 		GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 			Views.Guids.DiffViewGuid,
 			new Views.DiffViewModel(diffSource, null));
 	}
 
-	private static void OnViewTreeItemClick(object sender, EventArgs e)
+	private static void OnViewTreeItemClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var revPtr = (IRevisionPointer)item.Tag;
+		var item   = (ToolStripItem)sender!;
+		var revPtr = (IRevisionPointer)item.Tag!;
 
 		GitterApplication.WorkingEnvironment.ViewDockService.ShowView(
 			Views.Guids.TreeViewGuid,
 			new Views.TreeViewModel(new RevisionTreeSource(revPtr)));
 	}
 
-	private static void OnResolveConflictsClick(object sender, EventArgs e)
+	private static void OnResolveConflictsClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
-		var parent = Utility.GetParentControl(item);
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
+		var parent     = Utility.GetParentControl(item);
 
-		using var dlg = new ConflictsDialog(repository);
-		dlg.Run(parent);
+		using var dialog = new ConflictsDialog(repository);
+		dialog.Run(parent);
 	}
 
-	private static void OnCleanClick(object sender, EventArgs e)
+	private static void OnCleanClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var repository = (Repository)item.Tag;
-		var parent = Utility.GetParentControl(item);
+		var item       = (ToolStripItem)sender!;
+		var repository = (Repository)item.Tag!;
+		var parent     = Utility.GetParentControl(item);
 
-		using var dlg = new CleanDialog(repository);
-		dlg.Run(parent);
+		using var dialog = new CleanDialog(repository);
+		dialog.Run(parent);
 	}
 
-	private static void OnOpenUrlItemClick(object sender, EventArgs e)
+	private static void OnOpenUrlItemClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var url = (string)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var url  = (string)item.Tag!;
 
 		Utility.OpenUrl(url);
 	}
 
-	private static void OnOpenAppItemClick(object sender, EventArgs e)
+	private static void OnOpenAppItemClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var data = (Tuple<string, string>)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var data = (Tuple<string, string>)item.Tag!;
 
-		if(data.Item2 != null)
+		if(data.Item2 is not null)
 		{
 			Process.Start(data.Item1, data.Item2)?.Dispose();
 		}
@@ -3538,17 +3491,17 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnOpenUrlWithItemClick(object sender, EventArgs e)
+	private static void OnOpenUrlWithItemClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var url = (string)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var url  = (string)item.Tag!;
 
 		Utility.ShowOpenWithDialog(url);
 	}
 
-	private static void OnCopyToClipboardClick(object sender, EventArgs e)
+	private static void OnCopyToClipboardClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
+		var item = (ToolStripItem)sender!;
 		var text = item.Tag switch
 		{
 			string       x => x,
@@ -3558,9 +3511,9 @@ public class GuiItemFactory
 		ClipboardEx.TrySetTextSafe(text);
 	}
 
-	private static void OnCopyHashToClipboardClick(object sender, EventArgs e)
+	private static void OnCopyHashToClipboardClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
+		var item = (ToolStripItem)sender!;
 		var text = item.Tag switch
 		{
 			string       x => x,
@@ -3574,10 +3527,10 @@ public class GuiItemFactory
 		ClipboardEx.TrySetTextSafe(text);
 	}
 
-	private static void OnRefreshReferencesClick(object sender, EventArgs e)
+	private static void OnRefreshReferencesClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var data = (Tuple<Repository, ReferenceType>)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var data = (Tuple<Repository, ReferenceType>)item.Tag!;
 		var repository = data.Item1;
 		var type = data.Item2;
 
@@ -3610,24 +3563,24 @@ public class GuiItemFactory
 		}
 	}
 
-	private static void OnRefreshAllReferencesClick(object sender, EventArgs e)
+	private static void OnRefreshAllReferencesClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var data = (Repository)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var data = (Repository)item.Tag!;
 		data.Refs.Refresh();
 	}
 
-	private static void OnExpandAllClick(object sender, EventArgs e)
+	private static void OnExpandAllClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var treeItem = (CustomListBoxItem)item.Tag;
+		var item     = (ToolStripItem)sender!;
+		var treeItem = (CustomListBoxItem)item.Tag!;
 		treeItem.ExpandAll();
 	}
 
-	private static void OnCollapseAllClick(object sender, EventArgs e)
+	private static void OnCollapseAllClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var treeItem = (CustomListBoxItem)item.Tag;
+		var item     = (ToolStripItem)sender!;
+		var treeItem = (CustomListBoxItem)item.Tag!;
 		treeItem.CollapseAll();
 	}
 

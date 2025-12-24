@@ -33,9 +33,14 @@ partial class GitView : GitViewBase
 	public GitView(GuiProvider gui)
 		: base(Guids.GitViewGuid, gui)
 	{
-		InitializeComponent();
-
+		Name = nameof(GitView);
 		Text = Resources.StrGit;
+
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = System.Windows.Forms.AutoScaleMode.Dpi;
+		ResumeLayout(false);
+		PerformLayout();
 	}
 
 	public override IImageProvider ImageProvider => Icons.Git;

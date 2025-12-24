@@ -21,13 +21,7 @@
 namespace gitter.GitLab.Api;
 
 using System;
-using System.Collections.Generic;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
-using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 [DataContract]
 sealed class Commit
@@ -50,106 +44,54 @@ sealed class Commit
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Id)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Id)]
-#endif
-	public string Id { get; set; }
+	public string Id { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.ShortId)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.ShortId)]
-#endif
-	public string ShortId { get; set; }
+	public string ShortId { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Title)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Title)]
-#endif
-	public string Title { get; set; }
+	public string Title { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.AuthorName)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.AuthorName)]
-#endif
-	public string AuthorName { get; set; }
+	public string AuthorName { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.AuthorEmail)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.AuthorEmail)]
-#endif
-	public string AuthorEmail { get; set; }
+	public string AuthorEmail { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.AuthoredDate)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.AuthoredDate)]
-#endif
 	public DateTimeOffset AuthoredDate { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.CommitterName)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.CommitterName)]
-#endif
-	public string CommitterName { get; set; }
+	public string CommitterName { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.CommitterEmail)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.CommitterEmail)]
-#endif
-	public string CommitterEmail { get; set; }
+	public string CommitterEmail { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.CommittedDate)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.CommittedDate)]
-#endif
 	public DateTimeOffset CommittedDate { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.CreatedAt)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.CreatedAt)]
-#endif
 	public DateTimeOffset CreatedAt { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Message)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Message)]
-#endif
-	public string Message { get; set; }
+	public string Message { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.ParentIds)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.ParentIds)]
-#endif
-	public string[] ParentIds { get; set; }
+	public string[] ParentIds { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.WebUrl)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.WebUrl)]
-#endif
-	public string WebUrl { get; set; }
+	public string WebUrl { get; set; } = default!;
 }

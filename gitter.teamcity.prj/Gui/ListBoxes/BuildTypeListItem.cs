@@ -21,33 +21,28 @@
 namespace gitter.TeamCity.Gui;
 
 using System;
-using System.Globalization;
 using System.Drawing;
 
 using gitter.Framework.Controls;
 
-sealed class BuildTypeListItem : CustomListBoxItem<BuildType>
+sealed class BuildTypeListItem(BuildType buildType)
+	: CustomListBoxItem<BuildType>(buildType)
 {
-	public BuildTypeListItem(BuildType buildType)
-		: base(buildType)
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-	}
-
-	protected override void OnListBoxAttached()
-	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 
 		DataContext.PropertyChanged += OnBuildTypePropertyChanged;
 	}
 
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.PropertyChanged -= OnBuildTypePropertyChanged;
 
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
-	private void OnBuildTypePropertyChanged(object sender, TeamCityObjectPropertyChangedEventArgs e)
+	private void OnBuildTypePropertyChanged(object? sender, TeamCityObjectPropertyChangedEventArgs e)
 	{
 		if(e.Property == BuildType.NameProperty)
 		{

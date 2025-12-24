@@ -23,15 +23,9 @@ namespace gitter.Git.AccessLayer;
 using System;
 using System.Collections.Generic;
 
-public sealed class BranchesData
+public sealed class BranchesData(IReadOnlyList<BranchData> heads, IReadOnlyList<BranchData> remotes)
 {
-	public BranchesData(IReadOnlyList<BranchData> heads, IReadOnlyList<BranchData> remotes)
-	{
-		Heads   = heads;
-		Remotes = remotes;
-	}
+	public IReadOnlyList<BranchData> Heads { get; } = heads;
 
-	public IReadOnlyList<BranchData> Heads { get; }
-
-	public IReadOnlyList<BranchData> Remotes { get; }
+	public IReadOnlyList<BranchData> Remotes { get; } = remotes;
 }

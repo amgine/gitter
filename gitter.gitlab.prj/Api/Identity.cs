@@ -22,11 +22,6 @@ namespace gitter.GitLab.Api;
 
 using System;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
-using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 [DataContract]
 sealed class Identity
@@ -38,18 +33,10 @@ sealed class Identity
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.ExternUid)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Confidential)]
-#endif
-	public string ExternUid { get; set; }
+	public string ExternUid { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Provider)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Confidential)]
-#endif
-	public string Provider { get; set; }
+	public string? Provider { get; set; }
 }

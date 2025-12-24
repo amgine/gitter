@@ -23,11 +23,9 @@ namespace gitter.Framework.Controls;
 using System;
 using System.Windows.Forms;
 
-public interface IButtonWidget : IButtonControl, IDisposable
+public interface IButtonWidget : IButtonControl, IWidget
 {
 	event EventHandler Click;
-
-	Control Control { get; }
 
 	string Text { get; set; }
 }

@@ -23,51 +23,32 @@ namespace gitter.Framework.Controls;
 using System;
 using System.Windows.Forms;
 
-public sealed class SystemButtonAdapter : IButtonWidget
+public sealed class SystemButtonAdapter : WidgetAdapter<Button>, IButtonWidget
 {
-	private readonly Button _button;
-
-	public event EventHandler Click;
+	public event EventHandler? Click;
 
 	private void OnClick(EventArgs e)
 		=> Click?.Invoke(this, e);
 
-	public SystemButtonAdapter()
+	public SystemButtonAdapter() : base(new Button())
 	{
-		_button = new Button()
-		{
-			FlatStyle = FlatStyle.System,
-			UseVisualStyleBackColor = true,
-		};
-		_button.Click += OnButtonClick;
+		_control.FlatStyle = FlatStyle.System;
+		_control.UseVisualStyleBackColor = true;
+		_control.Click += OnButtonClick;
 	}
 
-	private void OnButtonClick(object sender, EventArgs e)
+	private void OnButtonClick(object? sender, EventArgs e)
 		=> OnClick(e);
-
-	public Control Control => _button;
-
-	public string Text
-	{
-		get => _button.Text;
-		set => _button.Text = value;
-	}
 
 	public DialogResult DialogResult
 	{
-		get => _button.DialogResult;
-		set => _button.DialogResult = value;
+		get => _control.DialogResult;
+		set => _control.DialogResult = value;
 	}
 
 	public void NotifyDefault(bool value)
-		=> _button.NotifyDefault(value);
+		=> _control.NotifyDefault(value);
 
 	public void PerformClick()
-		=> _button.PerformClick();
-
-	public void Dispose()
-	{
-		_button.Click -= OnButtonClick;
-		_button.Dispose();
-	}
+		=> _control.PerformClick();
 }

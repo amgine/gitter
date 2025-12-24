@@ -35,11 +35,6 @@ public class GitException : Exception
 
 	public GitException(string message, Exception inner)
 		: base(message, inner) { }
-
-	protected GitException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }
 
 /// <summary>Generic parser exception.</summary>
@@ -53,301 +48,196 @@ public class GitParserException : GitException
 
 	public GitParserException(string message, Exception inner)
 		: base(message, inner) { }
-
-	protected GitParserException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }
 
 /// <summary>Notifies that <see cref="M:BranchName"/> is not merged.</summary>
 [Serializable]
 public class BranchIsNotFullyMergedException : GitException
 {
-	private readonly string _branchName;
-
 	public BranchIsNotFullyMergedException(string branchName)
 		: base(string.Format(Resources.ExcBranchIsNotFullyMerged, branchName))
 	{
-		_branchName = branchName;
+		BranchName = branchName;
 	}
 
 	public BranchIsNotFullyMergedException(string branchName, Exception inner)
 		: base(string.Format(Resources.ExcBranchIsNotFullyMerged, branchName), inner)
 	{
-		_branchName = branchName;
+		BranchName = branchName;
 	}
 
-	protected BranchIsNotFullyMergedException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
-
-	public string BranchName
-	{
-		get { return _branchName; }
-	}
+	public string BranchName { get; }
 }
 
 /// <summary>Notifies that <see cref="M:BranchName"/> already exists.</summary>
 [Serializable]
 public class BranchAlreadyExistsException : GitException
 {
-	private readonly string _branchName;
-
 	public BranchAlreadyExistsException(string branchName)
 		: base(string.Format(Resources.ExcBranchAlreadyExists, branchName))
 	{
-		_branchName = branchName;
+		BranchName = branchName;
 	}
 
 	public BranchAlreadyExistsException(string branchName, Exception inner)
 		: base(string.Format(Resources.ExcBranchAlreadyExists, branchName), inner)
 	{
-		_branchName = branchName;
+		BranchName = branchName;
 	}
 
-	protected BranchAlreadyExistsException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
-
-	public string BranchName
-	{
-		get { return _branchName; }
-	}
+	public string BranchName { get; }
 }
 
 /// <summary>Notifies that <see cref="M:BranchName"/> not found.</summary>
 [Serializable]
 public class BranchNotFoundException : GitException
 {
-	private readonly string _branchName;
-
 	public BranchNotFoundException(string branchName)
 		: base(string.Format(Resources.ExcBranchNotFound, branchName))
 	{
-		_branchName = branchName;
+		BranchName = branchName;
 	}
 
 	public BranchNotFoundException(string branchName, Exception inner)
 		: base(string.Format(Resources.ExcBranchNotFound, branchName), inner)
 	{
-		_branchName = branchName;
+		BranchName = branchName;
 	}
 
-	protected BranchNotFoundException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
-
-	public string BranchName
-	{
-		get { return _branchName; }
-	}
+	public string BranchName { get; }
 }
 
 /// <summary>Notifies that <see cref="M:BranchName"/> is invalid.</summary>
 [Serializable]
 public class InvalidBranchNameException : GitException
 {
-	private readonly string _branchName;
-
 	public InvalidBranchNameException(string branchName)
 		: base(string.Format(Resources.ExcInvalidBranchName, branchName))
 	{
-		_branchName = branchName;
+		BranchName = branchName;
 	}
 
 	public InvalidBranchNameException(string branchName, Exception inner)
 		: base(string.Format(Resources.ExcInvalidBranchName, branchName), inner)
 	{
-		_branchName = branchName;
+		BranchName = branchName;
 	}
 
-	protected InvalidBranchNameException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
-
-	public string BranchName
-	{
-		get { return _branchName; }
-	}
+	public string BranchName { get; }
 }
 
 /// <summary>Notifies that <see cref="M:TagName"/> already exists.</summary>
 [Serializable]
 public class TagAlreadyExistsException : GitException
 {
-	private readonly string _tagName;
-
 	public TagAlreadyExistsException(string tagName)
 		: base(string.Format(Resources.ExcTagAlreadyExists, tagName))
 	{
-		_tagName = tagName;
+		TagName = tagName;
 	}
 
 	public TagAlreadyExistsException(string tagName, Exception inner)
 		: base(string.Format(Resources.ExcTagAlreadyExists, tagName), inner)
 	{
-		_tagName = tagName;
+		TagName = tagName;
 	}
 
-	protected TagAlreadyExistsException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
-
-	public string TagName
-	{
-		get { return _tagName; }
-	}
+	public string TagName { get; }
 }
 
 /// <summary>Notifies that <see cref="M:TagName"/> not found.</summary>
 [Serializable]
 public class TagNotFoundException : GitException
 {
-	private readonly string _tagName;
-
 	public TagNotFoundException(string tagName)
 		: base(string.Format(Resources.ExcTagNotFound, tagName))
 	{
-		_tagName = tagName;
+		TagName = tagName;
 	}
 
 	public TagNotFoundException(string tagName, Exception inner)
 		: base(string.Format(Resources.ExcTagNotFound, tagName), inner)
 	{
-		_tagName = tagName;
+		TagName = tagName;
 	}
 
-	protected TagNotFoundException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
-
-	public string TagName
-	{
-		get { return _tagName; }
-	}
+	public string TagName { get; }
 }
 
 /// <summary>Notifies that <see cref="M:TagName"/> is invalid.</summary>
 [Serializable]
 public class InvalidTagNameException : GitException
 {
-	private readonly string _tagName;
-
 	public InvalidTagNameException(string tagName)
 		: base(string.Format(Resources.ExcTagNotFound, tagName))
 	{
-		_tagName = tagName;
+		TagName = tagName;
 	}
 
 	public InvalidTagNameException(string tagName, Exception inner)
 		: base(string.Format(Resources.ExcTagNotFound, tagName), inner)
 	{
-		_tagName = tagName;
+		TagName = tagName;
 	}
 
-	protected InvalidTagNameException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
-
-	public string TagName
-	{
-		get { return _tagName; }
-	}
+	public string TagName { get; }
 }
 
 /// <summary>Notifies that <see cref="M:Revision"/> is unknown.</summary>
 [Serializable]
 public class UnknownRevisionException : GitException
 {
-	private readonly string _revision;
-
 	public UnknownRevisionException(string revision)
 		: base(string.Format(Resources.ExcUnknownRevision, revision))
 	{
-		_revision = revision;
+		Revision = revision;
 	}
 		
 	public UnknownRevisionException(string revision, Exception inner)
 		: base(string.Format(Resources.ExcUnknownRevision, revision), inner)
 	{
-		_revision = revision;
+		Revision = revision;
 	}
 
-	protected UnknownRevisionException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
-
-	public string Revision
-	{
-		get { return _revision; }
-	}
+	public string Revision { get; }
 }
 
 /// <summary>Is thrown when operation can't execute due to presence of untracked file.</summary>
 [Serializable]
 public class UntrackedFileWouldBeOverwrittenException : DirtyWorkingDirectoryException
 {
-	private readonly string _fileName;
-
 	public UntrackedFileWouldBeOverwrittenException(string fileName)
 		: base(string.Format(Resources.ExcUntrackedFileWouldBeOverwrittenException, fileName))
 	{
-		_fileName = fileName;
+		FileName = fileName;
 	}
 
 	public UntrackedFileWouldBeOverwrittenException(string fileName, Exception inner)
 		: base(string.Format(Resources.ExcUntrackedFileWouldBeOverwrittenException, fileName), inner)
 	{
-		_fileName = fileName;
+		FileName = fileName;
 	}
 
-	protected UntrackedFileWouldBeOverwrittenException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
-
-	public string FileName
-	{
-		get { return _fileName; }
-	}
+	public string FileName { get; }
 }
 
 /// <summary>Is thrown when operation can't execute on dirty working tree.</summary>
 [Serializable]
 public class HaveLocalChangesException : DirtyWorkingDirectoryException
 {
-	private readonly string _fileName;
-
 	public HaveLocalChangesException(string fileName)
 		: base(string.Format(Resources.ExcYouHaveLocalChanges, fileName))
 	{
-		_fileName = fileName;
+		FileName = fileName;
 	}
 
 	public HaveLocalChangesException(string fileName, Exception inner)
 		: base(string.Format(Resources.ExcYouHaveLocalChanges, fileName), inner)
 	{
-		_fileName = fileName;
+		FileName = fileName;
 	}
 
-	protected HaveLocalChangesException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
-
-	public string FileName
-	{
-		get { return _fileName; }
-	}
+	public string FileName { get; }
 }
 
 /// <summary>Is thrown when operation can't execute on working tree containing unresolved conflicts.</summary>
@@ -368,11 +258,6 @@ public class HaveConflictsException : DirtyWorkingDirectoryException
 		: base(message, inner)
 	{
 	}
-		
-	protected HaveConflictsException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }
 
 /// <summary>Is thrown when operation can't execute because the commit is a merge.</summary>
@@ -393,11 +278,6 @@ public class CommitIsMergeException : GitException
 		: base(message, inner)
 	{
 	}
-
-	protected CommitIsMergeException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }
 
 /// <summary>Is thrown when operation can't execute on dirty working directory.</summary>
@@ -418,11 +298,6 @@ public class DirtyWorkingDirectoryException : GitException
 		: base(message, inner)
 	{
 	}
-
-	protected DirtyWorkingDirectoryException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }
 
 /// <summary>Is thrown when merge resulted in conflicts.</summary>
@@ -443,11 +318,6 @@ public class AutomaticMergeFailedException : GitException
 		: base(message, inner)
 	{
 	}
-
-	protected AutomaticMergeFailedException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }
 
 /// <summary>Is thrown when cherry-pick resulted in conflicts.</summary>
@@ -468,11 +338,6 @@ public class AutomaticCherryPickFailedException : GitException
 		: base(message, inner)
 	{
 	}
-
-	protected AutomaticCherryPickFailedException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }
 
 /// <summary>Is thrown when cherry-pick resulted in no changes.</summary>
@@ -493,11 +358,6 @@ public class CherryPickIsEmptyException : GitException
 		: base(message, inner)
 	{
 	}
-
-	protected CherryPickIsEmptyException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }
 
 /// <summary>Is thrown when attempted to operate on empty stash.</summary>
@@ -517,11 +377,6 @@ public class StashIsEmptyException : GitException
 		: base(message, inner)
 	{
 	}
-
-	protected StashIsEmptyException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }
 
 /// <summary>Is thrown when attempted to operate on empty repository.</summary>
@@ -542,11 +397,6 @@ public class RepositoryIsEmptyException : GitException
 		: base(message, inner)
 	{
 	}
-
-	protected RepositoryIsEmptyException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }
 
 /// <summary>Thrown when failed to communicate with remote.</summary>
@@ -567,11 +417,6 @@ public class ConnectionException : GitException
 		: base(message, inner)
 	{
 	}
-
-	protected ConnectionException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }
 
 [Serializable]
@@ -591,11 +436,6 @@ public class ConfigParameterDoesNotExistException : GitException
 		: base(message, inner)
 	{
 	}
-
-	protected ConfigParameterDoesNotExistException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }
 
 [Serializable]
@@ -615,11 +455,6 @@ public class InvalidConfigFileException : GitException
 		: base(message, inner)
 	{
 	}
-
-	protected InvalidConfigFileException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }
 
 [Serializable]
@@ -639,11 +474,6 @@ public class CannotWriteConfigFileException : GitException
 		: base(message, inner)
 	{
 	}
-
-	protected CannotWriteConfigFileException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }
 
 [Serializable]
@@ -663,11 +493,6 @@ public class NoSectionProvidedException : GitException
 		: base(message, inner)
 	{
 	}
-
-	protected NoSectionProvidedException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }
 
 [Serializable]
@@ -687,9 +512,4 @@ public class InvalidSectionOrKeyException : GitException
 		: base(message, inner)
 	{
 	}
-
-	protected InvalidSectionOrKeyException(
-		System.Runtime.Serialization.SerializationInfo info,
-		System.Runtime.Serialization.StreamingContext context)
-		: base(info, context) { }
 }

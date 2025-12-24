@@ -37,12 +37,12 @@ partial class DiffView : GitViewBase
 	#region Data
 
 	private readonly DiffViewer _diffViewer;
-	private IDiffSource _diffSource;
-	private DiffOptions _options;
-	private AsyncDataBinding<Diff> _diffBinding;
+	private IDiffSource? _diffSource;
+	private DiffOptions? _options;
+	private AsyncDataBinding<Diff>? _diffBinding;
 	private DiffViewMode _viewMode;
-	private DiffViewer _diffViewerFiles;
-	private SplitContainer _container;
+	private DiffViewer? _diffViewerFiles;
+	private SplitContainer? _container;
 
 	#endregion
 
@@ -57,7 +57,7 @@ partial class DiffView : GitViewBase
 	}
 
 	protected virtual void OnViewModeChanged(EventArgs e)
-		=> ((EventHandler)Events[ViewModeChangedEvent])?.Invoke(this, e);
+		=> ((EventHandler?)Events[ViewModeChangedEvent])?.Invoke(this, e);
 
 	private static readonly object DiffOptionsUpdatedEvent = new();
 
@@ -68,7 +68,7 @@ partial class DiffView : GitViewBase
 	}
 
 	protected virtual void OnDiffOptionsUpdated(EventArgs e)
-		=> ((EventHandler)Events[DiffOptionsUpdatedEvent])?.Invoke(this, e);
+		=> ((EventHandler?)Events[DiffOptionsUpdatedEvent])?.Invoke(this, e);
 
 	#endregion
 
@@ -113,33 +113,32 @@ partial class DiffView : GitViewBase
 
 	public override bool IsDocument => true;
 
-	public IDiffSource DiffSource
+	public IDiffSource? DiffSource
 	{
 		get => _diffSource;
 		private set
 		{
-			if(_diffSource != value)
+			if(_diffSource == value) return;
+
+			if(_diffSource is not null)
 			{
-				if(_diffSource != null)
+				DiffBinding = null;
+				_diffSource.Updated -= OnDiffSourceUpdated;
+				_diffSource.Dispose();
+			}
+			_diffSource = value;
+			if(_diffSource is not null)
+			{
+				switch(ViewMode)
 				{
-					DiffBinding = null;
-					_diffSource.Dispose();
-					_diffSource.Updated -= OnDiffSourceUpdated;
+					case DiffViewMode.Single:
+						DiffBinding = new DiffBinding(_diffSource, _diffViewer, DiffOptions);
+						break;
+					case DiffViewMode.Split:
+						DiffBinding = new SplitDiffBinding(_diffSource, _diffViewer, DiffViewerFiles!, DiffOptions);
+						break;
 				}
-				_diffSource = value;
-				if(_diffSource != null)
-				{
-					switch(ViewMode)
-					{
-						case DiffViewMode.Single:
-							DiffBinding = new DiffBinding(value, _diffViewer, DiffOptions);
-							break;
-						case DiffViewMode.Split:
-							DiffBinding = new SplitDiffBinding(value, _diffViewer, _diffViewerFiles, DiffOptions);
-							break;
-					}
-					_diffSource.Updated += OnDiffSourceUpdated;
-				}
+				_diffSource.Updated += OnDiffSourceUpdated;
 			}
 		}
 	}
@@ -149,71 +148,66 @@ partial class DiffView : GitViewBase
 		get => _viewMode;
 		set
 		{
-			if(_viewMode != value)
+			if(_viewMode == value) return;
+
+			_viewMode = value;
+			switch(value)
 			{
-				_viewMode = value;
-				switch(value)
-				{
-					case DiffViewMode.Single:
-						DiffViewerFiles = null;
-						_diffViewer.Parent = null;
-						_diffViewer.Bounds = _container.Bounds;
-						_diffViewer.Dock = DockStyle.Bottom;
-						_diffViewer.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-						_diffViewer.Parent = this;
-						if(_container != null)
+				case DiffViewMode.Single:
+					DiffViewerFiles    = null;
+					_diffViewer.Parent = null;
+					_diffViewer.Bounds = _container!.Bounds;
+					_diffViewer.Dock   = DockStyle.Bottom;
+					_diffViewer.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
+					_diffViewer.Parent = this;
+					DisposableUtility.Dispose(ref _container);
+					if(DiffSource is not null)
+					{
+						DiffBinding = new DiffBinding(DiffSource, _diffViewer, DiffOptions);
+					}
+					break;
+				case DiffViewMode.Split:
+					_container = new SplitContainer
+					{
+						Orientation = Orientation.Horizontal,
+						Bounds = _diffViewer.Bounds,
+						Dock = DockStyle.Bottom,
+						Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom,
+						BackColor = GitterApplication.Style.Colors.WorkArea,
+						Parent = this,
+					};
+					_container.Panel1.BackColor = GitterApplication.Style.Colors.Window;
+					_container.Panel2.BackColor = GitterApplication.Style.Colors.Window;
+					if(_container.Height > _container.SplitterWidth)
+					{
+						try
 						{
-							_container.Dispose();
-							_container = null;
+							_container.SplitterDistance = (int)(_container.Height * 0.25);
 						}
-						if(DiffSource != null)
+						catch
 						{
-							DiffBinding = new DiffBinding(DiffSource, _diffViewer, DiffOptions);
 						}
-						break;
-					case DiffViewMode.Split:
-						_container = new SplitContainer
-						{
-							Orientation = Orientation.Horizontal,
-							Bounds = _diffViewer.Bounds,
-							Dock = DockStyle.Bottom,
-							Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom,
-							Parent = this,
-						};
-						_container.BackColor = GitterApplication.Style.Colors.WorkArea;
-						_container.Panel1.BackColor = GitterApplication.Style.Colors.Window;
-						_container.Panel2.BackColor = GitterApplication.Style.Colors.Window;
-						if(_container.Height > _container.SplitterWidth)
-						{
-							try
-							{
-								_container.SplitterDistance = (int)(_container.Height * 0.25);
-							}
-							catch
-							{
-							}
-						}
-						_diffViewer.Parent = null;
-						_diffViewer.Dock = DockStyle.Fill;
-						_diffViewer.Parent = _container.Panel1;
-						DiffViewerFiles = new DiffViewer
-						{
-							BorderStyle = BorderStyle.None,
-							Dock = DockStyle.Fill,
-							Parent = _container.Panel2,
-						};
-						if(DiffSource != null)
-						{
-							DiffBinding = new SplitDiffBinding(DiffSource, _diffViewer, DiffViewerFiles, DiffOptions);
-						}
-						break;
-				}
-				OnViewModeChanged(EventArgs.Empty);
+					}
+					_diffViewer.Parent = null;
+					_diffViewer.Dock = DockStyle.Fill;
+					_diffViewer.Parent = _container.Panel1;
+					DiffViewerFiles = new DiffViewer
+					{
+						BorderStyle = BorderStyle.None,
+						Dock = DockStyle.Fill,
+						Parent = _container.Panel2,
+					};
+					if(DiffSource is not null)
+					{
+						DiffBinding = new SplitDiffBinding(DiffSource, _diffViewer, DiffViewerFiles, DiffOptions);
+					}
+					break;
 			}
+			OnViewModeChanged(EventArgs.Empty);
 		}
 	}
 
-	private DiffViewer DiffViewerFiles
+	private DiffViewer? DiffViewerFiles
 	{
 		get => _diffViewerFiles;
 		set
@@ -223,30 +217,29 @@ partial class DiffView : GitViewBase
 			if(_diffViewerFiles is not null)
 			{
 				_diffViewerFiles.Parent = null;
-				_diffViewerFiles.DiffFileContextMenuRequested -= OnDiffFileContextMenuRequested;
+				_diffViewerFiles.DiffFileContextMenuRequested      -= OnDiffFileContextMenuRequested;
 				_diffViewerFiles.UntrackedFileContextMenuRequested -= OnUntrackedFileContextMenuRequested;
 				_diffViewerFiles.Dispose();
 			}
 			_diffViewerFiles = value;
 			if(_diffViewerFiles is not null)
 			{
-				_diffViewerFiles.DiffFileContextMenuRequested += OnDiffFileContextMenuRequested;
+				_diffViewerFiles.DiffFileContextMenuRequested      += OnDiffFileContextMenuRequested;
 				_diffViewerFiles.UntrackedFileContextMenuRequested += OnUntrackedFileContextMenuRequested;
 			}
 		}
 	}
 
-	private AsyncDataBinding<Diff> DiffBinding
+	private AsyncDataBinding<Diff>? DiffBinding
 	{
 		get => _diffBinding;
 		set
 		{
-			if(_diffBinding != value)
-			{
-				_diffBinding?.Dispose();
-				_diffBinding = value;
-				_diffBinding?.ReloadData();
-			}
+			if(_diffBinding == value) return;
+
+			DisposableUtility.Dispose(ref _diffBinding);
+			_diffBinding = value;
+			_diffBinding?.ReloadData();
 		}
 	}
 
@@ -262,11 +255,14 @@ partial class DiffView : GitViewBase
 	{
 		if(Guid == Guids.ContextualDiffViewGuid)
 		{
-			var node = section.GetCreateSection("ContextualDiffOptions");
-			node.SetValue<int>("Context", _options.Context);
-			node.SetValue<bool>("IgnoreWhitespace", _options.IgnoreWhitespace);
-			node.SetValue<bool>("UsePatienceAlgorithm", _options.UsePatienceAlgorithm);
-			node.SetValue<string>("ViewMode", ViewMode.ToString());
+			if(_options is not null)
+			{
+				var node = section.GetCreateSection("ContextualDiffOptions");
+				node.SetValue<int>   ("Context", _options.Context);
+				node.SetValue<bool>  ("IgnoreWhitespace", _options.IgnoreWhitespace);
+				node.SetValue<bool>  ("UsePatienceAlgorithm", _options.UsePatienceAlgorithm);
+				node.SetValue<string>("ViewMode", ViewMode.ToString());
+			}
 		}
 		base.SaveRepositoryConfig(section);
 	}
@@ -278,9 +274,10 @@ partial class DiffView : GitViewBase
 			var node = section.TryGetSection("ContextualDiffOptions");
 			if(node is not null)
 			{
-				_options.Context = node.GetValue<int>("Context", _options.Context);
-				_options.IgnoreWhitespace = node.GetValue<bool>("IgnoreWhitespace", _options.IgnoreWhitespace);
-				_options.UsePatienceAlgorithm = node.GetValue<bool>("UsePatienceAlgorithm", _options.UsePatienceAlgorithm);
+				var options = DiffOptions;
+				options.Context              = node.GetValue<int> ("Context",              options.Context);
+				options.IgnoreWhitespace     = node.GetValue<bool>("IgnoreWhitespace",     options.IgnoreWhitespace);
+				options.UsePatienceAlgorithm = node.GetValue<bool>("UsePatienceAlgorithm", options.UsePatienceAlgorithm);
 				OnDiffOptionsUpdated(EventArgs.Empty);
 				ViewMode = node.GetValue<string>("ViewMode", string.Empty) switch
 				{
@@ -321,7 +318,7 @@ partial class DiffView : GitViewBase
 		base.DetachViewModel(viewModel);
 	}
 
-	private void OnDiffSourceUpdated(object sender, EventArgs e)
+	private void OnDiffSourceUpdated(object? sender, EventArgs e)
 	{
 		if(InvokeRequired)
 		{
@@ -333,8 +330,10 @@ partial class DiffView : GitViewBase
 		}
 	}
 
-	private void OnDiffFileContextMenuRequested(object sender, DiffFileContextMenuRequestedEventArgs e)
+	private void OnDiffFileContextMenuRequested(object? sender, DiffFileContextMenuRequestedEventArgs e)
 	{
+		if(_diffSource is null) return;
+
 		var menu = new DiffFileMenu(_diffSource, e.File);
 		if(menu.Items.Count == 0)
 		{
@@ -347,7 +346,7 @@ partial class DiffView : GitViewBase
 		}
 	}
 
-	private void OnUntrackedFileContextMenuRequested(object sender, UntrackedFileContextMenuRequestedEventArgs e)
+	private void OnUntrackedFileContextMenuRequested(object? sender, UntrackedFileContextMenuRequestedEventArgs e)
 	{
 		var menu = new UnstagedItemMenu(e.File);
 		Utility.MarkDropDownForAutoDispose(menu);
@@ -383,7 +382,7 @@ partial class DiffView : GitViewBase
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 

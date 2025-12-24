@@ -21,6 +21,7 @@
 namespace gitter.Git;
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using gitter.Git.AccessLayer;
@@ -66,7 +67,7 @@ internal sealed class DynamicRevisionPointer : IRevisionPointer
 	public Revision Dereference()
 	{
 		var rev = Repository.Accessor.Dereference.Invoke(
-			new DereferenceParameters(Pointer));
+			new DereferenceRequest(Pointer));
 		lock(Repository.Revisions.SyncRoot)
 		{
 			return Repository.Revisions.GetOrCreateRevision(rev.CommitHash);
@@ -74,10 +75,10 @@ internal sealed class DynamicRevisionPointer : IRevisionPointer
 	}
 
 	/// <inheritdoc/>
-	public async ValueTask<Revision> DereferenceAsync()
+	public async ValueTask<Revision?> DereferenceAsync(CancellationToken cancellationToken = default)
 	{
 		var rev = await Repository.Accessor.Dereference
-			.InvokeAsync(new DereferenceParameters(Pointer))
+			.InvokeAsync(new DereferenceRequest(Pointer), cancellationToken: cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 		lock(Repository.Revisions.SyncRoot)
 		{

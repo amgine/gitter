@@ -38,24 +38,22 @@ static class WindowsExplorer
 			try
 			{
 				using var key = Registry.ClassesRoot.OpenSubKey($@"Directory\shell\{SubKeyName}\command", writable: false);
-				if(key is not null)
+				if(key is null) return false;
+				var value = (string?)key.GetValue(null, string.Empty);
+				if(string.IsNullOrEmpty(value)) return false;
+				if(value!.EndsWith(" \"%1\""))
 				{
-					var value = (string)key.GetValue(null, string.Empty);
-					if(value == string.Empty) return false;
-					if(value.EndsWith(" \"%1\""))
+					value = value.Substring(0, value.Length - 5);
+					if(value.StartsWith("\"") && value.EndsWith("\""))
 					{
-						value = value.Substring(0, value.Length - 5);
-						if(value.StartsWith("\"") && value.EndsWith("\""))
-						{
-							value = value.Substring(1, value.Length - 2);
-							value = Path.GetFullPath(value);
-							return value == GetAppPath();
-						}
+						value = value.Substring(1, value.Length - 2);
+						value = Path.GetFullPath(value);
+						return value == GetAppPath();
 					}
 				}
 				return false;
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 				return false;
 			}
@@ -67,6 +65,7 @@ static class WindowsExplorer
 		try
 		{
 			using var key = Registry.ClassesRoot.OpenSubKey(@"Directory\shell", writable: true);
+			if(key is null) return;
 			using var gitterKey = key.CreateSubKey(SubKeyName, RegistryKeyPermissionCheck.ReadWriteSubTree, RegistryOptions.None);
 			gitterKey.SetValue(null, @"Open with gitter");
 			using var commandKey = gitterKey.CreateSubKey("command", RegistryKeyPermissionCheck.ReadWriteSubTree, RegistryOptions.None);
@@ -78,7 +77,7 @@ static class WindowsExplorer
 			appPath += " \"%1\"";
 			commandKey.SetValue(null, appPath);
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 		}
 	}
@@ -88,9 +87,10 @@ static class WindowsExplorer
 		try
 		{
 			using var key = Registry.ClassesRoot.OpenSubKey(@"Directory\shell", writable: true);
+			if(key is null) return;
 			key.DeleteSubKeyTree(SubKeyName, throwOnMissingSubKey: false);
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 		}
 	}

@@ -25,6 +25,8 @@ using System.Collections.Generic;
 
 using gitter.Framework;
 
+using ColorIndex = short;
+
 public sealed class DefaultGraphBuilderFactory : IGraphBuilderFactory
 {
 	public IGraphBuilder<T> CreateGraphBuilder<T>() where T : class
@@ -34,7 +36,7 @@ public sealed class DefaultGraphBuilderFactory : IGraphBuilderFactory
 internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 	where T : class
 {
-	private static int ColorLookup(T[] line, int lineCount, T parent, int[] linecolors, IGraphColorProvider cprov)
+	private static int ColorLookup(T?[] line, int lineCount, T parent, ColorIndex[] linecolors, IGraphColorProvider cprov)
 	{
 		for(int i = 0; i < lineCount; ++i)
 		{
@@ -43,7 +45,7 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 		return cprov.AcquireColor();
 	}
 
-	private static void ContinueVerticalLines(GraphCell[] graphLine, T[] line, int[] linecolors, int from, int to)
+	private static void ContinueVerticalLines(GraphCell[] graphLine, T?[] line, ColorIndex[] linecolors, int from, int to)
 	{
 		for(int i = from; i <= to; ++i)
 		{
@@ -54,7 +56,7 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 		}
 	}
 
-	private static void DrawBottomConnection(GraphCell[] graphLine, int color, int from, int to)
+	private static void DrawBottomConnection(GraphCell[] graphLine, ColorIndex color, int from, int to)
 	{
 		if(to > from)
 		{
@@ -96,10 +98,10 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 		}
 	}
 
-	private static GraphCell[] BuildGraphLine0Child(IReadOnlyList<T> parents, T[] line, int[] linecolors, IGraphColorProvider cprov, ref int lineCount)
+	private static GraphCell[] BuildGraphLine0Child(Many<T> parents, T?[] line, ColorIndex[] linecolors, IGraphColorProvider cprov, ref int lineCount)
 	{
 		GraphCell[] res;
-		int lineColor;
+		ColorIndex lineColor;
 		// find position to insert dot
 		int j = lineCount;
 		while((j != 0) && (line[j - 1] is null))
@@ -142,7 +144,7 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 				}
 				// paint dot
 				res[j].Paint(GraphElement.Dot, lineColor);
-				line[j] = parents[0];
+				line[j] = parents.First();
 				linecolors[j] = lineColor;
 				res[j].Paint(GraphElement.VerticalBottom, lineColor);
 				break;
@@ -199,7 +201,7 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 		return res;
 	}
 
-	private static GraphCell[] BuildGraphLine(IReadOnlyList<T> parents, T[] line, int[] linecolors, IGraphColorProvider cprov, IList<int> pos, int id, ref int lineCount)
+	private static GraphCell[] BuildGraphLine(Many<T> parents, T?[] line, ColorIndex[] linecolors, IGraphColorProvider cprov, List<int> pos, int id, ref int lineCount)
 	{
 		GraphCell[] res;
 		int j = pos[id];
@@ -222,7 +224,7 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 					cprov.ReleaseColor(linecolors[j]);
 					if(j == lineCount - 1) // reduce graph width if it was last line
 					{
-						while(lineCount != 0 && line[lineCount - 1] == null)
+						while(lineCount != 0 && line[lineCount - 1] is null)
 						{
 							--lineCount;
 						}
@@ -235,7 +237,7 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 			case 1:
 				#region Line continues - most common case
 				{
-					int lineColor;
+					ColorIndex lineColor;
 					if(pos.Count > 1)
 					{
 						lineColor = cprov.AcquireColor();
@@ -263,11 +265,11 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 				#endregion
 				break;
 			default:
-				#region Several lines start here (point where 1+ git branches were merged)
+				#region 2 or more start here (point where 1+ git branches were merged)
 				{
 					line[j] = null;
 					//bool lastItem = j == lineCount - 1;
-					int lineColor;
+					ColorIndex lineColor;
 					var unmergeable = default(Dictionary<T, int>);
 					var mergeable   = new Dictionary<T, List<int>>(parents.Count);
 					// find mergeable parents
@@ -275,28 +277,19 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 					{
 						var p = line[i];
 						if(p is null) continue;
-						bool found = false;
-						for(int c = 0; c < parents.Count; ++c)
+						if(parents.Contains(p))
 						{
-							if(p == parents[c])
+							if(!mergeable.TryGetValue(p, out var positions))
 							{
-								found = true;
-								if(!mergeable.TryGetValue(p, out var positions))
-								{
-									mergeable.Add(p, positions = new(parents.Count));
-								}
-								positions.Add(i);
-								break;
+								mergeable.Add(p, positions = new(parents.Count));
 							}
-						}
-						if(found)
-						{
+							positions.Add(i);
 							if(mergeable.Count == parents.Count) break;
 						}
 					}
 					if(parents.Count == mergeable.Count)
 					{
-						var closest = default(T);
+						var closest = default(T)!;
 						int closestPosition = 0;
 						int minD = int.MaxValue;
 						bool found = true;
@@ -347,7 +340,7 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 							var p = parents[c];
 							if(!mergeable.ContainsKey(p))
 							{
-								while(line[np] != null && !pos.Contains(np))
+								while(line[np] is not null && !pos.Contains(np))
 								{
 									++np;
 								}
@@ -360,9 +353,7 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 							lineCount = np;
 						}
 					}
-					// allocate memory for new line
 					res = new GraphCell[lineCount];
-					// paint dot
 					res[j].Paint(GraphElement.Dot, linecolors[j]);
 					// paint mergeable
 					foreach(var c in mergeable)
@@ -387,10 +378,9 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 					{
 						line[pos[i]] = null;
 					}
-					// continue lines from previous graph line
 					ContinueVerticalLines(res, line, linecolors, 0, lineCount - 1);
 					// paint unmergeable
-					int oldcolor = 0;
+					var oldcolor = default(ColorIndex);
 					if(unmergeable is not null)
 					{
 						foreach(var c in unmergeable)
@@ -414,13 +404,13 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 		return res;
 	}
 
-	private static void BuildUpperConnections(GraphCell[] res, int[] linecolors, IGraphColorProvider cprov, IList<int> pos, int id)
+	private static void BuildUpperConnections(GraphCell[] res, ColorIndex[] linecolors, IGraphColorProvider cprov, List<int> pos, int id)
 	{
 		int j = pos[id];
 		for(int i = 0; i < pos.Count; ++i)
 		{
 			int cpos = pos[i];
-			int lineColor = linecolors[i];
+			var lineColor = linecolors[i];
 			if(cpos < j)
 			{
 				res[cpos].Paint(GraphElement.RightTopCorner, lineColor);
@@ -482,10 +472,22 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 		}
 	}
 
-	public GraphCell[][] BuildGraph(IReadOnlyList<T> items, Func<T, IReadOnlyList<T>> getParents)
+	public GraphCell[][] BuildGraph(IReadOnlyList<T> items, Func<T, Many<T>> getParents)
 	{
 		Verify.Argument.IsNotNull(items);
 		Verify.Argument.IsNotNull(getParents);
+
+		static void UpdatePositions(List<int> pos, T?[] line, T item)
+		{
+			pos.Clear();
+			int p = -1;
+			while(true)
+			{
+				p = Array.IndexOf(line, item, p + 1);
+				if(p < 0) break;
+				pos.Add(p);
+			}
+		}
 
 		var res = new GraphCell[items.Count][];
 
@@ -494,30 +496,17 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 			: GraphColors.ColorsForDarkBackground);
 
 		int id = 0;
-		var pos        = new List<int>(items.Count);
-		var line       = new T  [items.Count];
-		var linecolors = new int[items.Count];
+		var pos        = new List<int>(capacity: 8);
+		var line       = new T?        [items.Count];
+		var linecolors = new ColorIndex[items.Count];
 		var lineCount  = 0;
-		int[] upperLinecolors1 = default;
-		int[] upperLinecolors  = null;
+		ColorIndex[]? upperLinecolors1 = default;
+		ColorIndex[]? upperLinecolors  = null;
 		foreach(var item in items)
 		{
-			var parents = getParents(item);
-			pos.Clear();
+			UpdatePositions(pos, line, item);
 
-			int p = -1;
-			while(true)
-			{
-				p = Array.IndexOf<T>(line, item, p + 1);
-				if(p != -1)
-				{
-					pos.Add(p);
-				}
-				else
-				{
-					break;
-				}
-			}
+			var parents = getParents(item);
 
 			GraphCell[] graphLine;
 			// how many lines can be merged in a dot?
@@ -530,7 +519,7 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 					break;
 				case 1:
 					{
-						upperLinecolors1 ??= new int[1];
+						upperLinecolors1 ??= new ColorIndex[1];
 						upperLinecolors1[0] = linecolors[pos[0]];
 						graphLine = BuildGraphLine(parents, line, linecolors, cprov, pos, 0, ref lineCount);
 						BuildUpperConnections(graphLine, upperLinecolors1, cprov, pos, 0);
@@ -542,7 +531,7 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 						//int pid = (pos.Count - 1) / 2; - attempt to build balanced graph, not good one
 						if(upperLinecolors is null || upperLinecolors.Length < pos.Count)
 						{
-							upperLinecolors = new int[pos.Count];
+							upperLinecolors = new ColorIndex[pos.Count];
 						}
 						for(int i = 0; i < pos.Count; ++i)
 						{
@@ -553,22 +542,20 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 					}
 					break;
 			}
-			res[id] = graphLine;
+			res[id++] = graphLine;
 
-			while(lineCount != 0 && (lineCount >= line.Length || line[lineCount] is not null))
+			while(lineCount > 0 && (lineCount >= line.Length || line[lineCount] is not null))
 			{
 				--lineCount;
 			}
-
-			++id;
 		}
 
 		return res;
 	}
 
-	public void CleanGraph(GraphCell[] graph)
+	public void CleanGraph(GraphCell[]? graph)
 	{
-		Assert.IsNotNull(graph);
+		if(graph is null) return;
 
 		for(int i = 0; i < graph.Length; ++i)
 		{
@@ -580,10 +567,10 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 		}
 	}
 
-	public void CleanGraph(GraphCell[] prev, GraphCell[] next)
+	public void CleanGraph(GraphCell[]? prev, GraphCell[]? next)
 	{
-		Assert.IsNotNull(prev);
-		Assert.IsNotNull(next);
+		if(prev is null) return;
+		if(next is null) return;
 
 		for(int i = 0; i < next.Length; ++i)
 		{
@@ -596,19 +583,19 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 		}
 	}
 
-	public GraphCell[] AddGraphLineToTop(GraphCell[] next)
+	public GraphCell[] AddGraphLineToTop(GraphCell[]? next)
 	{
 		int id0 = 0;
 		int id = 0;
-		int color = 0;
+		var color = default(ColorIndex);
 		int len = 1;
 		bool move = false;
 		if(next is not null)
 		{
 			for(int i = next.Length - 1; i >=0; --i)
 			{
-				if(next[i].Elements == GraphElement.Space)
-					continue;
+				if(next[i].IsEmpty) continue;
+
 				if((next[i].Elements & (GraphElement.VerticalTop | GraphElement.LeftTopCorner | GraphElement.RightTopCorner | GraphElement.Dot)) != GraphElement.Space)
 				{
 					if(len == 1) len = i + 1;
@@ -619,7 +606,7 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 					break;
 				}
 			}
-			if(next[id0].Elements != GraphElement.Space)
+			if(!next[id0].IsEmpty)
 			{
 				if(next[id0].HasElement(GraphElement.VerticalTop))
 				{
@@ -628,14 +615,9 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 				}
 				else
 				{
-					if(next[id0].HasElement(GraphElement.VerticalBottom))
-					{
-						color = next[id0].ColorOf(GraphElementId.VerticalBottom);
-					}
-					else
-					{
-						color = next[id0].ColorOf(GraphElementId.HorizontalLeft);
-					}
+					color = next[id0].HasElement(GraphElement.VerticalBottom)
+						? next[id0].ColorOf(GraphElementId.VerticalBottom)
+						: next[id0].ColorOf(GraphElementId.HorizontalLeft);
 				}
 			}
 			if(move)
@@ -651,17 +633,17 @@ internal sealed class GraphBuilder<T> : IGraphBuilder<T>
 			{
 				if(next[i].HasElement(GraphElement.VerticalTop))
 				{
-					int c = next[i].ColorOf(GraphElementId.VerticalTop);
+					var c = next[i].ColorOf(GraphElementId.VerticalTop);
 					res[i].Paint(GraphElement.Vertical, c);
 				}
 				else if(next[i].HasElement(GraphElement.LeftTopCorner))
 				{
-					int c = next[i].ColorOf(GraphElementId.LeftTopCorner);
+					var c = next[i].ColorOf(GraphElementId.LeftTopCorner);
 					res[i].Paint(GraphElement.Vertical, c);
 				}
 				else if(next[i].HasElement(GraphElement.RightTopCorner))
 				{
-					int c = next[i].ColorOf(GraphElementId.RightTopCorner);
+					var c = next[i].ColorOf(GraphElementId.RightTopCorner);
 					res[i].Paint(GraphElement.Vertical, c);
 				}
 			}

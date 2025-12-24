@@ -71,7 +71,7 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 			RepositoryNotifications.BranchChanged))
 		{
 			Repository.Accessor.DeleteBranch
-				.Invoke(new DeleteBranchParameters(name, true, force));
+				.Invoke(new DeleteBranchRequest(name, true, force));
 		}
 		RemoveObject(branch);
 	}
@@ -100,7 +100,7 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 			RepositoryNotifications.BranchChanged))
 		{
 			await Repository.Accessor.DeleteBranch
-				.InvokeAsync(new DeleteBranchParameters(name, true, force))
+				.InvokeAsync(new DeleteBranchRequest(name, true, force))
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 		RemoveObject(branch);
@@ -152,7 +152,7 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 	public void Refresh()
 	{
 		var refs = Repository.Accessor.QueryBranches.Invoke(
-			new QueryBranchesParameters(QueryBranchRestriction.Remote));
+			new QueryBranchesRequest(QueryBranchRestriction.Remote));
 		RefreshInternal(refs.Remotes);
 	}
 
@@ -160,7 +160,7 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 	public async Task RefreshAsync()
 	{
 		var refs = await Repository.Accessor.QueryBranches
-			.InvokeAsync(new QueryBranchesParameters(QueryBranchRestriction.Remote))
+			.InvokeAsync(new QueryBranchesRequest(QueryBranchRestriction.Remote))
 			.ConfigureAwait(continueOnCapturedContext: false);
 		RefreshInternal(refs.Remotes);
 	}
@@ -190,7 +190,7 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 		Verify.Argument.IsValidGitObject(branch, Repository);
 
 		var remoteBranchData = Repository.Accessor.QueryBranch.Invoke(
-			new QueryBranchParameters(branch.Name, branch.IsRemote));
+			new QueryBranchRequest(branch.Name, branch.IsRemote));
 		if(remoteBranchData is not null)
 		{
 			ObjectFactories.UpdateRemoteBranch(branch, remoteBranchData);
@@ -208,7 +208,7 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 		Verify.Argument.IsValidGitObject(branch, Repository);
 
 		var remoteBranchData = await Repository.Accessor.QueryBranch
-			.InvokeAsync(new QueryBranchParameters(branch.Name, branch.IsRemote))
+			.InvokeAsync(new QueryBranchRequest(branch.Name, branch.IsRemote))
 			.ConfigureAwait(continueOnCapturedContext: false);
 		if(remoteBranchData != null)
 		{
@@ -233,19 +233,17 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 		{
 			return Preallocated<RemoteBranch>.EmptyArray;
 		}
-		else
+
+		var res = new List<RemoteBranch>(heads.Count);
+		lock(SyncRoot)
 		{
-			var res = new List<RemoteBranch>(heads.Count);
-			lock(SyncRoot)
+			foreach(var head in heads)
 			{
-				foreach(var head in heads)
-				{
-					var branch = TryGetItem(head.Name);
-					if(branch is not null) res.Add(branch);
-				}
+				var branch = TryGetItem(head.Name);
+				if(branch is not null) res.Add(branch);
 			}
-			return res;
 		}
+		return res;
 	}
 
 	/// <summary>Gets the list of unmerged remote branches.</summary>
@@ -253,7 +251,7 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 	public IReadOnlyList<RemoteBranch> GetUnmerged()
 	{
 		var refs = Repository.Accessor.QueryBranches.Invoke(
-			new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.NoMerged));
+			new QueryBranchesRequest(QueryBranchRestriction.Remote, BranchQueryMode.NoMerged));
 		return GetRemotes(refs);
 	}
 
@@ -262,7 +260,7 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 	public IReadOnlyList<RemoteBranch> GetMerged()
 	{
 		var refs = Repository.Accessor.QueryBranches.Invoke(
-			new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.Merged));
+			new QueryBranchesRequest(QueryBranchRestriction.Remote, BranchQueryMode.Merged));
 		return GetRemotes(refs);
 	}
 
@@ -275,7 +273,7 @@ public sealed class RefsRemotesCollection : GitObjectsCollection<RemoteBranch, R
 		Verify.Argument.IsValidRevisionPointer(revision, Repository);
 
 		var refs = Repository.Accessor.QueryBranches.Invoke(
-			new QueryBranchesParameters(QueryBranchRestriction.Remote, BranchQueryMode.Contains, revision.Pointer));
+			new QueryBranchesRequest(QueryBranchRestriction.Remote, BranchQueryMode.Contains, revision.Pointer));
 		return GetRemotes(refs);
 	}
 

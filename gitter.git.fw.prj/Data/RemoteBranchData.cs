@@ -20,35 +20,17 @@
 
 namespace gitter.Git.AccessLayer;
 
-using System;
-
 using gitter.Framework;
 
 /// <summary>RemoteBranch description.</summary>
-public sealed class RemoteBranchData : INamedObject
+public sealed class RemoteBranchData(string name, Sha1Hash hash) : INamedObject
 {
-	public RemoteBranchData(string name, Hash sha1)
-	{
-		Verify.Argument.IsNeitherNullNorWhitespace(name);
-
-		Name = name;
-		SHA1 = sha1;
-	}
-
 	/// <summary>Branch's name (short format, excluding /refs/remotes/).</summary>
-	public string Name { get; }
+	public string Name { get; } = name;
 
 	/// <summary>SHA1 of commit, which is pointed by branch.</summary>
-	public Hash SHA1 { get; }
+	public Sha1Hash Hash { get; } = hash;
 
-	/// <summary>It's not actually a branch, just a representation of detached HEAD.</summary>
-	public bool IsFake => false;
-
-	/// <summary>It is a remote tracking branch.</summary>
-	public bool IsRemote => true;
-
-	/// <summary>This branch is current HEAD.</summary>
-	public bool IsCurrent => false;
-
+	/// <inheritdoc/>
 	public override string ToString() => Name;
 }

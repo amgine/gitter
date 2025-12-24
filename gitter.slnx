@@ -1,0 +1,33 @@
+<Solution>
+  <Folder Name="/extensions/">
+    <Project Path="gitter.gitlab.prj/gitter.gitlab.csproj" />
+    <Project Path="gitter.redmine.prj/gitter.redmine.csproj" />
+    <Project Path="gitter.teamcity.prj/gitter.teamcity.csproj" />
+  </Folder>
+  <Folder Name="/git/">
+    <Project Path="gitter.git.cli.prj/gitter.git.cli.csproj" />
+    <Project Path="gitter.git.fw.prj/gitter.git.fw.csproj" />
+    <Project Path="gitter.git.gui.prj/gitter.git.gui.csproj" />
+    <Project Path="gitter.git.prj/gitter.git.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="common/CommonAssemblyInfo.cs" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="LICENSE" />
+    <File Path="nuget.config" />
+    <File Path="README.markdown" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/gitter.tests.prj/gitter.tests.csproj" />
+  </Folder>
+  <Folder Name="/utility/">
+    <Project Path="gitter.askpass.prj/gitter.askpass.csproj" />
+    <Project Path="gitter.uac.prj/gitter.uac.csproj" />
+    <Project Path="gitter.updater.prj/gitter.updater.csproj" />
+  </Folder>
+  <Project Path="gitter.fw.prj/gitter.fw.csproj" />
+  <Project Path="gitter.hunspell.prj/gitter.hunspell.csproj" />
+  <Project Path="gitter.ui.prj/gitter.ui.csproj" />
+</Solution>

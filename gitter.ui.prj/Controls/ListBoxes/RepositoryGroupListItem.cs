@@ -23,40 +23,34 @@ namespace gitter;
 using System;
 using System.Drawing;
 
+using gitter.Framework;
 using gitter.Framework.Controls;
 using gitter.Framework.Services;
 
 sealed class RepositoryGroupListItem : CustomListBoxItem<RepositoryGroup>
 {
-	private RepositoryGroupBinding _binding;
+	private RepositoryGroupBinding? _binding;
 
 	public RepositoryGroupListItem(RepositoryGroup repositoryGroup)
 		: base(repositoryGroup)
 	{
 	}
 
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		DataContext.NameChanged += OnRepositoryGroupNameChanged;
-		if(_binding != null)
-		{
-			_binding.Dispose();
-		}
-		_binding = new RepositoryGroupBinding(this.Items, DataContext);
+		_binding ??= new RepositoryGroupBinding(this.Items, DataContext);
 	}
 
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.NameChanged -= OnRepositoryGroupNameChanged;
-		if(_binding != null)
-		{
-			_binding.Dispose();
-		}
-		base.OnListBoxDetached();
+		DisposableUtility.Dispose(ref _binding);
+		base.OnListBoxDetached(listBox);
 	}
 
-	private void OnRepositoryGroupNameChanged(object sender, EventArgs e)
+	private void OnRepositoryGroupNameChanged(object? sender, EventArgs e)
 	{
 		InvalidateSafe();
 	}

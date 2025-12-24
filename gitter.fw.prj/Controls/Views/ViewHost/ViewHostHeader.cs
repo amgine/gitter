@@ -22,6 +22,7 @@ namespace gitter.Framework.Controls;
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -73,6 +74,9 @@ public sealed class ViewHostHeader : Control
 	/// <inheritdoc/>
 	[Browsable(false)]
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+	#if NETCOREAPP
+	[AllowNull]
+	#endif
 	public override string Text
 	{
 		get => ViewHost.Text;

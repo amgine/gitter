@@ -36,7 +36,7 @@ public abstract class IntegrationFeature : IIntegrationFeature
 
 	#region Events
 
-	public event EventHandler IsEnabledChanged;
+	public event EventHandler? IsEnabledChanged;
 
 	protected virtual void OnIsEnabledChanged() => IsEnabledChanged?.Invoke(this, EventArgs.Empty);
 
@@ -62,17 +62,16 @@ public abstract class IntegrationFeature : IIntegrationFeature
 		get => _enabled;
 		set
 		{
-			if(_enabled != value)
-			{
-				_enabled = value;
-				OnIsEnabledChanged();
-			}
+			if(_enabled == value) return;
+
+			_enabled = value;
+			OnIsEnabledChanged();
 		}
 	}
 
 	public virtual bool AdministratorRightsRequired => false;
 
-	public string GetEnableAction(bool enable) => default;
+	public string? GetEnableAction(bool enable) => default;
 
 	public bool HasConfiguration => true;
 

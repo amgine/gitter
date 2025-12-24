@@ -41,8 +41,6 @@ public interface ITextParser<out T> : ITextParser
 	T GetResult();
 }
 
-#nullable enable
-
 #if UNUSED
 
 abstract class LineByLineParser : ITextParser, IDisposable

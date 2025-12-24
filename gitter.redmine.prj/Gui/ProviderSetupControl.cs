@@ -20,36 +20,125 @@
 
 namespace gitter.Redmine.Gui;
 
+#nullable enable
+
 using System;
 using System.Drawing;
+using System.Windows.Forms;
 
 using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 
 using Resources = gitter.Redmine.Properties.Resources;
 
 public partial class ProviderSetupControl : DialogBase, IExecutableDialog
 {
+	readonly struct DialogControls
+	{
+		private readonly LabelControl _lblServiceUri;
+		public  readonly TextBox _txtServiceUri;
+		private readonly LabelControl _lblProject;
+		public  readonly TextBox _cmbProject;
+		public  readonly TextBox _txtApiKey;
+		private readonly LabelControl _lblApiKey;
+
+		public DialogControls(IGitterStyle style)
+		{
+			style ??= GitterApplication.Style;
+
+			_lblServiceUri = new();
+			_txtServiceUri = new();
+			_lblProject    = new();
+			_cmbProject    = new();
+			_txtApiKey     = new();
+			_lblApiKey     = new();
+
+			GitterApplication.FontManager.InputFont.Apply(_txtServiceUri, _txtApiKey, _cmbProject);
+		}
+
+		public void Localize()
+		{
+			_lblServiceUri.Text = Resources.StrServiceUri.AddColon();
+			_lblApiKey.Text     = Resources.StrApiKey.AddColon();
+			_lblProject.Text    = Resources.StrProject.AddColon();
+		}
+
+		public void Layout(Control parent)
+		{
+			var urlDec = new TextBoxDecorator(_txtServiceUri);
+			var keyDec = new TextBoxDecorator(_txtApiKey);
+			var projectDec = new TextBoxDecorator(_cmbProject);
+
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					columns:
+					[
+						SizeSpec.Absolute(94),
+						SizeSpec.Everything(),
+					],
+					rows:
+					[
+						LayoutConstants.TextInputRowHeight,
+						LayoutConstants.TextInputRowHeight,
+						LayoutConstants.TextInputRowHeight,
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblServiceUri, marginOverride: LayoutConstants.NoMargin),      row: 0, column: 0),
+						new GridContent(new ControlContent(urlDec,         marginOverride: LayoutConstants.TextBoxMargin), row: 0, column: 1),
+						new GridContent(new ControlContent(_lblApiKey,     marginOverride: LayoutConstants.NoMargin),      row: 1, column: 0),
+						new GridContent(new ControlContent(keyDec,         marginOverride: LayoutConstants.TextBoxMargin), row: 1, column: 1),
+						new GridContent(new ControlContent(_lblProject,    marginOverride: LayoutConstants.NoMargin),      row: 2, column: 0),
+						new GridContent(new ControlContent(projectDec,     marginOverride: LayoutConstants.TextBoxMargin), row: 2, column: 1),
+					]),
+			};
+
+			var tabIndex = 0;
+			_lblServiceUri.TabIndex = tabIndex++;
+			urlDec.TabIndex = tabIndex++;
+			_lblApiKey.TabIndex = tabIndex++;
+			keyDec.TabIndex = tabIndex++;
+			_lblProject.TabIndex = tabIndex++;
+			projectDec.TabIndex = tabIndex++;
+
+			_lblServiceUri.Parent = parent;
+			urlDec.Parent = parent;
+			_lblApiKey.Parent = parent;
+			keyDec.Parent = parent;
+			_lblProject.Parent = parent;
+			projectDec.Parent = parent;
+		}
+	}
+
+	private readonly DialogControls _controls;
 	private IRepository _repository;
 
 	public ProviderSetupControl(IRepository repository)
 	{
-		InitializeComponent();
+		Name = nameof(ProviderSetupControl);
+		Text = Resources.StrRedmine;
 
-		GitterApplication.FontManager.InputFont.Apply(_txtApiKey);
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		Size                = ScalableSize.GetValue(Dpi.Default);
+		_controls = new(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
 
 		_repository = repository;
-
-		Text = Resources.StrRedmine;
-		_lblServiceUri.Text = Resources.StrServiceUri.AddColon();
-		_lblApiKey.Text = Resources.StrApiKey.AddColon();
-		_lblProject.Text = Resources.StrProject.AddColon();
 
 		var section = _repository.ConfigSection.TryGetSection("IssueTrackers")?.TryGetSection("Redmine");
 		if(section is not null)
 		{
-			_txtServiceUri.Text = section.GetValue<string>("ServiceUri", string.Empty);
-			_txtApiKey.Text     = section.GetValue<string>("ApiKey", string.Empty);
-			_cmbProject.Text    = section.GetValue<string>("ProjectId", string.Empty);
+			_controls._txtServiceUri.Text = section.GetValue<string>("ServiceUri", string.Empty);
+			_controls._txtApiKey.Text     = section.GetValue<string>("ApiKey", string.Empty);
+			_controls._cmbProject.Text    = section.GetValue<string>("ProjectId", string.Empty);
 		}
 	}
 
@@ -58,20 +147,20 @@ public partial class ProviderSetupControl : DialogBase, IExecutableDialog
 
 	public string ServiceUri
 	{
-		get => _txtServiceUri.Text.Trim();
-		set => _txtServiceUri.Text = value;
+		get => _controls._txtServiceUri.Text.Trim();
+		set => _controls._txtServiceUri.Text = value;
 	}
 
 	public string ApiKey
 	{
-		get => _txtApiKey.Text.Trim();
-		set => _txtApiKey.Text = value;
+		get => _controls._txtApiKey.Text.Trim();
+		set => _controls._txtApiKey.Text = value;
 	}
 
 	public string ProjectId
 	{
-		get => _cmbProject.Text.Trim();
-		set => _cmbProject.Text = value;
+		get => _controls._cmbProject.Text.Trim();
+		set => _controls._cmbProject.Text = value;
 	}
 
 	private bool ValidateServiceUri(string uri)
@@ -79,7 +168,7 @@ public partial class ProviderSetupControl : DialogBase, IExecutableDialog
 		if(string.IsNullOrWhiteSpace(uri))
 		{
 			NotificationService.NotifyInputError(
-				_txtServiceUri,
+				_controls._txtServiceUri,
 				Resources.ErrNoServiceUriSpecified,
 				Resources.ErrServiceUriCannotBeEmpty);
 			return false;
@@ -87,7 +176,7 @@ public partial class ProviderSetupControl : DialogBase, IExecutableDialog
 		if(!Uri.TryCreate(uri, UriKind.Absolute, out _))
 		{
 			NotificationService.NotifyInputError(
-				_txtServiceUri,
+				_controls._txtServiceUri,
 				Resources.ErrInvalidServiceUri,
 				Resources.ErrServiceUriIsNotValid);
 		}
@@ -99,7 +188,7 @@ public partial class ProviderSetupControl : DialogBase, IExecutableDialog
 		if(string.IsNullOrWhiteSpace(apiKey))
 		{
 			NotificationService.NotifyInputError(
-				_txtApiKey,
+				_controls._txtApiKey,
 				Resources.ErrNoApiKeySpecified,
 				Resources.ErrApiKeyCannotBeEmpty);
 			return false;
@@ -107,7 +196,7 @@ public partial class ProviderSetupControl : DialogBase, IExecutableDialog
 		if(apiKey.Length != 40)
 		{
 			NotificationService.NotifyInputError(
-				_txtApiKey,
+				_controls._txtApiKey,
 				Resources.ErrInvalidApiKey,
 				Resources.ErrApiKeyMustContain40Characters);
 			return false;
@@ -117,7 +206,7 @@ public partial class ProviderSetupControl : DialogBase, IExecutableDialog
 			if(!Uri.IsHexDigit(apiKey[i]))
 			{
 				NotificationService.NotifyInputError(
-					_txtApiKey,
+					_controls._txtApiKey,
 					Resources.ErrInvalidApiKey,
 					Resources.ErrApiKeyContainsInvalidCharacters);
 				return false;
@@ -131,7 +220,7 @@ public partial class ProviderSetupControl : DialogBase, IExecutableDialog
 		if(string.IsNullOrWhiteSpace(projectId))
 		{
 			NotificationService.NotifyInputError(
-				_cmbProject,
+				_controls._cmbProject,
 				Resources.ErrNoProjectNameSpecified,
 				Resources.ErrProjectNameCannotBeEmpty);
 			return false;

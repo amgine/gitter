@@ -21,10 +21,6 @@
 namespace gitter.Redmine.Gui;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
 
 using gitter.Framework.Controls;
 
@@ -38,13 +34,8 @@ public sealed class NewsTitleColumn : CustomListBoxColumn
 		SizeMode = ColumnSizeMode.Fill;
 	}
 
-	public override string IdentificationString
-	{
-		get { return "Title"; }
-	}
+	public override string IdentificationString => "Title";
 
 	protected override Comparison<CustomListBoxItem> SortComparison
-	{
-		get { return NewsListItem.CompareByTitle; }
-	}
+		=> NewsListItem.CompareByTitle;
 }

@@ -27,5 +27,5 @@ public static class CharExtensions
 	/// <param name="c">Character.</param>
 	/// <returns><c>true</c> if specified char is oct digit; otherwise, <c>false</c>.</returns>
 	public static bool IsOctDigit(this char c)
-		=> (c - '0') is >= 0 and < 8;
+		=> c is >= '0' and < '8';
 }

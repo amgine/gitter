@@ -35,10 +35,10 @@ internal sealed class MainGitMenus : IDisposable
 {
 	private readonly GuiProvider _guiProvider;
 
-	private Repository _repository;
-	private ToolStripMenuItem[] _menus;
-	private ToolStripMenuItem _gitMenu;
-	private readonly List<ViewMenuItem> _viewMenuItems = new();
+	private Repository? _repository;
+	private ToolStripMenuItem[]? _menus;
+	private ToolStripMenuItem? _gitMenu;
+	private readonly List<ViewMenuItem> _viewMenuItems = [];
 
 	public MainGitMenus(GuiProvider guiProvider)
 	{
@@ -48,11 +48,11 @@ internal sealed class MainGitMenus : IDisposable
 
 		var repository = guiProvider.Repository;
 
-		_menus = new ToolStripMenuItem[]
-		{
+		_menus =
+		[
 			_gitMenu = new ToolStripMenuItem(
 				Resources.StrGit),
-		};
+		];
 
 		var dpiBindings = guiProvider.MainFormDpiBindings;
 
@@ -118,90 +118,99 @@ internal sealed class MainGitMenus : IDisposable
 		}
 	}
 
-	public IReadOnlyList<ToolStripMenuItem> Menus => _menus;
+	public IReadOnlyList<ToolStripMenuItem> Menus => _menus ?? [];
 
 	public IReadOnlyList<ViewMenuItem> ViewMenuItems => _viewMenuItems;
 
 	public GuiProvider Gui => _guiProvider;
 
-	//private void OnCheckoutClick(object sender, EventArgs e)
+	//private void OnCheckoutClick(object? sender, EventArgs e)
 	//{
 	//    _gui.StartCheckoutDialog();
 	//}
 
-	private void OnCreateBranchClick(object sender, EventArgs e)
+	private void OnCreateBranchClick(object? sender, EventArgs e)
 	{
 		_guiProvider.StartCreateBranchDialog();
 	}
 
-	private void OnCreateTagClick(object sender, EventArgs e)
+	private void OnCreateTagClick(object? sender, EventArgs e)
 	{
 		_guiProvider.StartCreateTagDialog();
 	}
 
-	//private void OnAddRemoteClick(object sender, EventArgs e)
+	//private void OnAddRemoteClick(object? sender, EventArgs e)
 	//{
 	//    _gui.StartAddRemoteDialog();
 	//}
 
-	private void OnGitGuiClick(object sender, EventArgs e)
+	private void OnGitGuiClick(object? sender, EventArgs e)
 	{
+		if(_repository is null) return;
 		StandardTools.StartGitGui(_repository.WorkingDirectory);
 	}
 
-	private void OnGitGitkClick(object sender, EventArgs e)
+	private void OnGitGitkClick(object? sender, EventArgs e)
 	{
+		if(_repository is null) return;
 		StandardTools.StartGitk(_repository.WorkingDirectory);
 	}
 
-	private void OnGitBashClick(object sender, EventArgs e)
+	private void OnGitBashClick(object? sender, EventArgs e)
 	{
+		if(_repository is null) return;
 		StandardTools.StartBash(_repository.WorkingDirectory);
 	}
 
-	private void OnCmdClick(object sender, EventArgs e)
+	private void OnCmdClick(object? sender, EventArgs e)
 	{
+		if(_repository is null) return;
 		var psi = new System.Diagnostics.ProcessStartInfo(@"cmd")
 		{
-			WorkingDirectory = Repository.WorkingDirectory,
+			WorkingDirectory = _repository.WorkingDirectory,
 		};
 		System.Diagnostics.Process.Start(psi)?.Dispose();
 	}
 
-	private void OnShowViewItemClick(object sender, EventArgs e)
+	private void OnShowViewItemClick(object? sender, EventArgs e)
 	{
-		var guid = (Guid)((ToolStripMenuItem)sender).Tag;
-		Gui.Environment.ViewDockService.ShowView(guid);
+		var guid = (Guid)((ToolStripMenuItem)sender!).Tag!;
+		Gui.Environment?.ViewDockService.ShowView(guid);
 	}
 
-	public Repository Repository
+	public Repository? Repository
 	{
 		get => _repository;
 		set
 		{
-			if(_repository != value)
+			if(_repository == value) return;
+
+			if(_repository is not null)
 			{
-				if(_repository is not null)
-				{
-					DetachFromRepository(_repository);
-				}
-				if(value is not null)
-				{
-					AttachToRepository(value);
-				}
+				DetachFromRepository(_repository);
+			}
+			if(value is not null)
+			{
+				AttachToRepository(value);
 			}
 		}
 	}
 
 	private void AttachToRepository(Repository repository)
 	{
-		_gitMenu.Enabled = true;
+		if(_gitMenu is not null)
+		{
+			_gitMenu.Enabled = true;
+		}
 		_repository = repository;
 	}
 
 	private void DetachFromRepository(Repository repository)
 	{
-		_gitMenu.Enabled = false;
+		if(_gitMenu is not null)
+		{
+			_gitMenu.Enabled = false;
+		}
 		_repository = null;
 	}
 
@@ -209,11 +218,7 @@ internal sealed class MainGitMenus : IDisposable
 
 	public void Dispose()
 	{
-		if(_gitMenu is not null)
-		{
-			_gitMenu.Dispose();
-			_gitMenu = null;
-		}
+		DisposableUtility.Dispose(ref _gitMenu);
 		_menus = null;
 		_repository = null;
 	}

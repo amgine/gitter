@@ -86,7 +86,7 @@ partial class ReferencesView : GitViewBase, ISearchableView<ReferencesSearchOpti
 		_lstReferences.LoadData(null);
 	}
 
-	public IRevisionPointer SelectedReference
+	public IRevisionPointer? SelectedReference
 	{
 		get
 		{
@@ -127,7 +127,7 @@ partial class ReferencesView : GitViewBase, ISearchableView<ReferencesSearchOpti
 		}
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		switch(e.KeyCode)
 		{

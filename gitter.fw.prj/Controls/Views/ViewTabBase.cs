@@ -56,13 +56,13 @@ public abstract class ViewTabBase : IDisposable
 
 	public ViewBase View { get; }
 
-	public IImageProvider ImageProvider => View.ImageProvider;
+	public IImageProvider? ImageProvider => View.ImageProvider;
 
 	public int Length { get; private set; }
 
 	public string Text => View.Text;
 
-	public virtual bool IsActive => View.Host.ActiveView == View;
+	public virtual bool IsActive => View.Host?.ActiveView == View;
 
 	public bool IsMouseOver { get; private set; }
 

@@ -25,17 +25,10 @@ using System;
 using gitter.Git.AccessLayer;
 
 /// <summary>Feature which is available in specified version of git.</summary>
-public sealed class VersionFeature : GitFeature
+public sealed class VersionFeature(string name, Version version)
+	: GitFeature(name)
 {
-	public VersionFeature(string name, Version version)
-		: base(name)
-	{
-		Verify.Argument.IsNotNull(version);
-
-		RequiredVersion = version;
-	}
-
-	public Version RequiredVersion { get; }
+	public Version RequiredVersion { get; } = version;
 
 	public override bool IsAvailableFor(IGitAccessor gitAccessor)
 	{

@@ -31,13 +31,13 @@ public sealed class Gravatar : IAvatar
 	#region Data
 
 	private string _email;
-	private Task<Image> _task;
+	private Task<Image?>? _task;
 
 	#endregion
 
 	#region Events
 
-	public event EventHandler Updated;
+	public event EventHandler? Updated;
 
 	private void InvokeUpdated()
 		=> Updated?.Invoke(this, EventArgs.Empty);
@@ -67,20 +67,22 @@ public sealed class Gravatar : IAvatar
 		}
 	}
 
+	public bool IsAvailable => !string.IsNullOrEmpty(Email);
+
 	#region IAvatar
 
-	public Image Image { get; private set; }
+	public Image? Image { get; private set; }
 
 	public bool IsLoaded => Image is not null;
 
-	public Task<Image> UpdateAsync()
+	public Task<Image?> UpdateAsync()
 	{
 		if(_task is not null) return _task;
 		_task = UpdateCoreAsync();
 		return _task;
 	}
 
-	private async Task<Image> UpdateCoreAsync()
+	private async Task<Image?> UpdateCoreAsync()
 	{
 		try
 		{

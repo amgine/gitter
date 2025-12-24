@@ -22,11 +22,6 @@ namespace gitter.GitLab.Api;
 
 using System;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
-using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 [DataContract]
 sealed class Job
@@ -56,162 +51,82 @@ sealed class Job
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Id)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Id)]
-#endif
 	public long Id { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Status)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Status)]
-#endif
-	public string Status { get; set; }
+	public string Status { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Stage)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Stage)]
-#endif
-	public string Stage { get; set; }
+	public string Stage { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Name)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Name)]
-#endif
-	public string Name { get; set; }
+	public string Name { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Ref)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Ref)]
-#endif
-	public string Ref { get; set; }
+	public string Ref { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Tag)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Tag)]
-#endif
 	public bool Tag { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Coverage)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Coverage)]
-#endif
-	public string Coverage { get; set; }
+	public string? Coverage { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.AllowFailure)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.AllowFailure)]
-#endif
 	public bool AllowFailure { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.CreatedAt)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.CreatedAt)]
-#endif
 	public DateTimeOffset CreatedAt { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.StartedAt)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.StartedAt)]
-#endif
 	public DateTimeOffset? StartedAt { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.FinishedAt)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.FinishedAt)]
-#endif
 	public DateTimeOffset? FinishedAt { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Duration)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Duration)]
-#endif
 	public double Duration { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.QueuedDuration)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.QueuedDuration)]
-#endif
 	public double QueuedDuration { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.User)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.User)]
-#endif
-	public User User { get; set; }
+	public User User { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Commit)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Commit)]
-#endif
-	public Commit Commit { get; set; }
+	public Commit Commit { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Pipeline)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Pipeline)]
-#endif
-	public Pipeline Pipeline { get; set; }
+	public Pipeline Pipeline { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.WebUrl)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.WebUrl)]
-#endif
-	public string WebUrl { get; set; }
+	public string WebUrl { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Runner)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Runner)]
-#endif
-	public Runner Runner { get; set; }
+	public Runner Runner { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.ArtifactsExpireAt)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.ArtifactsExpireAt)]
-#endif
 	public DateTimeOffset? ArtifactsExpireAt { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.TagList)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.TagList)]
-#endif
-	public string[] TagList { get; set; }
+	public string[]? TagList { get; set; }
 }

@@ -24,7 +24,7 @@ using gitter.Framework.Mvc;
 
 interface ICommitView : IView
 {
-	IUserInputSource<string> Message { get; }
+	IUserInputSource<string?> Message { get; }
 
 	IUserInputSource<bool> Amend { get; }
 

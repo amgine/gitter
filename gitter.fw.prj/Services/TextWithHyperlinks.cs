@@ -21,212 +21,65 @@
 namespace gitter.Framework;
 
 using System;
-using System.Linq;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 
 using gitter.Framework.Services;
 
 public sealed class TextWithHyperlinks
 {
-	#region Data
-
-	private readonly StringFormat _sf;
-	private readonly HyperlinkGlyph[] _glyphs;
-	private RectangleF _cachedRect;
-
-	#endregion
-
-	#region Events
-
-	public event EventHandler InvalidateRequired;
-
-	#endregion
-
-	private sealed class HyperlinkGlyph
+	public event EventHandler InvalidateRequired
 	{
-		private Region _region;
-
-		public HyperlinkGlyph(Hyperlink href)
-		{
-			Verify.Argument.IsNotNull(href);
-
-			Hyperlink = href;
-		}
-
-		public Hyperlink Hyperlink { get; }
-
-		public int Start => Hyperlink.Text.Start;
-
-		public int End => Hyperlink.Text.End;
-
-		public int Length => Hyperlink.Text.Length;
-
-		public Region Region
-		{
-			get => _region;
-			set
-			{
-				if(_region != value)
-				{
-					_region?.Dispose();
-					_region = value;
-				}
-			}
-		}
-
-		public bool IsHovered { get; set; }
+		add    => _text.InvalidateRequired += value;
+		remove => _text.InvalidateRequired -= value;
 	}
 
-	private readonly TrackingService<HyperlinkGlyph> _hoveredLink;
-	private bool _failedToSegment;
+	private readonly FormattedWrappedText _text;
 
-	public TextWithHyperlinks(string text, IHyperlinkExtractor extractor = null)
+	public TextWithHyperlinks(string text, IHyperlinkExtractor? extractor = null)
 	{
 		Text = text;
-		_sf = (StringFormat)(StringFormat.GenericTypographic.Clone());
-		_sf.FormatFlags = StringFormatFlags.FitBlackBox | StringFormatFlags.MeasureTrailingSpaces;
+		_text = new(text);
 		extractor ??= new AbsoluteUrlHyperlinkExtractor();
-		_glyphs = extractor.ExtractHyperlinks(text)
-							.Select(static h => new HyperlinkGlyph(h))
-							.ToArray();
-		try
+		if(extractor.ExtractHyperlinks(text) is { Count: not 0 } links)
 		{
-			_sf.SetMeasurableCharacterRanges(
-				Array.ConvertAll(_glyphs, static l => new CharacterRange(l.Start, l.Length)));
+			foreach(var hyperlink in links)
+			{
+				_text.AddHyperlink(hyperlink);
+			}
 		}
-		catch
-		{
-			_failedToSegment = true;
-		}
-
-		_hoveredLink = new TrackingService<HyperlinkGlyph>();
-		_hoveredLink.Changed += OnHoveredLinkChanged;
 	}
 
-	public Hyperlink HoveredHyperlink
-		=> _hoveredLink.IsTracked
-			? _hoveredLink.Item.Hyperlink
-			: null;
-
-	private void OnHoveredLinkChanged(object sender, TrackingEventArgs<HyperlinkGlyph> e)
-	{
-		Assert.IsNotNull(e);
-
-		e.Item.IsHovered = e.IsTracked;
-		InvalidateRequired?.Invoke(this, EventArgs.Empty);
-	}
+	public Hyperlink? HoveredHyperlink => _text.HoveredHyperlink;
 
 	public string Text { get; }
 
 	public void Render(IGitterStyle style, Graphics graphics, Font font, Rectangle rect)
+		=> _text.Render(style, graphics, font, rect, rect);
+
+	public Size Measure(Graphics graphics, Font font, Rectangle rect)
+		=> _text.Measure(graphics, font, rect);
+
+	public Size Measure(Font font, Rectangle rect)
+		=> _text.Measure(font, rect);
+
+	public Hyperlink? HitTest(Rectangle rect, Point p)
 	{
-		Assert.IsNotNull(style);
-		Assert.IsNotNull(graphics);
-		Assert.IsNotNull(font);
-
-		if(_failedToSegment)
-		{
-			GitterApplication.TextRenderer.DrawText(
-				graphics, Text, font, style.Colors.WindowText, rect, _sf);
-			return;
-		}
-
-		bool useCache = _cachedRect == rect;
-		if(useCache)
-		{
-			for(int i = 0; i < _glyphs.Length; ++i)
-			{
-				graphics.ExcludeClip(_glyphs[i].Region);
-			}
-		}
-		else
-		{
-			var cr = graphics.MeasureCharacterRanges(Text, font, rect, _sf);
-			for(int i = 0; i < _glyphs.Length; ++i)
-			{
-				_glyphs[i].Region = cr[i];
-				graphics.ExcludeClip(cr[i]);
-			}
-		}
-		GitterApplication.TextRenderer.DrawText(
-			graphics, Text, font, style.Colors.WindowText, rect, _sf);
-		graphics.ResetClip();
-		bool clipIsSet = false;
-		foreach(var glyph in _glyphs)
-		{
-			if(glyph != _hoveredLink.Item)
-			{
-				if(clipIsSet)
-				{
-					graphics.SetClip(glyph.Region, CombineMode.Union);
-				}
-				else
-				{
-					graphics.Clip = glyph.Region;
-					clipIsSet = true;
-				}
-			}
-		}
-		if(clipIsSet)
-		{
-			GitterApplication.TextRenderer.DrawText(
-				graphics, Text, font, style.Colors.HyperlinkText, rect, _sf);
-		}
-		if(_hoveredLink.IsTracked)
-		{
-			graphics.Clip = _hoveredLink.Item.Region;
-			using var f = new Font(font, FontStyle.Underline);
-			GitterApplication.TextRenderer.DrawText(
-				graphics, Text, f, style.Colors.HyperlinkTextHotTrack, rect, _sf);
-		}
-		graphics.ResetClip();
-		_cachedRect = rect;
+		p.X -= rect.X;
+		p.Y -= rect.Y;
+		return _text.HitTest(p);
 	}
 
-	public Hyperlink HitTest(RectangleF rect, Point p)
+	public void OnMouseMove(Rectangle rect, Point p)
 	{
-		var index = HitTestCore(rect, p);
-		return index >= 0
-			? _glyphs[index].Hyperlink
-			: default;
+		p.X -= rect.X;
+		p.Y -= rect.Y;
+		_text.OnMouseMove(p);
 	}
 
-	private int HitTestCore(RectangleF rect, Point p)
-	{
-		p.X += (int)(_cachedRect.X - rect.X);
-		p.Y += (int)(_cachedRect.Y - rect.Y);
-		for(int i = 0; i < _glyphs.Length; ++i)
-		{
-			var glyph = _glyphs[i];
-			if(glyph.Region is not null && glyph.Region.IsVisible(p))
-			{
-				return i;
-			}
-		}
-		return -1;
-	}
+	public void OnMouseDown(Rectangle rect, Point p)
+		=> HitTest(rect, p)?.Navigate();
 
-	public void OnMouseMove(RectangleF rect, Point p)
-	{
-		var index = HitTestCore(rect, p);
-		if(index != -1)
-		{
-			_hoveredLink.Track(index, _glyphs[index]);
-		}
-		else
-		{
-			_hoveredLink.Drop();
-		}
-	}
-
-	public void OnMouseDown(RectangleF rect, Point p)
-	{
-		var index = HitTestCore(rect, p);
-		if(index != -1) _glyphs[index].Hyperlink.Navigate();
-	}
-
-	public void OnMouseLeave() => _hoveredLink.Drop();
+	public void OnMouseLeave() => _text.OnMouseLeave();
 
 	public override string ToString() => Text;
 }

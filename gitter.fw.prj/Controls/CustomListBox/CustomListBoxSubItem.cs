@@ -24,16 +24,11 @@ using System;
 using System.Drawing;
 
 /// <summary>Atomic listbox element - single cell.</summary>
-public abstract class CustomListBoxSubItem
+public abstract class CustomListBoxSubItem(int id)
 {
-	protected CustomListBoxSubItem(int id)
-	{
-		Id = id;
-	}
+	public int Id { get; } = id;
 
-	public int Id { get; }
-
-	public CustomListBoxItem Item { get; internal set; }
+	public CustomListBoxItem? Item { get; internal set; }
 
 	public void Invalidate() => Item?.InvalidateSubItem(Id);
 

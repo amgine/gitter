@@ -25,7 +25,7 @@ using gitter.GitLab.Api;
 
 static class GuiUtils
 {
-	public static void GetPipelineStatusIconAndName(PipelineStatus status, out IImageProvider image, out string name)
+	public static void GetPipelineStatusIconAndName(PipelineStatus status, out IImageProvider? image, out string? name)
 	{
 		switch(status)
 		{

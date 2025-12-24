@@ -33,38 +33,34 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [DesignerCategory("")]
 sealed class ReferencesChangedNotification : NotificationContent
 {
-	private readonly ReferenceChange[] _changes;
+	private readonly Many<ReferenceChange> _changes;
 
 	private const int HorizontalMargin = 2;
 	private const int VerticalMargin = 2;
 	private const int ItemHeight = 18;
 	private const int MaxItems = 10;
 
-	public ReferencesChangedNotification(ReferenceChange[] changes)
+	public ReferencesChangedNotification(Many<ReferenceChange> changes)
 	{
 		_changes = changes;
 		Height = Measure(changes, Dpi.FromControl(this));
 	}
 
-	private static int Measure(ReferenceChange[] changes, Dpi dpi)
+	private static int Measure(Many<ReferenceChange> changes, Dpi dpi)
 	{
 		var conv = DpiConverter.FromDefaultTo(dpi);
-		if(changes is not { Length: > 0 })
+		if(changes.IsEmpty)
 		{
 			return conv.ConvertY(VerticalMargin) * 2 + conv.ConvertY(ItemHeight);
 		}
 		else
 		{
-			int count = changes.Length;
-			if(count > MaxItems)
-			{
-				count = MaxItems;
-			}
+			int count = Math.Min(changes.Count, MaxItems);
 			return conv.ConvertY(VerticalMargin) * 2 + count * conv.ConvertY(ItemHeight);
 		}
 	}
 
-	private static Image GetIcon(ReferenceType referenceType, int size)
+	private static Image? GetIcon(ReferenceType referenceType, int size)
 	{
 		var icon = referenceType switch
 		{
@@ -95,7 +91,7 @@ sealed class ReferencesChangedNotification : NotificationContent
 		int x = conv.ConvertX(HorizontalMargin);
 		int y = conv.ConvertY(VerticalMargin);
 		using var brush = SolidBrushCache.Get(ForeColor);
-		if(_changes is not { Length: > 0 })
+		if(_changes.IsEmpty)
 		{
 			GitterApplication.TextRenderer.DrawText(
 				e.Graphics, Resources.StrsEverythingIsUpToDate, Font, brush, new Point(x, y + 2));
@@ -105,29 +101,31 @@ sealed class ReferencesChangedNotification : NotificationContent
 			var itemHeight = conv.ConvertY(ItemHeight);
 			var v = conv.ConvertX(54);
 			var spacing = conv.ConvertX(4);
-			for(int i = 0; i < _changes.Length; ++i)
+			var i = 0;
+			foreach(var change in _changes)
 			{
-				if(i == MaxItems - 1 && _changes.Length > MaxItems)
+				if(i == MaxItems - 1 && _changes.Count > MaxItems)
 				{
 					GitterApplication.TextRenderer.DrawText(
-						e.Graphics, Resources.StrfNMoreChangesAreNotShown.UseAsFormat(_changes.Length - MaxItems + 1),
+						e.Graphics, Resources.StrfNMoreChangesAreNotShown.UseAsFormat(_changes.Count - MaxItems + 1),
 						Font, brush, new Point(x, y + 2));
 					break;
 				}
-				var prefix = GetTextPrefix(_changes[i].ChangeType);
+				var prefix = GetTextPrefix(change.ChangeType);
 				if(!string.IsNullOrWhiteSpace(prefix))
 				{
 					GitterApplication.TextRenderer.DrawText(
 						e.Graphics, prefix, Font, brush, new Point(x, y + 2));
 				}
-				var icon = GetIcon(_changes[i].ReferenceType, conv.ConvertX(16));
+				var icon = GetIcon(change.ReferenceType, conv.ConvertX(16));
 				if(icon is not null)
 				{
 					e.Graphics.DrawImage(icon, new Rectangle(x + v, y + (itemHeight - icon.Height) / 2, icon.Width, icon.Height));
 				}
 				GitterApplication.TextRenderer.DrawText(
-					e.Graphics, _changes[i].Name, Font, brush, new Point(x + v + (icon is not null ? icon.Width : 0) + spacing, y + 2));
+					e.Graphics, change.Name, Font, brush, new Point(x + v + (icon is not null ? icon.Width : 0) + spacing, y + 2));
 				y += itemHeight;
+				++i;
 			}
 		}
 	}

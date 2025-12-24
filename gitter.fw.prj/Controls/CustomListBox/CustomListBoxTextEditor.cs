@@ -26,7 +26,7 @@ using System.ComponentModel;
 
 public sealed class CustomListBoxTextEditor
 {
-	public event EventHandler<CancelEventArgs> Validating;
+	public event EventHandler<CancelEventArgs>? Validating;
 
 	private readonly TextBox _textBox;
 
@@ -38,7 +38,7 @@ public sealed class CustomListBoxTextEditor
 		_textBox.KeyDown += OnKeyDown;
 	}
 
-	public void OnKeyDown(object sender, KeyEventArgs e)
+	public void OnKeyDown(object? sender, KeyEventArgs e)
 	{
 		switch(e.KeyCode)
 		{
@@ -52,7 +52,7 @@ public sealed class CustomListBoxTextEditor
 		}
 	}
 
-	private void OnValidating(object sender, CancelEventArgs e)
+	private void OnValidating(object? sender, CancelEventArgs e)
 	{
 		var handler = Validating;
 		if(handler != null)

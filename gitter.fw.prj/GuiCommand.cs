@@ -22,25 +22,15 @@ namespace gitter.Framework;
 
 using System;
 
-public sealed class GuiCommand : INamedObject
+public sealed class GuiCommand(string name, string displayName, IImageProvider image, Action<IWorkingEnvironment> execute) : INamedObject
 {
-	private readonly Action<IWorkingEnvironment> _execute;
+	public string Name { get; } = name;
 
-	public GuiCommand(string name, string displayName, IImageProvider image, Action<IWorkingEnvironment> execute)
-	{
-		Name        = name;
-		DisplayName = displayName;
-		Image       = image;
-		_execute    = execute;
-	}
+	public string DisplayName { get; } = displayName;
 
-	public string Name { get; }
-
-	public string DisplayName { get; }
-
-	public IImageProvider Image { get; }
+	public IImageProvider Image { get; } = image;
 
 	public bool IsEnabled { get; set; } = true;
 
-	public void Execute(IWorkingEnvironment env) => _execute(env);
+	public void Execute(IWorkingEnvironment env) => execute(env);
 }

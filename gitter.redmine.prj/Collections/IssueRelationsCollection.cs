@@ -20,11 +20,14 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Globalization;
 using System.Xml;
+using System.Threading.Tasks;
+using System.Threading;
 
 public class IssueRelationsCollection : RedmineObjectsCache<IssueRelation>
 {
@@ -34,26 +37,22 @@ public class IssueRelationsCollection : RedmineObjectsCache<IssueRelation>
 	}
 
 	protected override IssueRelation Create(int id)
-	{
-		return new IssueRelation(Context, id);
-	}
+		=> new(Context, id);
 
 	protected override IssueRelation Create(XmlNode node)
-	{
-		return new IssueRelation(Context, node);
-	}
+		=> new(Context, node);
 
-	public LinkedList<IssueRelation> Fetch(Issue issue)
+	public Task<List<IssueRelation>> FetchAsync(Issue issue, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(issue);
 
-		return Fetch(issue.Id);
+		return FetchAsync(issue.Id, cancellationToken);
 	}
 
-	public LinkedList<IssueRelation> Fetch(int issueId)
+	public Task<List<IssueRelation>> FetchAsync(int issueId, CancellationToken cancellationToken = default)
 	{
 		var url = string.Format(CultureInfo.InvariantCulture,
 			@"issues/{0}/relations.xml", issueId);
-		return FetchItemsFromSinglePage(url);
+		return FetchItemsFromSinglePageAsync(url, cancellationToken);
 	}
 }

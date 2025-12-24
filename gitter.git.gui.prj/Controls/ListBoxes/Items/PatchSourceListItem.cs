@@ -26,15 +26,10 @@ using System.Drawing;
 using gitter.Framework;
 using gitter.Framework.Controls;
 
-public class PatchSourceListItem : CustomListBoxItem<IPatchSource>
+public class PatchSourceListItem(IPatchSource patchSource)
+	: CustomListBoxItem<IPatchSource>(patchSource)
 {
-	public PatchSourceListItem(IPatchSource patchSource)
-		: base(patchSource)
-	{
-		Verify.Argument.IsNotNull(patchSource);
-	}
-
-	private static Image GetIcon(Dpi dpi)
+	private static Image? GetIcon(Dpi dpi)
 		=> Icons.Patch.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 
 	/// <inheritdoc/>

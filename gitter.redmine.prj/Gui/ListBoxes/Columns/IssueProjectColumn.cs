@@ -21,9 +21,6 @@
 namespace gitter.Redmine.Gui;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 using gitter.Framework.Controls;
 
@@ -37,13 +34,8 @@ public sealed class IssueProjectColumn : CustomListBoxColumn
 		Width = 80;
 	}
 
-	public override string IdentificationString
-	{
-		get { return "Project"; }
-	}
+	public override string IdentificationString => "Project";
 
 	protected override Comparison<CustomListBoxItem> SortComparison
-	{
-		get { return IssueListItem.CompareByProject; }
-	}
+		=> IssueListItem.CompareByProject;
 }

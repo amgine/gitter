@@ -60,10 +60,10 @@ class GuiItemFactory
 
 	class OpenWithVisualStudioCodeProvider : IPathCommandsProvider
 	{
-		private string _vsCodePath;
+		private string? _vsCodePath;
 		private bool _vsCodeSearched;
 
-		private static string FindVSCode()
+		private static string? FindVSCode()
 		{
 			var path0 = Path.Combine(
 				Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -134,18 +134,24 @@ class GuiItemFactory
 			return fullFileName;
 		}
 
+		static readonly string[] Patterns = ["*.sln", "*.slnx"];
+
 		public IEnumerable<GuiCommand> GetPathCommands(string path)
 		{
 			path = Path.GetFullPath(path);
-			foreach(var sln in Directory.EnumerateFiles(path, "*.sln", SearchOption.TopDirectoryOnly))
+
+			foreach(var pattern in Patterns)
 			{
-				yield return new GuiCommand("OpenVSSolution", GetFileName(path, sln), CommonIcons.Solution, _ => Utility.OpenUrl(sln));
-			}
-			foreach(var dir in Directory.EnumerateDirectories(path))
-			{
-				foreach(var sln in Directory.EnumerateFiles(dir, "*.sln", SearchOption.TopDirectoryOnly))
+				foreach(var sln in Directory.EnumerateFiles(path, pattern, SearchOption.TopDirectoryOnly))
 				{
 					yield return new GuiCommand("OpenVSSolution", GetFileName(path, sln), CommonIcons.Solution, _ => Utility.OpenUrl(sln));
+				}
+				foreach(var dir in Directory.EnumerateDirectories(path))
+				{
+					foreach(var sln in Directory.EnumerateFiles(dir, pattern, SearchOption.TopDirectoryOnly))
+					{
+						yield return new GuiCommand("OpenVSSolution", GetFileName(path, sln), CommonIcons.Solution, _ => Utility.OpenUrl(sln));
+					}
 				}
 			}
 		}
@@ -181,7 +187,7 @@ class GuiItemFactory
 		return item;
 	}
 
-	public static T GetOpenUrlItem<T>(string name, Image image, string url)
+	public static T GetOpenUrlItem<T>(string name, Image? image, string url)
 		where T : ToolStripItem, new()
 	{
 		Verify.Argument.IsNeitherNullNorWhitespace(url);
@@ -211,38 +217,38 @@ class GuiItemFactory
 		return item;
 	}
 
-	private static void OnRemoveRecentRepositoryClick(object sender, EventArgs e)
+	private static void OnRemoveRecentRepositoryClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var repo = (RepositoryLink)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var repo = (RepositoryLink)item.Tag!;
 
 		GitterApplication.WorkingEnvironment.RepositoryManagerService.RecentRepositories.Remove(repo);
 	}
 
-	private static void OnRemoveRepositoryClick(object sender, EventArgs e)
+	private static void OnRemoveRepositoryClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var repository = (RepositoryListItem)item.Tag;
+		var item       = (ToolStripItem)sender!;
+		var repository = (RepositoryListItem)item.Tag!;
 
-		if(repository.ListBox is LocalRepositoriesListBox list && list.FullList != null)
+		if(repository.ListBox is LocalRepositoriesListBox list && list.FullList is not null)
 		{
 			list.FullList.Remove(repository);
 		}
 		repository.Remove();
 	}
 
-	private static void OnOpenUrlItemClick(object sender, EventArgs e)
+	private static void OnOpenUrlItemClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var url  = (string)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var url  = (string)item.Tag!;
 
 		Utility.OpenUrl(url);
 	}
 
-	private static void OnOpenCmdAtItemClick(object sender, EventArgs e)
+	private static void OnOpenCmdAtItemClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var path = (string)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var path = (string)item.Tag!;
 
 		var psi = new ProcessStartInfo(@"cmd")
 			{
@@ -316,10 +322,10 @@ class GuiItemFactory
 		return res;
 	}
 
-	static void OnGuiCommandItemClick(object sender, EventArgs e)
+	static void OnGuiCommandItemClick(object? sender, EventArgs e)
 	{
-		var item = (ToolStripItem)sender;
-		var cmd  = (GuiCommand)item.Tag;
+		var item = (ToolStripItem)sender!;
+		var cmd  = (GuiCommand)item.Tag!;
 
 		cmd.Execute(GitterApplication.WorkingEnvironment);
 	}

@@ -31,12 +31,12 @@ class GitUpdateDriver : IUpdateDriver
 {
 	public string Name => "git";
 
-	private static string GetFullPath(string filename)
+	private static string? GetFullPath(string filename)
 	{
-		string environmentVariable = Environment.GetEnvironmentVariable("PATH");
+		string environmentVariable = Environment.GetEnvironmentVariable("PATH") ?? "";
 		if(!string.IsNullOrEmpty(environmentVariable))
 		{
-			foreach(string str2 in environmentVariable.Split(new char[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries))
+			foreach(string str2 in environmentVariable.Split([Path.PathSeparator], StringSplitOptions.RemoveEmptyEntries))
 			{
 				try
 				{
@@ -54,14 +54,14 @@ class GitUpdateDriver : IUpdateDriver
 		return null;
 	}
 
-	private static string DetectGitExePath()
+	private static string? DetectGitExePath()
 	{
-		string fullPath = GetFullPath("git.exe");
+		var fullPath = GetFullPath("git.exe");
 		if(!string.IsNullOrEmpty(fullPath))
 		{
 			return fullPath;
 		}
-		string str2 = GetFullPath("git.cmd");
+		var str2 = GetFullPath("git.cmd") ?? "";
 		if(string.IsNullOrEmpty(str2))
 		{
 			return null;
@@ -74,9 +74,9 @@ class GitUpdateDriver : IUpdateDriver
 		return Path.Combine(str2.Substring(0, length), @"bin\git.exe");
 	}
 
-	public IUpdateProcess CreateProcess(CommandLine cmdline)
+	public IUpdateProcess? CreateProcess(CommandLine cmdline)
 	{
-		Version ver;
+		Version? ver;
 		var version = cmdline["version"];
 		if(string.IsNullOrEmpty(version))
 		{
@@ -100,7 +100,7 @@ class GitUpdateDriver : IUpdateDriver
 		var target = cmdline["target"];
 		if(string.IsNullOrEmpty(target)) return null;
 		bool skipVersionCheck = cmdline.IsDefined("skipversioncheck");
-		return new UpdateFromGitRepositoryProcess(ver, git, url, target, skipVersionCheck);
+		return new UpdateFromGitRepositoryProcess(ver, git!, url!, target!, skipVersionCheck);
 	}
 }
 
@@ -122,9 +122,9 @@ class UpdateFromGitRepositoryProcess : UpdateProcessBase
 	private readonly string _gitExePath;
 	private readonly bool _skipVersionCheck;
 
-	private Version GetRemoteMasterVersion()
+	private Version? GetRemoteMasterVersion()
 	{
-		Version result = null;
+		Version? result = null;
 		using(var git = new Process())
 		{
 			var args = "ls-remote --heads --tags " + _repoUrl;
@@ -159,8 +159,8 @@ class UpdateFromGitRepositoryProcess : UpdateProcessBase
 			git.WaitForExit();
 			if(git.ExitCode == 0)
 			{
-				string masterSHA1 = null;
-				var lines = stdout.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+				var masterSHA1 = default(string);
+				var lines = stdout.Split(['\n'], StringSplitOptions.RemoveEmptyEntries);
 				for(int i = 0; i < lines.Length; ++i)
 				{
 					if(lines[i].Length > 41)

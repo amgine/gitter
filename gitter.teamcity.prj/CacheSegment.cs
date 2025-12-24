@@ -22,6 +22,8 @@ namespace gitter.TeamCity;
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 public abstract class CacheSegment<T> : IEnumerable<T>
 	where T : TeamCityObject
@@ -35,11 +37,11 @@ public abstract class CacheSegment<T> : IEnumerable<T>
 		_cache = cache;
 	}
 
-	public object SyncRoot => _cache.SyncRoot;
+	public LockType SyncRoot => _cache.SyncRoot;
 
 	protected TeamCityServiceContext Context => _cache.Context;
 
-	public abstract void Refresh();
+	public abstract Task RefreshAsync(CancellationToken cancellationToken = default);
 
 	protected abstract bool IsIncluded(T item);
 

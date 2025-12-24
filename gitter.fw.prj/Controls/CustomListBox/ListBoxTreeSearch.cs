@@ -38,15 +38,15 @@ public abstract class ListBoxTreeSearch<T> : SearchBase, ISearch<T>
 
 	protected abstract bool TestItem(CustomListBoxItem item, T search);
 
-	private static CustomListBoxItemsCollection GetParentItems(CustomListBoxItem item)
+	private static CustomListBoxItemsCollection? GetParentItems(CustomListBoxItem item)
 		=> item.Parent?.Items ?? item.ListBox?.Items;
 
-	private static CustomListBoxItem First(CustomListBoxItemsCollection items)
+	private static CustomListBoxItem? First(CustomListBoxItemsCollection items)
 	{
 		return items.Count != 0 ? items[0] : null;
 	}
 
-	private static CustomListBoxItem Last(CustomListBoxItemsCollection items)
+	private static CustomListBoxItem? Last(CustomListBoxItemsCollection items)
 	{
 		if(items.Count == 0) return null;
 		var item = items[items.Count - 1];
@@ -57,10 +57,9 @@ public abstract class ListBoxTreeSearch<T> : SearchBase, ISearch<T>
 		return item;
 	}
 
-	private static CustomListBoxItem Next(CustomListBoxItem item)
+	private static CustomListBoxItem? Next(CustomListBoxItem? item)
 	{
-		Assert.IsNotNull(item);
-
+		if(item is null) return default;
 		if(item.Items.Count > 0)
 		{
 			return item.Items[0];
@@ -77,14 +76,14 @@ public abstract class ListBoxTreeSearch<T> : SearchBase, ISearch<T>
 				}
 			}
 			item = item.Parent;
-		} while(item != null);
-		return null;
+		}
+		while(item is not null);
+		return default;
 	}
 
-	private static CustomListBoxItem Prev(CustomListBoxItem item)
+	private static CustomListBoxItem? Prev(CustomListBoxItem? item)
 	{
-		Assert.IsNotNull(item);
-
+		if(item is null) return default;
 		var items = GetParentItems(item);
 		if(items is not null)
 		{
@@ -98,15 +97,15 @@ public abstract class ListBoxTreeSearch<T> : SearchBase, ISearch<T>
 		return item.Parent;
 	}
 
-	private bool Search(CustomListBoxItem start, T search, int direction)
+	private bool Search(CustomListBoxItem? start, T search, int direction)
 	{
-		if(search.Text.Length == 0) return true;
+		if(search.Text is not { Length: not 0 }) return true;
 
 		start ??= direction switch
 		{
-				1 => First(ListBox.Items),
-			-1 => Last(ListBox.Items),
-				_ => throw new ArgumentException("Invalid direction", nameof(direction)),
+			 1 => First(ListBox.Items),
+			-1 => Last (ListBox.Items),
+			_  => throw new ArgumentException("Invalid direction", nameof(direction)),
 		};
 
 		if(start is null) return false;
@@ -122,12 +121,12 @@ public abstract class ListBoxTreeSearch<T> : SearchBase, ISearch<T>
 
 			current = direction switch
 			{
-					1 => Next(current) ?? First(ListBox.Items),
+				 1 => Next(current) ?? First(ListBox.Items),
 				-1 => Prev(current) ?? Last (ListBox.Items),
-					_ => throw new ArgumentException("Invalid direction", nameof(direction)),
+				_  => throw new ArgumentException("Invalid direction", nameof(direction)),
 			};
 		}
-		while(current != start);
+		while(current is not null && current != start);
 		return false;
 	}
 
@@ -142,7 +141,7 @@ public abstract class ListBoxTreeSearch<T> : SearchBase, ISearch<T>
 	{
 		Verify.Argument.IsNotNull(search);
 
-		if(search.Text.Length == 0) return true;
+		if(search.Text is not { Length: not 0 }) return true;
 		if(ListBox.SelectedItems.Count == 0)
 		{
 			return Search(null, search, 1);
@@ -154,7 +153,7 @@ public abstract class ListBoxTreeSearch<T> : SearchBase, ISearch<T>
 	{
 		Verify.Argument.IsNotNull(search);
 
-		if(search.Text.Length == 0) return true;
+		if(search.Text is not { Length: not 0 }) return true;
 		if(ListBox.SelectedItems.Count == 0)
 		{
 			return Search(null, search, 1);
@@ -166,7 +165,7 @@ public abstract class ListBoxTreeSearch<T> : SearchBase, ISearch<T>
 	{
 		Verify.Argument.IsNotNull(search);
 
-		if(search.Text.Length == 0) return true;
+		if(search.Text is not { Length: not 0 }) return true;
 		if(ListBox.SelectedItems.Count == 0)
 		{
 			return Search(null, search, 1);

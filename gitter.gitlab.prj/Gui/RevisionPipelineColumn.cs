@@ -29,7 +29,7 @@ using gitter.Git.Gui.Controls;
 
 class RevisionPipelineColumn : CustomListBoxColumn
 {
-	private readonly Dictionary<Hash, List<Api.Pipeline>> _pipelines = new();
+	private readonly Dictionary<Sha1Hash, List<Api.Pipeline>> _pipelines = new();
 
 	public RevisionPipelineColumn()
 		: base(-1000, "Pipeline", true)

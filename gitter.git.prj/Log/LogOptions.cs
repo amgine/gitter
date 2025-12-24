@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git;
@@ -29,7 +29,7 @@ using gitter.Git.AccessLayer;
 
 public sealed class LogOptions
 {
-	public event EventHandler Changed;
+	public event EventHandler? Changed;
 
 	private void OnChanged(EventArgs e)
 		=> Changed?.Invoke(this, e);
@@ -44,7 +44,7 @@ public sealed class LogOptions
 	{
 		_order = RevisionQueryOrder.DateOrder;
 		_filter = LogReferenceFilter.All;
-		_allowedReferences = new HashSet<Reference>();
+		_allowedReferences = [];
 		_skip = 0;
 		_maxCount = 500;
 	}
@@ -140,9 +140,9 @@ public sealed class LogOptions
 		OnChanged(EventArgs.Empty);
 	}
 
-	internal QueryRevisionsParameters GetLogParameters()
+	internal QueryRevisionsRequest GetLogRequest()
 	{
-		var p = new QueryRevisionsParameters()
+		var request = new QueryRevisionsRequest()
 		{
 			MaxCount = MaxCount,
 			Skip = Skip,
@@ -151,21 +151,32 @@ public sealed class LogOptions
 		switch(_filter)
 		{
 			case LogReferenceFilter.All:
-				p.All = true;
+				request.All = true;
 				break;
 			case LogReferenceFilter.Allowed:
-				var l = new List<string>(capacity: _allowedReferences.Count);
-				foreach(var reference in _allowedReferences)
+				if(_allowedReferences.Count == 1)
 				{
-					l.Add(reference.FullName);
+					foreach(var allowed in _allowedReferences)
+					{
+						request.References = allowed.FullName;
+					}
 				}
-				p.References = l;
+				else if(_allowedReferences.Count > 1)
+				{
+					var l = new string[_allowedReferences.Count];
+					var i = 0;
+					foreach(var reference in _allowedReferences)
+					{
+						l[i++] = reference.FullName;
+					}
+					request.References = l;
+				}
 				break;
 			case LogReferenceFilter.HEAD:
-				p.References = new[] { GitConstants.HEAD };
+				request.References = GitConstants.HEAD;
 				break;
 		}
-		return p;
+		return request;
 	}
 
 	public void SaveTo(Section section)

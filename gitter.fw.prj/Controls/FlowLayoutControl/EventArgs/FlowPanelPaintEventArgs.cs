@@ -23,21 +23,13 @@ namespace gitter.Framework.Controls;
 using System;
 using System.Drawing;
 
-public class FlowPanelPaintEventArgs : EventArgs
+public class FlowPanelPaintEventArgs(Graphics graphics, Dpi dpi, Rectangle clipRectangle, Rectangle bounds) : EventArgs
 {
-	public FlowPanelPaintEventArgs(Graphics graphics, Dpi dpi, Rectangle clipRectangle, Rectangle bounds)
-	{
-		Graphics      = graphics;
-		ClipRectangle = clipRectangle;
-		Bounds        = bounds;
-		Dpi           = dpi;
-	}
+	public Graphics Graphics { get; } = graphics;
 
-	public Graphics Graphics { get; }
+	public Rectangle Bounds { get; } = bounds;
 
-	public Rectangle Bounds { get; }
+	public Rectangle ClipRectangle { get; } = clipRectangle;
 
-	public Rectangle ClipRectangle { get; }
-
-	public Dpi Dpi { get; }
+	public Dpi Dpi { get; } = dpi;
 }

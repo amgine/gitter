@@ -27,12 +27,8 @@ namespace NHunspell;
 
 public class MyThes
 {
-	private readonly object dictionaryLock = new();
-	private readonly Dictionary<string, ThesMeaning[]> synonyms = new();
-
-	public MyThes()
-	{
-	}
+	private readonly object _dictionaryLock = new();
+	private readonly Dictionary<string, ThesMeaning[]> _synonyms = [];
 
 	public MyThes(byte[] datBytes) => Load(datBytes);
 
@@ -72,25 +68,24 @@ public class MyThes
 
 	public void Load(byte[] dictionaryBytes)
 	{
-		if(this.synonyms.Count > 0)
+		if(_synonyms.Count > 0)
 			throw new InvalidOperationException("Thesaurus already loaded");
 		int num1 = 0;
-		int lineLength1 = this.GetLineLength(dictionaryBytes, num1);
+		int lineLength1 = GetLineLength(dictionaryBytes, num1);
 		Encoding encoding = MyThes.GetEncoding(Encoding.ASCII.GetString(dictionaryBytes, num1, lineLength1));
 		int pos = num1 + lineLength1;
 		string empty = string.Empty;
-		List<ThesMeaning> thesMeaningList = new List<ThesMeaning>();
+		var meanings = new List<ThesMeaning>();
 		int num2;
 		int lineLength2;
 		for(; pos < dictionaryBytes.Length; pos = num2 + lineLength2)
 		{
-			num2 = pos + this.GetCrLfLength(dictionaryBytes, pos);
-			lineLength2 = this.GetLineLength(dictionaryBytes, num2);
+			num2 = pos + GetCrLfLength(dictionaryBytes, pos);
+			lineLength2 = GetLineLength(dictionaryBytes, num2);
 			string str = encoding.GetString(dictionaryBytes, num2, lineLength2).Trim();
-			if(str != null && str.Length > 0)
+			if(str is { Length : not 0 })
 			{
-				string[] strArray = str.Split('|');
-				if(strArray.Length > 0)
+				if(str.Split('|') is { Length: not 0 } strArray)
 				{
 					bool flag = true;
 					if(string.IsNullOrEmpty(strArray[0]))
@@ -101,38 +96,43 @@ public class MyThes
 						flag = false;
 					if(flag)
 					{
-						lock(this.dictionaryLock)
+						lock(_dictionaryLock)
 						{
 							if(empty.Length > 0)
 							{
-								if(!this.synonyms.ContainsKey(empty.ToLowerInvariant()))
-									this.synonyms.Add(empty.ToLowerInvariant(), thesMeaningList.ToArray());
+								var emptyKey = empty.ToLowerInvariant();
+								if(!_synonyms.ContainsKey(emptyKey))
+								{
+									_synonyms.Add(emptyKey, [.. meanings]);
+								}
 							}
 						}
-						thesMeaningList = new List<ThesMeaning>();
+						meanings = new List<ThesMeaning>();
 						empty = strArray[0];
 					}
 					else
 					{
-						List<string> synonyms = new List<string>();
-						string description = (string)null;
+						var synonyms = new List<string>();
+						var description = default(string);
 						for(int index = 1; index < strArray.Length; ++index)
 						{
 							synonyms.Add(strArray[index]);
 							if(index == 1)
+							{
 								description = strArray[index];
+							}
 						}
-						ThesMeaning thesMeaning = new ThesMeaning(description, synonyms);
-						thesMeaningList.Add(thesMeaning);
+						var thesMeaning = new ThesMeaning(description, synonyms);
+						meanings.Add(thesMeaning);
 					}
 				}
 			}
 		}
-		lock(this.dictionaryLock)
+		lock(this._dictionaryLock)
 		{
-			if(empty.Length <= 0 || this.synonyms.ContainsKey(empty.ToLowerInvariant()))
+			if(empty.Length <= 0 || this._synonyms.ContainsKey(empty.ToLowerInvariant()))
 				return;
-			this.synonyms.Add(empty.ToLowerInvariant(), thesMeaningList.ToArray());
+			this._synonyms.Add(empty.ToLowerInvariant(), meanings.ToArray());
 		}
 	}
 
@@ -140,63 +140,65 @@ public class MyThes
 	{
 		dictionaryFile = Path.GetFullPath(dictionaryFile);
 		if(!File.Exists(dictionaryFile))
-			throw new FileNotFoundException("DAT File not found: " + dictionaryFile);
-		byte[] dictionaryBytes;
-		using(FileStream input = File.OpenRead(dictionaryFile))
 		{
-			using(BinaryReader binaryReader = new BinaryReader((Stream)input))
-				dictionaryBytes = binaryReader.ReadBytes((int)input.Length);
+			throw new FileNotFoundException("DAT File not found: " + dictionaryFile);
 		}
-		this.Load(dictionaryBytes);
+		Load(File.ReadAllBytes(dictionaryFile));
 	}
 
-	public ThesResult Lookup(string word)
+	public ThesResult? Lookup(string word)
 	{
-		if(this.synonyms.Count == 0)
+		if(_synonyms.Count == 0)
 			throw new InvalidOperationException("Thesaurus not loaded");
 		word = word.ToLowerInvariant();
-		ThesMeaning[] collection;
-		lock(this.dictionaryLock)
+		ThesMeaning[]? collection;
+		lock(_dictionaryLock)
 		{
-			if(!this.synonyms.TryGetValue(word, out collection))
-				return (ThesResult)null;
+			if(!_synonyms.TryGetValue(word, out collection))
+			{
+				return default;
+			}
 		}
-		return new ThesResult(new List<ThesMeaning>((IEnumerable<ThesMeaning>)collection), false);
+		return new ThesResult([.. collection], generatedByStem: false);
 	}
 
-	public ThesResult Lookup(string word, Hunspell stemming)
+	public ThesResult? Lookup(string word, Hunspell stemming)
 	{
-		if(this.synonyms.Count == 0)
+		if(_synonyms.Count == 0)
 			throw new InvalidOperationException("Thesaurus not loaded");
-		ThesResult thesResult1 = this.Lookup(word);
-		if(thesResult1 != null)
-			return thesResult1;
-		List<string> stringList = stemming.Stem(word);
-		if(stringList == null || stringList.Count == 0)
-			return (ThesResult)null;
-		List<ThesMeaning> meanings = new List<ThesMeaning>();
-		foreach(string word1 in stringList)
+		var thesResult1 = Lookup(word);
+		if(thesResult1 is not null) return thesResult1;
+
+		var stringList = stemming.Stem(word);
+		if(stringList is not { Count: not 0 }) return default;
+
+		var meanings = new List<ThesMeaning>();
+		foreach(var word1 in stringList)
 		{
-			ThesResult thesResult2 = this.Lookup(word1);
-			if(thesResult2 != null)
+			var thesResult2 = Lookup(word1);
+			if(thesResult2 is not null)
 			{
-				foreach(ThesMeaning meaning in thesResult2.Meanings)
+				foreach(var meaning in thesResult2.Meanings)
 				{
-					List<string> synonyms = new List<string>();
+					var synonyms = new List<string>();
 					foreach(string synonym in meaning.Synonyms)
 					{
 						foreach(string str in stemming.Generate(synonym, word))
+						{
 							synonyms.Add(str);
+						}
 					}
 					if(synonyms.Count > 0)
+					{
 						meanings.Add(new ThesMeaning(meaning.Description, synonyms));
+					}
 				}
 			}
 		}
-		return meanings.Count > 0 ? new ThesResult(meanings, true) : (ThesResult)null;
+		return meanings.Count > 0 ? new ThesResult(meanings, generatedByStem: true) : default;
 	}
 
-	private int GetCrLfLength(byte[] buffer, int pos)
+	private static int GetCrLfLength(byte[] buffer, int pos)
 	{
 		if(buffer[pos] == (byte)10)
 			return buffer.Length > pos + 1 && buffer[pos] == (byte)13 ? 2 : 1;
@@ -205,7 +207,7 @@ public class MyThes
 		return buffer.Length > pos + 1 && buffer[pos] == (byte)10 ? 2 : 1;
 	}
 
-	private int GetLineLength(byte[] buffer, int start)
+	private static int GetLineLength(byte[] buffer, int start)
 	{
 		for(int index = start; index < buffer.Length; ++index)
 		{

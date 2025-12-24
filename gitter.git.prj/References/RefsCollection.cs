@@ -1,27 +1,28 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git;
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 using gitter.Framework;
@@ -87,31 +88,58 @@ public sealed class RefsCollection : GitObject, IReadOnlyCollection<Reference>
 
 	#region Refresh()
 
+	private static QueryReferencesRequest GetQueryReferencesRequest() => new(
+		ReferenceType.LocalBranch |
+		ReferenceType.RemoteBranch |
+		ReferenceType.Tag);
+
+	private void Refresh(ReferencesData refs)
+	{
+		Assert.IsNotNull(refs);
+
+		if(refs.Heads   is not null) Heads  .Refresh(refs.Heads);
+		if(refs.Remotes is not null) Remotes.Refresh(refs.Remotes);
+		if(refs.Tags    is not null) Tags   .Refresh(refs.Tags);
+	}
+
+	private void RefreshRequestedTypes(ReferencesData refs, ReferenceType referenceTypes)
+	{
+		Assert.IsNotNull(refs);
+
+		static bool Requested(ReferenceType flags, ReferenceType flag)
+			=> (flags & flag) == flag;
+
+		if(Requested(referenceTypes, ReferenceType.LocalBranch) && refs.Heads is not null)
+		{
+			Heads.Refresh(refs.Heads);
+		}
+		if(Requested(referenceTypes, ReferenceType.RemoteBranch) && refs.Remotes is not null)
+		{
+			Remotes.Refresh(refs.Remotes);
+		}
+		if(Requested(referenceTypes, ReferenceType.Tag) && refs.Tags is not null)
+		{
+			Tags.Refresh(refs.Tags);
+		}
+	}
+
 	/// <summary>Updates all cached references.</summary>
 	public void Refresh()
 	{
 		var refs = Repository.Accessor.QueryReferences.Invoke(
-			new QueryReferencesParameters(
-				ReferenceType.LocalBranch |
-				ReferenceType.RemoteBranch |
-				ReferenceType.Tag));
-		Heads.Refresh(refs.Heads);
-		Remotes.Refresh(refs.Remotes);
-		Tags.Refresh(refs.Tags);
+			GetQueryReferencesRequest());
+
+		Refresh(refs);
 	}
 
 	/// <summary>Updates all cached references.</summary>
-	public async Task RefreshAsync()
+	public async Task RefreshAsync(CancellationToken cancellationToken = default)
 	{
 		var refs = await Repository.Accessor.QueryReferences
-			.InvokeAsync(new QueryReferencesParameters(
-				ReferenceType.LocalBranch |
-				ReferenceType.RemoteBranch |
-				ReferenceType.Tag))
+			.InvokeAsync(GetQueryReferencesRequest(), cancellationToken: cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
-		Heads.Refresh(refs.Heads);
-		Remotes.Refresh(refs.Remotes);
-		Tags.Refresh(refs.Tags);
+
+		Refresh(refs);
 	}
 
 	/// <summary>Updates cached references of specified types.</summary>
@@ -119,63 +147,46 @@ public sealed class RefsCollection : GitObject, IReadOnlyCollection<Reference>
 	public void Refresh(ReferenceType referenceTypes)
 	{
 		var refs = Repository.Accessor.QueryReferences.Invoke(
-			new QueryReferencesParameters(referenceTypes));
-		if((referenceTypes & ReferenceType.LocalBranch) == ReferenceType.LocalBranch)
-		{
-			Heads.Refresh(refs.Heads);
-		}
-		if((referenceTypes & ReferenceType.RemoteBranch) == ReferenceType.RemoteBranch)
-		{
-			Remotes.Refresh(refs.Remotes);
-		}
-		if((referenceTypes & ReferenceType.Tag) == ReferenceType.Tag)
-		{
-			Tags.Refresh(refs.Tags);
-		}
+			new QueryReferencesRequest(referenceTypes));
+		RefreshRequestedTypes(refs, referenceTypes);
 	}
 
 	/// <summary>Updates cached references of specified types.</summary>
 	/// <param name="referenceTypes">Reference types to update.</param>
-	public async Task RefreshAsync(ReferenceType referenceTypes)
+	/// <param name="cancellationToken">Cancellation token.</param>
+	public async Task RefreshAsync(ReferenceType referenceTypes, CancellationToken cancellationToken = default)
 	{
 		var refs = await Repository.Accessor.QueryReferences
-			.InvokeAsync(new QueryReferencesParameters(referenceTypes))
+			.InvokeAsync(new QueryReferencesRequest(referenceTypes), cancellationToken: cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
-		if((referenceTypes & ReferenceType.LocalBranch) == ReferenceType.LocalBranch)
-		{
-			Heads.Refresh(refs.Heads);
-		}
-		if((referenceTypes & ReferenceType.RemoteBranch) == ReferenceType.RemoteBranch)
-		{
-			Remotes.Refresh(refs.Remotes);
-		}
-		if((referenceTypes & ReferenceType.Tag) == ReferenceType.Tag)
-		{
-			Tags.Refresh(refs.Tags);
-		}
+		RefreshRequestedTypes(refs, referenceTypes);
 	}
 
 	/// <summary>
 	/// Updates all references of <see cref="ReferenceType.LocalBranch"/> or
 	/// <see cref="ReferenceType.RemoteBranch"/> type.
 	/// </summary>
-	public void RefreshBranches() => Refresh(ReferenceType.Branch);
+	public void RefreshBranches()
+		=> Refresh(ReferenceType.Branch);
 
 	/// <summary>
 	/// Updates all references of <see cref="ReferenceType.LocalBranch"/> or
 	/// <see cref="ReferenceType.RemoteBranch"/> type.
 	/// </summary>
-	public Task RefreshBranchesAsync() => RefreshAsync(ReferenceType.Branch);
+	public Task RefreshBranchesAsync(CancellationToken cancellationToken = default)
+		=> RefreshAsync(ReferenceType.Branch, cancellationToken);
 
 	/// <summary>
 	/// Updates all references of <see cref="ReferenceType.Tag"/> type.
 	/// </summary>
-	public void RefreshTags() => Refresh(ReferenceType.Tag);
+	public void RefreshTags()
+		=> Refresh(ReferenceType.Tag);
 
 	/// <summary>
 	/// Updates all references of <see cref="ReferenceType.Tag"/> type.
 	/// </summary>
-	public Task RefreshTagsAsync() => RefreshAsync(ReferenceType.Tag);
+	public Task RefreshTagsAsync(CancellationToken cancellationToken = default)
+		=> RefreshAsync(ReferenceType.Tag, cancellationToken);
 
 	#endregion
 
@@ -187,15 +198,17 @@ public sealed class RefsCollection : GitObject, IReadOnlyCollection<Reference>
 	/// </summary>
 	/// <param name="name">Reference name.</param>
 	/// <returns>Reference with a given name or <c>null</c>, if such reference does not exist</returns>
-	public Reference TryGetReference(string name)
-		=> (Reference)Heads.TryGetItem(name) ?? (Reference)Remotes.TryGetItem(name) ?? (Reference)Tags.TryGetItem(name);
+	public Reference? TryGetReference(string name)
+		=> (Reference?)Heads.TryGetItem(name)
+		?? (Reference?)Remotes.TryGetItem(name)
+		?? (Reference?)Tags.TryGetItem(name);
 
 	/// <summary>Gets the list of unmerged branches.</summary>
 	/// <returns>List of unmerged branches.</returns>
 	public IReadOnlyList<BranchBase> GetUnmergedBranches()
 	{
 		var refs = Repository.Accessor.QueryBranches.Invoke(
-			new QueryBranchesParameters(QueryBranchRestriction.All, BranchQueryMode.NoMerged));
+			new QueryBranchesRequest(QueryBranchRestriction.All, BranchQueryMode.NoMerged));
 		var heads = refs.Heads;
 		var remotes = refs.Remotes;
 		var count = heads.Count + remotes.Count;
@@ -209,7 +222,7 @@ public sealed class RefsCollection : GitObject, IReadOnlyCollection<Reference>
 			foreach(var head in heads)
 			{
 				var branch = Heads.TryGetItem(head.Name);
-				if(branch != null) res.Add(branch);
+				if(branch is not null) res.Add(branch);
 			}
 		}
 		lock(Remotes.SyncRoot)
@@ -217,7 +230,7 @@ public sealed class RefsCollection : GitObject, IReadOnlyCollection<Reference>
 			foreach(var remote in remotes)
 			{
 				var branch = Remotes.TryGetItem(remote.Name);
-				if(branch != null) res.Add(branch);
+				if(branch is not null) res.Add(branch);
 			}
 		}
 		return res;
@@ -228,7 +241,7 @@ public sealed class RefsCollection : GitObject, IReadOnlyCollection<Reference>
 	public IReadOnlyList<BranchBase> GetMergedBranches()
 	{
 		var refs = Repository.Accessor.QueryBranches.Invoke(
-			new QueryBranchesParameters(QueryBranchRestriction.All, BranchQueryMode.Merged));
+			new QueryBranchesRequest(QueryBranchRestriction.All, BranchQueryMode.Merged));
 		var heads = refs.Heads;
 		var remotes = refs.Remotes;
 		var count = heads.Count + remotes.Count;
@@ -265,7 +278,7 @@ public sealed class RefsCollection : GitObject, IReadOnlyCollection<Reference>
 		Verify.Argument.IsValidRevisionPointer(revision, Repository, nameof(revision));
 
 		var refs = Repository.Accessor.QueryBranches.Invoke(
-		    new QueryBranchesParameters(QueryBranchRestriction.All, BranchQueryMode.Contains, revision.Pointer));
+		    new QueryBranchesRequest(QueryBranchRestriction.All, BranchQueryMode.Contains, revision.Pointer));
 		var heads = refs.Heads;
 		var remotes = refs.Remotes;
 		var count = heads.Count + remotes.Count;
@@ -306,9 +319,9 @@ public sealed class RefsCollection : GitObject, IReadOnlyCollection<Reference>
 	{
 		Verify.Argument.IsNotNull(refs);
 
-		if(refs.Heads   is not null) Heads.Load  (refs.Heads);
+		if(refs.Heads   is not null) Heads  .Load(refs.Heads);
 		if(refs.Remotes is not null) Remotes.Load(refs.Remotes);
-		if(refs.Tags    is not null) Tags.Load   (refs.Tags);
+		if(refs.Tags    is not null) Tags   .Load(refs.Tags);
 	}
 
 	#endregion

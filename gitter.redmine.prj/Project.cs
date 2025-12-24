@@ -22,22 +22,19 @@ namespace gitter.Redmine;
 
 using System;
 using System.Globalization;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 public sealed class Project : NamedRedmineObject
 {
 	#region Static
 
-	public static readonly RedmineObjectProperty<string> IdentifierProperty =
-		new RedmineObjectProperty<string>("identifier", "Identifier");
-	public static readonly RedmineObjectProperty<string> DescriptionProperty =
-		new RedmineObjectProperty<string>("description", "Description");
-	public static readonly RedmineObjectProperty<Project> ParentProperty =
-		new RedmineObjectProperty<Project>("parent", "Parent");
-	public static readonly RedmineObjectProperty<DateTime> CreatedOnProperty =
-		new RedmineObjectProperty<DateTime>("created_on", "CreatedOn");
-	public static readonly RedmineObjectProperty<DateTime> UpdatedOnProperty =
-		new RedmineObjectProperty<DateTime>("updated_on", "UpdatedOn");
+	public static readonly RedmineObjectProperty<string>   IdentifierProperty  = new("identifier",  nameof(Identifier));
+	public static readonly RedmineObjectProperty<string>   DescriptionProperty = new("description", nameof(Description));
+	public static readonly RedmineObjectProperty<Project>  ParentProperty      = new("parent",      nameof(Parent));
+	public static readonly RedmineObjectProperty<DateTime> CreatedOnProperty   = new("created_on",  nameof(CreatedOn));
+	public static readonly RedmineObjectProperty<DateTime> UpdatedOnProperty   = new("updated_on",  nameof(UpdatedOn));
 
 	#endregion
 
@@ -64,8 +61,8 @@ public sealed class Project : NamedRedmineObject
 		_identifier		= RedmineUtility.LoadString(node[IdentifierProperty.XmlNodeName]);
 		_description	= RedmineUtility.LoadString(node[DescriptionProperty.XmlNodeName]);
 		_parent			= RedmineUtility.LoadNamedObject(node[ParentProperty.XmlNodeName], context.Projects.Lookup);
-		_createdOn		= RedmineUtility.LoadDateForSure(node[CreatedOnProperty.XmlNodeName]);
-		_updatedOn		= RedmineUtility.LoadDateForSure(node[UpdatedOnProperty.XmlNodeName]);
+		_createdOn		= RedmineUtility.LoadDateRequired(node[CreatedOnProperty.XmlNodeName]);
+		_updatedOn		= RedmineUtility.LoadDateRequired(node[UpdatedOnProperty.XmlNodeName]);
 	}
 
 	#endregion
@@ -79,15 +76,15 @@ public sealed class Project : NamedRedmineObject
 		Identifier		= RedmineUtility.LoadString(node[IdentifierProperty.XmlNodeName]);
 		Description		= RedmineUtility.LoadString(node[DescriptionProperty.XmlNodeName]);
 		Parent			= RedmineUtility.LoadNamedObject(node[ParentProperty.XmlNodeName], Context.Projects.Lookup);
-		CreatedOn		= RedmineUtility.LoadDateForSure(node[CreatedOnProperty.XmlNodeName]);
-		UpdatedOn		= RedmineUtility.LoadDateForSure(node[UpdatedOnProperty.XmlNodeName]);
+		CreatedOn		= RedmineUtility.LoadDateRequired(node[CreatedOnProperty.XmlNodeName]);
+		UpdatedOn		= RedmineUtility.LoadDateRequired(node[UpdatedOnProperty.XmlNodeName]);
 	}
 
-	public override void Update()
+	public override Task UpdateAsync(CancellationToken cancellationToken = default)
 	{
 		var url = string.Format(CultureInfo.InvariantCulture,
 			@"projects/{0}.xml", Id);
-		Context.Projects.FetchSingleItem(url);
+		return Context.Projects.FetchSingleItemAsync(url, cancellationToken);
 	}
 
 	#endregion
@@ -108,20 +105,20 @@ public sealed class Project : NamedRedmineObject
 
 	public DateTime CreatedOn
 	{
-		get { return _createdOn; }
-		private set { UpdatePropertyValue(ref _createdOn, value, CreatedOnProperty); }
+		get => _createdOn;
+		private set => UpdatePropertyValue(ref _createdOn, value, CreatedOnProperty);
 	}
 
 	public DateTime UpdatedOn
 	{
-		get { return _updatedOn; }
-		private set { UpdatePropertyValue(ref _updatedOn, value, UpdatedOnProperty); }
+		get => _updatedOn;
+		private set => UpdatePropertyValue(ref _updatedOn, value, UpdatedOnProperty);
 	}
 
 	public Project Parent
 	{
-		get { return _parent; }
-		private set { UpdatePropertyValue(ref _parent, value, ParentProperty); }
+		get => _parent;
+		private set => UpdatePropertyValue(ref _parent, value, ParentProperty);
 	}
 
 	#endregion

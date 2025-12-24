@@ -27,16 +27,140 @@ using System.Windows.Forms;
 
 using gitter.Framework;
 using gitter.Framework.Services;
-using gitter.Framework.Controls;
 
 using gitter.Git.AccessLayer;
 using gitter.Git.Gui.Controls;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
+using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 
 public partial class ApplyPatchesDialog : GitDialogBase, IExecutableDialog
 {
-	#region .ctor
+	readonly struct DialogControls
+	{
+		public readonly LabelControl _lblPatches;
+		public readonly CustomListBox _lstPatches;
+		public readonly IButtonWidget _btnAddFiles;
+		public readonly IButtonWidget _btnAddFromClipboard;
+		public readonly GroupSeparator _grpApplyTo;
+		public readonly IRadioButtonWidget _radWorkingDirectory;
+		public readonly IRadioButtonWidget _radIndexAndWorkingDirectory;
+		public readonly IRadioButtonWidget _radIndexOnly;
+		public readonly GroupSeparator _grpOptions;
+		public readonly ICheckBoxWidget _chkReverse;
+
+		public DialogControls(IGitterStyle style)
+		{
+			style ??= GitterApplication.Style;
+
+			_lblPatches = new();
+			_grpApplyTo = new();
+			_grpOptions = new();
+			var rbf = style.RadioButtonFactory;
+			_radWorkingDirectory = rbf.Create();
+			_radIndexAndWorkingDirectory = rbf.Create();
+			_radIndexOnly = rbf.Create();
+			var bf = style.ButtonFactory;
+			_btnAddFiles = bf.Create();
+			_btnAddFromClipboard = bf.Create();
+			_chkReverse = style.CheckBoxFactory.Create();
+			_lstPatches = new()
+			{
+				Style          = style,
+				HeaderStyle    = HeaderStyle.Hidden,
+				ShowCheckBoxes = true,
+				Multiselect    = true,
+			};
+			_lstPatches.Columns.Add(new NameColumn { SizeMode = ColumnSizeMode.Auto });
+			_radWorkingDirectory.IsChecked = true;
+		}
+
+		public void Localize()
+		{
+			_lblPatches.Text = Resources.StrPatches.AddColon();
+			_lstPatches.Text = Resources.StrsNoPatchesToApply;
+			_btnAddFiles.Text = Resources.StrAddFiles.AddEllipsis();
+			_btnAddFromClipboard.Text = Resources.StrAddFromClipboard;
+			_grpApplyTo.Text = Resources.StrApplyTo;
+			_radWorkingDirectory.Text = Resources.StrsWorkingDirectory;
+			_radIndexOnly.Text = Resources.StrIndex;
+			_radIndexAndWorkingDirectory.Text = Resources.StrsIndexAndWorkingDirectory;
+			_grpOptions.Text = Resources.StrOptions;
+			_chkReverse.Text = Resources.StrReverse;
+		}
+
+		public void Layout(Control parent)
+		{
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					rows:
+					[
+						/*  0 */ LayoutConstants.LabelRowHeight,
+						/*  1 */ LayoutConstants.LabelRowSpacing,
+						/*  2 */ SizeSpec.Everything(),
+						/*  3 */ LayoutConstants.RowSpacing,
+						/*  4 */ LayoutConstants.ButtonRowHeight,
+						/*  5 */ LayoutConstants.GroupSeparatorRowHeight,
+						/*  6 */ LayoutConstants.RadioButtonRowHeight,
+						/*  7 */ LayoutConstants.RadioButtonRowHeight,
+						/*  8 */ LayoutConstants.RadioButtonRowHeight,
+						/*  9 */ LayoutConstants.GroupSeparatorRowHeight,
+						/* 10 */ LayoutConstants.CheckBoxRowHeight,
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblPatches, marginOverride: LayoutConstants.NoMargin), row: 0),
+						new GridContent(new ControlContent(_lstPatches, marginOverride: LayoutConstants.NoMargin), row: 2),
+						new GridContent(new Grid(
+							columns:
+							[
+								SizeSpec.Everything(),
+								SizeSpec.Absolute(93),
+								SizeSpec.Absolute(6),
+								SizeSpec.Absolute(154),
+							],
+							content:
+							[
+								new GridContent(new WidgetContent(_btnAddFiles,         marginOverride: LayoutConstants.NoMargin), column: 1),
+								new GridContent(new WidgetContent(_btnAddFromClipboard, marginOverride: LayoutConstants.NoMargin), column: 3),
+							]), row: 4),
+						new GridContent(new ControlContent(_grpApplyTo,                  marginOverride: LayoutConstants.NoMargin), row: 5),
+						new GridContent(new WidgetContent (_radWorkingDirectory,         marginOverride: LayoutConstants.GroupPadding), row: 6),
+						new GridContent(new WidgetContent (_radIndexOnly,                marginOverride: LayoutConstants.GroupPadding), row: 7),
+						new GridContent(new WidgetContent (_radIndexAndWorkingDirectory, marginOverride: LayoutConstants.GroupPadding), row: 8),
+						new GridContent(new ControlContent(_grpOptions,                  marginOverride: LayoutConstants.NoMargin), row: 9),
+						new GridContent(new WidgetContent (_chkReverse,                  marginOverride: LayoutConstants.GroupPadding), row: 10),
+					]),
+			};
+
+			var tabIndex = 0;
+			_lblPatches.TabIndex = tabIndex++;
+			_lstPatches.TabIndex = tabIndex++;
+			_btnAddFiles.TabIndex = tabIndex++;
+			_btnAddFromClipboard.TabIndex = tabIndex++;
+			_grpApplyTo.TabIndex = tabIndex++;
+			_radWorkingDirectory.TabIndex = tabIndex++;
+			_radIndexOnly.TabIndex = tabIndex++;
+			_radIndexAndWorkingDirectory.TabIndex = tabIndex++;
+			_grpOptions.TabIndex = tabIndex++;
+			_chkReverse.TabIndex = tabIndex++;
+
+			_lblPatches.Parent = parent;
+			_lstPatches.Parent = parent;
+			_btnAddFiles.Parent = parent;
+			_btnAddFromClipboard.Parent = parent;
+			_grpApplyTo.Parent = parent;
+			_radWorkingDirectory.Parent = parent;
+			_radIndexOnly.Parent = parent;
+			_radIndexAndWorkingDirectory.Parent = parent;
+			_grpOptions.Parent = parent;
+			_chkReverse.Parent = parent;
+		}
+	}
+
+	private readonly DialogControls _controls;
 
 	public ApplyPatchesDialog(Repository repository)
 	{
@@ -44,32 +168,26 @@ public partial class ApplyPatchesDialog : GitDialogBase, IExecutableDialog
 
 		Repository = repository;
 
-		InitializeComponent();
-
+		Name = nameof(ApplyPatchesDialog);
 		Text = Resources.StrApplyPatches;
 
-		_lstPatches.Style = GitterApplication.DefaultStyle;
-		_lstPatches.HeaderStyle = Framework.Controls.HeaderStyle.Hidden;
-		_lstPatches.ShowCheckBoxes = true;
-		_lstPatches.Multiselect = true;
-		_lstPatches.Columns.Add(new NameColumn() { SizeMode = Framework.Controls.ColumnSizeMode.Auto });
-		_lstPatches.KeyDown += OnPatchesKeyDown;
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		Size                = ScalableSize.GetValue(Dpi.Default);
+		_controls = new(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(false);
+		PerformLayout();
 
-		_lblPatches.Text = Resources.StrPatches.AddColon();
-		_lstPatches.Text = Resources.StrsNoPatchesToApply;
-		_btnAddFiles.Text = Resources.StrAddFiles.AddEllipsis();
-		_btnAddFromClipboard.Text = Resources.StrAddFromClipboard;
-		_grpApplyTo.Text = Resources.StrApplyTo;
-		_radWorkingDirectory.Text = Resources.StrsWorkingDirectory;
-		_radIndexOnly.Text = Resources.StrIndex;
-		_radIndexAndWorkingDirectory.Text = Resources.StrsIndexAndWorkingDirectory;
-		_grpOptions.Text = Resources.StrOptions;
-		_chkReverse.Text = Resources.StrReverse;
+		_controls._lstPatches.KeyDown += OnPatchesKeyDown;
+		_controls._btnAddFiles.Click += OnAddFilesClick;
+		_controls._btnAddFromClipboard.Click += OnAddFromClipboardClick;
 	}
 
-	#endregion
-
-	#region Properties
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
 
 	/// <inheritdoc/>
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(400, 325));
@@ -80,43 +198,28 @@ public partial class ApplyPatchesDialog : GitDialogBase, IExecutableDialog
 	{
 		get
 		{
-			if(_radWorkingDirectory.Checked)
-			{
-				return ApplyPatchTo.WorkingDirectory;
-			}
-			if(_radIndexOnly.Checked)
-			{
-				return ApplyPatchTo.Index;
-			}
-			if(_radIndexAndWorkingDirectory.Checked)
-			{
-				return ApplyPatchTo.IndexAndWorkingDirectory;
-			}
+			if(_controls._radWorkingDirectory.IsChecked)         return ApplyPatchTo.WorkingDirectory;
+			if(_controls._radIndexOnly.IsChecked)                return ApplyPatchTo.Index;
+			if(_controls._radIndexAndWorkingDirectory.IsChecked) return ApplyPatchTo.IndexAndWorkingDirectory;
 			return ApplyPatchTo.WorkingDirectory;
 		}
 		set
 		{
-			switch(value)
+			var button = value switch
 			{
-				case ApplyPatchTo.WorkingDirectory:
-					_radWorkingDirectory.Checked = true;
-					break;
-				case ApplyPatchTo.Index:
-					_radIndexOnly.Checked = true;
-					break;
-				case ApplyPatchTo.IndexAndWorkingDirectory:
-					_radIndexAndWorkingDirectory.Checked = true;
-					break;
-				default:
-					throw new ArgumentException();
-			}
+				ApplyPatchTo.WorkingDirectory         => _controls._radWorkingDirectory,
+				ApplyPatchTo.Index                    => _controls._radIndexOnly,
+				ApplyPatchTo.IndexAndWorkingDirectory => _controls._radIndexAndWorkingDirectory,
+				_ => throw new ArgumentException($"Unknown mode: {value}", nameof(value)),
+			};
+			button.IsChecked = true;
 		}
 	}
 
 	public bool Reverse
 	{
-		get => _chkReverse.Checked;
-		set => _chkReverse.Checked = value;
+		get => _controls._chkReverse.IsChecked;
+		set => _controls._chkReverse.IsChecked = value;
 	}
 
 	protected override string ActionVerb => Resources.StrApply;
@@ -125,7 +228,7 @@ public partial class ApplyPatchesDialog : GitDialogBase, IExecutableDialog
 	{
 		get
 		{
-			foreach(PatchSourceListItem item in _lstPatches.Items)
+			foreach(PatchSourceListItem item in _controls._lstPatches.Items)
 			{
 				if(item.IsChecked)
 				{
@@ -135,76 +238,62 @@ public partial class ApplyPatchesDialog : GitDialogBase, IExecutableDialog
 		}
 	}
 
-	#endregion
-
-	#region Methods
-
 	private void AddPatchSource(IPatchSource patchSource)
 	{
 		Assert.IsNotNull(patchSource);
 
 		var item = new PatchSourceListItem(patchSource);
-		item.CheckedState = Framework.Controls.CheckedState.Checked;
-		_lstPatches.Items.Add(item);
+		item.CheckedState = CheckedState.Checked;
+		_controls._lstPatches.Items.Add(item);
 		item.FocusAndSelect();
 	}
 
-	#endregion
-
-	#region Event Handlers
-
-	private void OnPatchesKeyDown(object sender, KeyEventArgs e)
+	private void OnPatchesKeyDown(object? sender, KeyEventArgs e)
 	{
 		switch(e.KeyCode)
 		{
 			case Keys.Delete:
-				while(_lstPatches.SelectedItems.Count != 0)
+				while(_controls._lstPatches.SelectedItems.Count != 0)
 				{
-					_lstPatches.SelectedItems[0].Remove();
+					_controls._lstPatches.SelectedItems[0].Remove();
 				}
 				break;
 		}
 	}
 
-	private void OnAddFilesClick(object sender, EventArgs e)
+	private void OnAddFilesClick(object? sender, EventArgs e)
 	{
-		using(var dlg = new OpenFileDialog()
-			{
-				Filter = "Patches (*.patch)|*.patch|All files|*.*",
-				Multiselect = true,
-			})
+		using var dialog = new OpenFileDialog()
 		{
-			if(dlg.ShowDialog(this) == DialogResult.OK)
+			Filter = "Patches (*.patch)|*.patch|All files|*.*",
+			Multiselect = true,
+		};
+		if(dialog.ShowDialog(this) == DialogResult.OK)
+		{
+			foreach(var fileName in dialog.FileNames)
 			{
-				foreach(var fileName in dlg.FileNames)
-				{
-					var src = new PatchFromFile(fileName);
-					AddPatchSource(src);
-				}
+				var src = new PatchFromFile(fileName);
+				AddPatchSource(src);
 			}
 		}
 	}
 
-	private void OnAddFromClipboardClick(object sender, EventArgs e)
+	private void OnAddFromClipboardClick(object? sender, EventArgs e)
 	{
-		string patch = null;
+		var patch = default(string);
 		try
 		{
 			patch = Clipboard.GetText();
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 		}
 		if(!string.IsNullOrWhiteSpace(patch))
 		{
-			var src = new PatchFromString("Patch from clipboard", patch);
+			var src = new PatchFromString("Patch from clipboard", patch!);
 			AddPatchSource(src);
 		}
 	}
-
-	#endregion
-
-	#region IExecutableDialog
 
 	public bool Execute()
 	{
@@ -230,6 +319,4 @@ public partial class ApplyPatchesDialog : GitDialogBase, IExecutableDialog
 		}
 		return true;
 	}
-
-	#endregion
 }

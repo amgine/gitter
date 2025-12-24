@@ -26,24 +26,24 @@ namespace NHunspell;
 
 internal static class MarshalHunspellDll
 {
-	private static readonly object nativeDllReferenceCountLock = new();
+	private static readonly object _refCountLock = new();
 
-	internal static HunspellAddDelegate HunspellAdd;
-	internal static HunspellAddWithAffixDelegate HunspellAddWithAffix;
-	internal static HunspellAnalyzeDelegate HunspellAnalyze;
-	internal static HunspellFreeDelegate HunspellFree;
-	internal static HunspellGenerateDelegate HunspellGenerate;
-	internal static HunspellInitDelegate HunspellInit;
-	internal static HunspellRemoveDelegate HunspellRemove;
-	internal static HunspellSpellDelegate HunspellSpell;
-	internal static HunspellStemDelegate HunspellStem;
-	internal static HunspellSuggestDelegate HunspellSuggest;
-	internal static HyphenFreeDelegate HyphenFree;
-	internal static HyphenHyphenateDelegate HyphenHyphenate;
-	internal static HyphenInitDelegate HyphenInit;
+	internal static HunspellAddDelegate HunspellAdd = default!;
+	internal static HunspellAddWithAffixDelegate HunspellAddWithAffix = default!;
+	internal static HunspellAnalyzeDelegate HunspellAnalyze = default!;
+	internal static HunspellFreeDelegate HunspellFree = default!;
+	internal static HunspellGenerateDelegate HunspellGenerate = default!;
+	internal static HunspellInitDelegate HunspellInit = default!;
+	internal static HunspellRemoveDelegate HunspellRemove = default!;
+	internal static HunspellSpellDelegate HunspellSpell = default!;
+	internal static HunspellStemDelegate HunspellStem = default!;
+	internal static HunspellSuggestDelegate HunspellSuggest = default!;
+	internal static HyphenFreeDelegate HyphenFree = default!;
+	internal static HyphenHyphenateDelegate HyphenHyphenate = default!;
+	internal static HyphenInitDelegate HyphenInit = default!;
 
 	private static IntPtr dllHandle = IntPtr.Zero;
-	private static string nativeDLLPath;
+	private static string? nativeDLLPath;
 	private static int nativeDllReferenceCount;
 
 	internal static string NativeDLLPath
@@ -71,7 +71,7 @@ internal static class MarshalHunspellDll
 
 	internal static void ReferenceNativeHunspellDll()
 	{
-		lock(nativeDllReferenceCountLock)
+		lock(_refCountLock)
 		{
 			if(nativeDllReferenceCount == 0)
 			{
@@ -128,7 +128,7 @@ internal static class MarshalHunspellDll
 
 	internal static void UnReferenceNativeHunspellDll()
 	{
-		lock(nativeDllReferenceCountLock)
+		lock(_refCountLock)
 		{
 			if(nativeDllReferenceCount <= 0)
 				throw new InvalidOperationException("native DLL reference count is <= 0");
@@ -175,7 +175,7 @@ internal static class MarshalHunspellDll
 		nint affixDataSize,
 		[MarshalAs(UnmanagedType.LPArray)] byte[] dictionaryData,
 		nint dictionaryDataSize,
-		string key);
+		string? key);
 
 	internal delegate bool HunspellRemoveDelegate(IntPtr handle, [MarshalAs(UnmanagedType.LPWStr)] string word);
 

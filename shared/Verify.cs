@@ -47,16 +47,19 @@ internal static partial class Verify
 		/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
-		public static void IsNeitherNullNorEmpty(string value,
+#endif
+		public static void IsNeitherNullNorEmpty([NotNull] string? value,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
+#if NET7_0_OR_GREATER
+			ArgumentException.ThrowIfNullOrEmpty(value, parameterName);
+#else
 			const string errorMessage = "The parameter can not be either null or empty.";
-			if(null == value)
+			if(value is null)
 			{
 				throw new ArgumentNullException(parameterName, errorMessage);
 			}
@@ -64,6 +67,7 @@ internal static partial class Verify
 			{
 				throw new ArgumentException(errorMessage, parameterName);
 			}
+#endif
 		}
 
 		/// <summary>Ensure that a string argument is neither null nor does it consist only of whitespace.</summary>
@@ -71,16 +75,19 @@ internal static partial class Verify
 		/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
-		public static void IsNeitherNullNorWhitespace(string value,
+#endif
+		public static void IsNeitherNullNorWhitespace([NotNull] string? value,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
+#if NET7_0_OR_GREATER
+			ArgumentException.ThrowIfNullOrWhiteSpace(value, parameterName);
+#else
 			const string errorMessage = "The parameter can not be either null or empty or consist only of white space characters.";
-			if(null == value)
+			if(value is null)
 			{
 				throw new ArgumentNullException(parameterName, errorMessage);
 			}
@@ -88,6 +95,7 @@ internal static partial class Verify
 			{
 				throw new ArgumentException(errorMessage, parameterName);
 			}
+#endif
 		}
 
 		/// <summary>Verifies that an argument is not default value.</summary>
@@ -96,10 +104,10 @@ internal static partial class Verify
 		/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
-		public static void IsNotDefault<T>(T obj,
+#endif
+		public static void IsNotDefault<T>(T? obj,
 			[CallerArgumentExpression(nameof(obj))] string? parameterName = null)
 			where T : struct
 		{
@@ -122,16 +130,16 @@ internal static partial class Verify
 		/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
-		public static void IsNotNull<T>(T obj,
+#endif
+		public static void IsNotNull<T>([NotNull] T? obj,
 			[CallerArgumentExpression(nameof(obj))] string? parameterName = null)
 			where T : class
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
-			if(null == obj)
+			if(obj is null)
 			{
 				throw new ArgumentNullException(parameterName);
 			}
@@ -143,16 +151,16 @@ internal static partial class Verify
 		/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
-		public static void IsNull<T>(T obj,
+#endif
+		public static void IsNull<T>(T? obj,
 			[CallerArgumentExpression(nameof(obj))] string? parameterName = null)
 			where T : class
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
-			if(null != obj)
+			if(obj is not null)
 			{
 				throw new ArgumentException("The parameter must be null.", parameterName);
 			}
@@ -166,9 +174,9 @@ internal static partial class Verify
 		/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void HasNoNullItems<T>(IEnumerable<T> sequence,
 			[CallerArgumentExpression(nameof(sequence))] string? parameterName = null)
 			where T : class
@@ -178,7 +186,7 @@ internal static partial class Verify
 
 			foreach(var item in sequence)
 			{
-				if(item == null)
+				if(item is null)
 				{
 					throw new ArgumentException("Sequence contains null elements.", parameterName);
 				}
@@ -192,18 +200,15 @@ internal static partial class Verify
 		/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsNotNegative(int value,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
-			if(value < 0)
-			{
-				throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
-			}
+			if(value < 0) throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
 		}
 
 		/// <summary>
@@ -213,18 +218,15 @@ internal static partial class Verify
 		/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsNotNegative(float value,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
-			if(value < 0)
-			{
-				throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
-			}
+			if(value < 0) throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
 		}
 
 		/// <summary>
@@ -234,18 +236,15 @@ internal static partial class Verify
 		/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsNotNegative(double value,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
-			if(value < 0)
-			{
-				throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
-			}
+			if(value < 0) throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
 		}
 
 		/// <summary>
@@ -255,18 +254,15 @@ internal static partial class Verify
 		/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsPositive(int value,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
-			if(value < 1)
-			{
-				throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
-			}
+			if(value < 1) throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
 		}
 
 		/// <summary>
@@ -276,18 +272,15 @@ internal static partial class Verify
 		/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsPositive(float value,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
-			if(value < 1)
-			{
-				throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
-			}
+			if(value < 1) throw new ArgumentOutOfRangeException(parameterName, "Must be non-negative.");
 		}
 
 		/// <summary>
@@ -297,9 +290,9 @@ internal static partial class Verify
 		/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsPositive(double value,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
@@ -320,9 +313,9 @@ internal static partial class Verify
 		/// <param name="parameterName">Name of the parameter to include in the <see cref="ArgumentException"/>.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsGreaterThan(double value, double minValue,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
@@ -347,9 +340,9 @@ internal static partial class Verify
 		/// <param name="parameterName">Name of the parameter to include in the <see cref="ArgumentException"/>.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsLesserThan(double value, double minValue,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
@@ -372,18 +365,15 @@ internal static partial class Verify
 		/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsTrue(bool statement,
 			[CallerArgumentExpression(nameof(statement))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
-			if(!statement)
-			{
-				throw new ArgumentException("", parameterName);
-			}
+			if(!statement) throw new ArgumentException("", parameterName);
 		}
 
 		/// <summary>
@@ -394,17 +384,14 @@ internal static partial class Verify
 		/// <param name="message">The message to include in the ArgumentException.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsTrue(bool statement, string parameterName, string message)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
-			if(!statement)
-			{
-				throw new ArgumentException(message, parameterName);
-			}
+			if(!statement) throw new ArgumentException(message, parameterName);
 		}
 
 		/// <summary>
@@ -414,17 +401,14 @@ internal static partial class Verify
 		/// <param name="parameterName">Name of the parameter to include in the ArgumentException.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsFalse(bool statement, string parameterName)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
 
-			if(statement)
-			{
-				throw new ArgumentException("", parameterName);
-			}
+			if(statement) throw new ArgumentException("", parameterName);
 		}
 
 		/// <summary>
@@ -435,9 +419,9 @@ internal static partial class Verify
 		/// <param name="message">The message to include in the ArgumentException.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsFalse(bool statement, string parameterName, string message)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
@@ -450,9 +434,9 @@ internal static partial class Verify
 
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void UriIsAbsolute(Uri uri, [CallerArgumentExpression(nameof(uri))] string? parameterName = null)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
@@ -469,9 +453,9 @@ internal static partial class Verify
 
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void AreEqual<T>(T expected, T actual, string parameterName, string message)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
@@ -492,9 +476,9 @@ internal static partial class Verify
 
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void AreNotEqual<T>(T notExpected, T actual, string parameterName, string message)
 		{
 			Assert.IsNeitherNullNorWhitespace(parameterName);
@@ -515,9 +499,9 @@ internal static partial class Verify
 
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void TypeSupportsInterface(Type type, Type interfaceType, string parameterName)
 		{
 			Assert.IsNeitherNullNorEmpty(parameterName);
@@ -535,9 +519,9 @@ internal static partial class Verify
 
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void FileExists(string filePath, string parameterName)
 		{
 			Assert.IsNeitherNullNorEmpty(parameterName);
@@ -556,9 +540,9 @@ internal static partial class Verify
 
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void DirectoryExists(string directoryPath, string parameterName)
 		{
 			Assert.IsNeitherNullNorEmpty(parameterName);
@@ -583,9 +567,9 @@ internal static partial class Verify
 		/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsValidIndex(int value, int upperBoundExclusive,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
@@ -613,9 +597,9 @@ internal static partial class Verify
 		/// <param name="parameterName">The name of the parameter that will be presented if an exception is thrown.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsValidIndex(int lowerBoundInclusive, int value, int upperBoundExclusive,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = default)
 		{
@@ -636,9 +620,9 @@ internal static partial class Verify
 
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsInRange(int lowerBoundInclusive, int value, int upperBoundInclusive, string message,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = default)
 		{
@@ -647,15 +631,15 @@ internal static partial class Verify
 
 			if(value < lowerBoundInclusive || value > upperBoundInclusive)
 			{
-			    throw new ArgumentOutOfRangeException(parameterName, message);
+				throw new ArgumentOutOfRangeException(parameterName, message);
 			}
 		}
 
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsInRange(int lowerBoundInclusive, int value, int upperBoundInclusive,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = default)
 		{
@@ -676,9 +660,9 @@ internal static partial class Verify
 
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsInRange(double lowerBoundInclusive, double value, double upperBoundInclusive, string message, string parameterName)
 		{
 			Assert.IsTrue(upperBoundInclusive >= lowerBoundInclusive);
@@ -686,15 +670,15 @@ internal static partial class Verify
 
 			if(value < lowerBoundInclusive || value > upperBoundInclusive)
 			{
-			    throw new ArgumentOutOfRangeException(parameterName, message);
+				throw new ArgumentOutOfRangeException(parameterName, message);
 			}
 		}
 
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsInRange(float lowerBoundInclusive, float value, float upperBoundInclusive,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
@@ -703,21 +687,21 @@ internal static partial class Verify
 
 			if(value < lowerBoundInclusive || value > upperBoundInclusive)
 			{
-			    throw new ArgumentOutOfRangeException(
-			        parameterName,
-			        string.Format(
-			            CultureInfo.InvariantCulture,
-			            "The System.Single value must be bounded with [{0}, {1}]",
-			            lowerBoundInclusive,
-			            upperBoundInclusive));
+				throw new ArgumentOutOfRangeException(
+					parameterName,
+					string.Format(
+						CultureInfo.InvariantCulture,
+						"The System.Single value must be bounded with [{0}, {1}]",
+						lowerBoundInclusive,
+						upperBoundInclusive));
 			}
 		}
 
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsInRange(double lowerBoundInclusive, double value, double upperBoundInclusive,
 			[CallerArgumentExpression(nameof(value))] string? parameterName = null)
 		{
@@ -726,21 +710,21 @@ internal static partial class Verify
 
 			if(value < lowerBoundInclusive || value > upperBoundInclusive)
 			{
-			    throw new ArgumentOutOfRangeException(
-			        parameterName,
-			        string.Format(
-			            CultureInfo.InvariantCulture,
-			            "The System.Double value must be bounded with [{0}, {1}]",
-			            lowerBoundInclusive,
-			            upperBoundInclusive));
+				throw new ArgumentOutOfRangeException(
+					parameterName,
+					string.Format(
+						CultureInfo.InvariantCulture,
+						"The System.Double value must be bounded with [{0}, {1}]",
+						lowerBoundInclusive,
+						upperBoundInclusive));
 			}
 		}
 
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void ImplementsInterface(object parameter, Type interfaceType, string parameterName)
 		{
 			Assert.IsNotNull(parameter);
@@ -787,9 +771,9 @@ internal static partial class Verify
 		/// </exception>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void IsApartmentState(ApartmentState requiredState, string message)
 		{
 			if(Thread.CurrentThread.GetApartmentState() != requiredState)
@@ -800,12 +784,12 @@ internal static partial class Verify
 
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void PropertyIsNotNull<T>(T obj, string name) where T : class
 		{
-			if(null == obj)
+			if(obj is null)
 			{
 				throw new InvalidOperationException(
 					string.Format(
@@ -817,12 +801,12 @@ internal static partial class Verify
 
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
+#endif
 		public static void PropertyIsNull<T>(T obj, string name) where T : class
 		{
-			if(null != obj)
+			if(obj is not null)
 			{
 				throw new InvalidOperationException(
 					string.Format(
@@ -833,91 +817,82 @@ internal static partial class Verify
 		}
 
 		/// <summary>
-		/// Verifies the specified statement is true. Throws an InvalidOperationException if it's not.
+		/// Verifies the specified statement is true. Throws an <see cref="InvalidOperationException"/> if it's not.
 		/// </summary>
 		/// <param name="statement">The statement to be verified as true.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
-		public static void IsTrue(
-			#if NETCOREAPP
-			[DoesNotReturnIf(false)]
-			#endif
-			bool statement)
+#endif
+		public static void IsTrue([DoesNotReturnIf(false)] bool statement)
 		{
-			if(!statement)
-			{
-				throw new InvalidOperationException();
-			}
+			if(!statement) throw new InvalidOperationException();
 		}
 
 		/// <summary>
-		/// Verifies the specified statement is true. Throws an InvalidOperationException if it's not.
+		/// Verifies the specified statement is true. Throws an <see cref="InvalidOperationException"/> if it's not.
 		/// </summary>
 		/// <param name="statement">The statement to be verified as true.</param>
 		/// <param name="message">The message to include in the InvalidOperationException.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
-		public static void IsTrue(
-			#if NETCOREAPP
-			[DoesNotReturnIf(false)]
-			#endif
-			bool statement,
-			string message)
+#endif
+		public static void IsTrue([DoesNotReturnIf(false)] bool statement, string message)
 		{
-			if(!statement)
-			{
-				throw new InvalidOperationException(message);
-			}
+			if(!statement) throw new InvalidOperationException(message);
 		}
 
 		/// <summary>
-		/// Verifies the specified statement is false. Throws an InvalidOperationException if it's not.
+		/// Verifies the specified statement is false. Throws an <see cref="InvalidOperationException"/> if it's not.
 		/// </summary>
 		/// <param name="statement">The statement to be verified as false.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
-		public static void IsFalse(
-			#if NETCOREAPP
-			[DoesNotReturnIf(true)]
-			#endif
-			bool statement)
+#endif
+		public static void IsFalse([DoesNotReturnIf(true)] bool statement)
 		{
-			if(statement)
-			{
-				throw new InvalidOperationException();
-			}
+			if(statement) throw new InvalidOperationException();
 		}
 
 		/// <summary>
-		/// Verifies the specified statement is false. Throws an InvalidOperationException if it's not.
+		/// Verifies the specified statement is false. Throws an <see cref="InvalidOperationException"/> if it's not.
 		/// </summary>
 		/// <param name="statement">The statement to be verified as false.</param>
 		/// <param name="message">The message to include in the InvalidOperationException.</param>
 		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
 		[DebuggerStepThrough]
-		#if HAS_AGGRESSIVE_INLINING
+#if HAS_AGGRESSIVE_INLINING
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		#endif
-		public static void IsFalse(
-			#if NETCOREAPP
-			[DoesNotReturnIf(true)]
-			#endif
-			bool statement,
-			string message)
+#endif
+		public static void IsFalse([DoesNotReturnIf(true)] bool statement, string message)
 		{
-			if(statement)
-			{
-				throw new InvalidOperationException(message);
-			}
+			if(statement) throw new InvalidOperationException(message);
+		}
+
+		/// <summary>
+		/// Verifies the specified instance is not disposed. Throws an <see cref="ObjectDisposedException"/> if it is.
+		/// </summary>
+		/// <param name="isDisposed">Disposed flag value.</param>
+		/// <param name="instance">Object instance.</param>
+		[SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+		[DebuggerStepThrough]
+#if HAS_AGGRESSIVE_INLINING
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+		public static void IsNotDisposed([DoesNotReturnIf(true)] bool isDisposed, object instance)
+		{
+			Assert.IsNotNull(instance);
+
+#if NET9_0_OR_GREATER
+			ObjectDisposedException.ThrowIf(isDisposed, instance);
+#else
+			if(isDisposed) throw new ObjectDisposedException(instance.GetType().Name);
+#endif
 		}
 	}
 }

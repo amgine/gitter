@@ -22,24 +22,15 @@ namespace gitter.Git;
 
 using System;
 
-public struct DiffColumnHeader
+public readonly struct DiffColumnHeader(DiffColumnAction action, int startLine, int lineCount)
 {
-	public DiffColumnHeader(DiffColumnAction action, int startLine, int lineCount)
-	{
-		Action    = action;
-		StartLine = startLine;
-		LineCount = lineCount;
-	}
+	public DiffColumnAction Action { get; } = action;
 
-	public DiffColumnAction Action { get; }
+	public int StartLine { get; } = startLine;
 
-	public int StartLine { get; }
-
-	public int LineCount { get; }
+	public int LineCount { get; } = lineCount;
 
 	public override string ToString()
-	{
-		return string.Format(System.Globalization.CultureInfo.InvariantCulture,
+		=> string.Format(System.Globalization.CultureInfo.InvariantCulture,
 			"{0}{1},{2}", Action == DiffColumnAction.Add ? '+' : '-', StartLine, LineCount);
-	}
 }

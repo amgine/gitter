@@ -30,16 +30,16 @@ public sealed class TreeBinding : IDisposable
 	#region Data
 
 	private readonly CustomListBoxItemsCollection _itemHost;
-	private HashSet<TreeDirectory> _trackedDirectories;
+	private HashSet<TreeDirectory>? _trackedDirectories;
 	private bool _plain;
 
 	#endregion
 
 	#region Events
 
-	public event EventHandler<ItemContextMenuRequestEventArgs> ItemContextMenuRequested;
+	public event EventHandler<ItemContextMenuRequestEventArgs>? ItemContextMenuRequested;
 
-	public event EventHandler<BoundItemActivatedEventArgs<TreeItem>> ItemActivated;
+	public event EventHandler<BoundItemActivatedEventArgs<TreeItem>>? ItemActivated;
 
 	private void OnItemContextMenuRequested(ItemContextMenuRequestEventArgs e)
 		=> ItemContextMenuRequested?.Invoke(this, e);
@@ -114,7 +114,7 @@ public sealed class TreeBinding : IDisposable
 
 	private void InitPlain(bool oneLevel)
 	{
-		_trackedDirectories = new HashSet<TreeDirectory>();
+		_trackedDirectories = [];
 		_itemHost.Clear();
 		_itemHost.Comparison = TreeItemListItem.CompareByRelativePath;
 		InsertFiles(Root, oneLevel);
@@ -143,7 +143,7 @@ public sealed class TreeBinding : IDisposable
 			item.ContextMenuRequested += OnItemContextMenuRequested;
 			_itemHost.AddSafe(item);
 		}
-		_trackedDirectories.Add(directory);
+		_trackedDirectories?.Add(directory);
 		if(!oneLevel)
 		{
 			directory.DirectoryAdded += OnDirectoryAdded2;
@@ -153,40 +153,40 @@ public sealed class TreeBinding : IDisposable
 		directory.Deleted += OnDirectoryDeleted;
 	}
 
-	private void OnItemActivated(object sender, EventArgs e)
+	private void OnItemActivated(object? sender, EventArgs e)
 	{
 		var handler = ItemActivated;
 		if(handler is not null)
 		{
-			var listItem = (CustomListBoxItem)(sender);
+			var listItem = (CustomListBoxItem)sender!;
 			var data     = ((ITreeItemListItem)listItem).TreeItem;
 			handler(this, new BoundItemActivatedEventArgs<TreeItem>(listItem, data));
 		}
 	}
 
-	private void OnItemContextMenuRequested(object sender, ItemContextMenuRequestEventArgs e)
+	private void OnItemContextMenuRequested(object? sender, ItemContextMenuRequestEventArgs e)
 	{
 		OnItemContextMenuRequested(e);
 	}
 
-	private void OnSubItemActivated(object sender, BoundItemActivatedEventArgs<TreeItem> e)
+	private void OnSubItemActivated(object? sender, BoundItemActivatedEventArgs<TreeItem> e)
 	{
 		OnItemActivated(e.Item, e.Object);
 	}
 
 	public TreeDirectory Root { get; }
 
-	private void OnDirectoryDeleted(object sender, EventArgs e)
+	private void OnDirectoryDeleted(object? sender, EventArgs e)
 	{
-		var directory = (TreeDirectory)sender;
+		var directory = (TreeDirectory)sender!;
 		directory.DirectoryAdded -= OnDirectoryAdded2;
 		directory.FileAdded -= OnFileAdded;
 		directory.CommitAdded -= OnCommitAdded;
 		directory.Deleted -= OnDirectoryDeleted;
-		_trackedDirectories.Remove(directory);
+		_trackedDirectories?.Remove(directory);
 	}
 
-	private void OnDirectoryAdded(object sender, TreeDirectoryEventArgs e)
+	private void OnDirectoryAdded(object? sender, TreeDirectoryEventArgs e)
 	{
 		var item = new TreeDirectoryListItem(e.Folder, OnSubItemActivated, OnItemContextMenuRequested);
 		item.Activated += OnItemActivated;
@@ -194,12 +194,12 @@ public sealed class TreeBinding : IDisposable
 		_itemHost.AddSafe(item);
 	}
 
-	private void OnDirectoryAdded2(object sender, TreeDirectoryEventArgs e)
+	private void OnDirectoryAdded2(object? sender, TreeDirectoryEventArgs e)
 	{
 		InsertFiles(e.Folder, false);
 	}
 
-	private void OnFileAdded(object sender, TreeFileEventArgs e)
+	private void OnFileAdded(object? sender, TreeFileEventArgs e)
 	{
 		var item = new TreeFileListItem(e.File, _plain);
 		item.Activated += OnItemActivated;
@@ -207,7 +207,7 @@ public sealed class TreeBinding : IDisposable
 		_itemHost.AddSafe(item);
 	}
 
-	private void OnCommitAdded(object sender, TreeCommitEventArgs e)
+	private void OnCommitAdded(object? sender, TreeCommitEventArgs e)
 	{
 		var item = new TreeCommitListItem(e.Object, _plain);
 		item.Activated += OnItemActivated;
@@ -224,7 +224,7 @@ public sealed class TreeBinding : IDisposable
 		Root.DirectoryAdded -= OnDirectoryAdded;
 		Root.DirectoryAdded -= OnDirectoryAdded2;
 		Root.Deleted -= OnDirectoryDeleted;
-		if(_trackedDirectories != null)
+		if(_trackedDirectories is not null)
 		{
 			foreach(var directory in _trackedDirectories)
 			{

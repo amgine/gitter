@@ -68,9 +68,9 @@ sealed class IssuesListBinding : AsyncDataBinding<IReadOnlyList<Issue>>
 	}
 
 	protected override Task<IReadOnlyList<Issue>> FetchDataAsync(
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
-		Verify.State.IsFalse(IsDisposed, "IssuesListBinding is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		progress?.Report(new("Fetching issues..."));
 		IssuesListBox.Cursor = Cursors.WaitCursor;

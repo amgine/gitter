@@ -29,7 +29,6 @@ public record class GraphStyleOptions(
 	int  BaseLineWidth     = 1,
 	int  NodeRadius        = 3)
 {
-
 	public static GraphStyleOptions Default { get; } = new();
 
 	public static void SaveTo(GraphStyleOptions options, Section section)

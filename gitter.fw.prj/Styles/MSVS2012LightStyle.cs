@@ -30,7 +30,7 @@ sealed class MSVS2012LightStyle : MSVS2012Style, IGitterStyle
 {
 	private readonly IGitterStyleColors _colors;
 	private readonly IItemBackgroundStyles _itemBackgroundStyles;
-	private ToolStripRenderer _toolStriprenderer;
+	private ToolStripRenderer? _toolStriprenderer;
 
 	private sealed class MSVS2012LightItemBackgroundStyles : IItemBackgroundStyles
 	{
@@ -44,17 +44,12 @@ sealed class MSVS2012LightStyle : MSVS2012Style, IGitterStyle
 			HoveredFocused  = new BackgroundWithBorder(MSVS2012LightColors.HOT_TRACK, MSVS2012LightColors.HIGHLIGHT);
 		}
 
-		public IBackgroundStyle Focused { get; }
-
+		public IBackgroundStyle Focused         { get; }
 		public IBackgroundStyle SelectedFocused { get; }
-
-		public IBackgroundStyle Selected { get; }
-
+		public IBackgroundStyle Selected        { get; }
 		public IBackgroundStyle SelectedNoFocus { get; }
-
-		public IBackgroundStyle Hovered { get; }
-
-		public IBackgroundStyle HoveredFocused { get; }
+		public IBackgroundStyle Hovered         { get; }
+		public IBackgroundStyle HoveredFocused  { get; }
 	}
 
 	public MSVS2012LightStyle()
@@ -76,11 +71,17 @@ sealed class MSVS2012LightStyle : MSVS2012Style, IGitterStyle
 	public IScrollBarWidget CreateScrollBar(Orientation orientation)
 		=> new CustomScrollBarAdapter(orientation, CustomScrollBarRenderer.MSVS2012Light);
 
-	public ICheckBoxWidget CreateCheckBox()
-		=> new CustomCheckBoxAdapter(CustomCheckBoxRenderer.MSVS2012Dark);
+	public IFactory<ICheckBoxWidget> CheckBoxFactory
+		=> Controls.CheckBoxFactory.MSVS2012Dark;
 
-	public IButtonWidget CreateButton()
-		=> new CustomButtonAdapter(CustomButtonRenderer.MSVS2012Dark);
+	public IFactory<IRadioButtonWidget> RadioButtonFactory
+		=> Controls.RadioButtonFactory.MSVS2012Dark;
+
+	public IFactory<IButtonWidget> ButtonFactory
+		=> Controls.ButtonFactory.MSVS2012Dark;
+
+	public IFactory<IProgressBarWidget> ProgressBarFactory
+		=> Controls.ProgressBarFactory.System;
 
 	public CustomListBoxRenderer ListBoxRenderer
 		=> CustomListBoxManager.MSVS2012LightRenderer;

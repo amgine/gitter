@@ -55,7 +55,7 @@ public static class HelperExecutables
 	{
 		const string updaterExeName = @"gitter.updater.exe";
 
-		var sourcePath = Path.GetDirectoryName(typeof(Utility).Assembly.Location);
+		var sourcePath = Path.GetDirectoryName(typeof(Utility).Assembly.Location) ?? "";
 		return File.Exists(Path.Combine(sourcePath, updaterExeName)) && !CheckIfUpdaterIsRunning();
 	}
 
@@ -70,7 +70,7 @@ public static class HelperExecutables
 		const string updaterConfigName = @"gitter.updater.exe.config";
 #endif
 
-		var sourcePath = Path.GetDirectoryName(typeof(HelperExecutables).Assembly.Location);
+		var sourcePath = Path.GetDirectoryName(typeof(HelperExecutables).Assembly.Location) ?? "";
 		var targetPath = Path.Combine(Path.GetTempPath(), tempPathName);
 		if(!Directory.Exists(targetPath))
 		{

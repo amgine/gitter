@@ -24,16 +24,16 @@ using System;
 
 public sealed class HashStringCache
 {
-	private readonly Func<Hash> _getHash;
+	private readonly Func<Sha1Hash> _getHash;
 	private readonly WeakReference<string> _ref;
 	private int _length;
 
-	public HashStringCache(Func<Hash> getHash)
+	public HashStringCache(Func<Sha1Hash> getHash)
 	{
 		Verify.Argument.IsNotNull(getHash);
 
 		_getHash = getHash;
-		_ref     = new WeakReference<string>(null);
+		_ref     = new(null!);
 		_length  = -1;
 	}
 

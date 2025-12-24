@@ -81,10 +81,10 @@ partial class RemotesView : GitViewBase, ISearchableView<RemotesSearchOptions>
 		set => _searchToolbar.IsVisible = false;
 	}
 
-	private void OnItemActivated(object sender, ItemEventArgs e)
+	private void OnItemActivated(object? sender, ItemEventArgs e)
 	{
 		var remote = ((CustomListBoxItem<Remote>)e.Item).DataContext;
-		Gui.Environment.ViewDockService.ShowView(Guids.RemoteViewGuid, new RemoteViewModel(remote), true);
+		Gui.Environment?.ViewDockService.ShowView(Guids.RemoteViewGuid, new RemoteViewModel(remote), true);
 	}
 
 	protected override void AttachToRepository(Repository repository)
@@ -135,7 +135,7 @@ partial class RemotesView : GitViewBase, ISearchableView<RemotesSearchOptions>
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 

@@ -24,26 +24,18 @@ using System;
 using System.Collections.Generic;
 using System.Resources;
 
-public class CachedResources<T>
+public class CachedResources<T>(ResourceManager manager)
 {
-	private readonly Dictionary<string, T> _cache;
-	private readonly ResourceManager _manager;
+	private readonly Dictionary<string, T> _cache = [];
 
-	public CachedResources(ResourceManager manager)
-	{
-		Verify.Argument.IsNotNull(manager);
-
-		_manager = manager;
-		_cache   = new Dictionary<string, T>();
-	}
-
-	public T this[string name]
+	public T? this[string name]
 	{
 		get
 		{
 			if(!_cache.TryGetValue(name, out var resource))
 			{
-				resource = (T)_manager.GetObject(name);
+				resource = (T?)manager.GetObject(name);
+				if(resource is null) return default;
 				_cache.Add(name, resource);
 			}
 			return resource;

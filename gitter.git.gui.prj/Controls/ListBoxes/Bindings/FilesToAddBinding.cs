@@ -44,15 +44,15 @@ sealed class FilesToAddBinding : AsyncDataBinding<IList<TreeFile>>
 
 	private TreeListBox TreeListBox { get; }
 
-	public string Pattern { get; set; }
+	public string? Pattern { get; set; }
 
 	public bool IncludeUntracked { get; set; }
 
 	public bool IncludeIgnored { get; set; }
 
-	protected override Task<IList<TreeFile>> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	protected override Task<IList<TreeFile>> FetchDataAsync(IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
 	{
-		Verify.State.IsFalse(IsDisposed, "FilesToAddBinding is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		TreeListBox.Cursor = Cursors.WaitCursor;
 		return Repository.Status.GetFilesToAddAsync(Pattern, IncludeUntracked, IncludeIgnored,

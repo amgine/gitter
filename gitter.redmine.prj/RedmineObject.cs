@@ -22,26 +22,18 @@ namespace gitter.Redmine;
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 public abstract class RedmineObject
 {
-	#region Static
-
-	public static readonly RedmineObjectProperty<int> IdProperty = new("id", "Id");
-
-	#endregion
-
-	#region Events
+	public static readonly RedmineObjectProperty<int> IdProperty = new("id", nameof(Id));
 
 	public event EventHandler<RedmineObjectPropertyChangedEventArgs> PropertyChanged;
 
 	protected void OnPropertyChanged(RedmineObjectProperty property)
 		=> PropertyChanged?.Invoke(this, new RedmineObjectPropertyChangedEventArgs(property));
-
-	#endregion
-
-	#region .ctor
 
 	protected RedmineObject(RedmineServiceContext context, int id)
 	{
@@ -60,16 +52,13 @@ public abstract class RedmineObject
 		Id      = RedmineUtility.LoadInt(node[IdProperty.XmlNodeName]);
 	}
 
-	#endregion
-
-	#region Methods
-
 	internal virtual void Update(XmlNode node)
 	{
 		Verify.Argument.IsNotNull(node);
 	}
 
-	public virtual void Update() => throw new NotSupportedException();
+	public virtual Task UpdateAsync(CancellationToken cancellationToken = default)
+		=> throw new NotSupportedException();
 
 	public object GetValue(RedmineObjectProperty property)
 	{
@@ -80,20 +69,13 @@ public abstract class RedmineObject
 
 	protected void UpdatePropertyValue<T>(ref T field, T value, RedmineObjectProperty<T> property)
 	{
-		if(!EqualityComparer<T>.Default.Equals(field, value))
-		{
-			field = value;
-			OnPropertyChanged(property);
-		}
+		if(EqualityComparer<T>.Default.Equals(field, value)) return;
+
+		field = value;
+		OnPropertyChanged(property);
 	}
-
-	#endregion
-
-	#region Properties
 
 	public int Id { get; }
 
 	public RedmineServiceContext Context { get; }
-
-	#endregion
 }

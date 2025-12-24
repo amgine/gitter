@@ -21,6 +21,7 @@
 namespace gitter;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -29,12 +30,9 @@ using System.Threading.Tasks;
 
 using gitter.Framework;
 using gitter.Framework.Services;
-using System.Diagnostics.CodeAnalysis;
-
-#nullable enable
 
 /// <summary>Downloads updates from <c>github</c>.</summary>
-public sealed class GithubReleasesUpdateChannel : IUpdateChannel
+public sealed class GithubReleasesUpdateChannel(HttpMessageInvoker httpMessageInvoker) : IUpdateChannel
 {
 	const string ServiceUrl = @"https://github.com";
 
@@ -100,28 +98,12 @@ public sealed class GithubReleasesUpdateChannel : IUpdateChannel
 			: ServiceUrl + @"/" + url;
 	}
 
-	public GithubReleasesUpdateChannel(HttpMessageInvoker httpMessageInvoker)
-	{
-		Verify.Argument.IsNotNull(httpMessageInvoker);
-
-		HttpMessageInvoker = httpMessageInvoker;
-	}
-
-	private HttpMessageInvoker HttpMessageInvoker { get; }
-
 	private static bool TryFindBestUrl(string src, Regex regex,
-		#if NET5_0_OR_GREATER
-		[MaybeNullWhen(returnValue: false)]
-		#endif
-		out string url,
-		#if NET5_0_OR_GREATER
-		[MaybeNullWhen(returnValue: false)]
-		#endif
-		out Version version
-	)
+		[MaybeNullWhen(returnValue: false)] out string url,
+		[MaybeNullWhen(returnValue: false)] out Version version)
 	{
-		version = default;
-		url     = default;
+		version = default!;
+		url     = default!;
 
 		foreach(Match match in regex.Matches(src))
 		{
@@ -142,7 +124,7 @@ public sealed class GithubReleasesUpdateChannel : IUpdateChannel
 	{
 		using var message = new HttpRequestMessage(HttpMethod.Get, url);
 
-		using var response = await HttpMessageInvoker
+		using var response = await httpMessageInvoker
 			.SendAsync(message, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 

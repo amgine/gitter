@@ -31,16 +31,11 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 
 partial class RevisionHeaderContent
 {
-	abstract class TextWithHyperlinksElementBase : BaseElement
+	abstract class TextWithHyperlinksElementBase(RevisionHeaderContent owner, string headerText)
+		: BaseElement(owner)
 	{
-		private readonly string _headerText;
-		private TextWithHyperlinks _text;
-
-		protected TextWithHyperlinksElementBase(RevisionHeaderContent owner, string headerText)
-			: base(owner)
-		{
-			_headerText = headerText;
-		}
+		private readonly string _headerText = headerText;
+		private TextWithHyperlinks? _text;
 
 		protected abstract string GetText(Revision revision);
 
@@ -51,7 +46,7 @@ partial class RevisionHeaderContent
 				var link = _text.HitTest(GetContentRectangle(bounds), new Point(x, y));
 				if(link is not null) return new HyperlinkContextMenu(link);
 			}
-			var menu        = new ContextMenuStrip();
+			var menu        = new ContextMenuStrip() { Renderer = GitterApplication.Style.ToolStripRenderer };
 			var dpiBindings = new DpiBindings(menu);
 			var factory     = new GuiItemFactory(dpiBindings);
 			menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCopyToClipboard,
@@ -60,34 +55,48 @@ partial class RevisionHeaderContent
 			return menu;
 		}
 
+		private TextWithHyperlinks GetTextWithHyperlinks(Revision revision)
+		{
+			var text = GetText(revision);
+			if(_text is null || _text.Text != text)
+			{
+				if(_text is not null)
+				{
+					_text.InvalidateRequired -= OnTextInvalidateRequired;
+					_text = default;
+				}
+				_text = new TextWithHyperlinks(text, GetHyperlinkExtractor(revision));
+				_text.InvalidateRequired += OnTextInvalidateRequired;
+			}
+			return _text;
+		}
+
 		public override Size Measure(Graphics graphics, Dpi dpi, Revision revision, int width)
-			=> MeasureMultilineContent(graphics, dpi, GetText(revision), width);
+		{
+			var text = GetTextWithHyperlinks(revision);
+			var font = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi);
+			return MeasureMultilineContent(graphics, dpi, font, text, width);
+		}
 
 		public override void Paint(Graphics graphics, Dpi dpi, Revision revision, Rectangle rect)
 		{
 			Assert.IsNotNull(graphics);
 			Assert.IsNotNull(revision);
 
-			var text = GetText(revision);
-			if(_text is null || _text.Text != text)
-			{
-				_text = new TextWithHyperlinks(text, GetHyperlinkExtractor(revision));
-				_text.InvalidateRequired += OnTextInvalidateRequired;
-			}
-
-			DefaultPaint(graphics, dpi, _headerText, _text, rect);
+			var text = GetTextWithHyperlinks(revision);
+			DefaultPaint(graphics, dpi, _headerText, text, rect);
 		}
 
-		private void OnTextInvalidateRequired(object sender, EventArgs e)
+		private void OnTextInvalidateRequired(object? sender, EventArgs e)
 		{
 			OnInvalidateRequired();
-			if(_text.HoveredHyperlink is null)
+			if(_text is { HoveredHyperlink: not null })
 			{
-				ChangeCursor(Cursors.Default);
+				ChangeCursor(Cursors.Hand);
 			}
 			else
 			{
-				ChangeCursor(Cursors.Hand);
+				ChangeCursor(Cursors.Default);
 			}
 		}
 

@@ -29,7 +29,7 @@ public sealed class BalloonNotificationService : INotificationService, IDisposab
 	#region Data
 
 	private ToolTip _toolTip;
-	private Control _notifyControl;
+	private Control? _notifyControl;
 	private Size _toolTipSize;
 	private const int ToolTipTimeout = 5000;
 
@@ -52,7 +52,7 @@ public sealed class BalloonNotificationService : INotificationService, IDisposab
 			_ => ToolTipIcon.None,
 		};
 
-	private void Notify(Control control, int x, int y, NotificationType type, string title, string message, bool focus)
+	private void Notify(Control control, int x, int y, NotificationType type, string title, string? message, bool focus)
 	{
 		if(_notifyControl is not null)
 		{
@@ -69,39 +69,41 @@ public sealed class BalloonNotificationService : INotificationService, IDisposab
 		if(focus) control.Focus();
 	}
 
-	public void Notify(Control control, NotificationType type, string title, string message)
+	public void Notify(Control control, NotificationType type, string title, string? message)
 	{
 		Notify(control, 0, 0, type, title, message, false);
 	}
 
-	public void Notify(ToolStripItem item, NotificationType type, string title, string message)
+	public void Notify(ToolStripItem item, NotificationType type, string title, string? message)
 	{
 		var control = Utility.GetParentControl(item);
+		if(control is null) return;
 		Notify(control, item.Bounds.X, item.Bounds.Y, type, title, message, false);
 	}
 
-	public void Notify(Control control, string title, string message)
+	public void Notify(Control control, string title, string? message)
 	{
 		Notify(control, 0, 0, NotificationType.Simple, title, message, false);
 	}
 
-	public void Notify(ToolStripItem item, string title, string message)
+	public void Notify(ToolStripItem item, string title, string? message)
 	{
 		var control = Utility.GetParentControl(item);
+		if(control is null) return;
 		Notify(control, item.Bounds.X, item.Bounds.Y, NotificationType.Simple, title, message, false);
 	}
 
-	public void NotifyInputError(Control control, NotificationType type, string title, string message)
+	public void NotifyInputError(Control control, NotificationType type, string title, string? message)
 	{
 		Notify(control, 0, 0, type, title, message, true);
 	}
 
-	public void NotifyInputError(Control control, string title, string message)
+	public void NotifyInputError(Control control, string title, string? message)
 	{
 		Notify(control, 0, 0, NotificationType.Simple, title, message, true);
 	}
 
-	private void OnToolTipPopup(object sender, PopupEventArgs e)
+	private void OnToolTipPopup(object? sender, PopupEventArgs e)
 	{
 		_toolTipSize = e.ToolTipSize;
 	}
@@ -119,7 +121,7 @@ public sealed class BalloonNotificationService : INotificationService, IDisposab
 				}
 				_toolTip.RemoveAll();
 				_toolTip.Dispose();
-				_toolTip = null;
+				_toolTip = null!;
 			}
 		}
 	}

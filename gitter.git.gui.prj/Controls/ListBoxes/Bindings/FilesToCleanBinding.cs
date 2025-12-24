@@ -30,8 +30,6 @@ using gitter.Framework;
 
 sealed class FilesToCleanBinding : AsyncDataBinding<IReadOnlyList<TreeItem>>
 {
-	#region .ctor
-
 	public FilesToCleanBinding(Repository repository, TreeListBox treeListBox)
 	{
 		Verify.Argument.IsNotNull(repository);
@@ -43,30 +41,22 @@ sealed class FilesToCleanBinding : AsyncDataBinding<IReadOnlyList<TreeItem>>
 		Progress = treeListBox.ProgressMonitor;
 	}
 
-	#endregion
-
-	#region Properties
-
 	public Repository Repository { get; }
 
 	private TreeListBox TreeListBox { get; }
 
-	public string IncludePattern { get; set; }
+	public string? IncludePattern { get; set; }
 
-	public string ExcludePattern { get; set; }
+	public string? ExcludePattern { get; set; }
 
 	public CleanFilesMode CleanFilesMode { get; set; }
 
 	public bool IncludeDirectories { get; set; }
 
-	#endregion
-
-	#region Methods
-
 	protected override Task<IReadOnlyList<TreeItem>> FetchDataAsync(
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
-		Verify.State.IsFalse(IsDisposed, "FilesToCleanBinding is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		TreeListBox.Cursor = Cursors.WaitCursor;
 		return Repository.Status.GetFilesToCleanAsync(
@@ -124,6 +114,4 @@ sealed class FilesToCleanBinding : AsyncDataBinding<IReadOnlyList<TreeItem>>
 		}
 		base.Dispose(disposing);
 	}
-
-	#endregion
 }

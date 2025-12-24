@@ -20,8 +20,6 @@
 
 namespace gitter.Framework.Layout;
 
-#nullable enable
-
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -190,7 +188,7 @@ public sealed class ControlContent : IContent
 
 	private void UpdateControlBounds()
 	{
-		if(_updating > 0 || _dpi == default(Dpi)) return;
+		if(_updating > 0 || _dpi == default) return;
 
 		var bounds      = _bounds.WithPadding(GetMargin(_dpi));
 		var controlSize = GetSize(_dpi);

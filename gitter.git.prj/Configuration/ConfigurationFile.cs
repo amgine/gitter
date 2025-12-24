@@ -1,27 +1,28 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
 using gitter.Framework;
@@ -36,23 +37,23 @@ public class ConfigurationFile : IEnumerable<ConfigParameter>
 	/// <param name="configAccessor">Configuration file accessor.</param>
 	/// <param name="load">Immediately load file contents.</param>
 	public static ConfigurationFile OpenSystemFile(IConfigAccessor configAccessor, bool load = true)
-		=> new(configAccessor, ConfigFile.System, load);
+		=> new(configAccessor, ConfigFile.LocalSystem, load);
 
 	/// <summary>Open config file with user-specific settings.</summary>
 	/// <param name="configAccessor">Configuration file accessor.</param>
 	/// <param name="load">Immediately load file contents.</param>
 	public static ConfigurationFile OpenCurrentUserFile(IConfigAccessor configAccessor, bool load = true)
-		=> new(configAccessor, ConfigFile.User, load);
+		=> new(configAccessor, ConfigFile.CurrentUser, load);
 
 	#endregion
 
 	#region Events
 
 	/// <summary>New parameter created/detected.</summary>
-	public event EventHandler<ConfigParameterEventArgs> ParameterCreated;
+	public event EventHandler<ConfigParameterEventArgs>? ParameterCreated;
 
 	/// <summary>Parameter removed/lost.</summary>
-	public event EventHandler<ConfigParameterEventArgs> ParameterDeleted;
+	public event EventHandler<ConfigParameterEventArgs>? ParameterDeleted;
 
 	/// <summary>Invokes <see cref="ParameterCreated"/> event.</summary>
 	/// <param name="parameter">New branch.</param>
@@ -78,10 +79,10 @@ public class ConfigurationFile : IEnumerable<ConfigParameter>
 	#region Data
 
 	private readonly IConfigAccessor _configAccessor;
-	private readonly Repository _repository;
-	private readonly string _fileName;
+	private readonly Repository? _repository;
+	private readonly string? _fileName;
 	private readonly ConfigFile _configFile;
-	private readonly Dictionary<string, ConfigParameter> _parameters = new();
+	private readonly Dictionary<string, ConfigParameter> _parameters = [];
 
 	#endregion
 
@@ -139,13 +140,12 @@ public class ConfigurationFile : IEnumerable<ConfigParameter>
 	{
 		get
 		{
-			ConfigParameter res;
 			lock(SyncRoot)
 			{
-				Verify.Argument.IsTrue(_parameters.TryGetValue(name, out res), nameof(name),
+				Verify.Argument.IsTrue(_parameters.TryGetValue(name, out var res), nameof(name),
 					"Parameter not found.");
+				return res!;
 			}
-			return res;
 		}
 	}
 
@@ -169,7 +169,7 @@ public class ConfigurationFile : IEnumerable<ConfigParameter>
 	}
 
 	/// <summary>Object used for cross-thread synchronization.</summary>
-	public object SyncRoot => _parameters;
+	public LockType SyncRoot { get; } = new();
 
 	#endregion
 
@@ -185,26 +185,26 @@ public class ConfigurationFile : IEnumerable<ConfigParameter>
 			switch(_configFile)
 			{
 				case ConfigFile.Other:
-					_configAccessor.SetConfigValue.Invoke(new SetConfigValueParameters(name, value)
+					_configAccessor.SetConfigValue.Invoke(new SetConfigValueRequest(name, value)
 					{
 						ConfigFile = _configFile,
 						FileName = _fileName,
 					});
 					break;
-				case ConfigFile.System:
-				case ConfigFile.User:
-					_configAccessor.SetConfigValue.Invoke(new SetConfigValueParameters(name, value)
+				case ConfigFile.LocalSystem:
+				case ConfigFile.CurrentUser:
+					_configAccessor.SetConfigValue.Invoke(new SetConfigValueRequest(name, value)
 					{
 						ConfigFile = _configFile,
 					});
 					break;
 				case ConfigFile.Repository:
-					_configAccessor.SetConfigValue.Invoke(new SetConfigValueParameters(name, value));
+					_configAccessor.SetConfigValue.Invoke(new SetConfigValueRequest(name, value));
 					break;
 			}
-			var configParameter = _repository != null ?
+			var configParameter = _repository is not null ?
 				new ConfigParameter(_repository, _configFile, name, value) :
-				new ConfigParameter(_configAccessor, _fileName, name, value);
+				new ConfigParameter(_configAccessor, _fileName!, name, value);
 			_parameters.Add(name, configParameter);
 			InvokeCreated(configParameter);
 			return configParameter;
@@ -219,23 +219,23 @@ public class ConfigurationFile : IEnumerable<ConfigParameter>
 		{
 			case ConfigFile.Other:
 				_configAccessor.UnsetConfigValue.Invoke(
-					new UnsetConfigValueParameters(parameter.Name)
+					new UnsetConfigValueRequest(parameter.Name)
 					{
 						FileName = _fileName,
 						ConfigFile = ConfigFile.Other,
 					});
 				break;
-			case ConfigFile.System:
-			case ConfigFile.User:
+			case ConfigFile.LocalSystem:
+			case ConfigFile.CurrentUser:
 				_configAccessor.UnsetConfigValue.Invoke(
-					new UnsetConfigValueParameters(parameter.Name)
+					new UnsetConfigValueRequest(parameter.Name)
 					{
 						ConfigFile = _configFile,
 					});
 				break;
 			case ConfigFile.Repository:
 				_configAccessor.UnsetConfigValue.Invoke(
-					new UnsetConfigValueParameters(parameter.Name));
+					new UnsetConfigValueRequest(parameter.Name));
 				break;
 		}
 		lock(SyncRoot)
@@ -247,7 +247,7 @@ public class ConfigurationFile : IEnumerable<ConfigParameter>
 		}
 	}
 
-	public bool TryGetParameter(string name, out ConfigParameter parameter)
+	public bool TryGetParameter(string name, [MaybeNullWhen(returnValue: false)] out ConfigParameter parameter)
 	{
 		lock(SyncRoot)
 		{
@@ -255,9 +255,9 @@ public class ConfigurationFile : IEnumerable<ConfigParameter>
 		}
 	}
 
-	public ConfigParameter TryGetParameter(string name)
+	public ConfigParameter? TryGetParameter(string name)
 	{
-		ConfigParameter parameter;
+		ConfigParameter? parameter;
 		lock(SyncRoot)
 		{
 			if(_parameters.TryGetValue(name, out parameter))
@@ -270,19 +270,15 @@ public class ConfigurationFile : IEnumerable<ConfigParameter>
 
 	public ConfigParameter SetValue(string name, string value)
 	{
-		ConfigParameter p;
 		lock(_parameters)
 		{
-			if(_parameters.TryGetValue(name, out p))
+			if(_parameters.TryGetValue(name, out var p))
 			{
 				p.Value = value;
+				return p;
 			}
-			else
-			{
-				p = CreateParameter(name, value);
-			}
+			return CreateParameter(name, value);
 		}
-		return p;
 	}
 
 	#region Refresh()
@@ -320,22 +316,22 @@ public class ConfigurationFile : IEnumerable<ConfigParameter>
 		}
 	}
 
-	private QueryConfigParameters GetQueryConfigParameters()
+	private QueryConfigRequest GetQueryConfigRequest()
 		=> _configFile switch
 		{
-			ConfigFile.Other      => new QueryConfigParameters(_fileName),
-			ConfigFile.Repository => new QueryConfigParameters(),
-			ConfigFile.System     => new QueryConfigParameters(ConfigFile.System),
-			ConfigFile.User       => new QueryConfigParameters(ConfigFile.User),
+			ConfigFile.Other       => new QueryConfigRequest(_fileName!),
+			ConfigFile.Repository  => new QueryConfigRequest(),
+			ConfigFile.LocalSystem => new QueryConfigRequest(ConfigFile.LocalSystem),
+			ConfigFile.CurrentUser => new QueryConfigRequest(ConfigFile.CurrentUser),
 			_ => throw new ApplicationException($"Unknown {nameof(ConfigFile)} value: {_configFile}"),
 		};
 
 	/// <summary>Synchronize cached information with actual data.</summary>
 	public void Refresh()
 	{
-		var parameters = GetQueryConfigParameters();
+		var request = GetQueryConfigRequest();
 		var config = _configAccessor.QueryConfig
-			.Invoke(parameters);
+			.Invoke(request);
 
 		Refresh(config);
 	}
@@ -343,9 +339,9 @@ public class ConfigurationFile : IEnumerable<ConfigParameter>
 	/// <summary>Synchronize cached information with actual data.</summary>
 	public async Task RefreshAsync()
 	{
-		var parameters = GetQueryConfigParameters();
+		var request = GetQueryConfigRequest();
 		var config = await _configAccessor.QueryConfig
-			.InvokeAsync(parameters)
+			.InvokeAsync(request)
 			.ConfigureAwait(continueOnCapturedContext: false);
 
 		Refresh(config);

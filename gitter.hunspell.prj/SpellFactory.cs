@@ -26,16 +26,15 @@ namespace NHunspell;
 
 public class SpellFactory : IDisposable
 {
-	private readonly int processors;
-	private volatile bool disposed;
-	private Semaphore hunspellSemaphore;
-	private Stack<Hunspell> hunspells;
+	private readonly int _processors;
+	private Semaphore _hunspellSemaphore;
+	private Stack<Hunspell> _hunspells = default!;
 	private object hunspellsLock = new();
-	private Semaphore hyphenSemaphore;
-	private Stack<Hyphen> hyphens;
+	private Semaphore _hyphenSemaphore;
+	private Stack<Hyphen> _hyphens = default!;
 	private readonly object hyphensLock = new();
-	private Semaphore myThesSemaphore;
-	private Stack<MyThes> myTheses;
+	private Semaphore _myThesSemaphore;
+	private Stack<MyThes> myTheses = default!;
 	private readonly object myThesesLock = new();
 
 	public bool Add(string word)
@@ -43,7 +42,7 @@ public class SpellFactory : IDisposable
 		bool flag = false;
 		lock(this.hunspellsLock)
 		{
-			foreach(Hunspell hunspell in this.hunspells)
+			foreach(Hunspell hunspell in this._hunspells)
 				flag = hunspell.Add(word);
 			return flag;
 		}
@@ -54,7 +53,7 @@ public class SpellFactory : IDisposable
 		bool flag = false;
 		lock(this.hunspellsLock)
 		{
-			foreach(Hunspell hunspell in this.hunspells)
+			foreach(Hunspell hunspell in this._hunspells)
 				flag = hunspell.AddWithAffix(word, example);
 			return flag;
 		}
@@ -65,7 +64,7 @@ public class SpellFactory : IDisposable
 		bool flag = false;
 		lock(this.hunspellsLock)
 		{
-			foreach(Hunspell hunspell in this.hunspells)
+			foreach(Hunspell hunspell in this._hunspells)
 				flag = hunspell.Remove(word);
 			return flag;
 		}
@@ -75,38 +74,38 @@ public class SpellFactory : IDisposable
 	{
 		if(this.IsDisposed)
 			throw new ObjectDisposedException(nameof(SpellFactory));
-		if(this.hunspells is null)
+		if(this._hunspells is null)
 			throw new InvalidOperationException("Hunspell Dictionary isn't loaded");
-		this.hunspellSemaphore.WaitOne();
+		this._hunspellSemaphore.WaitOne();
 		lock(this.hunspellsLock)
 		{
-			return this.hunspells.Pop();
+			return this._hunspells.Pop();
 		}
 	}
 
 	private void HunspellsPush(Hunspell hunspell)
 	{
 		lock(this.hunspellsLock)
-			this.hunspells.Push(hunspell);
-		this.hunspellSemaphore.Release();
+			this._hunspells.Push(hunspell);
+		this._hunspellSemaphore.Release();
 	}
 
 	private Hyphen HyphenPop()
 	{
 		if(this.IsDisposed)
 			throw new ObjectDisposedException(nameof(SpellFactory));
-		if(this.hyphens == null)
+		if(this._hyphens == null)
 			throw new InvalidOperationException("Hyphen Dictionary isn't loaded");
-		this.hyphenSemaphore.WaitOne();
+		this._hyphenSemaphore.WaitOne();
 		lock(this.hyphensLock)
-			return this.hyphens.Pop();
+			return this._hyphens.Pop();
 	}
 
 	private void HyphenPush(Hyphen hyphen)
 	{
 		lock(this.hyphensLock)
-			this.hyphens.Push(hyphen);
-		this.hyphenSemaphore.Release();
+			this._hyphens.Push(hyphen);
+		this._hyphenSemaphore.Release();
 	}
 
 	private MyThes MyThesPop()
@@ -115,50 +114,54 @@ public class SpellFactory : IDisposable
 			throw new ObjectDisposedException(nameof(SpellFactory));
 		if(this.myTheses == null)
 			throw new InvalidOperationException("MyThes Dictionary isn't loaded");
-		this.myThesSemaphore.WaitOne();
+		this._myThesSemaphore.WaitOne();
 		lock(this.myThesesLock)
 			return this.myTheses.Pop();
 	}
 
 	private void MyThesPush(MyThes myThes)
 	{
-		lock(this.myThesesLock)
+		lock(myThesesLock)
 			this.myTheses.Push(myThes);
-		this.myThesSemaphore.Release();
+		_myThesSemaphore.Release();
 	}
 
 	public SpellFactory(LanguageConfig config)
 	{
-		this.processors = config.Processors;
-		if(!string.IsNullOrEmpty(config.HunspellAffFile))
+		_processors = config.Processors;
+		if(config.HunspellAffFile is { Length: not 0 } affFile && config.HunspellDictFile is { Length: not 0 } dictFile)
 		{
-			this.hunspells = new Stack<Hunspell>(this.processors);
-			for(int index = 0; index < this.processors; ++index)
+			_hunspells = new Stack<Hunspell>(capacity: _processors);
+			for(int index = 0; index < _processors; ++index)
 			{
-				if(config.HunspellKey != null && config.HunspellKey != string.Empty)
-					this.hunspells.Push(new Hunspell(config.HunspellAffFile, config.HunspellDictFile, config.HunspellKey));
-				else
-					this.hunspells.Push(new Hunspell(config.HunspellAffFile, config.HunspellDictFile));
+				var hunspell = config.HunspellKey is { Length: not 0 } key
+					? new Hunspell(affFile, dictFile, key)
+					: new Hunspell(affFile, dictFile);
+				_hunspells.Push(hunspell);
 			}
 		}
-		if(!string.IsNullOrEmpty(config.HyphenDictFile))
+		if(config.HyphenDictFile is { Length: not 0 } hyphenDict)
 		{
-			this.hyphens = new Stack<Hyphen>(this.processors);
-			for(int index = 0; index < this.processors; ++index)
-				this.hyphens.Push(new Hyphen(config.HyphenDictFile));
+			_hyphens = new Stack<Hyphen>(capacity: _processors);
+			for(int index = 0; index < _processors; ++index)
+			{
+				_hyphens.Push(new Hyphen(hyphenDict));
+			}
 		}
-		if(!string.IsNullOrEmpty(config.MyThesDatFile))
+		if(config.MyThesDatFile is { Length: not 0 } thesFile)
 		{
-			this.myTheses = new Stack<MyThes>(this.processors);
-			for(int index = 0; index < this.processors; ++index)
-				this.myTheses.Push(new MyThes(config.MyThesDatFile));
+			myTheses = new Stack<MyThes>(_processors);
+			for(int index = 0; index < _processors; ++index)
+			{
+				myTheses.Push(new MyThes(thesFile));
+			}
 		}
-		this.hunspellSemaphore = new Semaphore(this.processors, this.processors);
-		this.hyphenSemaphore = new Semaphore(this.processors, this.processors);
-		this.myThesSemaphore = new Semaphore(this.processors, this.processors);
+		_hunspellSemaphore = new(_processors, _processors);
+		_hyphenSemaphore   = new(_processors, _processors);
+		_myThesSemaphore   = new(_processors, _processors);
 	}
 
-	public bool IsDisposed => this.disposed;
+	public bool IsDisposed { get; private set; }
 
 	public List<string> Analyze(string word)
 	{
@@ -175,34 +178,44 @@ public class SpellFactory : IDisposable
 
 	public void Dispose()
 	{
-		if(this.IsDisposed)
-			return;
-		this.disposed = true;
-		for(int index = 0; index < this.processors; ++index)
-			this.hunspellSemaphore.WaitOne();
-		if(this.hunspells != null)
+		if(IsDisposed) return;
+
+		IsDisposed = true;
+		for(int index = 0; index < this._processors; ++index)
 		{
-			foreach(Hunspell hunspell in this.hunspells)
+			_hunspellSemaphore.WaitOne();
+		}
+		if(_hunspells is not null)
+		{
+			foreach(var hunspell in _hunspells)
+			{
 				hunspell.Dispose();
+			}
 		}
-		this.hunspellSemaphore.Release(this.processors);
-		this.hunspellSemaphore = (Semaphore)null;
-		this.hunspells = (Stack<Hunspell>)null;
-		for(int index = 0; index < this.processors; ++index)
-			this.hyphenSemaphore.WaitOne();
-		if(this.hyphens != null)
+		this._hunspellSemaphore.Release(this._processors);
+		this._hunspellSemaphore = default!;
+		this._hunspells = default!;
+		for(int index = 0; index < _processors; ++index)
 		{
-			foreach(Hyphen hyphen in this.hyphens)
-				hyphen.Dispose();
+			_hyphenSemaphore.WaitOne();
 		}
-		this.hyphenSemaphore.Release(this.processors);
-		this.hyphenSemaphore = (Semaphore)null;
-		this.hyphens = (Stack<Hyphen>)null;
-		for(int index = 0; index < this.processors; ++index)
-			this.myThesSemaphore.WaitOne();
-		this.myThesSemaphore.Release(this.processors);
-		this.myThesSemaphore = (Semaphore)null;
-		this.myTheses = (Stack<MyThes>)null;
+		if(_hyphens is not null)
+		{
+			foreach(var hyphen in _hyphens)
+			{
+				hyphen.Dispose();
+			}
+		}
+		_hyphenSemaphore.Release(this._processors);
+		_hyphenSemaphore = default!;
+		_hyphens = default!;
+		for(int index = 0; index < this._processors; ++index)
+		{
+			_myThesSemaphore.WaitOne();
+		}
+		_myThesSemaphore.Release(_processors);
+		_myThesSemaphore = default!;
+		myTheses = default!;
 	}
 
 	public List<string> Generate(string word, string sample)
@@ -218,7 +231,7 @@ public class SpellFactory : IDisposable
 		}
 	}
 
-	public HyphenResult Hyphenate(string word)
+	public HyphenResult? Hyphenate(string word)
 	{
 		var hyphen = HyphenPop();
 		try
@@ -231,7 +244,7 @@ public class SpellFactory : IDisposable
 		}
 	}
 
-	public ThesResult LookupSynonyms(string word, bool useGeneration)
+	public ThesResult? LookupSynonyms(string word, bool useGeneration)
 	{
 		var myThes   = default(MyThes);
 		var hunspell = default(Hunspell);

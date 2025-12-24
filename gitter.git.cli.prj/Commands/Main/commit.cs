@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git.AccessLayer.CLI;
@@ -24,6 +24,34 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>Record changes to the repository.</summary>
+/// <remarks>
+/// <code>
+/// <![CDATA[
+/// git commit
+///   [-a | --interactive | --patch]
+///   [-s]
+///   [-v]
+///   [-u[<mode>]]
+///   [--amend]
+///   [--dry-run] <commit>]
+///   [-F <file> | -m <msg>]
+///   [--reset-author]
+///   [--allow-empty]
+///   [--allow-empty-message]
+///   [--no-verify]
+///   [-e]
+///   [--author=<author>]
+///   [--date=<date>]
+///   [--cleanup=<mode>]
+///   [--[no-]status]
+///   [-i | -o]
+///   [--pathspec-from-file=<file> [--pathspec-file-nul]]
+///   [(--trailer <token>[(=|:)<value>])...​] [-S[<keyid>]]
+///   [--]
+///   [<pathspec>...]
+/// ]]>
+/// </code>
+/// </remarks>
 public sealed class CommitCommand : Command
 {
 	/// <summary>
@@ -46,18 +74,16 @@ public sealed class CommitCommand : Command
 		=> new CommandFlag("--reset-author");
 
 	public static ICommandArgument Author(string author)
-		=> new CommandParameterValue("--author", author.SurroundWithDoubleQuotes(), '=');
+		=> new CommandParameterQuotedValue("--author", author, '=');
 
 	public static ICommandArgument Date(DateTime date)
-		=> new CommandParameterValue("--date", ((int)(date - GitConstants.UnixEraStart).TotalSeconds).ToString(
-			System.Globalization.CultureInfo.InvariantCulture), '=');
+		=> new CommandParameterLongValue("--date", (long)(date - GitConstants.UnixEraStart).TotalSeconds, '=');
 
 	public static ICommandArgument Date(DateTimeOffset date)
-		=> new CommandParameterValue("--date", date.ToUnixTimeSeconds().ToString(
-			System.Globalization.CultureInfo.InvariantCulture), '=');
+		=> new CommandParameterLongValue("--date", date.ToUnixTimeSeconds(), '=');
 
 	public static ICommandArgument Message(string message)
-		=> new CommandParameterValue("--message", message.SurroundWithDoubleQuotes(), '=');
+		=> new CommandParameterQuotedValue("--message", message, '=');
 
 	/// <summary>
 	///	Take an existing commit object, and reuse the log message and the authorship information (including the timestamp)
@@ -70,10 +96,10 @@ public sealed class CommitCommand : Command
 		=> new CommandParameterValue("--reedit-message", commit);
 
 	public static ICommandArgument File(string file)
-		=> new CommandParameterValue("--file", file.AssureDoubleQuotes());
+		=> new CommandParameterPathValue("--file", file);
 
 	public static ICommandArgument Template(string file)
-		=> new CommandParameterValue("--template", file);
+		=> new CommandParameterPathValue("--template", file);
 
 	public static ICommandArgument Only()
 		=> new CommandFlag("--only");
@@ -85,7 +111,7 @@ public sealed class CommitCommand : Command
 		=> CommandFlag.SignOff;
 
 	public static ICommandArgument NoVerify()
-		=> new CommandFlag("--no-verify");
+		=> new CommandFlag("-n", "--no-verify");
 
 	public static ICommandArgument AllowEmpty()
 		=> new CommandFlag("--allow-empty");
@@ -94,7 +120,32 @@ public sealed class CommitCommand : Command
 		=> new CommandFlag("--allow-empty-message");
 
 	public static ICommandArgument Edit()
-		=> new CommandFlag("--edit");
+		=> new CommandFlag("-e", "--edit");
+
+	public static ICommandArgument Status()
+		=> new CommandFlag("--status");
+
+	public static ICommandArgument NoStatus()
+		=> new CommandFlag("--no-status");
+
+	public static ICommandArgument NoPostRewrite { get; } = new CommandFlag("--no-post-rewrite");
+
+	private static ICommandArgument CleanupDefault    { get; } = new CommandParameterValue("--cleanup", "default");
+	private static ICommandArgument CleanupScissors   { get; } = new CommandParameterValue("--cleanup", "scissors");
+	private static ICommandArgument CleanupVerbatim   { get; } = new CommandParameterValue("--cleanup", "verbatim");
+	private static ICommandArgument CleanupWhitespace { get; } = new CommandParameterValue("--cleanup", "whitespace");
+	private static ICommandArgument CleanupStrip      { get; } = new CommandParameterValue("--cleanup", "strip");
+
+	public static ICommandArgument Cleanup(CommitMessageCleanupMode mode)
+		=> mode switch
+		{
+			CommitMessageCleanupMode.Default    => CleanupDefault,
+			CommitMessageCleanupMode.Scissors   => CleanupScissors,
+			CommitMessageCleanupMode.Verbatim   => CleanupVerbatim,
+			CommitMessageCleanupMode.Whitespace => CleanupWhitespace,
+			CommitMessageCleanupMode.Strip      => CleanupStrip,
+			_ => throw new ArgumentException($"Unknown mode: {mode}", nameof(mode)),
+		};
 
 	public static ICommandArgument Verbose()
 		=> CommandFlag.Verbose;

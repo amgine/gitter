@@ -24,45 +24,32 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>Working tree status information.</summary>
-public sealed class StatusData
+public sealed class StatusData(
+	Dictionary<string, TreeFileData> stagedFiles,
+	Dictionary<string, TreeFileData> unstagedFiles,
+	int unstagedUntrackedCount,
+	int unstagedRemovedCount,
+	int unstagedModifiedCount,
+	int unmergedCount,
+	int stagedAddedCount,
+	int stagedModifiedCount,
+	int stagedRemovedCount)
 {
-	public StatusData(
-		Dictionary<string, TreeFileData> stagedFiles,
-		Dictionary<string, TreeFileData> unstagedFiles,
-		int unstagedUntrackedCount,
-		int unstagedRemovedCount,
-		int unstagedModifiedCount,
-		int unmergedCount,
-		int stagedAddedCount,
-		int stagedModifiedCount,
-		int stagedRemovedCount)
-	{
-		StagedFiles            = stagedFiles;
-		UnstagedFiles          = unstagedFiles;
-		UnstagedUntrackedCount = unstagedUntrackedCount;
-		UnstagedRemovedCount   = unstagedRemovedCount;
-		UnstagedModifiedCount  = unstagedModifiedCount;
-		UnmergedCount          = unmergedCount;
-		StagedAddedCount       = stagedAddedCount;
-		StagedModifiedCount    = stagedModifiedCount;
-		StagedRemovedCount     = stagedRemovedCount;
-	}
+	public Dictionary<string, TreeFileData> StagedFiles { get; } = stagedFiles;
 
-	public Dictionary<string, TreeFileData> StagedFiles { get; }
+	public Dictionary<string, TreeFileData> UnstagedFiles { get; } = unstagedFiles;
 
-	public Dictionary<string, TreeFileData> UnstagedFiles { get; }
+	public int UnstagedUntrackedCount { get; } = unstagedUntrackedCount;
 
-	public int UnstagedUntrackedCount { get; }
+	public int UnstagedModifiedCount { get; } = unstagedModifiedCount;
 
-	public int UnstagedModifiedCount { get; }
+	public int UnstagedRemovedCount { get; } = unstagedRemovedCount;
 
-	public int UnstagedRemovedCount { get; }
+	public int UnmergedCount { get; } = unmergedCount;
 
-	public int UnmergedCount { get; }
+	public int StagedAddedCount { get; } = stagedAddedCount;
 
-	public int StagedAddedCount { get; }
+	public int StagedModifiedCount { get; } = stagedModifiedCount;
 
-	public int StagedModifiedCount { get; }
-
-	public int StagedRemovedCount { get; }
+	public int StagedRemovedCount { get; } = stagedRemovedCount;
 }

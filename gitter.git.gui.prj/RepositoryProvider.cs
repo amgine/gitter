@@ -39,14 +39,12 @@ using gitter.Git.Gui.Dialogs;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-#nullable enable
-
 /// <summary>git <see cref="Repository"/> provider.</summary>
 sealed class RepositoryProvider : IGitRepositoryProvider
 {
 	#region Static Data
 
-	private static readonly Version _minVersion = new(1,7,0,2);
+	private static readonly Version _minVersion = new(1, 7, 0, 2);
 
 	#endregion
 
@@ -113,27 +111,41 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 
 	private ILifetimeScope LifetimeScope { get; }
 
+	private void OnGitAccessorDetached(IGitAccessorProvider provider, IGitAccessor accessor)
+	{
+		if(_configSection is not null && _configSection.TryGetSection(provider.Name, out var section))
+		{
+			accessor.SaveTo(section);
+		}
+	}
+
+	private void OnGitAccessorAttached(IGitAccessorProvider provider, IGitAccessor accessor)
+	{
+		if(_configSection is not null && _configSection.TryGetSection(provider.Name, out var section))
+		{
+			accessor.LoadFrom(section);
+		}
+	}
+
 	public IGitAccessorProvider? ActiveGitAccessorProvider
 	{
 		get => _gitAccessorProvider;
 		set
 		{
-			if(_gitAccessorProvider != value)
+			if(_gitAccessorProvider == value) return;
+
+			if(_gitAccessorProvider is not null && _gitAccessor is not null)
 			{
-				if(_gitAccessorProvider is not null && _gitAccessor is not null && _configSection is not null)
-				{
-					var gitAccessorSection = _configSection.GetCreateSection(_gitAccessorProvider.Name);
-					_gitAccessor.SaveTo(gitAccessorSection);
-				}
+				OnGitAccessorDetached(_gitAccessorProvider, _gitAccessor);
+			}
 
-				_gitAccessorProvider = value;
-				_gitAccessor = value?.CreateAccessor();
+			_gitAccessor = default;
+			_gitAccessorProvider = value;
+			_gitAccessor = value?.CreateAccessor();
 
-				if(_gitAccessor is not null && _configSection is not null)
-				{
-					var gitAccessorSection = _configSection.TryGetSection(value.Name);
-					_gitAccessor.LoadFrom(gitAccessorSection);
-				}
+			if(_gitAccessorProvider is not null && _gitAccessor is not null)
+			{
+				OnGitAccessorAttached(_gitAccessorProvider, _gitAccessor);
 			}
 		}
 	}
@@ -143,17 +155,15 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 		get => _gitAccessor;
 		set
 		{
-			if(_gitAccessor != value)
-			{
-				if(_gitAccessorProvider is not null && _gitAccessor is not null && _configSection is not null)
-				{
-					var gitAccessorSection = _configSection.GetCreateSection(_gitAccessorProvider.Name);
-					_gitAccessor.SaveTo(gitAccessorSection);
-				}
+			if(_gitAccessor == value) return;
 
-				_gitAccessorProvider = _gitAccessor?.Provider;
-				_gitAccessor = value;
+			if(_gitAccessorProvider is not null && _gitAccessor is not null)
+			{
+				OnGitAccessorDetached(_gitAccessorProvider, _gitAccessor);
 			}
+
+			_gitAccessorProvider = _gitAccessor?.Provider;
+			_gitAccessor = value;
 		}
 	}
 
@@ -187,17 +197,17 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 		{
 			gitVersion = GitAccessor?.GitVersion;
 		}
-		catch(Exception exc) when (!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			gitVersion = null;
 		}
 		if(gitVersion is null || gitVersion < MinimumRequiredGitVersion)
 		{
-			using var dlg = VersionCheckDialogFactory.Create();
-			dlg.RequiredVersion  = MinimumRequiredGitVersion;
-			dlg.InstalledVersion = gitVersion;
-			dlg.Run(environment.MainForm);
-			gitVersion = dlg.InstalledVersion;
+			using var dialog = VersionCheckDialogFactory.Create();
+			dialog.RequiredVersion  = MinimumRequiredGitVersion;
+			dialog.InstalledVersion = gitVersion;
+			dialog.Run(environment.MainForm);
+			gitVersion = dialog.InstalledVersion;
 			if(gitVersion is null || gitVersion < _minVersion)
 			{
 				return false;
@@ -252,8 +262,8 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 
 		if(_environment is not null && repository is Repository { UserIdentity: null } gitRepository)
 		{
-			using var dlg = new UserIdentificationDialog(_environment, gitRepository);
-			dlg.Run(_environment.MainForm);
+			using var dialog = new UserIdentificationDialog(this, gitRepository);
+			dialog.Run(_environment.MainForm);
 		}
 	}
 
@@ -266,7 +276,7 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 			using var fs = new FileStream(cfgFileName, FileMode.Create, FileAccess.Write, FileShare.None);
 			gitRepository.ConfigurationManager.Save(new XmlAdapter(fs));
 		}
-		catch(Exception exc) when (!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 		}
 		finally
@@ -288,13 +298,13 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 
 		DialogResult res;
 		string path = "";
-		using(var dlg = InitDialogFactory.Create())
+		using(var dialog = InitDialogFactory.Create())
 		{
-			dlg.RepositoryPath.Value = _environment.RecentRepositoryPath;
-			res = dlg.Run(_environment.MainForm);
+			dialog.RepositoryPath.Value = _environment!.RecentRepositoryPath;
+			res = dialog.Run(_environment.MainForm);
 			if(res == DialogResult.OK)
 			{
-				path = Path.GetFullPath(dlg.RepositoryPath.Value);
+				path = Path.GetFullPath(dialog.RepositoryPath.Value);
 			}
 		}
 		if(res == DialogResult.OK)
@@ -313,13 +323,13 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 
 		DialogResult res;
 		var path = default(string);
-		using(var dlg = CloneDialogFactory.Create())
+		using(var dialog = CloneDialogFactory.Create())
 		{
-			dlg.RepositoryPath.Value = _environment.RecentRepositoryPath;
-			res = dlg.Run(_environment.MainForm);
+			dialog.RepositoryPath.Value = _environment!.RecentRepositoryPath;
+			res = dialog.Run(_environment.MainForm);
 			if(res == DialogResult.OK)
 			{
-				path = dlg.RepositoryPath.Value;
+				path = dialog.RepositoryPath.Value;
 				if(!string.IsNullOrWhiteSpace(path))
 				{
 					path = Path.GetFullPath(path);
@@ -328,7 +338,7 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 		}
 		if(!string.IsNullOrWhiteSpace(path))
 		{
-			_environment.OpenRepository(path);
+			_environment.OpenRepository(path!);
 		}
 		return res;
 	}

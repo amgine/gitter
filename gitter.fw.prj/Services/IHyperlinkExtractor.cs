@@ -24,5 +24,5 @@ using System.Collections.Generic;
 
 public interface IHyperlinkExtractor
 {
-	IReadOnlyList<Hyperlink> ExtractHyperlinks(string text);
+	IReadOnlyList<Hyperlink>? ExtractHyperlinks(string text);
 }

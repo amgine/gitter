@@ -35,7 +35,9 @@ public sealed class UserMenu : ContextMenuStrip
 {
 	public UserMenu(User user)
 	{
-		Verify.Argument.IsValidGitObject(user, nameof(user));
+		Verify.Argument.IsValidGitObject(user);
+
+		Renderer = GitterApplication.Style.ToolStripRenderer;
 
 		User = user;
 

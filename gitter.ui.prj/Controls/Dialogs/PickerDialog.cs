@@ -27,8 +27,7 @@ using System.Windows.Forms;
 
 using gitter.Framework;
 using gitter.Framework.Controls;
-
-using Resources = gitter.Properties.Resources;
+using gitter.Framework.Layout;
 
 public abstract class PickerDialog<TPicker, TValue> : DialogBase, IExecutableDialog
 	where TPicker : Control, IPicker<TValue>, new()
@@ -38,7 +37,7 @@ public abstract class PickerDialog<TPicker, TValue> : DialogBase, IExecutableDia
 
 	sealed class ScalableSizeImpl : IDpiBoundValue<Size>
 	{
-		public IDpiBoundValue<Size> DisplayedControlSize { get; set; }
+		public IDpiBoundValue<Size>? DisplayedControlSize { get; set; }
 
 		public Size GetValue(Dpi dpi)
 		{
@@ -55,39 +54,46 @@ public abstract class PickerDialog<TPicker, TValue> : DialogBase, IExecutableDia
 		}
 	}
 
-	private readonly Dictionary<TValue, Control> _controlCache;
-	private readonly Label _label;
+	private readonly Dictionary<TValue, Control?> _controlCache = [];
+	private readonly LabelControl _label;
 	private readonly TPicker _picker;
 	private readonly ScalableSizeImpl _size = new();
 
 	protected PickerDialog(string displayName)
 	{
-		_controlCache = new Dictionary<TValue, Control>();
-		_label = new Label();
+		_label = new LabelControl
+		{
+			Text = displayName,
+		};
 		_picker = new TPicker();
 		SuspendLayout();
-		// 
-		// _label
-		// 
-		_label.Name = "_label";
-		_label.AutoSize = true;
-		_label.Bounds = new System.Drawing.Rectangle(0, 6, 54, 15);
-		_label.Text = displayName;
-		// 
-		// _picker
-		// 
-		_picker.Name = "_picker";
-		_picker.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-		_picker.Bounds = new System.Drawing.Rectangle(94, 3, 303, 23);
-		_picker.TabIndex = 0;
+
+		_ = new ControlLayout(this)
+		{
+			Content = new Grid(
+				columns:
+				[
+					SizeSpec.Absolute(94),
+					SizeSpec.Everything(),
+				],
+				rows:
+				[
+					LayoutConstants.TextInputRowHeight,
+					SizeSpec.Everything(),
+				],
+				content:
+				[
+					new GridContent(new ControlContent(_label,  marginOverride: LayoutConstants.NoMargin), column: 0),
+					new GridContent(new ControlContent(_picker, marginOverride: LayoutConstants.TextBoxMargin), column: 1),
+				]),
+		};
+
 		_picker.SelectedValueChanged += OnSelectedValueChanged;
-		// 
-		// PickerDialog
-		// 
-		AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
-		Controls.Add(_label);
-		Controls.Add(_picker);
-		Size = new System.Drawing.Size(400, 30);
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode = AutoScaleMode.Dpi;
+		_label.Parent = this;
+		_picker.Parent = this;
+		Size = new(400, 30);
 		ResumeLayout(false);
 		PerformLayout();
 	}
@@ -95,15 +101,15 @@ public abstract class PickerDialog<TPicker, TValue> : DialogBase, IExecutableDia
 	/// <inheritdoc/>
 	public override IDpiBoundValue<Size> ScalableSize => _size;
 
-	public TValue SelectedValue => _picker.SelectedValue;
+	public TValue? SelectedValue => _picker.SelectedValue;
 
 	protected virtual int MinimumSelectableItems => 1;
 
-	protected Control SelectedControl { get; private set; }
+	protected Control? SelectedControl { get; private set; }
 
 	protected abstract void LoadItems(TPicker picker);
 
-	protected abstract Control CreateControl(TValue item);
+	protected abstract Control? CreateControl(TValue item);
 
 	/// <inheritdoc/>
 	protected override void OnLoad(EventArgs e)
@@ -129,7 +135,7 @@ public abstract class PickerDialog<TPicker, TValue> : DialogBase, IExecutableDia
 		}
 	}
 
-	protected Control GetOrCreateControl(TValue item)
+	protected Control? GetOrCreateControl(TValue item)
 	{
 		if(!_controlCache.TryGetValue(item, out var control))
 		{
@@ -139,7 +145,7 @@ public abstract class PickerDialog<TPicker, TValue> : DialogBase, IExecutableDia
 		return control;
 	}
 
-	private void OnSelectedValueChanged(object sender, EventArgs e)
+	private void OnSelectedValueChanged(object? sender, EventArgs e)
 	{
 		var item = _picker.SelectedValue;
 		var control = item is not null ? GetOrCreateControl(item) : default;
@@ -164,17 +170,14 @@ public abstract class PickerDialog<TPicker, TValue> : DialogBase, IExecutableDia
 	{
 		if(disposing)
 		{
-			if(_controlCache is not null)
+			foreach(var ctl in _controlCache.Values)
 			{
-				foreach(var ctl in _controlCache.Values)
+				if(ctl is { IsDisposed : false })
 				{
-					if(ctl is { IsDisposed : false })
-					{
-						ctl.Dispose();
-					}
+					ctl.Dispose();
 				}
-				_controlCache.Clear();
 			}
+			_controlCache.Clear();
 		}
 		base.Dispose(disposing);
 	}

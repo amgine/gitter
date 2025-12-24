@@ -26,14 +26,9 @@ using gitter.Framework.Controls;
 
 using gitter.Git.Gui.Controls;
 
-class ReflogSearch<T> : HistorySearch<T>
+class ReflogSearch<T>(CustomListBox listBox) : HistorySearch<T>(listBox)
 	where T : ReflogSearchOptions
 {
-	public ReflogSearch(CustomListBox listBox)
-		: base(listBox)
-	{
-	}
-
 	protected static bool TestReflogRecord(ReflogRecord record, T search)
 	{
 		Assert.IsNotNull(record);

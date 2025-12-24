@@ -23,8 +23,11 @@ namespace gitter.Git.Gui.Dialogs;
 using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Windows.Forms;
 
 using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Mvc;
 using gitter.Framework.Mvc.WinForms;
 
@@ -36,6 +39,70 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public partial class StashToBranchDialog : GitDialogBase, IExecutableDialog, IStashToBranchView
 {
+	readonly struct DialogControls
+	{
+		private readonly LabelControl _lblStash;
+		public  readonly TextBox _txtStashName;
+		private readonly LabelControl _lblBranchName;
+		public  readonly TextBox _txtBranchName;
+
+		public DialogControls(IGitterStyle? style)
+		{
+			style ??= GitterApplication.Style;
+
+			_lblStash      = new();
+			_txtStashName  = new() { ReadOnly = true };
+			_lblBranchName = new();
+			_txtBranchName = new();
+		}
+
+		public void Localize()
+		{
+			_lblBranchName.Text = Resources.StrBranch.AddColon();
+			_lblStash.Text = Resources.StrStash.AddColon();
+		}
+
+		public void Layout(Control parent)
+		{
+			var decStashName  = new TextBoxDecorator(_txtStashName);
+			var decBranchName = new TextBoxDecorator(_txtBranchName);
+
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					rows:
+					[
+						LayoutConstants.TextInputRowHeight,
+						LayoutConstants.TextInputRowHeight,
+					],
+					columns:
+					[
+						SizeSpec.Absolute(60),
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblStash,      marginOverride: LayoutConstants.TextBoxLabelMargin), row: 0, column: 0),
+						new GridContent(new ControlContent(decStashName,   marginOverride: LayoutConstants.TextBoxMargin),      row: 0, column: 1),
+						new GridContent(new ControlContent(_lblBranchName, marginOverride: LayoutConstants.TextBoxLabelMargin), row: 1, column: 0),
+						new GridContent(new ControlContent(decBranchName,  marginOverride: LayoutConstants.TextBoxMargin),      row: 1, column: 1),
+					]),
+			};
+
+			var tabIndex = 0;
+			_lblStash.TabIndex      = tabIndex++;
+			_txtStashName.TabIndex  = tabIndex++;
+			_lblBranchName.TabIndex = tabIndex++;
+			_txtBranchName.TabIndex = tabIndex++;
+
+			_lblStash.Parent      = parent;
+			decStashName.Parent   = parent;
+			_lblBranchName.Parent = parent;
+			decBranchName.Parent  = parent;
+		}
+	}
+
+	private readonly DialogControls _controls;
 	private readonly IStashToBranchController _controller;
 
 	public StashToBranchDialog(StashedState stashedState)
@@ -46,23 +113,35 @@ public partial class StashToBranchDialog : GitDialogBase, IExecutableDialog, ISt
 
 		StashedState = stashedState;
 
-		InitializeComponent();
-		Localize();
+		SuspendLayout();
+		AutoScaleMode = AutoScaleMode.Dpi;
+		AutoScaleDimensions = Dpi.Default;
+		Name = nameof(StashToBranchDialog);
+		Text = Resources.StrStashToBranch;
+		Size = ScalableSize.GetValue(Dpi.Default);
+		_controls = new(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(false);
+		PerformLayout();
 
 		var inputs = new IUserInputSource[]
 		{
-			BranchName = new TextBoxInputSource(_txtBranchName),
+			BranchName = new TextBoxInputSource(_controls._txtBranchName),
 		};
 		ErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
-		SetupReferenceNameInputBox(_txtBranchName, ReferenceType.LocalBranch);
+		SetupReferenceNameInputBox(_controls._txtBranchName, ReferenceType.LocalBranch);
 
-		_txtStashName.Text = ((IRevisionPointer)StashedState).Pointer;
+		_controls._txtStashName.Text = ((IRevisionPointer)StashedState).Pointer;
 
-		GitterApplication.FontManager.InputFont.Apply(_txtBranchName, _txtStashName);
+		GitterApplication.FontManager.InputFont.Apply(_controls._txtBranchName, _controls._txtStashName);
 
 		_controller = new StashToBranchController(stashedState) { View = this };
 	}
+
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
 
 	/// <inheritdoc/>
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 53));
@@ -72,7 +151,7 @@ public partial class StashToBranchDialog : GitDialogBase, IExecutableDialog, ISt
 
 	public StashedState StashedState { get; }
 
-	public IUserInputSource<string> BranchName { get; }
+	public IUserInputSource<string?> BranchName { get; }
 
 	public IUserInputErrorNotifier ErrorNotifier { get; }
 
@@ -80,15 +159,7 @@ public partial class StashToBranchDialog : GitDialogBase, IExecutableDialog, ISt
 	protected override void OnLoad(EventArgs e)
 	{
 		base.OnLoad(e);
-		BeginInvoke(_txtBranchName.Focus);
-	}
-
-	private void Localize()
-	{
-		Text = Resources.StrStashToBranch;
-
-		_lblBranchName.Text = Resources.StrBranch.AddColon();
-		_lblStash.Text = Resources.StrStash.AddColon();
+		BeginInvoke(_controls._txtBranchName.Focus);
 	}
 
 	public bool Execute() => _controller.TryCreateBranch();

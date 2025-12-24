@@ -20,6 +20,9 @@
 
 namespace gitter.Git;
 
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using System.Threading.Tasks;
 
 using gitter.Framework;
@@ -27,39 +30,65 @@ using gitter.Framework;
 using gitter.Git.AccessLayer;
 
 /// <summary>Repository committers collection.</summary>
-public sealed class UsersCollection : GitObjectsCollection<User, UserEventArgs>
+public sealed class UsersCollection : GitObjectsCollection<UsersCollection.Key, User, UserEventArgs>
 {
-	#region .ctor
+	public readonly record struct Key(string Name, string Email);
+
+	sealed class Updater(UsersCollection collection)
+		: CacheUpdater<Key, User, UserData>(collection._dictionary, collection.SyncRoot)
+	{
+		protected override User CreateObject(UserData data)
+			=> ObjectFactories.CreateUser(collection.Repository, data);
+
+		protected override void UpdateObject(User @object, UserData data)
+			=> ObjectFactories.UpdateUser(@object, data);
+
+		protected override Key GetKey(User @object)
+			=> new(@object.Name, @object.Email);
+
+		protected override Key GetKey(UserData data)
+			=> new(data.Name, data.Email);
+
+		protected override void OnObjectAdded(User @object)
+			=> collection.InvokeObjectAdded(@object);
+
+		protected override void OnObjectRemoved(User @object)
+			=> collection.InvokeObjectRemoved(@object);
+	}
+
+	private readonly Updater _updater;
 
 	/// <summary>Create <see cref="UsersCollection"/>.</summary>
 	/// <param name="repository">Host <see cref="Repository"/>.</param>
 	internal UsersCollection(Repository repository)
 		: base(repository)
 	{
+		_updater = new(this);
 	}
 
-	#endregion
+	protected override Key GetKey(User @object) => new(@object.Name, @object.Email);
 
 	protected override UserEventArgs CreateEventArgs(User item) => new(item);
 
 	public User this[string name, string email]
 	{
-		get { lock(SyncRoot) return ObjectStorage[name + "\n" + email]; }
+		get { lock(SyncRoot) return ObjectStorage[new(name, email)]; }
 	}
 
-	public bool TryGetUser(string name, string email, out User user)
+	public bool TryGetUser(string name, string email,
+		[MaybeNullWhen(returnValue: false)] out User user)
 	{
 		lock(SyncRoot)
 		{
-			return ObjectStorage.TryGetValue(name + "\n" + email, out user);
+			return ObjectStorage.TryGetValue(new(name, email), out user);
 		}
 	}
 
-	public User TryGetUser(string name, string email)
+	public User? TryGetUser(string name, string email)
 	{
 		lock(SyncRoot)
 		{
-			if(ObjectStorage.TryGetValue(name + "\n" + email, out var user))
+			if(ObjectStorage.TryGetValue(new(name, email), out var user))
 			{
 				return user;
 			}
@@ -69,53 +98,30 @@ public sealed class UsersCollection : GitObjectsCollection<User, UserEventArgs>
 
 	internal User GetOrCreateUser(string name, string email)
 	{
-		User user;
+		var key = new Key(name, email);
 		lock(SyncRoot)
 		{
-			if(!ObjectStorage.TryGetValue(name + "\n" + email, out user))
+			if(!_dictionary.TryGetValue(key, out var user))
 			{
-				AddObject(user = new(Repository, name, email, 0));
+				_dictionary.Add(key, user = new(Repository, name, email, 0));
+				InvokeObjectAdded(user);
 			}
+			return user;
 		}
-		return user;
 	}
 
 	public void Refresh()
 	{
 		var users = Repository.Accessor.QueryUsers.Invoke(
-			new QueryUsersParameters());
-		lock(SyncRoot)
-		{
-			CacheUpdater.UpdateObjectDictionary<User, UserData>(
-				ObjectStorage,
-				null,
-				null,
-				users,
-				userData => ObjectFactories.CreateUser(Repository, userData),
-				ObjectFactories.UpdateUser,
-				InvokeObjectAdded,
-				InvokeObjectRemoved,
-				true);
-		}
+			new QueryUsersRequest());
+		_updater.Update(users);
 	}
 
-	public async Task RefreshAsync()
+	public async Task RefreshAsync(CancellationToken cancellationToken = default)
 	{
 		var users = await Repository.Accessor.QueryUsers
-			.InvokeAsync(new QueryUsersParameters())
+			.InvokeAsync(new QueryUsersRequest(), cancellationToken: cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
-		lock(SyncRoot)
-		{
-			CacheUpdater.UpdateObjectDictionary<User, UserData>(
-				ObjectStorage,
-				null,
-				null,
-				users,
-				userData => ObjectFactories.CreateUser(Repository, userData),
-				ObjectFactories.UpdateUser,
-				InvokeObjectAdded,
-				InvokeObjectRemoved,
-				true);
-		}
+		_updater.Update(users);
 	}
 }

@@ -29,7 +29,7 @@ using System.Windows.Forms;
 
 public sealed class GdiTextRenderer : ITextRenderer
 {
-	private static readonly Dictionary<Font, float> _fontHeight = new();
+	private static readonly Dictionary<Font, float> _fontHeight = [];
 	private const TextFormatFlags DefaultFormatFlags =
 		TextFormatFlags.NoPadding |
 		TextFormatFlags.NoPrefix |
@@ -159,52 +159,52 @@ public sealed class GdiTextRenderer : ITextRenderer
 
 	public StringFormat CenterAlign => DefaultStringFormatCenterAlign;
 
-	public void DrawText(Graphics graphics, string text, Font font, Brush brush, Rectangle layoutRectangle, StringFormat format)
+	public void DrawText(Graphics graphics, string? text, Font font, Brush brush, Rectangle layoutRectangle, StringFormat format)
 		=> TextRenderer.DrawText(graphics, text, font, layoutRectangle, ExtractColor(brush), ExtractFormatFlags(format));
 
-	public void DrawText(Graphics graphics, string text, Font font, Brush brush, Point point, StringFormat format)
+	public void DrawText(Graphics graphics, string? text, Font font, Brush brush, Point point, StringFormat format)
 		=> TextRenderer.DrawText(graphics, text, font, point, ExtractColor(brush), ExtractFormatFlags(format));
 
-	public void DrawText(Graphics graphics, string text, Font font, Brush brush, int x, int y, StringFormat format)
+	public void DrawText(Graphics graphics, string? text, Font font, Brush brush, int x, int y, StringFormat format)
 		=> TextRenderer.DrawText(graphics, text, font, new Point(x, y), ExtractColor(brush), ExtractFormatFlags(format));
 
-	public void DrawText(Graphics graphics, string text, Font font, Brush brush, Rectangle layoutRectangle)
+	public void DrawText(Graphics graphics, string? text, Font font, Brush brush, Rectangle layoutRectangle)
 		=> TextRenderer.DrawText(graphics, text, font, layoutRectangle, ExtractColor(brush), DefaultFormatFlags);
 
-	public void DrawText(Graphics graphics, string text, Font font, Brush brush, Point point)
+	public void DrawText(Graphics graphics, string? text, Font font, Brush brush, Point point)
 		=> TextRenderer.DrawText(graphics, text, font, point, ExtractColor(brush), DefaultFormatFlags);
 
-	public void DrawText(Graphics graphics, string text, Font font, Brush brush, int x, int y)
+	public void DrawText(Graphics graphics, string? text, Font font, Brush brush, int x, int y)
 		=> TextRenderer.DrawText(graphics, text, font, new Point(x, y), ExtractColor(brush), DefaultFormatFlags);
 
-	public void DrawText(Graphics graphics, string text, Font font, Color color, Rectangle layoutRectangle, StringFormat format)
+	public void DrawText(Graphics graphics, string? text, Font font, Color color, Rectangle layoutRectangle, StringFormat format)
 		=> TextRenderer.DrawText(graphics, text, font, layoutRectangle, color, ExtractFormatFlags(format));
 
-	public void DrawText(Graphics graphics, string text, Font font, Color color, Point point, StringFormat format)
+	public void DrawText(Graphics graphics, string? text, Font font, Color color, Point point, StringFormat format)
 		=> TextRenderer.DrawText(graphics, text, font, point, color, ExtractFormatFlags(format));
 
-	public void DrawText(Graphics graphics, string text, Font font, Color color, int x, int y, StringFormat format)
+	public void DrawText(Graphics graphics, string? text, Font font, Color color, int x, int y, StringFormat format)
 		=> TextRenderer.DrawText(graphics, text, font, new Point(x, y), color, ExtractFormatFlags(format));
 
-	public void DrawText(Graphics graphics, string text, Font font, Color color, Rectangle layoutRectangle)
+	public void DrawText(Graphics graphics, string? text, Font font, Color color, Rectangle layoutRectangle)
 		=> TextRenderer.DrawText(graphics, text, font, layoutRectangle, color, DefaultFormatFlags);
 
-	public void DrawText(Graphics graphics, string text, Font font, Color color, Point point)
+	public void DrawText(Graphics graphics, string? text, Font font, Color color, Point point)
 		=> TextRenderer.DrawText(graphics, text, font, point, color, DefaultFormatFlags);
 
-	public void DrawText(Graphics graphics, string text, Font font, Color color, int x, int y)
+	public void DrawText(Graphics graphics, string? text, Font font, Color color, int x, int y)
 		=> TextRenderer.DrawText(graphics, text, font, new Point(x, y), color, DefaultFormatFlags);
 
-	public Size MeasureText(Graphics graphics, string text, Font font, Size layoutArea, StringFormat format)
+	public Size MeasureText(Graphics graphics, string? text, Font font, Size layoutArea, StringFormat format)
 		=> TextRenderer.MeasureText(graphics, text, font, layoutArea, ExtractFormatFlags(format));
 
-	public Size MeasureText(Graphics graphics, string text, Font font, int width, StringFormat format)
+	public Size MeasureText(Graphics graphics, string? text, Font font, int width, StringFormat format)
 		=> TextRenderer.MeasureText(graphics, text, font, new Size(width, short.MaxValue), ExtractFormatFlags(format));
 
-	public Size MeasureText(Graphics graphics, string text, Font font, Size layoutArea)
+	public Size MeasureText(Graphics graphics, string? text, Font font, Size layoutArea)
 		=> TextRenderer.MeasureText(graphics, text, font, layoutArea, DefaultFormatFlags);
 
-	public Size MeasureText(Graphics graphics, string text, Font font, int width)
+	public Size MeasureText(Graphics graphics, string? text, Font font, int width)
 		=> TextRenderer.MeasureText(graphics, text, font, new Size(width, short.MaxValue), DefaultFormatFlags);
 
 #if NET5_0_OR_GREATER
@@ -261,7 +261,7 @@ public sealed class GdiTextRenderer : ITextRenderer
 
 	public float GetFontHeight(Font font) => GetFontHeight(null, font);
 
-	public float GetFontHeight(Graphics graphics, Font font)
+	public float GetFontHeight(Graphics? graphics, Font font)
 	{
 		if(!_fontHeight.TryGetValue(font, out var height))
 		{

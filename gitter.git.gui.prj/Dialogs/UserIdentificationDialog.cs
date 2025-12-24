@@ -26,6 +26,8 @@ using System.Drawing;
 using System.Windows.Forms;
 
 using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Services;
 
 using gitter.Git.AccessLayer;
@@ -33,92 +35,186 @@ using gitter.Git.AccessLayer;
 using Resources = gitter.Git.Gui.Properties.Resources;
 
 [ToolboxItem(false)]
-public partial class UserIdentificationDialog : GitDialogBase, IExecutableDialog
+partial class UserIdentificationDialog : GitDialogBase, IExecutableDialog
 {
-	private readonly IWorkingEnvironment _environment;
-	private RepositoryProvider _repositoryProvider;
-	private Repository _repository;
-	private string _oldUserName;
-	private string _oldUserEmail;
-
-	public UserIdentificationDialog(IWorkingEnvironment environment, Repository repository)
+	readonly struct DialogControls
 	{
-		Verify.Argument.IsNotNull(environment);
+		public  readonly TextBox _txtUsername;
+		public  readonly TextBox _txtEmail;
+		private readonly LabelControl _lblUser;
+		private readonly LabelControl _lblEmail;
+		public  readonly IRadioButtonWidget _radSetUserGlobally;
+		public  readonly IRadioButtonWidget _radSetUserForRepositoryOnly;
+		private readonly LabelControl _lblUseThisUserNameAndEmail;
 
-		_environment = environment;
-		_repository = repository;
-		_repositoryProvider = environment.GetRepositoryProvider<RepositoryProvider>();
+		public DialogControls(IGitterStyle? style = default)
+		{
+			style ??= GitterApplication.Style;
 
-		InitializeComponent();
+			_lblUser = new();
+			_txtUsername = new();
+			_lblEmail = new();
+			_txtEmail = new();
+			_lblUseThisUserNameAndEmail = new();
+			_radSetUserGlobally = style.RadioButtonFactory.Create();
+			_radSetUserForRepositoryOnly = style.RadioButtonFactory.Create();
+
+			_radSetUserGlobally.IsChecked = true;
+
+			GitterApplication.FontManager.InputFont.Apply(_txtUsername, _txtEmail);
+		}
+
+		public void Localize()
+		{
+			_lblUser.Text = Resources.StrUsername.AddColon();
+			_lblEmail.Text = Resources.StrEmail.AddColon();
+			_lblUseThisUserNameAndEmail.Text = Resources.StrsUseThisUserNameAndEmail.AddColon();
+			_radSetUserGlobally.Text = Resources.StrsForCurrentWindowsUser;
+			_radSetUserForRepositoryOnly.Text = Resources.StrsForCurrentRepositoryOnly;
+		}
+
+		public void Layout(Control parent)
+		{
+			var nameDec = new TextBoxDecorator(_txtUsername);
+			var mailDec = new TextBoxDecorator(_txtEmail);
+
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					columns:
+					[
+						SizeSpec.Absolute(70),
+						SizeSpec.Everything(),
+					],
+					rows:
+					[
+						/* 0 */ LayoutConstants.TextInputRowHeight,
+						/* 1 */ LayoutConstants.TextInputRowHeight,
+						/* 2 */ LayoutConstants.LabelRowSpacing,
+						/* 3 */ LayoutConstants.LabelRowHeight,
+						/* 4 */ LayoutConstants.RadioButtonRowHeight,
+						/* 5 */ LayoutConstants.RadioButtonRowHeight,
+						/* 6 */ SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblUser,  marginOverride: LayoutConstants.NoMargin), row: 0),
+						new GridContent(new ControlContent(nameDec,   marginOverride: LayoutConstants.TextBoxMargin), column: 1, row: 0),
+						new GridContent(new ControlContent(_lblEmail, marginOverride: LayoutConstants.NoMargin), row: 1),
+						new GridContent(new ControlContent(mailDec,   marginOverride: LayoutConstants.TextBoxMargin), column: 1, row: 1),
+						new GridContent(new ControlContent(_lblUseThisUserNameAndEmail, marginOverride: LayoutConstants.NoMargin), row: 3, columnSpan: 2),
+						new GridContent(new WidgetContent(_radSetUserGlobally, marginOverride: LayoutConstants.GroupPadding), row: 4, columnSpan: 2),
+						new GridContent(new WidgetContent(_radSetUserForRepositoryOnly, marginOverride: LayoutConstants.GroupPadding), row: 5, columnSpan: 2),
+					]),
+			};
+
+			var tabIndex = 0;
+			_lblUser.TabIndex = tabIndex++;
+			nameDec.TabIndex = tabIndex++;
+			_lblEmail.TabIndex = tabIndex++;
+			mailDec.TabIndex = tabIndex++;
+			_lblUseThisUserNameAndEmail.TabIndex = tabIndex++;
+			_radSetUserGlobally.TabIndex = tabIndex++;
+			_radSetUserForRepositoryOnly.TabIndex = tabIndex++;
+
+			_lblUser.Parent = parent;
+			nameDec.Parent = parent;
+			_lblEmail.Parent = parent;
+			mailDec.Parent = parent;
+			_lblUseThisUserNameAndEmail.Parent = parent;
+			_radSetUserGlobally.Parent = parent;
+			_radSetUserForRepositoryOnly.Parent = parent;
+		}
+	}
+
+	private readonly DialogControls _controls;
+	private readonly RepositoryProvider _repositoryProvider;
+	private readonly string? _oldUserName;
+	private readonly string? _oldUserEmail;
+	private readonly Repository? _repository;
+
+	public UserIdentificationDialog(RepositoryProvider provider, Repository? repository)
+	{
+		Verify.Argument.IsNotNull(provider);
+
+		_repository         = repository;
+		_repositoryProvider = provider;
+
+		Name = nameof(UserIdentificationDialog);
+
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		Size                = ScalableSize.GetValue(Dpi.Default);
+		_controls = new(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
 
 		Text = Resources.StrUserIdentification;
-
-		_lblUser.Text = Resources.StrUsername.AddColon();
-		_lblEmail.Text = Resources.StrEmail.AddColon();
-		_lblUseThisUserNameAndEmail.Text = Resources.StrsUseThisUserNameAndEmail.AddColon();
-		_radSetUserGlobally.Text = Resources.StrsForCurrentWindowsUser;
-		_radSetUserForRepositoryOnly.Text = Resources.StrsForCurrentRepositoryOnly;
 
 		if(repository is not null)
 		{
 			var userName = repository.Configuration.TryGetParameter(GitConstants.UserNameParameter);
 			if(userName is not null)
 			{
-				_txtUsername.Text = _oldUserName = userName.Value;
+				_controls._txtUsername.Text = _oldUserName = userName.Value;
 			}
 			else
 			{
-				_txtUsername.Text = Environment.UserName;
+				_controls._txtUsername.Text = Environment.UserName;
 			}
 			var userEmail = repository.Configuration.TryGetParameter(GitConstants.UserEmailParameter);
 			if(userEmail is not null)
 			{
-				_txtEmail.Text = _oldUserEmail = userEmail.Value;
+				_controls._txtEmail.Text = _oldUserEmail = userEmail.Value;
 			}
 			else
 			{
-				_txtEmail.Text = string.Format("{0}@{1}", Environment.UserName, Environment.UserDomainName);
+				_controls._txtEmail.Text = string.Format("{0}@{1}", Environment.UserName, Environment.UserDomainName);
 			}
 		}
 		else
 		{
-			_radSetUserForRepositoryOnly.Enabled = false;
+			_controls._radSetUserForRepositoryOnly.Enabled = false;
 		}
-
-		GitterApplication.FontManager.InputFont.Apply(_txtUsername, _txtEmail);
 	}
 
 	/// <inheritdoc/>
-	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 128));
+	protected override bool ScaleChildren => false;
+
+	/// <inheritdoc/>
+	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 116));
 
 	public string Username
 	{
-		get => _txtUsername.Text;
-		set => _txtUsername.Text = value;
+		get => _controls._txtUsername.Text;
+		set => _controls._txtUsername.Text = value;
 	}
 
 	public string Email
 	{
-		get => _txtEmail.Text;
-		set => _txtEmail.Text = value;
+		get => _controls._txtEmail.Text;
+		set => _controls._txtEmail.Text = value;
 	}
 
 	public bool SetGlobally
 	{
-		get => _radSetUserGlobally.Checked;
+		get => _controls._radSetUserGlobally.IsChecked;
 		set
 		{
 			if(value)
 			{
-				_radSetUserGlobally.Checked = true;
+				_controls._radSetUserGlobally.IsChecked = true;
 			}
 			else
 			{
-				if(!_radSetUserForRepositoryOnly.Enabled)
+				if(!_controls._radSetUserForRepositoryOnly.Enabled)
 				{
 					throw new InvalidOperationException();
 				}
-				_radSetUserForRepositoryOnly.Checked = true;
+				_controls._radSetUserForRepositoryOnly.IsChecked = true;
 			}
 		}
 	}
@@ -127,23 +223,23 @@ public partial class UserIdentificationDialog : GitDialogBase, IExecutableDialog
 	protected override void OnLoad(EventArgs e)
 	{
 		base.OnLoad(e);
-		BeginInvoke(_txtUsername.Focus);
+		BeginInvoke(_controls._txtUsername.Focus);
 	}
 
 	public void SetDefaults()
 	{
-		_txtUsername.Text = Environment.UserName;
-		_txtEmail.Text = string.Format("{0}@{1}", Environment.UserName, Environment.UserDomainName);
+		_controls._txtUsername.Text = Environment.UserName;
+		_controls._txtEmail.Text = string.Format("{0}@{1}", Environment.UserName, Environment.UserDomainName);
 	}
 
 	public bool Execute()
 	{
-		string userName = _txtUsername.Text.Trim();
-		string userEmail = _txtEmail.Text.Trim();
+		var userName  = _controls._txtUsername.Text.Trim();
+		var userEmail = _controls._txtEmail.Text.Trim();
 		if(userName.Length == 0)
 		{
 			NotificationService.NotifyInputError(
-				_txtUsername,
+				_controls._txtUsername,
 				Resources.ErrInvalidUserName,
 				Resources.ErrUserNameCannotBeEmpty);
 			return false;
@@ -151,68 +247,57 @@ public partial class UserIdentificationDialog : GitDialogBase, IExecutableDialog
 		if(userEmail.Length == 0)
 		{
 			NotificationService.NotifyInputError(
-				_txtEmail,
+				_controls._txtEmail,
 				Resources.ErrInvalidEmail,
 				Resources.ErrEmailCannotBeEmpty);
 			return false;
 		}
 		try
 		{
-			if(_radSetUserGlobally.Checked)
+			if(_controls._radSetUserGlobally.IsChecked)
 			{
 				if(_oldUserName != userName || _oldUserEmail != userEmail)
 				{
 					if(_repository is not null)
 					{
-						var cpUserName = _repository.Configuration.TryGetParameter(GitConstants.UserNameParameter);
-						if(cpUserName is not null)
+						static void Unset(ConfigParametersCollection cfg, string name)
 						{
+							if(!cfg.TryGetParameter(name, out var p)) return;
 							try
 							{
-								cpUserName.Unset();
+								p.Unset();
 							}
 							catch(GitException)
 							{
 							}
 						}
-						var cpUserEmail = _repository.Configuration.TryGetParameter(GitConstants.UserEmailParameter);
-						if(cpUserEmail is not null)
+
+						var cfg = _repository.Configuration;
+						Unset(cfg, GitConstants.UserNameParameter);
+						Unset(cfg, GitConstants.UserEmailParameter);
+					}
+					var accessor = _repositoryProvider.GitAccessor;
+					if(accessor is not null)
+					{
+						static void SetValue(IGitAccessor accessor, string name, string value)
 						{
 							try
 							{
-								cpUserEmail.Unset();
+							accessor.SetConfigValue.Invoke(
+								new SetConfigValueRequest(name, value)
+								{
+									ConfigFile = ConfigFile.CurrentUser,
+								});
 							}
-							catch(GitException)
+							catch(ConfigParameterDoesNotExistException)
 							{
 							}
 						}
+
+						SetValue(accessor, GitConstants.UserEmailParameter, userEmail);
+						SetValue(accessor, GitConstants.UserNameParameter,  userName);
 					}
-					try
-					{
-						_repositoryProvider.GitAccessor.SetConfigValue.Invoke(
-							new SetConfigValueParameters(GitConstants.UserEmailParameter, userEmail)
-							{
-								ConfigFile = ConfigFile.User,
-							});
-					}
-					catch(ConfigParameterDoesNotExistException)
-					{
-					}
-					try
-					{
-						_repositoryProvider.GitAccessor.SetConfigValue.Invoke(
-							new SetConfigValueParameters(GitConstants.UserNameParameter, userName)
-							{
-								ConfigFile = ConfigFile.User,
-							});
-					}
-					catch(ConfigParameterDoesNotExistException)
-					{
-					}
-					if(_repository is not null)
-					{
-						_repository.Configuration.Refresh();
-					}
+					_repository?.Configuration.Refresh();
 				}
 				if(_repository is not null)
 				{
@@ -221,7 +306,7 @@ public partial class UserIdentificationDialog : GitDialogBase, IExecutableDialog
 			}
 			else
 			{
-				_repository.Configuration.SetUserIdentity(userName, userEmail);
+				_repository?.Configuration.SetUserIdentity(userName, userEmail);
 			}
 		}
 		catch(GitException exc)

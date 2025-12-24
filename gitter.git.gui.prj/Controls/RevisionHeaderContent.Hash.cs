@@ -31,14 +31,9 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 
 partial class RevisionHeaderContent
 {
-	sealed class HashElement : BaseElement
+	sealed class HashElement(RevisionHeaderContent owner) : BaseElement(owner)
 	{
 		private static readonly string HeaderText = Resources.StrHash.AddColon();
-
-		public HashElement(RevisionHeaderContent owner)
-			: base(owner)
-		{
-		}
 
 		public override Element Element => Element.Hash;
 
@@ -46,7 +41,10 @@ partial class RevisionHeaderContent
 		{
 			Assert.IsNotNull(revision);
 
-			var menu = new ContextMenuStrip();
+			var menu = new ContextMenuStrip
+			{
+				Renderer = GitterApplication.Style.ToolStripRenderer
+			};
 
 			var dpiBindings = new DpiBindings(menu);
 			var factory     = new GuiItemFactory(dpiBindings);

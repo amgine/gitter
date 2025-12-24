@@ -193,27 +193,28 @@ public sealed class DiffFile : IReadOnlyList<DiffHunk>, ICloneable
 	{
 		Verify.Argument.IsNotNull(sb);
 
-		sb.Append("diff --git a/");
-		sb.Append(SourceFile);
-		sb.Append(" b/");
-		sb.Append(TargetFile);
-		sb.Append(LineEnding.Lf);
+		_ = sb
+		  .Append("diff --git a/")
+		  .Append(SourceFile)
+		  .Append(" b/")
+		  .Append(TargetFile)
+		  .Append(LineEnding.Lf)
 
-		sb.Append("index ");
-		sb.Append(OldIndex);
-		sb.Append("..");
-		sb.Append(NewIndex);
-		sb.Append(' ');
-		sb.Append(NewMode);
-		sb.Append(LineEnding.Lf);
+		  .Append("index ")
+		  .Append(OldIndex)
+		  .Append("..")
+		  .Append(NewIndex)
+		  .Append(' ')
+		  .Append(NewMode)
+		  .Append(LineEnding.Lf)
 
-		sb.Append("--- a/");
-		sb.Append(SourceFile);
-		sb.Append(LineEnding.Lf);
+		  .Append("--- a/")
+		  .Append(SourceFile)
+		  .Append(LineEnding.Lf)
 
-		sb.Append("+++ b/");
-		sb.Append(TargetFile);
-		sb.Append(LineEnding.Lf);
+		  .Append("+++ b/")
+		  .Append(TargetFile)
+		  .Append(LineEnding.Lf);
 
 		foreach(var hunk in _hunks)
 		{
@@ -248,7 +249,6 @@ public sealed class DiffFile : IReadOnlyList<DiffHunk>, ICloneable
 			hunks,
 			IsBinary,
 			Stats.Clone());
-
 	}
 
 	object ICloneable.Clone() => Clone();

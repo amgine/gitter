@@ -24,32 +24,33 @@ using System;
 
 using gitter.Framework.Configuration;
 
-public sealed class ServerInfo
+public sealed class ServerInfo(
+	string name,
+	Uri    serviceUri,
+	string apiKey)
 {
-	public string Name { get; set; }
+	public string Name { get; set; } = name;
 
-	public Uri ServiceUrl { get; set; }
+	public Uri ServiceUri { get; set; } = serviceUri;
 
-	public string ApiKey { get; set; }
+	public string ApiKey { get; set; } = apiKey;
 
 	internal static ServerInfo LoadFrom(Section section)
 	{
 		Verify.Argument.IsNotNull(section);
 
-		return new ServerInfo
-		{
-			Name       = section.GetValue<string>("Name"),
-			ServiceUrl = new Uri(section.GetValue<string>("ServiceUrl")),
-			ApiKey     = section.GetValue<string>("ApiKey"),
-		};
+		return new ServerInfo(
+			name:       section.GetValue<string>("Name") ?? "",
+			serviceUri: new Uri(section.GetValue<string>("ServiceUrl") ?? ""),
+			apiKey:     section.GetValue<string>("ApiKey") ?? "");
 	}
 
 	internal void SaveTo(Section section)
 	{
 		Verify.Argument.IsNotNull(section);
 
-		section.SetValue("Name", Name);
-		section.SetValue("ServiceUrl", ServiceUrl.ToString());
-		section.SetValue("ApiKey", ApiKey);
+		section.SetValue("Name",       Name);
+		section.SetValue("ServiceUrl", ServiceUri.ToString());
+		section.SetValue("ApiKey",     ApiKey);
 	}
 }

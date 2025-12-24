@@ -22,11 +22,14 @@ namespace gitter.GitLab.Options;
 
 using System;
 using System.Drawing;
+using System.Net.Http;
 using System.Windows.Forms;
 
 using gitter.Framework;
 using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Options;
+using gitter.Framework.Services;
 
 using Resources = gitter.GitLab.Properties.Resources;
 
@@ -34,23 +37,62 @@ partial class ConfigurationPage : PropertyPage, IExecutableDialog
 {
 	public static readonly new Guid Guid = new("FD59B6BD-AFC4-4ABB-AE0C-F170B57B25BE");
 
+	private readonly DialogControls _controls;
 	private readonly NotifyCollection<ServerInfo> _servers;
 	private bool _changed;
 	private IDisposable _serverListBinding;
 
-	sealed class Item : CustomListBoxItem<ServerInfo>
+	sealed class ItemContextMenu : ContextMenuStrip
 	{
+		private static readonly object SetApiKeyRequestedEvent = new();
+
+		public event EventHandler SetApiKeyRequested
+		{
+			add    => Events.AddHandler    (SetApiKeyRequestedEvent, value);
+			remove => Events.RemoveHandler (SetApiKeyRequestedEvent, value);
+		}
+
+		private void OnSetApiKeyRequested(EventArgs e)
+			=> ((EventHandler?)Events[SetApiKeyRequestedEvent])?.Invoke(this, e);
+
+		public ItemContextMenu(Item item)
+		{
+			Renderer = GitterApplication.Style.ToolStripRenderer;
+
+			Items.Add(new ToolStripMenuItem("Refresh Access Token Info", null, (_, _) => item.RefreshTokenInfo()));
+			Items.Add(new ToolStripMenuItem("Set Access Token...", null, (_, e) => OnSetApiKeyRequested(e)));
+			Items.Add(new ToolStripMenuItem("Rotate Access Token", null, (_, _) =>
+			{
+				var expiresAt = DateTime.Now.AddDays(360);
+				item.SelfRotate(expiresAt);
+			})
+			{
+				Enabled = item.CanSelfRotate,
+			});
+		}
+	}
+
+	sealed class Item(ConfigurationPage page, HttpMessageInvoker httpMessageInvoker, ServerInfo serverInfo)
+		: CustomListBoxItem<ServerInfo>(serverInfo)
+	{
+		private readonly Api.ApiEndpoint _ep = new(httpMessageInvoker, serverInfo);
+		private TokenUpdateState _tokenState;
+		private Api.PersonalAccessToken? _token;
+		private bool _isRotating;
+
+		enum TokenUpdateState
+		{
+			InProcess,
+			Failed,
+			Received,
+		}
+
 		private static readonly StringFormat TextStringFormat = new(StringFormat.GenericTypographic)
 		{
 			FormatFlags   = StringFormatFlags.LineLimit | StringFormatFlags.NoClip,
 			Trimming      = StringTrimming.EllipsisCharacter,
 			LineAlignment = StringAlignment.Center,
 		};
-
-		public Item(ServerInfo serverInfo)
-			: base(serverInfo)
-		{
-		}
 
 		protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		{
@@ -65,20 +107,147 @@ partial class ConfigurationPage : PropertyPage, IExecutableDialog
 			var bounds   = paintEventArgs.Bounds;
 
 			var d = (bounds.Height - iconSize.Height) / 2;
-			var iconBounds = new Rectangle(bounds.X + d, bounds.Y + d, iconSize.Height, iconSize.Width);
+			var iconBounds = new Rectangle(bounds.X + conv.ConvertX(8), bounds.Y + d, iconSize.Height, iconSize.Width);
 
-			graphics.DrawImage(CachedResources.ScaledBitmaps[@"gitlab", iconSize.Width], iconBounds);
+			var icon = CachedResources.ScaledBitmaps[@"gitlab", iconSize.Width];
+			if(icon is not null)
+			{
+				graphics.DrawImage(icon, iconBounds);
+			}
 
 			var dy = conv.ConvertY(3);
 			bounds.Y      += dy;
 			bounds.Height -= dy * 2;
 
 			var x = bounds.X + iconBounds.Right + conv.ConvertX(4);
-			var textBounds1 = new Rectangle(x, bounds.Y, bounds.Width - iconBounds.Right - conv.ConvertX(4) * 2, bounds.Height / 2);
-			var textBounds2 = new Rectangle(x, bounds.Y + textBounds1.Height, textBounds1.Width, bounds.Height - textBounds1.Height);
+			var h = bounds.Height / 3;
+			var textBounds1 = new Rectangle(x, bounds.Y, bounds.Width - iconBounds.Right - conv.ConvertX(4) * 2, h);
+			var textBounds2 = new Rectangle(x, bounds.Y + textBounds1.Height, textBounds1.Width, h);
+			var textBounds3 = new Rectangle(x, textBounds2.Bottom, textBounds1.Width, bounds.Height - h*2);
 
-			GitterApplication.TextRenderer.DrawText(graphics, DataContext.Name.ToString(),       paintEventArgs.Font, SystemBrushes.WindowText, textBounds1, TextStringFormat);
-			GitterApplication.TextRenderer.DrawText(graphics, DataContext.ServiceUrl.ToString(), paintEventArgs.Font, SystemBrushes.GrayText,   textBounds2, TextStringFormat);
+			var c1 = paintEventArgs.ListBox.Style.Colors.WindowText;
+			var c2 = (paintEventArgs.State & ItemState.Selected) == ItemState.Selected
+				? c1
+				: paintEventArgs.ListBox.Style.Colors.GrayText;
+
+			GitterApplication.TextRenderer.DrawText(graphics, DataContext.Name.ToString(),       paintEventArgs.Font, c1, textBounds1, TextStringFormat);
+			GitterApplication.TextRenderer.DrawText(graphics, DataContext.ServiceUri.ToString(), paintEventArgs.Font, c2, textBounds2, TextStringFormat);
+			if(_token is not null && _token.ExpiresAt.HasValue)
+			{
+				var expiresIn = Utility.FormatDate(_token.ExpiresAt.Value, DateFormat.Relative);
+				var days = (int)(_token.ExpiresAt.Value - DateTimeOffset.UtcNow).TotalDays;
+				var dt = days switch
+				{
+					< 0 => $"token expired",
+					  0 => $"token expires today",
+					  1 => $"token expires in 1 day",
+					> 1 => $"token expires in {days} days",
+				};
+				GitterApplication.TextRenderer.DrawText(graphics, dt, paintEventArgs.Font, c2, textBounds3, TextStringFormat);
+			}
+			else
+			{
+				var m = _tokenState switch
+				{
+					TokenUpdateState.InProcess => "updating access token info...",
+					TokenUpdateState.Failed    => "failed to get access token info",
+					_ => default,
+				};
+				if(m is not null)
+				{
+					GitterApplication.TextRenderer.DrawText(graphics, m, paintEventArgs.Font, c2, textBounds3, TextStringFormat);
+				}
+			}
+		}
+
+		private async void UpdateTokenInfo()
+		{
+			_tokenState = TokenUpdateState.InProcess;
+			try
+			{
+				_token = await _ep.GetPersonalAccessTokenAsync();
+				_tokenState = TokenUpdateState.Received;
+			}
+			catch
+			{
+				_token = default;
+				_tokenState = TokenUpdateState.Failed;
+			}
+			Invalidate();
+		}
+
+		public void RefreshTokenInfo()
+		{
+			UpdateTokenInfo();
+		}
+
+		public bool CanSelfRotate
+		{
+			get
+			{
+				if(_isRotating) return false;
+				if(_tokenState != TokenUpdateState.Received) return false;
+				if(_token?.Scopes is not { Length: not 0 } scopes) return false;
+				return Array.IndexOf(scopes, "self_rotate") >= 0
+					|| Array.IndexOf(scopes, "api") >= 0;
+			}
+		}
+
+		public async void SelfRotate(DateTime? expiresAt = default)
+		{
+			_tokenState = TokenUpdateState.InProcess;
+			try
+			{
+				var token = await _ep.SelfRotatePersonalAccessTokenAsync(expiresAt);
+				if(token?.Token is { Length: not 0 } apiKey)
+				{
+					DataContext.ApiKey = token.Token;
+					_token = token;
+					_tokenState = TokenUpdateState.Received;
+				}
+				else
+				{
+					GitterApplication.MessageBoxService.Show(ListBox,
+						"Failed to rotate personal access token.",
+						"Token Rotation",
+						MessageBoxButton.Close, MessageBoxIcon.Error);
+				}
+				Invalidate();
+			}
+			catch
+			{
+				UpdateTokenInfo();
+				GitterApplication.MessageBoxService.Show(ListBox,
+					"Failed to rotate personal access token.",
+					"Token Rotation",
+					MessageBoxButton.Close, MessageBoxIcon.Error);
+			}
+			finally
+			{
+				_isRotating = false;
+			}
+		}
+
+		protected override void OnListBoxAttached(CustomListBox listBox)
+		{
+			base.OnListBoxAttached(listBox);
+			UpdateTokenInfo();
+		}
+
+		protected override void OnListBoxDetached(CustomListBox listBox)
+		{
+			base.OnListBoxDetached(listBox);
+		}
+
+		public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+		{
+			var menu = new ItemContextMenu(this);
+			menu.SetApiKeyRequested += (_, _) =>
+			{
+				page.SetApiKey(DataContext);
+			};
+			Utility.MarkDropDownForAutoDispose(menu);
+			return menu;
 		}
 	}
 
@@ -87,34 +256,116 @@ partial class ConfigurationPage : PropertyPage, IExecutableDialog
 		public Column() : base(0, "", visible: true) => SizeMode = ColumnSizeMode.Fill;
 	}
 
-	public ConfigurationPage(IWorkingEnvironment workingEnvironment, GitLabServiceProvider serviceProvider)
+	readonly struct DialogControls
+	{
+		public readonly CustomListBox _lstServers;
+		public readonly LabelControl _lblServers;
+		public readonly IButtonWidget _btnAdd;
+		public readonly IButtonWidget _btnRemove;
+
+		public DialogControls(IGitterStyle? style = default)
+		{
+			style ??= GitterApplication.Style;
+
+			_lstServers = new();
+			_lblServers = new();
+			_btnAdd     = style.ButtonFactory.Create();
+			_btnRemove  = style.ButtonFactory.Create();
+			_btnRemove.Enabled = false;
+		}
+
+		public void Localize()
+		{
+			_lblServers.Text = Resources.StrServers.AddColon();
+			_btnAdd.Text     = Resources.StrAdd.AddEllipsis();
+			_btnRemove.Text  = Resources.StrRemove;
+		}
+
+		public void Layout(Control parent)
+		{
+			var noMargin = DpiBoundValue.Constant(Padding.Empty);
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					rows:
+					[
+						LayoutConstants.LabelRowHeight,
+						LayoutConstants.LabelRowSpacing,
+						SizeSpec.Everything(),
+						SizeSpec.Absolute(4),
+						SizeSpec.Absolute(23),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblServers, marginOverride: noMargin), row: 0),
+						new GridContent(new ControlContent(_lstServers, marginOverride: noMargin), row: 2),
+						new GridContent(new Grid(
+							columns:
+							[
+								SizeSpec.Everything(),
+								SizeSpec.Absolute(75),
+								SizeSpec.Absolute(6),
+								SizeSpec.Absolute(75),
+							],
+							content:
+							[
+								new GridContent(new WidgetContent(_btnAdd,    marginOverride: noMargin), column: 1),
+								new GridContent(new WidgetContent(_btnRemove, marginOverride: noMargin), column: 3),
+							]), row: 4),
+					]),
+			};
+
+			var tabIndex = 0;
+			_lblServers.TabIndex = tabIndex++;
+			_lstServers.TabIndex = tabIndex++;
+			_btnAdd.TabIndex     = tabIndex++;
+			_btnRemove.TabIndex  = tabIndex++;
+
+			_lblServers.Parent = parent;
+			_lstServers.Parent = parent;
+			_btnAdd.Parent     = parent;
+			_btnRemove.Parent  = parent;
+		}
+	}
+
+	public ConfigurationPage(IWorkingEnvironment workingEnvironment, GitLabServiceProvider serviceProvider, HttpMessageInvoker httpMessageInvoker)
 		: base(Guid)
 	{
 		Verify.Argument.IsNotNull(workingEnvironment);
 		Verify.Argument.IsNotNull(serviceProvider);
+		Verify.Argument.IsNotNull(httpMessageInvoker);
+
+		Name = nameof(ConfigurationPage);
 
 		WorkingEnvironment = workingEnvironment;
 		ServiceProvider    = serviceProvider;
 
-		InitializeComponent();
-		_lstServers.BeginUpdate();
-		_lstServers.HeaderStyle = HeaderStyle.Hidden;
-		_lstServers.Columns.Add(new Column());
-		_lstServers.Style = GitterApplication.DefaultStyle;
-		_lstServers.BaseItemHeight = 32 + 4;
-		_lstServers.EndUpdate();
-		_lblServers.Text = Resources.StrServers.AddColon();
-		_btnAdd.Text = Resources.StrAdd.AddEllipsis();
-		_btnRemove.Text = Resources.StrRemove;
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode = AutoScaleMode.Dpi;
+		Size = new(617, 542);
+		_controls = new(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
 
-		_servers = new NotifyCollection<ServerInfo>();
-		_servers.AddRange(serviceProvider.Servers);
+		_controls._btnAdd.Click += OnAddServerClick;
+		_controls._btnRemove.Click += OnRemoveServerClick;
+
+		_controls._lstServers.BeginUpdate();
+		_controls._lstServers.HeaderStyle = HeaderStyle.Hidden;
+		_controls._lstServers.Columns.Add(new Column());
+		_controls._lstServers.BaseItemHeight = 16*3 + 4;
+		_controls._lstServers.EndUpdate();
+
+		_servers = [.. serviceProvider.Servers];
 		_serverListBinding = new NotifyCollectionBinding<ServerInfo>(
-			_lstServers.Items, _servers, serverInfo => new Item(serverInfo));
+			_controls._lstServers.Items, _servers, serverInfo => new Item(this, httpMessageInvoker, serverInfo));
 
-		_lstServers.SelectionChanged += (_, _) => _btnRemove.Enabled = _lstServers.SelectedItems.Count > 0;
+		_controls._lstServers.SelectionChanged += (_, _) => _controls._btnRemove.Enabled = _controls._lstServers.SelectedItems.Count > 0;
 
-		_lstServers.KeyDown += (_, e) =>
+		_controls._lstServers.KeyDown += (_, e) =>
 		{
 			switch(e.KeyCode)
 			{
@@ -134,14 +385,14 @@ partial class ConfigurationPage : PropertyPage, IExecutableDialog
 
 	private void RemoveSelectedServers()
 	{
-		if(_lstServers.SelectedItems.Count == 1)
+		if(_controls._lstServers.SelectedItems.Count == 1)
 		{
-			_servers.Remove(((CustomListBoxItem<ServerInfo>)_lstServers.SelectedItems[0]).DataContext);
+			_servers.Remove(((CustomListBoxItem<ServerInfo>)_controls._lstServers.SelectedItems[0]).DataContext);
 			_changed = true;
 		}
 	}
 
-	private void OnAddServerClick(object sender, EventArgs e)
+	private void OnAddServerClick(object? sender, EventArgs e)
 	{
 		using var dialog = new AddServerDialog(ServiceProvider.HttpMessageInvoker, _servers);
 		if(dialog.Run(this) == DialogResult.OK)
@@ -150,7 +401,16 @@ partial class ConfigurationPage : PropertyPage, IExecutableDialog
 		}
 	}
 
-	private void OnRemoveServerClick(object sender, EventArgs e)
+	private void SetApiKey(ServerInfo server)
+	{
+		using var dialog = new SetApiKeyDialog(ServiceProvider.HttpMessageInvoker, _servers, server);
+		if(dialog.Run(this) == DialogResult.OK)
+		{
+			_changed = true;
+		}
+	}
+
+	private void OnRemoveServerClick(object? sender, EventArgs e)
 	{
 		RemoveSelectedServers();
 	}
@@ -172,7 +432,6 @@ partial class ConfigurationPage : PropertyPage, IExecutableDialog
 		if(disposing)
 		{
 			_serverListBinding.Dispose();
-			components?.Dispose();
 		}
 		base.Dispose(disposing);
 	}

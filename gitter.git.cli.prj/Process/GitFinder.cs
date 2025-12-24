@@ -23,8 +23,6 @@ namespace gitter.Git.AccessLayer.CLI;
 using System;
 using System.IO;
 
-#nullable enable
-
 static class GitFinder
 {
 	const string GitExe = "git.exe";
@@ -56,7 +54,7 @@ static class GitFinder
 					return path;
 				}
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 			}
 		}
@@ -72,7 +70,7 @@ static class GitFinder
 		}
 
 		string gitWrapperExecutable = string.Format(@"{0}cmd{0}{1}", Path.DirectorySeparatorChar, fileName);
-		if(gitExeFullPath.EndsWith(gitWrapperExecutable, StringComparison.OrdinalIgnoreCase))
+		if(gitExeFullPath!.EndsWith(gitWrapperExecutable, StringComparison.OrdinalIgnoreCase))
 		{
 			var realGitExe = Path.Combine(
 				gitExeFullPath.Substring(0, gitExeFullPath.Length - gitWrapperExecutable.Length),

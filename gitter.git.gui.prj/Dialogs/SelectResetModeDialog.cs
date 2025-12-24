@@ -34,32 +34,38 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public partial class SelectResetModeDialog : GitDialogBase
 {
-	#region Static
+	const int ButtonHeight  = 66;
+	const int ButtonSpacing = 16;
+
+	sealed class SizeImpl(List<CommandLink> buttons) : IDpiBoundValue<Size>
+	{
+		public Size GetValue(Dpi dpi)
+		{
+			var conv = DpiConverter.FromDefaultTo(dpi);
+			var bh = conv.ConvertY(ButtonHeight);
+			var bs = conv.ConvertY(ButtonSpacing);
+			var h = buttons.Count * bh + bs * 2 + bs * (buttons.Count - 1);
+			return new(conv.ConvertX(350), h);
+		}
+	}
 
 	private static readonly ResetMode[] ResetModes =
-		{
+		[
 			ResetMode.Soft,
 			ResetMode.Mixed,
 			ResetMode.Hard,
 			ResetMode.Merge,
 			ResetMode.Keep,
-		};
-
-	#endregion
-
-	#region Data
+		];
 
 	private List<CommandLink> _buttons;
 
-	#endregion
-
-	#region .ctor
-
 	public SelectResetModeDialog(ResetMode availableModes)
 	{
-		InitializeComponent();
-
+		SuspendLayout();
+		Name = nameof(SelectResetModeDialog);
 		Text = Resources.StrReset;
+		AutoScaleDimensions = Dpi.Default;
 
 		AvailableModes = availableModes;
 		ResetMode = ResetMode.Mixed;
@@ -75,19 +81,17 @@ public partial class SelectResetModeDialog : GitDialogBase
 
 		const int margin = 16;
 
-		SuspendLayout();
 		var location = new Point(margin, margin);
-		var h = margin;
 		foreach(var button in _buttons)
 		{
 			button.Location = location;
 			button.Parent = this;
-			h += button.Height + margin;
-			location.Y += button.Height + margin;
+			location.Y += button.Height + ButtonSpacing;
 		}
 
-		Height = h;
-		AutoScaleDimensions = new SizeF(96F, 96F);
+		ScalableSize = new SizeImpl(_buttons);
+		Size = ScalableSize.GetValue(Dpi.Default);
+
 		ResumeLayout(false);
 		PerformLayout();
 	}
@@ -97,12 +101,8 @@ public partial class SelectResetModeDialog : GitDialogBase
 	{
 	}
 
-	#endregion
-
-	#region Properties
-
 	/// <inheritdoc/>
-	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(350, 261));
+	public override IDpiBoundValue<Size> ScalableSize { get; }
 
 	public ResetMode AvailableModes { get; }
 
@@ -114,14 +114,13 @@ public partial class SelectResetModeDialog : GitDialogBase
 	/// <inheritdoc/>
 	public override DialogButtons OptimalButtons => DialogButtons.Cancel;
 
-	#endregion
-
-	#region Methods
+	static ResetMode GetResetMode(object? sender)
+		=> (ResetMode)((Control)sender!).Tag!;
 
 	private CommandLink CreateResetButton(ResetMode mode)
 	{
-		string text = string.Empty;
-		string desc = string.Empty;
+		var text = string.Empty;
+		var desc = string.Empty;
 
 		switch(mode)
 		{
@@ -146,26 +145,27 @@ public partial class SelectResetModeDialog : GitDialogBase
 				desc = Resources.TipKeepReset;
 				break;
 			default:
-				throw new NotSupportedException();
+				throw new ArgumentException($"Unknown reset mode: {mode}", nameof(mode));
 		}
 
-		var btn = new CommandLink()
+		var button = new CommandLink()
 		{
-			Size		= new Size(319, 66),
-			Text		= text,
-			Description	= desc,
-			Tag			= mode,
+			Size        = new Size(319, ButtonHeight),
+			Text        = text,
+			Description = desc,
+			Tag         = mode,
 		};
 
-		btn.Click += (s, _) =>
+		button.Click += (s, _) =>
 			{
-				ResetMode = (ResetMode)((Control)s).Tag;
+				ResetMode = GetResetMode(s);
 				ClickOk();
 			};
 
-		return btn;
+		return button;
 	}
 
+	/// <inheritdoc/>
 	protected override void OnShown()
 	{
 		base.OnShown();
@@ -174,7 +174,7 @@ public partial class SelectResetModeDialog : GitDialogBase
 		{
 			foreach(var btn in _buttons)
 			{
-				if(((ResetMode)btn.Tag) == ResetMode)
+				if(GetResetMode(btn) == ResetMode)
 				{
 					btn.Focus();
 					return;
@@ -183,6 +183,4 @@ public partial class SelectResetModeDialog : GitDialogBase
 			_buttons[0].Focus();
 		}
 	}
-
-	#endregion
 }

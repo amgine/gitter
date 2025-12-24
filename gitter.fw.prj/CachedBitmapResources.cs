@@ -26,17 +26,16 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 
 /// <summary>Provides cached bitmap resources.</summary>
-public sealed class CachedBitmapResources : CachedResources<Bitmap>
+public sealed class CachedBitmapResources(ResourceManager resourceManager)
+	: CachedResources<Bitmap>(resourceManager)
 {
-	public CachedBitmapResources(ResourceManager resourceManager)
-		: base(resourceManager)
+	public Bitmap? CombineBitmaps(string resBackground, string resOverlay)
 	{
-	}
-
-	public Bitmap CombineBitmaps(string resBackground, string resOverlay)
-	{
-		var res = new Bitmap(this[resBackground]);
+		var background = this[resBackground];
+		if(background is null) return default;
 		var ovl = this[resOverlay];
+		if(ovl is null) return background;
+		var res = new Bitmap(background);
 		using(var graphics = Graphics.FromImage(res))
 		{
 			graphics.CompositingQuality = CompositingQuality.HighQuality;

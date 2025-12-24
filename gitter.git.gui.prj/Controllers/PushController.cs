@@ -28,29 +28,20 @@ using gitter.Git.Gui.Interfaces;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class PushController : ViewControllerBase<IPushView>, IPushController
+sealed class PushController(Repository repository)
+	: ViewControllerBase<IPushView>, IPushController
 {
-	public PushController(Repository repository)
-	{
-		Verify.Argument.IsNotNull(repository);
-
-		Repository = repository;
-	}
-
-	private Repository Repository { get; }
-
 	public bool TryPush()
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+		var view           = RequireView();
+		var forceOverwrite = view.ForceOverwrite.Value;
+		var thinPack       = view.ThinPack.Value;
+		var sendTags       = view.SendTags.Value;
+		var branches       = view.References.Value;
 
-		var forceOverwrite = View.ForceOverwrite.Value;
-		var thinPack       = View.ThinPack.Value;
-		var sendTags       = View.SendTags.Value;
-		var branches       = View.References.Value;
-
-		if(branches.Count == 0)
+		if(branches.IsEmpty)
 		{
-			View.ErrorNotifier.NotifyError(View.References,
+			view.ErrorNotifier.NotifyError(view.References,
 				new UserInputError(
 				Resources.ErrNoBranchesSelected,
 				Resources.ErrYouMustSelectBranchesToPush));
@@ -58,31 +49,31 @@ sealed class PushController : ViewControllerBase<IPushView>, IPushController
 		}
 
 		GuiCommandStatus status;
-		switch(View.PushTo.Value)
+		switch(view.PushTo.Value)
 		{
 			case PushTo.Remote:
-				var remote = View.Remote.Value;
+				var remote = view.Remote.Value;
 				if(remote is null)
 				{
-					View.ErrorNotifier.NotifyError(View.Remote,
+					view.ErrorNotifier.NotifyError(view.Remote,
 						new UserInputError(
 							Resources.ErrInvalidRemoteName,
 							Resources.ErrRemoteNameCannotBeEmpty));
 					return false;
 				}
-				status = GuiCommands.Push(View as IWin32Window, remote, branches, forceOverwrite, thinPack, sendTags);
+				status = GuiCommands.Push(view as IWin32Window, remote, branches, forceOverwrite, thinPack, sendTags);
 				break;
 			case PushTo.Url:
-				var url = View.Url.Value;
+				var url = view.Url.Value;
 				if(string.IsNullOrWhiteSpace(url))
 				{
-					View.ErrorNotifier.NotifyError(View.Url,
+					view.ErrorNotifier.NotifyError(view.Url,
 						new UserInputError(
 							Resources.ErrInvalidUrl,
 							Resources.ErrUrlCannotBeEmpty));
 					return false;
 				}
-				status = GuiCommands.Push(View as IWin32Window, Repository, url, branches, forceOverwrite, thinPack, sendTags);
+				status = GuiCommands.Push(view as IWin32Window, repository, url!, branches, forceOverwrite, thinPack, sendTags);
 				break;
 			default:
 				return false;

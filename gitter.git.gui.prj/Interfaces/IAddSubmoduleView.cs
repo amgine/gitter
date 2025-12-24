@@ -24,13 +24,13 @@ using gitter.Framework.Mvc;
 
 interface IAddSubmoduleView : IView
 {
-	IUserInputSource<string> Path { get; }
+	IUserInputSource<string?> Path { get; }
 
-	IUserInputSource<string> Url { get; }
+	IUserInputSource<string?> Url { get; }
 
 	IUserInputSource<bool> UseCustomBranch { get; }
 
-	IUserInputSource<string> BranchName { get; }
+	IUserInputSource<string?> BranchName { get; }
 
 	IUserInputErrorNotifier ErrorNotifier { get; }
 }

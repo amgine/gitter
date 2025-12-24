@@ -43,9 +43,9 @@ public static class GuiCommands
 		return exc.Message;
 	}
 
-	private static GuiCommandStatus Fetch(IWin32Window parent, Repository repository, Remote remote)
+	private static GuiCommandStatus Fetch(IWin32Window? parent, Repository repository, Remote? remote)
 	{
-		Func<IProgress<OperationProgress>, CancellationToken, Task> func = remote == null
+		Func<IProgress<OperationProgress>, CancellationToken, Task> func = remote is null
 			? repository.Remotes.FetchAsync
 			: remote.FetchAsync;
 		try
@@ -59,7 +59,7 @@ public static class GuiCommands
 		}
 		catch(GitException exc)
 		{
-			string messageTitle = remote != null
+			string messageTitle = remote is not null
 				? string.Format(CultureInfo.InvariantCulture, Resources.ErrFailedToFetchFrom, remote.Name)
 				: Resources.ErrFailedToFetch;
 			GitterApplication.MessageBoxService.Show(
@@ -72,23 +72,23 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus Fetch(IWin32Window parent, Repository repository)
+	public static GuiCommandStatus Fetch(IWin32Window? parent, Repository repository)
 	{
 		Verify.Argument.IsNotNull(repository);
 
 		return Fetch(parent, repository, null);
 	}
 
-	public static GuiCommandStatus Fetch(IWin32Window parent, Remote remote)
+	public static GuiCommandStatus Fetch(IWin32Window? parent, Remote remote)
 	{
 		Verify.Argument.IsNotNull(remote);
 
 		return Fetch(parent, remote.Repository, remote);
 	}
 
-	private static GuiCommandStatus Pull(IWin32Window parent, Repository repository, Remote remote)
+	private static GuiCommandStatus Pull(IWin32Window? parent, Repository repository, Remote? remote)
 	{
-		Func<IProgress<OperationProgress>, CancellationToken, Task> func = remote == null
+		Func<IProgress<OperationProgress>, CancellationToken, Task> func = remote is null
 			? repository.Remotes.PullAsync
 			: remote.PullAsync;
 		try
@@ -115,21 +115,21 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus Pull(IWin32Window parent, Repository repository)
+	public static GuiCommandStatus Pull(IWin32Window? parent, Repository repository)
 	{
 		Verify.Argument.IsNotNull(repository);
 
 		return Pull(parent, repository, null);
 	}
 
-	public static GuiCommandStatus Pull(IWin32Window parent, Remote remote)
+	public static GuiCommandStatus Pull(IWin32Window? parent, Remote remote)
 	{
 		Verify.Argument.IsNotNull(remote);
 
 		return Pull(parent, remote.Repository, remote);
 	}
 
-	private static GuiCommandStatus Push(IWin32Window parent, Func<IProgress<OperationProgress>, CancellationToken, Task> func, string remoteRepository)
+	private static GuiCommandStatus Push(IWin32Window? parent, Func<IProgress<OperationProgress>, CancellationToken, Task> func, string remoteRepository)
 	{
 		try
 		{
@@ -153,7 +153,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus Push(IWin32Window parent, Remote remote, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
+	public static GuiCommandStatus Push(IWin32Window? parent, Remote remote, Many<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
 	{
 		Func<IProgress<OperationProgress>, CancellationToken, Task> func =
 			(p, c) => remote.PushAsync(branches, forceOverwrite, thinPack, sendTags, p, c);
@@ -161,7 +161,7 @@ public static class GuiCommands
 		return Push(parent, func, remote.Name);
 	}
 
-	public static GuiCommandStatus Push(IWin32Window parent, Repository repository, string url, ICollection<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
+	public static GuiCommandStatus Push(IWin32Window? parent, Repository repository, string url, Many<Branch> branches, bool forceOverwrite, bool thinPack, bool sendTags)
 	{
 		Func<IProgress<OperationProgress>, CancellationToken, Task> func =
 			(p, c) => repository.Remotes.PushToAsync(url, branches, forceOverwrite, thinPack, sendTags, p, c);
@@ -169,7 +169,7 @@ public static class GuiCommands
 		return Push(parent, func, url);
 	}
 
-	public static GuiCommandStatus Prune(IWin32Window parent, Remote remote)
+	public static GuiCommandStatus Prune(IWin32Window? parent, Remote remote)
 	{
 		Verify.Argument.IsNotNull(remote);
 
@@ -197,7 +197,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus Clone(IWin32Window parent, IGitAccessor gitAccessor, string url, string path, string template, string remoteName, bool shallow, int depth, bool bare, bool mirror, bool recursive, bool noCheckout)
+	public static GuiCommandStatus Clone(IWin32Window? parent, IGitAccessor gitAccessor, string url, string path, string? template, string? remoteName, bool shallow, int depth, bool bare, bool mirror, bool recursive, bool noCheckout)
 	{
 		try
 		{
@@ -221,10 +221,10 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus Archive(IWin32Window parent, IRevisionPointer revision, string path, string format)
+	public static GuiCommandStatus Archive(IWin32Window? parent, IRevisionPointer revision, string? path, string? format)
 	{
-		string outputPath = null;
-		using(var dlg = new SaveFileDialog()
+		var outputPath = default(string);
+		using(var dialog = new SaveFileDialog()
 			{
 				FileName = revision.Pointer,
 				Filter = "zip files|.zip|" +
@@ -236,9 +236,9 @@ public static class GuiCommands
 				Title = Resources.StrArchive,
 			})
 		{
-			if(dlg.ShowDialog(parent) == DialogResult.OK)
+			if(dialog.ShowDialog(parent) == DialogResult.OK)
 			{
-				outputPath = dlg.FileName;
+				outputPath = dialog.FileName;
 			}
 		}
 		if(string.IsNullOrWhiteSpace(outputPath))
@@ -248,7 +248,7 @@ public static class GuiCommands
 		try
 		{
 			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrArchive,
-				(p) => revision.ArchiveAsync(outputPath, null, null, p));
+				(p) => revision.ArchiveAsync(outputPath!, null, null, p));
 			return GuiCommandStatus.Completed;
 		}
 		catch(OperationCanceledException)
@@ -267,13 +267,13 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus FormatPatch(IWin32Window parent, IRevisionPointer revision)
+	public static GuiCommandStatus FormatPatch(IWin32Window? parent, IRevisionPointer revision)
 	{
 		Verify.Argument.IsNotNull(revision);
 
 		const string patchExt = ".patch";
-		string outputPath = null;
-		using(var dlg = new SaveFileDialog()
+		var outputPath = default(string);
+		using(var dialog = new SaveFileDialog()
 			{
 				FileName        = revision.Pointer + patchExt,
 				Filter          = Resources.StrPatches + "|" + patchExt,
@@ -282,9 +282,9 @@ public static class GuiCommands
 				Title           = Resources.StrSavePatch,
 			})
 		{
-			if(dlg.ShowDialog(parent) == DialogResult.OK)
+			if(dialog.ShowDialog(parent) == DialogResult.OK)
 			{
-				outputPath = dlg.FileName;
+				outputPath = dialog.FileName;
 			}
 			else
 			{
@@ -322,7 +322,7 @@ public static class GuiCommands
 				File.WriteAllBytes(outputPath, patch);
 				return GuiCommandStatus.Completed;
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 				GitterApplication.MessageBoxService.Show(
 					parent,
@@ -336,7 +336,7 @@ public static class GuiCommands
 		return GuiCommandStatus.Faulted;
 	}
 
-	public static GuiCommandStatus RebaseHeadTo(IWin32Window parent, IRevisionPointer revision)
+	public static GuiCommandStatus RebaseHeadTo(IWin32Window? parent, IRevisionPointer revision)
 	{
 		Verify.Argument.IsNotNull(revision);
 
@@ -362,7 +362,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus Rebase(IWin32Window parent, Repository repository, RebaseControl control)
+	public static GuiCommandStatus Rebase(IWin32Window? parent, Repository repository, RebaseControl control)
 	{
 		Verify.Argument.IsNotNull(repository);
 
@@ -388,7 +388,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus CherryPick(IWin32Window parent, Repository repository, CherryPickControl control)
+	public static GuiCommandStatus CherryPick(IWin32Window? parent, Repository repository, CherryPickControl control)
 	{
 		Verify.Argument.IsNotNull(repository);
 
@@ -414,7 +414,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus Revert(IWin32Window parent, Repository repository, RevertControl control)
+	public static GuiCommandStatus Revert(IWin32Window? parent, Repository repository, RevertControl control)
 	{
 		Verify.Argument.IsNotNull(repository);
 
@@ -440,7 +440,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus SaveStash(IWin32Window parent, StashedStatesCollection stash, bool keepIndex, bool includeUntracked, string message)
+	public static GuiCommandStatus SaveStash(IWin32Window? parent, StashedStatesCollection stash, bool keepIndex, bool includeUntracked, string? message)
 	{
 		try
 		{
@@ -464,7 +464,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus PopStashedState(IWin32Window parent, StashedState stashedState, bool restoreIndex)
+	public static GuiCommandStatus PopStashedState(IWin32Window? parent, StashedState stashedState, bool restoreIndex)
 	{
 		Verify.Argument.IsNotNull(stashedState);
 
@@ -490,7 +490,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus PopStashedState(IWin32Window parent, StashedStatesCollection stash, bool restoreIndex)
+	public static GuiCommandStatus PopStashedState(IWin32Window? parent, StashedStatesCollection stash, bool restoreIndex)
 	{
 		Verify.Argument.IsNotNull(stash);
 
@@ -516,7 +516,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus ApplyStashedState(IWin32Window parent, StashedState stashedState, bool restoreIndex)
+	public static GuiCommandStatus ApplyStashedState(IWin32Window? parent, StashedState stashedState, bool restoreIndex)
 	{
 		Verify.Argument.IsNotNull(stashedState);
 
@@ -542,7 +542,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus ApplyStashedState(IWin32Window parent, StashedStatesCollection stash, bool restoreIndex)
+	public static GuiCommandStatus ApplyStashedState(IWin32Window? parent, StashedStatesCollection stash, bool restoreIndex)
 	{
 		Verify.Argument.IsNotNull(stash);
 
@@ -568,7 +568,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus DropStashedState(IWin32Window parent, StashedState stashedState)
+	public static GuiCommandStatus DropStashedState(IWin32Window? parent, StashedState stashedState)
 	{
 		Verify.Argument.IsNotNull(stashedState);
 
@@ -593,7 +593,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus DropStashedState(IWin32Window parent, StashedStatesCollection stash)
+	public static GuiCommandStatus DropStashedState(IWin32Window? parent, StashedStatesCollection stash)
 	{
 		Verify.Argument.IsNotNull(stash);
 
@@ -622,7 +622,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus ClearStash(IWin32Window parent, StashedStatesCollection stash)
+	public static GuiCommandStatus ClearStash(IWin32Window? parent, StashedStatesCollection stash)
 	{
 		Verify.Argument.IsNotNull(stash);
 
@@ -647,14 +647,11 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus UpdateSubmodule(IWin32Window parent, Submodule submodule)
+	public static GuiCommandStatus UpdateSubmodule(IWin32Window? parent, Submodule submodule)
 	{
 		Verify.Argument.IsNotNull(submodule);
 
-		if(parent == null)
-		{
-			parent = GitterApplication.MainForm;
-		}
+		parent ??= GitterApplication.MainForm;
 		try
 		{
 			ProgressForm.MonitorTaskAsModalWindow(parent, Resources.StrUpdate + ": " + submodule.Name,
@@ -677,7 +674,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus SyncSubmodule(IWin32Window parent, Submodule submodule)
+	public static GuiCommandStatus SyncSubmodule(IWin32Window? parent, Submodule submodule)
 	{
 		Verify.Argument.IsNotNull(submodule);
 
@@ -704,7 +701,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus UpdateSubmodules(IWin32Window parent, SubmodulesCollection submodules)
+	public static GuiCommandStatus UpdateSubmodules(IWin32Window? parent, SubmodulesCollection submodules)
 	{
 		Verify.Argument.IsNotNull(submodules);
 
@@ -730,7 +727,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus SyncSubmodules(IWin32Window parent, SubmodulesCollection submodules)
+	public static GuiCommandStatus SyncSubmodules(IWin32Window? parent, SubmodulesCollection submodules)
 	{
 		Verify.Argument.IsNotNull(submodules);
 
@@ -757,7 +754,7 @@ public static class GuiCommands
 		}
 	}
 
-	public static GuiCommandStatus GarbageCollect(IWin32Window parent, Repository repository)
+	public static GuiCommandStatus GarbageCollect(IWin32Window? parent, Repository repository)
 	{
 		Verify.Argument.IsNotNull(repository);
 

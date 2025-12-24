@@ -1,24 +1,22 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
-
-#nullable enable
 
 namespace gitter.Git;
 
@@ -36,7 +34,7 @@ public sealed class Branch : BranchBase
 	/// <param name="name">Branch name.</param>
 	/// <param name="errorMessage">Error message.</param>
 	/// <returns><c>true</c> if <paramref name="name"/> is a valid branch name; otherwise, <c>false</c>.</returns>
-	public static bool ValidateName(string name, out string? errorMessage)
+	public static bool ValidateName(string? name, out string? errorMessage)
 	{
 		if(!Reference.ValidateName(name, ReferenceType.Branch, out errorMessage))
 		{
@@ -74,9 +72,12 @@ public sealed class Branch : BranchBase
 	/// <value><see cref="ReferenceType.LocalBranch"/>.</value>
 	public override ReferenceType Type => ReferenceType.LocalBranch;
 
+	private string? _cachedFullName;
+
 	/// <summary>Gets the full branch name.</summary>
 	/// <value>Full branch name.</value>
-	public override string FullName => GitConstants.LocalBranchPrefix + Name;
+	public override string FullName
+		=> _cachedFullName ??= GitConstants.LocalBranchPrefix + Name;
 
 	/// <summary>Gets a value indicating whether this branch is remote.</summary>
 	/// <value><c>false</c>.</value>
@@ -104,14 +105,15 @@ public sealed class Branch : BranchBase
 		Verify.Argument.IsValidRevisionPointer(revision, Repository);
 		Verify.State.IsNotDeleted(this);
 
-		var rev = revision.Dereference();
+		var rev = revision.Dereference()
+			?? throw new ArgumentException($"Unable to dereference '{revision.Pointer}'", nameof(revision));
 		if(Revision != rev)
 		{
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged))
 			{
 				Repository.Accessor.ResetBranch
-					.Invoke(new ResetBranchParameters(Name, revision.Pointer));
+					.Invoke(new ResetBranchRequest(Name, revision.Pointer));
 			}
 			Pointer = rev;
 			NotifyReflogRecordAdded();
@@ -139,13 +141,17 @@ public sealed class Branch : BranchBase
 		var rev = await revision
 			.DereferenceAsync()
 			.ConfigureAwait(continueOnCapturedContext: false);
+		if(rev is null)
+		{
+			throw new ArgumentException($"Unable to dereference '{revision.Pointer}'", nameof(revision));
+		}
 		if(Revision != rev)
 		{
 			using(Repository.Monitor.BlockNotifications(
 				RepositoryNotifications.BranchChanged))
 			{
 				await Repository.Accessor.ResetBranch
-					.InvokeAsync(new ResetBranchParameters(Name, revision.Pointer))
+					.InvokeAsync(new ResetBranchRequest(Name, revision.Pointer))
 					.ConfigureAwait(continueOnCapturedContext: false);
 			}
 			Pointer = rev;
@@ -218,6 +224,7 @@ public sealed class Branch : BranchBase
 	/// <param name="oldName">Old name.</param>
 	protected override void AfterRename(string oldName)
 	{
+		_cachedFullName = default;
 		InvokeNameChanged(oldName, Name);
 		Repository.Refs.Heads.NotifyRenamed(this, oldName);
 	}

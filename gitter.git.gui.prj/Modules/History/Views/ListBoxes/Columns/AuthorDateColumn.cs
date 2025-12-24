@@ -23,23 +23,18 @@ namespace gitter.Git.Gui.Controls;
 using System;
 using System.Drawing;
 
-using gitter.Framework;
 using gitter.Framework.Controls;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
 /// <summary>"Author Date" column.</summary>
-public sealed class AuthorDateColumn : DateColumn
+public sealed class AuthorDateColumn()
+	: DateColumn((int)ColumnId.AuthorDate, Resources.StrAuthorDate, visible: false)
 {
-	public AuthorDateColumn()
-		: base((int)ColumnId.AuthorDate, Resources.StrAuthorDate, visible: false)
-	{
-	}
-
 	/// <inheritdoc/>
 	public override string IdentificationString => "AuthorDate";
 
-	private static bool TryGetAuthorTimestamp(Revision revision, out DateTimeOffset authorDate)
+	private static bool TryGetAuthorTimestamp(Revision? revision, out DateTimeOffset authorDate)
 	{
 		if(revision is not null)
 		{

@@ -23,33 +23,25 @@ namespace gitter.Framework.Configuration;
 using System;
 
 /// <summary>Configuration parameter.</summary>
-public sealed class Parameter : INamedObject
+/// <param name="name">Parameter name.</param>
+/// <param name="type">Parameter type.</param>
+/// <param name="value">Parameter value.</param>
+public sealed class Parameter(string name, Type type, object? value) : INamedObject
 {
 	/// <summary>Parameter value.</summary>
-	private object _value;
-
-	/// <summary>Initializes a new instance of the <see cref="Parameter"/> class.</summary>
-	/// <param name="name">Parameter name.</param>
-	/// <param name="type">Parameter type.</param>
-	/// <param name="value">Parameter value.</param>
-	public Parameter(string name, Type type, object value)
-	{
-		Name   = name;
-		Type   = type;
-		_value = value;
-	}
+	private object? _value = value;
 
 	/// <summary>Gets parameter name.</summary>
 	/// <value>Parameter name.</value>
-	public string Name { get; }
+	public string Name { get; } = name;
 
 	/// <summary>Gets parameter type.</summary>
 	/// <value>Parameter type.</value>
-	public Type Type { get; }
+	public Type Type { get; } = type;
 
 	/// <summary>Gets or sets parameter value.</summary>
 	/// <value>Parameter value.</value>
-	public object Value
+	public object? Value
 	{
 		get => _value;
 		set

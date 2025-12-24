@@ -27,11 +27,10 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using gitter.Framework;
-using gitter.Framework.Controls;
 
 using Resources = gitter.Redmine.Properties.Resources;
 
-sealed class VersionsListBinding : AsyncDataBinding<LinkedList<ProjectVersion>>
+sealed class VersionsListBinding : AsyncDataBinding<List<ProjectVersion>>
 {
 	#region .ctor
 
@@ -58,9 +57,9 @@ sealed class VersionsListBinding : AsyncDataBinding<LinkedList<ProjectVersion>>
 
 	#region Methods
 
-	protected override Task<LinkedList<ProjectVersion>> FetchDataAsync(System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	protected override Task<List<ProjectVersion>> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken = default)
 	{
-		Verify.State.IsFalse(IsDisposed, "VersionsListBinding is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		VersionsListBox.Cursor = Cursors.WaitCursor;
 
@@ -68,7 +67,7 @@ sealed class VersionsListBinding : AsyncDataBinding<LinkedList<ProjectVersion>>
 			progress, cancellationToken);
 	}
 
-	protected override void OnFetchCompleted(LinkedList<ProjectVersion> versions)
+	protected override void OnFetchCompleted(List<ProjectVersion> versions)
 	{
 		Assert.IsNotNull(versions);
 

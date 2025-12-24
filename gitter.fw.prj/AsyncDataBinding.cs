@@ -26,34 +26,17 @@ using System.Threading.Tasks;
 
 public abstract class AsyncDataBinding<T> : IDisposable
 {
-	#region Data
+	private CancellationTokenSource? _cancellationTokenSource;
+	private T? _data;
 
-	private CancellationTokenSource _cancellationTokenSource;
-	private T _data;
+	public event EventHandler? DataChanged;
 
-	#endregion
-
-	#region Events
-
-	public event EventHandler DataChanged;
-
-	protected virtual void OnDataChanged() => DataChanged?.Invoke(this, EventArgs.Empty);
-
-	#endregion
-
-	#region .ctor & finalizer
-
-	protected AsyncDataBinding()
-	{
-	}
+	protected virtual void OnDataChanged()
+		=> DataChanged?.Invoke(this, EventArgs.Empty);
 
 	~AsyncDataBinding() => Dispose(disposing: false);
 
-	#endregion
-
-	#region Properties
-
-	public T Data
+	public T? Data
 	{
 		get => _data;
 		private set
@@ -63,23 +46,16 @@ public abstract class AsyncDataBinding<T> : IDisposable
 		}
 	}
 
-	public IProgress<OperationProgress> Progress { get; set; }
+	public IProgress<OperationProgress>? Progress { get; set; }
 
-	#endregion
-
-	#region Methods
-
-	protected abstract Task<T> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken);
+	protected abstract Task<T> FetchDataAsync(IProgress<OperationProgress>? progress, CancellationToken cancellationToken);
 
 	protected abstract void OnFetchCompleted(T data);
 
 	protected abstract void OnFetchFailed(Exception exception);
 
-	public async void ReloadData()
+	private void Restart(CancellationTokenSource? cts)
 	{
-		if(IsDisposed) throw new ObjectDisposedException(GetType().Name);
-
-		using var cts = new CancellationTokenSource();
 		try
 		{
 			Interlocked.Exchange(ref _cancellationTokenSource, cts)?.Cancel(false);
@@ -87,6 +63,17 @@ public abstract class AsyncDataBinding<T> : IDisposable
 		catch(ObjectDisposedException)
 		{
 		}
+	}
+
+	private bool TryFinish(CancellationTokenSource? cts)
+		=> Interlocked.CompareExchange(ref _cancellationTokenSource, null, cts) == cts;
+
+	public async void ReloadData()
+	{
+		Verify.State.IsNotDisposed(IsDisposed, this);
+
+		using var cts = new CancellationTokenSource();
+		Restart(cts);
 		var progress = Progress;
 		T data;
 		try
@@ -95,19 +82,19 @@ public abstract class AsyncDataBinding<T> : IDisposable
 		}
 		catch(OperationCanceledException)
 		{
-			Interlocked.CompareExchange(ref _cancellationTokenSource, null, cts);
+			TryFinish(cts);
 			return;
 		}
 		catch(Exception exc)
 		{
-			if(Interlocked.CompareExchange(ref _cancellationTokenSource, null, cts) == cts)
+			if(TryFinish(cts))
 			{
 				Data = default;
 				OnFetchFailed(exc);
 			}
 			return;
 		}
-		if(Interlocked.CompareExchange(ref _cancellationTokenSource, null, cts) == cts)
+		if(TryFinish(cts))
 		{
 			progress?.Report(OperationProgress.Completed);
 			Data = data;
@@ -115,25 +102,11 @@ public abstract class AsyncDataBinding<T> : IDisposable
 		}
 	}
 
-	#endregion
-
-	#region IDisposable Members
-
 	public bool IsDisposed { get; private set; }
 
 	protected virtual void Dispose(bool disposing)
 	{
-		var cts = Interlocked.Exchange(ref _cancellationTokenSource, null);
-		if(cts is not null)
-		{
-			try
-			{
-				cts.Cancel(false);
-			}
-			catch(ObjectDisposedException)
-			{
-			}
-		}
+		Restart(null);
 	}
 
 	public void Dispose()
@@ -141,9 +114,7 @@ public abstract class AsyncDataBinding<T> : IDisposable
 		if(IsDisposed) return;
 
 		GC.SuppressFinalize(this);
-		Dispose(true);
+		Dispose(disposing: true);
 		IsDisposed = true;
 	}
-
-	#endregion
 }

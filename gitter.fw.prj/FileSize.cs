@@ -23,9 +23,9 @@ namespace gitter.Framework;
 public readonly struct FileSize
 {
 	private static readonly string[] KnownUnits =
-	{
+	[
 		"B", "KB", "MB", "GB", "TB", "PB"
-	};
+	];
 
 	public FileSize(long size)
 	{

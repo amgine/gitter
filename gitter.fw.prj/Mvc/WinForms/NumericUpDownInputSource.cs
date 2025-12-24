@@ -25,10 +25,10 @@ using System.Windows.Forms;
 
 public class NumericUpDownInputSource<T> : ControlInputSource<NumericUpDown, T>
 {
-	private readonly Converter<decimal, T> _convert;
-	private readonly Converter<T, decimal> _convertBack;
+	private readonly Converter<decimal, T?> _convert;
+	private readonly Converter<T?, decimal> _convertBack;
 
-	public NumericUpDownInputSource(NumericUpDown numericUpDown, Converter<decimal, T> convert, Converter<T, decimal> convertBack)
+	public NumericUpDownInputSource(NumericUpDown numericUpDown, Converter<decimal, T?> convert, Converter<T?, decimal> convertBack)
 		: base(numericUpDown)
 	{
 		Verify.Argument.IsNotNull(convert);
@@ -44,16 +44,16 @@ public class NumericUpDownInputSource<T> : ControlInputSource<NumericUpDown, T>
 		set => Control.ReadOnly = value;
 	}
 
-	protected override T FetchValue() => _convert(Control.Value);
+	protected override T? FetchValue() => _convert(Control.Value);
 
-	protected override void SetValue(T value) => Control.Value = _convertBack(value);
+	protected override void SetValue(T? value) => Control.Value = _convertBack(value);
 
 	protected override void SubscribeToValueChangeEvent()
 	{
 		Control.ValueChanged +=	OnControlValueChanged;
 	}
 
-	protected override void UnsubscribeToValueChangeEvent()
+	protected override void UnsubscribeFromValueChangeEvent()
 	{
 		Control.ValueChanged -= OnControlValueChanged;
 	}

@@ -25,12 +25,12 @@ using System;
 /// <summary>Simple plain text subitem.</summary>
 public class TextSubItem : BaseTextSubItem
 {
-	private string _text;
+	private string? _text;
 
 	/// <summary>Create <see cref="TextSubItem"/>.</summary>
 	/// <param name="id">Subitem id.</param>
 	/// <param name="text">Subitem text.</param>
-	public TextSubItem(int id, string text)
+	public TextSubItem(int id, string? text)
 		: base(id)
 	{
 		_text = text;
@@ -44,7 +44,7 @@ public class TextSubItem : BaseTextSubItem
 	}
 
 	/// <summary>Subitem text.</summary>
-	public override string Text
+	public override string? Text
 	{
 		get => _text;
 		set

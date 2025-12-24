@@ -28,9 +28,11 @@ public interface IAvatar
 {
 	event EventHandler Updated;
 
-	Image Image { get; }
+	Image? Image { get; }
 
 	bool IsLoaded { get; }
 
-	Task<Image> UpdateAsync();
+	bool IsAvailable { get; }
+
+	Task<Image?> UpdateAsync();
 }

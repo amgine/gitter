@@ -26,13 +26,11 @@ using System.Threading.Tasks;
 
 using gitter.Framework;
 
-#nullable enable
-
-public interface IGitFunction<in TParameters, TOutput>
+public interface IGitFunction<in TRequest, TOutput>
 {
-	TOutput Invoke(TParameters parameters);
+	TOutput Invoke(TRequest request);
 
-	Task<TOutput> InvokeAsync(TParameters parameters,
+	Task<TOutput> InvokeAsync(TRequest request,
 		IProgress<OperationProgress>? progress = default,
 		CancellationToken cancellationToken = default);
 }

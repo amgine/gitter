@@ -35,8 +35,8 @@ sealed class ReflogView : GitViewBase, ISearchableView<ReflogSearchOptions>
 	private readonly ReflogListBox _lstReflog;
 	private readonly ReflogToolbar _toolbar;
 	private ISearchToolBarController _searchToolbar;
-	private Reflog _reflog;
-	private Reference _reference;
+	private Reflog? _reflog;
+	private Reference? _reference;
 
 	public ReflogView(GuiProvider gui, IFactory<ReflogListBox> reflogListBoxFactory)
 		: base(Guids.ReflogViewGuid, gui)
@@ -82,48 +82,46 @@ sealed class ReflogView : GitViewBase, ISearchableView<ReflogSearchOptions>
 	public override bool IsDocument => true;
 
 	public override IImageProvider ImageProvider
-		=> Reflog is not null && Reflog.Reference.Type == ReferenceType.RemoteBranch
+		=> Reflog is { Reference.Type: ReferenceType.RemoteBranch }
 			? Icons.RemoteBranchReflog
 			: Icons.BranchReflog;
 
-	public Reflog Reflog
+	public Reflog? Reflog
 	{
 		get => _reflog;
 		private set
 		{
-			if(_reflog != value)
-			{
-				_reflog = value;
-				_lstReflog.Load(value);
-				Reference = value?.Reference;
-			}
+			if(_reflog == value) return;
+
+			_reflog = value;
+			_lstReflog.Load(value);
+			Reference = value?.Reference;
 		}
 	}
 
-	public Reference Reference
+	public Reference? Reference
 	{
 		get => _reference;
 		private set
 		{
-			if(_reference != value)
+			if(_reference == value) return;
+
+			if(_reference is not null)
 			{
-				if(_reference != null)
+				if(_reference is Branch branch)
 				{
-					if(_reference is Branch branch)
-					{
-						branch.Renamed -= OnBranchRenamed;
-					}
+					branch.Renamed -= OnBranchRenamed;
 				}
-				_reference = value;
-				if(_reference != null)
-				{
-					if(_reference is Branch branch)
-					{
-						branch.Renamed += OnBranchRenamed;
-					}
-				}
-				UpdateText();
 			}
+			_reference = value;
+			if(_reference is not null)
+			{
+				if(_reference is Branch branch)
+				{
+					branch.Renamed += OnBranchRenamed;
+				}
+			}
+			UpdateText();
 		}
 	}
 
@@ -182,7 +180,7 @@ sealed class ReflogView : GitViewBase, ISearchableView<ReflogSearchOptions>
 	}
 
 	private void UpdateText()
-		=> Text = Reference != null
+		=> Text = Reference is not null
 			? Resources.StrReflog + ": " + Reference.Name
 			: Resources.StrReflog;
 
@@ -192,12 +190,12 @@ sealed class ReflogView : GitViewBase, ISearchableView<ReflogSearchOptions>
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnReflogSelectionChanged(object sender, EventArgs e)
+	private void OnReflogSelectionChanged(object? sender, EventArgs e)
 	{
 		ShowSelectedCommitDetails();
 	}
 
-	private void OnReflogItemActivated(object sender, ItemEventArgs e)
+	private void OnReflogItemActivated(object? sender, ItemEventArgs e)
 	{
 		if(e.Item is ReflogRecordListItem item)
 		{
@@ -206,7 +204,7 @@ sealed class ReflogView : GitViewBase, ISearchableView<ReflogSearchOptions>
 		}
 	}
 
-	private void OnBranchRenamed(object sender, NameChangeEventArgs e)
+	private void OnBranchRenamed(object? sender, NameChangeEventArgs e)
 	{
 		if(!IsDisposed)
 		{
@@ -227,7 +225,7 @@ sealed class ReflogView : GitViewBase, ISearchableView<ReflogSearchOptions>
 		}
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 

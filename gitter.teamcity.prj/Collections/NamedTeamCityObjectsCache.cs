@@ -32,9 +32,9 @@ public abstract class NamedTeamCityObjectsCache<T> : TeamCityObjectsCacheBase<T>
 
 	protected abstract T Create(string id);
 
-	internal T Lookup(string id, string name)
+	internal T Lookup(string id, string? name)
 	{
-		T obj;
+		T? obj;
 		lock(SyncRoot)
 		{
 			if(!Cache.TryGetValue(id, out obj))
@@ -55,15 +55,15 @@ public abstract class NamedTeamCityObjectsCache<T> : TeamCityObjectsCacheBase<T>
 		return obj;
 	}
 
-	internal T Lookup(string id)
+	internal T? Lookup(string? id)
 	{
-		T obj;
+		if(id is not { Length: not 0 }) return default;
+		T? obj;
 		lock(SyncRoot)
 		{
 			if(!Cache.TryGetValue(id, out obj))
 			{
-				obj = Create(id);
-				Cache.Add(id, obj);
+				Cache.Add(id, obj = Create(id));
 			}
 		}
 		return obj;

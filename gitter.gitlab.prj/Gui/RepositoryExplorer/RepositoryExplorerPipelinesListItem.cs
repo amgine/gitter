@@ -21,21 +21,22 @@
 namespace gitter.GitLab.Gui;
 
 using System;
+using System.Windows.Forms;
 
 using gitter.Framework;
+using gitter.Framework.Controls;
 
 using Resources = gitter.GitLab.Properties.Resources;
 
-sealed class RepositoryExplorerPipelinesListItem : RepositoryExplorerItemBase
+sealed class RepositoryExplorerPipelinesListItem(IWorkingEnvironment env, GitLabGuiProvider guiProvider)
+	: RepositoryExplorerItemBase(env, guiProvider, @"pipelines", Resources.StrPipelines)
 {
-	public RepositoryExplorerPipelinesListItem(IWorkingEnvironment env, GitLabGuiProvider guiProvider)
-		: base(env, guiProvider, @"pipelines", Resources.StrPipelines)
-	{
-	}
-
 	protected override void OnActivate()
 	{
 		base.OnActivate();
 		ShowView(Guids.PipelinesViewGuid);
 	}
+
+	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+		=> new Controls.GitLabPipelinesContextMenu(GuiProvider.ServiceContext);
 }

@@ -4,6 +4,7 @@
     <AssemblyName>gitter.hunspell</AssemblyName>
     <RootNamespace>gitter.Hunspell</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
 </Project>

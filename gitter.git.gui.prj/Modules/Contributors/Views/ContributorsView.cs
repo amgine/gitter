@@ -103,7 +103,7 @@ sealed class ContributorsView : GitViewBase, ISearchableView<ContributorsSearchO
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 

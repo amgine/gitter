@@ -29,12 +29,7 @@ using gitter.Framework.Controls;
 [DesignerCategory("")]
 public class TeamCityViewBase : ViewBase
 {
-	private TeamCityServiceContext _serviceContext;
-
-	/// <summary>Create <see cref="TeamCityViewBase"/>.</summary>
-	public TeamCityViewBase()
-	{
-	}
+	private TeamCityServiceContext? _serviceContext;
 
 	/// <summary>Create <see cref="TeamCityViewBase"/>.</summary>
 	public TeamCityViewBase(Guid guid, IWorkingEnvironment environment)
@@ -42,31 +37,30 @@ public class TeamCityViewBase : ViewBase
 	{
 	}
 
-	public TeamCityServiceContext ServiceContext
+	public TeamCityServiceContext? ServiceContext
 	{
 		get => _serviceContext;
 		set
 		{
-			if(value != _serviceContext)
+			if(_serviceContext == value) return;
+
+			if(_serviceContext is not null)
 			{
-				if(_serviceContext != null)
-				{
-					OnContextDetached();
-				}
-				_serviceContext = value;
-				if(_serviceContext != null)
-				{
-					OnContextAttached();
-				}
+				OnContextDetached(_serviceContext);
+			}
+			_serviceContext = value;
+			if(_serviceContext is not null)
+			{
+				OnContextAttached(_serviceContext);
 			}
 		}
 	}
 
-	protected virtual void OnContextAttached()
+	protected virtual void OnContextAttached(TeamCityServiceContext context)
 	{
 	}
 
-	protected virtual void OnContextDetached()
+	protected virtual void OnContextDetached(TeamCityServiceContext context)
 	{
 	}
 

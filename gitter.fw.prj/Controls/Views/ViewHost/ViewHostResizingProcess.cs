@@ -21,22 +21,16 @@
 namespace gitter.Framework.Controls;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
 
 sealed class ViewHostResizingProcess : IMouseDragProcess, IDisposable
 {
-	#region Data
-
-	private SplitterMarker _splitterMarker;
-	private bool _isActive;
+	private SplitterMarker? _splitterMarker;
 	private int _resizeOffset;
 	private int _minimumPosition;
 	private int _maximumPosition;
-
-	#endregion
-
-	#region .ctor
 
 	public ViewHostResizingProcess(ViewHost viewHost)
 	{
@@ -45,15 +39,9 @@ sealed class ViewHostResizingProcess : IMouseDragProcess, IDisposable
 		ViewHost = viewHost;
 	}
 
-	#endregion
-
-	#region Properties
-
 	public ViewHost ViewHost { get; }
 
-	public bool IsActive => _isActive;
-
-	#endregion
+	public bool IsActive { get; private set; }
 
 	public bool Start(Point location)
 	{
@@ -63,10 +51,10 @@ sealed class ViewHostResizingProcess : IMouseDragProcess, IDisposable
 
 		var dpi = Dpi.FromControl(ViewHost);
 
-		_isActive = true;
+		IsActive = true;
 		var size = ViewHost.Size;
 		Rectangle bounds;
-		var side = ViewHost.DockSide;
+		var side = ViewHost.DockSide ?? throw new InvalidOperationException();
 		var grid = side.DockPanel;
 		Orientation orientation;
 		switch(side.Side)
@@ -126,7 +114,8 @@ sealed class ViewHostResizingProcess : IMouseDragProcess, IDisposable
 	{
 		Verify.State.IsTrue(IsActive);
 
-		switch(ViewHost.DockSide.Orientation)
+		var side = ViewHost.DockSide ?? throw new InvalidOperationException();
+		switch(side.Orientation)
 		{
 			case Orientation.Vertical:
 				{
@@ -141,10 +130,13 @@ sealed class ViewHostResizingProcess : IMouseDragProcess, IDisposable
 				}
 				break;
 			default:
-				throw new ApplicationException($"Unexpected ViewDockSide.Orientation: {ViewHost.DockSide.Orientation}");
+				throw new ApplicationException($"Unexpected ViewDockSide.Orientation: {side.Orientation}");
 		}
 		location = ViewHost.PointToScreen(location);
-		_splitterMarker.Location = location;
+		if(_splitterMarker is not null)
+		{
+			_splitterMarker.Location = location;
+		}
 	}
 
 	public void Commit(Point e)
@@ -152,8 +144,9 @@ sealed class ViewHostResizingProcess : IMouseDragProcess, IDisposable
 		Verify.State.IsTrue(IsActive);
 
 		KillMarker();
-		_isActive = false;
-		switch(ViewHost.DockSide.Side)
+		IsActive = false;
+		var side = ViewHost.DockSide ?? throw new InvalidOperationException();
+		switch(side.Side)
 		{
 			case AnchorStyles.Left:
 				{
@@ -184,7 +177,7 @@ sealed class ViewHostResizingProcess : IMouseDragProcess, IDisposable
 				}
 				break;
 			default:
-				throw new ApplicationException($"Unexpected ViewDockSide.Side: {ViewHost.DockSide.Side}");
+				throw new ApplicationException($"Unexpected ViewDockSide.Side: {side.Side}");
 		}
 	}
 
@@ -193,9 +186,12 @@ sealed class ViewHostResizingProcess : IMouseDragProcess, IDisposable
 		Verify.State.IsTrue(IsActive);
 
 		KillMarker();
-		_isActive = false;
+		IsActive = false;
 	}
 
+	#if NETCOREAPP
+	[MemberNotNull(nameof(_splitterMarker))]
+	#endif
 	private void SpawnMarker(Rectangle bounds, Orientation orientation)
 	{
 		Verify.State.IsTrue(_splitterMarker is null);
@@ -206,12 +202,11 @@ sealed class ViewHostResizingProcess : IMouseDragProcess, IDisposable
 
 	private void KillMarker()
 	{
-		if(_splitterMarker is not null)
-		{
-			_splitterMarker.Close();
-			_splitterMarker.Dispose();
-			_splitterMarker = null;
-		}
+		if(_splitterMarker is null) return;
+
+		_splitterMarker.Close();
+		_splitterMarker.Dispose();
+		_splitterMarker = null;
 	}
 
 	public void Dispose()
@@ -221,6 +216,6 @@ sealed class ViewHostResizingProcess : IMouseDragProcess, IDisposable
 			_splitterMarker.Dispose();
 			_splitterMarker = null;
 		}
-		_isActive = false;
+		IsActive = false;
 	}
 }

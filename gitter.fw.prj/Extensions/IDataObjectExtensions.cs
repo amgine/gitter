@@ -24,17 +24,10 @@ using System.Windows.Forms;
 
 public static class IDataObjectExtensions
 {
-	public static T GetData<T>(this IDataObject data)
-	{
-		Verify.Argument.IsNotNull(data);
+	public static T? GetData<T>(this IDataObject? data)
+		=> (T?)data?.GetData(typeof(T));
 
-		return (T)data.GetData(typeof(T));
-	}
-
-	public static bool GetDataPresent<T>(this IDataObject data)
-	{
-		Verify.Argument.IsNotNull(data);
-
-		return data.GetDataPresent(typeof(T));
-	}
+	public static bool GetDataPresent<T>(this IDataObject? data)
+		=> data is not null
+		&& data.GetDataPresent(typeof(T));
 }

@@ -20,20 +20,23 @@
 
 namespace gitter.Git.Gui.Controls;
 
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
 using gitter.Framework.Controls;
 
 abstract class EmailPainterBase<T> : ISubItemPainter
 {
-	protected virtual bool TryGetTextBrush(SubItemPaintEventArgs paintEventArgs, out Brush textBrush, out bool disposeBrush)
+	protected virtual bool TryGetTextBrush(SubItemPaintEventArgs paintEventArgs,
+		[MaybeNullWhen(returnValue: false)] out Brush textBrush,
+		[MaybeNullWhen(returnValue: false)] out bool disposeBrush)
 	{
 		textBrush    = default;
 		disposeBrush = false;
 		return false;
 	}
 
-	protected abstract string GetEmail(T item);
+	protected abstract string? GetEmail(T item);
 
 	public bool TryMeasure(SubItemMeasureEventArgs measureEventArgs, out Size size)
 	{

@@ -20,11 +20,25 @@
 
 namespace gitter.TeamCity;
 
+using System.Text;
+
 public sealed class UserLocator : ObjectLocator
 {
-	public string Id { get; set; }
+	public string? Id { get; set; }
 
-	public string Username { get; set; }
+	public string? Username { get; set; }
+
+	public override void ToString(StringBuilder sb)
+	{
+		if(!string.IsNullOrWhiteSpace(Id))
+		{
+			sb.Append("id:").Append(Id);
+		}
+		if(!string.IsNullOrWhiteSpace(Username))
+		{
+			sb.Append("username:").Append(Username);
+		}
+	}
 
 	public override string ToString()
 	{

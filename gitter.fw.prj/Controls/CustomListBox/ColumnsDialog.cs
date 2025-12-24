@@ -25,6 +25,8 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
+using gitter.Framework.Layout;
+
 using Resources = gitter.Framework.Properties.Resources;
 
 /// <summary>Dialog for editing columns of <see cref="CustomListBox"/>.</summary>
@@ -32,6 +34,112 @@ using Resources = gitter.Framework.Properties.Resources;
 [DesignerCategory("")]
 internal partial class ColumnsDialog : DialogBase, IExecutableDialog
 {
+	readonly struct DialogControls
+	{
+		public readonly CustomListBox _lstColumns;
+		public readonly IButtonWidget _btnHide;
+		public readonly IButtonWidget _btnUp;
+		public readonly IButtonWidget _btnShow;
+		public readonly IButtonWidget _btnDown;
+		public readonly LabelControl _lblVisibleColumns;
+
+		public DialogControls(IGitterStyle style)
+		{
+			style ??= GitterApplication.Style;
+
+			var bf = style.ButtonFactory;
+
+			_lblVisibleColumns = new();
+			_lstColumns = new()
+			{
+				HeaderStyle = HeaderStyle.Hidden,
+				ShowCheckBoxes = true,
+				Style = style,
+			};
+			_btnHide = bf.Create();
+			_btnUp   = bf.Create();
+			_btnShow = bf.Create();
+			_btnDown = bf.Create();
+
+			_btnHide.Enabled = false;
+			_btnUp.Enabled   = false;
+			_btnShow.Enabled = false;
+			_btnDown.Enabled = false;
+
+			_lstColumns.Columns.Add(new CustomListBoxColumn(0, string.Empty, true) { SizeMode = ColumnSizeMode.Fill });
+		}
+
+		public void Localize()
+		{
+			_lblVisibleColumns.Text = Resources.StrVisibleColumns.AddColon();
+			_btnUp.Text = Resources.StrUp;
+			_btnDown.Text = Resources.StrDown;
+			_btnShow.Text = Resources.StrShow;
+			_btnHide.Text = Resources.StrHide;
+		}
+
+		public void Layout(Control parent)
+		{
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					columns:
+					[
+						SizeSpec.Everything(),
+						LayoutConstants.ColumnSpacing,
+						SizeSpec.Absolute(75),
+					],
+					rows:
+					[
+						LayoutConstants.LabelRowHeight,
+						LayoutConstants.LabelRowSpacing,
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblVisibleColumns, marginOverride: LayoutConstants.NoMargin), row: 0, column: 0),
+						new GridContent(new ControlContent(_lstColumns,        marginOverride: LayoutConstants.NoMargin), row: 2, column: 0),
+						new GridContent(new Grid(
+							rows:
+							[
+								LayoutConstants.ButtonRowHeight,
+								LayoutConstants.RowSpacing,
+								LayoutConstants.ButtonRowHeight,
+								LayoutConstants.RowSpacing,
+								LayoutConstants.ButtonRowHeight,
+								LayoutConstants.RowSpacing,
+								LayoutConstants.ButtonRowHeight,
+								SizeSpec.Everything(),
+							],
+							content:
+							[
+								new GridContent(new WidgetContent(_btnUp,   marginOverride: LayoutConstants.NoMargin), row: 0),
+								new GridContent(new WidgetContent(_btnDown, marginOverride: LayoutConstants.NoMargin), row: 2),
+								new GridContent(new WidgetContent(_btnHide, marginOverride: LayoutConstants.NoMargin), row: 4),
+								new GridContent(new WidgetContent(_btnShow, marginOverride: LayoutConstants.NoMargin), row: 6),
+							]), row: 2, column: 2),
+					]),
+			};
+
+			var tabIndex = 0;
+			_lblVisibleColumns.TabIndex = tabIndex++;
+			_lstColumns.TabIndex = tabIndex++;
+			_btnUp.TabIndex = tabIndex++;
+			_btnDown.TabIndex = tabIndex++;
+			_btnHide.TabIndex = tabIndex++;
+			_btnShow.TabIndex = tabIndex++;
+
+			_lblVisibleColumns.Parent = parent;
+			_lstColumns.Parent = parent;
+			_btnUp.Parent = parent;
+			_btnDown.Parent = parent;
+			_btnHide.Parent = parent;
+			_btnShow.Parent = parent;
+		}
+	}
+
+	protected override bool ScaleChildren => false;
+
 	public override IDpiBoundValue<Size> ScalableSize => DpiBoundValue.Size(new(300, 247));
 
 	private sealed class ColumnItem : CustomListBoxItem<CustomListBoxColumn>
@@ -64,6 +172,8 @@ internal partial class ColumnsDialog : DialogBase, IExecutableDialog
 		}
 	}
 
+	private readonly DialogControls _controls;
+
 	/// <summary>Create <see cref="ColumnsDialog"/>.</summary>
 	/// <param name="listBox">Related <see cref="CustomListBox"/>.</param>
 	public ColumnsDialog(CustomListBox listBox)
@@ -72,88 +182,95 @@ internal partial class ColumnsDialog : DialogBase, IExecutableDialog
 
 		ListBox = listBox;
 
-		InitializeComponent();
-
+		Name = nameof(ColumnsDialog);
 		Text = Resources.StrColumns;
 
-		_lblVisibleColumns.Text = Resources.StrVisibleColumns.AddColon();
-		_btnUp.Text = Resources.StrUp;
-		_btnDown.Text = Resources.StrDown;
-		_btnShow.Text = Resources.StrShow;
-		_btnHide.Text = Resources.StrHide;
-			
-		_lstColumns.BeginUpdate();
-		_lstColumns.Style = GitterApplication.DefaultStyle;
-		_lstColumns.HeaderStyle = HeaderStyle.Hidden;
-		_lstColumns.Columns.Add(new CustomListBoxColumn(0, string.Empty, true) { SizeMode = ColumnSizeMode.Fill });
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		Size                = ScalableSize.GetValue(Dpi.Default);
+		_controls = new(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(false);
+		PerformLayout();
+
+		_controls._lstColumns.BeginUpdate();
 		foreach(var c in ListBox.Columns)
 		{
-			_lstColumns.Items.Add(new ColumnItem(c));
+			_controls._lstColumns.Items.Add(new ColumnItem(c));
 		}
-		_lstColumns.EndUpdate();
+		_controls._lstColumns.EndUpdate();
+
+		_controls._btnHide.Click += _btnHide_Click;
+		_controls._btnUp.Click   += _btnUp_Click;
+		_controls._btnShow.Click += _btnShow_Click;
+		_controls._btnDown.Click += _btnDown_Click;
+
+		_controls._lstColumns.SelectionChanged += _lstColumns_SelectionChanged;
 	}
 
 	/// <summary>Affected <see cref="CustomListBox"/>.</summary>
 	public CustomListBox ListBox { get; }
 
-	private void _lstColumns_SelectionChanged(object sender, EventArgs e)
+	private void _lstColumns_SelectionChanged(object? sender, EventArgs e)
 	{
-		if(_lstColumns.SelectedItems.Count == 0)
+		if(_controls._lstColumns.SelectedItems.Count == 0)
 		{
-			_btnShow.Enabled = false;
-			_btnHide.Enabled = false;
-			_btnUp.Enabled = false;
-			_btnDown.Enabled = false;
+			_controls._btnShow.Enabled = false;
+			_controls._btnHide.Enabled = false;
+			_controls._btnUp.Enabled   = false;
+			_controls._btnDown.Enabled = false;
 		}
 		else
 		{
-			_btnShow.Enabled = true;
-			_btnHide.Enabled = true;
-			var item = _lstColumns.SelectedItems[0];
-			var index = _lstColumns.Items.IndexOf(item);
+			_controls._btnShow.Enabled = true;
+			_controls._btnHide.Enabled = true;
+			var item  = _controls._lstColumns.SelectedItems[0];
+			var index = _controls._lstColumns.Items.IndexOf(item);
 			if(ListBox.AllowColumnReorder)
 			{
-				_btnUp.Enabled = index != 0;
-				_btnDown.Enabled = index != _lstColumns.Items.Count - 1;
+				_controls._btnUp.Enabled   = index != 0;
+				_controls._btnDown.Enabled = index != _controls._lstColumns.Items.Count - 1;
 			}
 		}
 	}
 
-	private void _btnShow_Click(object sender, EventArgs e)
+	private void _btnShow_Click(object? sender, EventArgs e)
 	{
-		foreach(var item in _lstColumns.SelectedItems)
+		foreach(var item in _controls._lstColumns.SelectedItems)
 		{
 			item.CheckedState = CheckedState.Checked;
 		}
 	}
 
-	private void _btnHide_Click(object sender, EventArgs e)
+	private void _btnHide_Click(object? sender, EventArgs e)
 	{
-		foreach(var item in _lstColumns.SelectedItems)
+		foreach(var item in _controls._lstColumns.SelectedItems)
 		{
 			item.CheckedState = CheckedState.Unchecked;
 		}
 	}
 
-	private void _btnUp_Click(object sender, EventArgs e)
+	private void _btnUp_Click(object? sender, EventArgs e)
 	{
-		if(_lstColumns.SelectedItems.Count != 1) return;
-		var item = _lstColumns.SelectedItems[0];
-		var index = _lstColumns.Items.IndexOf(item);
+		if(_controls._lstColumns.SelectedItems.Count != 1) return;
+		var item  = _controls._lstColumns.SelectedItems[0];
+		var index = _controls._lstColumns.Items.IndexOf(item);
 		if(index == 0) return;
-		_lstColumns.Items.RemoveAt(index);
-		_lstColumns.Items.Insert(index - 1, item);
+		_controls._lstColumns.Items.RemoveAt(index);
+		_controls._lstColumns.Items.Insert(index - 1, item);
 		item.IsSelected = true;
 	}
 
-	private void _btnDown_Click(object sender, EventArgs e)
+	private void _btnDown_Click(object? sender, EventArgs e)
 	{
-		if(_lstColumns.SelectedItems.Count != 1) return;
-		var item = _lstColumns.SelectedItems[0];
-		var index = _lstColumns.Items.IndexOf(item);
-		if(index == _lstColumns.Items.Count - 1) return;
-		_lstColumns.Items.RemoveAt(index);
-		_lstColumns.Items.Insert(index + 1, item);
+		if(_controls._lstColumns.SelectedItems.Count != 1) return;
+		var item =  _controls._lstColumns.SelectedItems[0];
+		var index = _controls._lstColumns.Items.IndexOf(item);
+		if(index == _controls._lstColumns.Items.Count - 1) return;
+		_controls._lstColumns.Items.RemoveAt(index);
+		_controls._lstColumns.Items.Insert(index + 1, item);
 		item.IsSelected = true;
 	}
 
@@ -161,7 +278,7 @@ internal partial class ColumnsDialog : DialogBase, IExecutableDialog
 	{
 		ListBox.BeginUpdate();
 		ListBox.Columns.Clear();
-		foreach(var item in _lstColumns.Items)
+		foreach(var item in _controls._lstColumns.Items)
 		{
 			var c = ((ColumnItem)item).DataContext;
 			c.IsVisible = item.CheckedState == CheckedState.Checked;

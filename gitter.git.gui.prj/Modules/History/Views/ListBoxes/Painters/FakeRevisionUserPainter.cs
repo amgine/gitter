@@ -20,18 +20,19 @@
 
 namespace gitter.Git.Gui.Controls;
 
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
-using gitter.Framework;
 using gitter.Framework.Controls;
 
 sealed class FakeRevisionUserPainter : UserPainterBase<FakeRevisionListItem>
 {
 	/// <inheritdoc/>
-	protected override User GetUser(FakeRevisionListItem item)
+	protected override User? GetUser(FakeRevisionListItem item)
 		=> item.Repository.UserIdentity;
 
 	/// <inheritdoc/>
-	protected override bool TryGetTextBrush(SubItemPaintEventArgs paintEventArgs, out Brush textBrush, out bool disposeBrush)
+	protected override bool TryGetTextBrush(SubItemPaintEventArgs paintEventArgs,
+		[MaybeNullWhen(returnValue: false)] out Brush textBrush, out bool disposeBrush)
 		=> FakeRevisionPainterHelper.TryGetTextBrush(paintEventArgs, out textBrush, out disposeBrush);
 }

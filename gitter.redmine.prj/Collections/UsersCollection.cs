@@ -20,10 +20,12 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 public sealed class UsersCollection : NamedRedmineObjectsCache<User>
@@ -34,24 +36,20 @@ public sealed class UsersCollection : NamedRedmineObjectsCache<User>
 	}
 
 	protected override User Create(int id, string name)
-	{
-		return new User(Context, id, name);
-	}
+		=> new(Context, id, name);
 
 	protected override User Create(XmlNode node)
-	{
-		return new User(Context, node);
-	}
+		=> new(Context, node);
 
-	public LinkedList<User> Fetch()
+	public Task<List<User>> FetchAsync(CancellationToken cancellationToken = default)
 	{
 		const string url = "users.xml";
-		return FetchItemsFromAllPages(url);
+		return FetchItemsFromAllPagesAsync(url, cancellationToken);
 	}
 
-	public User FetchCurrent()
+	public Task<User> FetchCurrentAsync(CancellationToken cancellationToken = default)
 	{
 		const string url = "users/current.xml";
-		return FetchSingleItem(url);
+		return FetchSingleItemAsync(url, cancellationToken);
 	}
 }

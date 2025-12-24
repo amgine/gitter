@@ -28,20 +28,12 @@ using gitter.Framework.Controls;
 
 using gitter.Git.Gui.Controls;
 
-public abstract class RepositoryExplorerItemBase : CustomListBoxItem
+public abstract class RepositoryExplorerItemBase(IImageProvider icon, string text) : CustomListBoxItem
 {
-	private readonly IImageProvider _icon;
-	private readonly string _text;
-	private Repository _repository;
+	private Repository? _repository;
 
-	protected RepositoryExplorerItemBase(IImageProvider icon, string text)
-	{
-		_icon = icon;
-		_text = text;
-	}
-
-	private Image GetImage(Dpi dpi)
-		=> _icon.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
+	private Image? GetImage(Dpi dpi)
+		=> icon.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 
 	/// <inheritdoc/>
 	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
@@ -51,7 +43,7 @@ public abstract class RepositoryExplorerItemBase : CustomListBoxItem
 		switch((ColumnId)paintEventArgs.SubItemId)
 		{
 			case ColumnId.Name:
-				paintEventArgs.PaintImageAndText(GetImage(paintEventArgs.Dpi), _text);
+				paintEventArgs.PaintImageAndText(GetImage(paintEventArgs.Dpi), text);
 				break;
 		}
 	}
@@ -64,37 +56,36 @@ public abstract class RepositoryExplorerItemBase : CustomListBoxItem
 		switch((ColumnId)measureEventArgs.SubItemId)
 		{
 			case ColumnId.Name:
-				return measureEventArgs.MeasureImageAndText(GetImage(measureEventArgs.Dpi), _text);
+				return measureEventArgs.MeasureImageAndText(GetImage(measureEventArgs.Dpi), text);
 			default:
 				return Size.Empty;
 		}
 	}
 
-	public Repository Repository
+	public Repository? Repository
 	{
 		get => _repository;
 		set
 		{
-			if(_repository != value)
+			if(_repository == value) return;
+
+			if(_repository is not null)
 			{
-				if(_repository is not null)
-				{
-					DetachFromRepository();
-				}
-				_repository = value;
-				if(_repository is not null)
-				{
-					AttachToRepository();
-				}
+				DetachFromRepository(_repository);
+			}
+			_repository = value;
+			if(_repository is not null)
+			{
+				AttachToRepository(_repository);
 			}
 		}
 	}
 
-	protected virtual void DetachFromRepository()
+	protected virtual void DetachFromRepository(Repository repository)
 	{
 	}
 
-	protected virtual void AttachToRepository()
+	protected virtual void AttachToRepository(Repository repository)
 	{
 	}
 }

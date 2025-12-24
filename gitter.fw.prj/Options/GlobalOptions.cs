@@ -29,8 +29,8 @@ using gitter.Framework.Configuration;
 
 public static class GlobalOptions
 {
-	private static readonly Dictionary<string, SelectableColorCategory> _colorCategories = new();
-	private static readonly Dictionary<string, SelectableColor> _colors = new();
+	private static readonly Dictionary<string, SelectableColorCategory> _colorCategories = [];
+	private static readonly Dictionary<string, SelectableColor> _colors = [];
 
 	public static void RegisterSelectableColor(SelectableColor color)
 	{
@@ -50,34 +50,17 @@ public static class GlobalOptions
 	{
 		Verify.Argument.IsNotNull(section);
 
-		var appearanceNode = section.TryGetSection("Appearance");
-		if(appearanceNode != null)
-		{
-			var textRenderer = appearanceNode.TryGetParameter("TextRenderer");
-			if(textRenderer != null)
-			{
-				switch(textRenderer.Value as string)
-				{
-					case "GDI":
-						GitterApplication.TextRenderer = GitterApplication.GdiTextRenderer;
-						break;
-					case "GDI+":
-						GitterApplication.TextRenderer = GitterApplication.GdiPlusTextRenderer;
-						break;
-				}
-			}
-		}
 		var servicesNode = section.TryGetSection("Services");
-		if(servicesNode != null)
+		if(servicesNode is not null)
 		{
 			var spellingSection = servicesNode.TryGetSection("Spelling");
-			if(spellingSection != null)
+			if(spellingSection is not null)
 			{
 				SpellingService.LoadFrom(spellingSection);
 			}
 		}
 		var featuresSection = section.TryGetSection("IntegrationFeatures");
-		if(featuresSection != null)
+		if(featuresSection is not null)
 		{
 			GitterApplication.IntegrationFeatures.LoadFrom(featuresSection);
 		}
@@ -87,15 +70,6 @@ public static class GlobalOptions
 	{
 		Verify.Argument.IsNotNull(section);
 
-		var appearanceNode = section.GetCreateSection("Appearance");
-		if(GitterApplication.TextRenderer == GitterApplication.GdiTextRenderer)
-		{
-			appearanceNode.SetValue("TextRenderer", "GDI");
-		}
-		else if(GitterApplication.TextRenderer == GitterApplication.GdiPlusTextRenderer)
-		{
-			appearanceNode.SetValue("TextRenderer", "GDI+");
-		}
 		var servicesNode = section.GetCreateSection("Services");
 		var spellingNode = servicesNode.GetCreateSection("Spelling");
 		SpellingService.SaveTo(spellingNode);

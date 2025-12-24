@@ -52,6 +52,6 @@ public sealed class TeamCityObjectProperty<T> : TeamCityObjectProperty
 	{
 		Verify.Argument.IsNotNull(obj);
 
-		return (T)obj.GetType().GetProperty(Name).GetValue(obj, null);
+		return (T)obj.GetType().GetProperty(Name)!.GetValue(obj, null)!;
 	}
 }

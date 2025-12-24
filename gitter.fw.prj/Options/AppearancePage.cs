@@ -35,8 +35,8 @@ using Resources = gitter.Framework.Properties.Resources;
 public partial class AppearancePage : PropertyPage, IExecutableDialog
 {
 	private readonly Panel _pnlRestartRequiredWarning;
-	private readonly RadioButton _radGdi;
-	private readonly RadioButton _radGdiPlus;
+	private readonly IRadioButtonWidget _radGdi;
+	private readonly IRadioButtonWidget _radGdiPlus;
 	private IGitterStyle _selectedStyle;
 
 	public AppearancePage()
@@ -47,23 +47,22 @@ public partial class AppearancePage : PropertyPage, IExecutableDialog
 		Panel pnlTextRenderers;
 		Panel pnlStyles;
 
-		var radioButtonRowSize = SizeSpec.Absolute(23);
-
 		_selectedStyle = GitterApplication.StyleOnNextStartup;
 
 		_ = new ControlLayout(this)
 		{
 			Content = new Grid(
-				rows:new[]
-				{
-					SizeSpec.Absolute(19),
-					SizeSpec.Absolute(50),
-					SizeSpec.Absolute(19),
+				rows:
+				[
+					LayoutConstants.GroupSeparatorRowHeight,
+					LayoutConstants.RadioButtonRowHeight,
+					LayoutConstants.RadioButtonRowHeight,
+					LayoutConstants.GroupSeparatorRowHeight,
 					SizeSpec.Everything(),
 					SizeSpec.Absolute(23),
-				},
-				content: new[]
-				{
+				],
+				content:
+				[
 					new GridContent(new ControlContent(new GroupSeparator()
 					{
 						Margin = Padding.Empty,
@@ -74,55 +73,50 @@ public partial class AppearancePage : PropertyPage, IExecutableDialog
 					{
 						Margin = Padding.Empty,
 						Parent = this,
-					}), row: 1),
+					}), row: 1, rowSpan: 2),
 					new GridContent(new ControlContent(new GroupSeparator()
 					{
 						Margin = Padding.Empty,
 						Text   = "Application theme",
 						Parent = this,
-					}), row: 2),
+					}), row: 3),
 					new GridContent(new ControlContent(pnlStyles = new()
 					{
 						Margin = Padding.Empty,
 						Parent = this,
-					}), row: 3),
+					}), row: 4),
 					new GridContent(new ControlContent(_pnlRestartRequiredWarning = new()
 					{
 						Margin = Padding.Empty,
 						Parent = this,
-					}), row: 4),
-				}),
+					}), row: 5),
+				]),
 		};
+
+		_radGdi = GitterApplication.Style.RadioButtonFactory.Create();
+		_radGdi.Text      = "GDI";
+		_radGdi.IsChecked = true;
+		_radGdi.Parent    = pnlTextRenderers;
+		_radGdiPlus = GitterApplication.Style.RadioButtonFactory.Create();
+		_radGdiPlus.Enabled = false;
+		_radGdiPlus.Text    = "GDI+";
+		_radGdiPlus.Parent  = pnlTextRenderers;
 
 		_ = new ControlLayout(pnlTextRenderers)
 		{
 			Content = new Grid(
-				padding: DpiBoundValue.Padding(new(3, 0, 0, 0)),
-				rows: new[]
-				{
-					radioButtonRowSize,
-					radioButtonRowSize,
+				padding: LayoutConstants.GroupPadding,
+				rows:
+				[
+					LayoutConstants.RadioButtonRowHeight,
+					LayoutConstants.RadioButtonRowHeight,
 					SizeSpec.Everything(),
-				},
-				content: new[]
-				{
-					new GridContent(new ControlContent(_radGdi = new()
-					{
-						Margin    = Padding.Empty,
-						Text      = "GDI",
-						Checked   = GitterApplication.TextRenderer == GitterApplication.GdiTextRenderer,
-						FlatStyle = FlatStyle.System,
-						Parent    = pnlTextRenderers,
-					}), row: 0),
-					new GridContent(new ControlContent(_radGdiPlus = new()
-					{
-						Margin    = Padding.Empty,
-						Text      = "GDI+",
-						Checked   = GitterApplication.TextRenderer == GitterApplication.GdiPlusTextRenderer,
-						FlatStyle = FlatStyle.System,
-						Parent    = pnlTextRenderers,
-					}), row: 1),
-				}),
+				],
+				content:
+				[
+					new GridContent(new WidgetContent(_radGdi,     marginOverride: LayoutConstants.NoMargin), row: 0),
+					new GridContent(new WidgetContent(_radGdiPlus, marginOverride: LayoutConstants.NoMargin), row: 1),
+				]),
 		};
 
 		var styleRows    = new List<ISizeSpec>();
@@ -130,55 +124,50 @@ public partial class AppearancePage : PropertyPage, IExecutableDialog
 		var row = 0;
 		foreach(var style in GitterApplication.Styles)
 		{
-			styleRows.Add(radioButtonRowSize);
-			var button = new RadioButton
-			{
-				Margin    = Padding.Empty,
-				Text      = style.DisplayName,
-				FlatStyle = FlatStyle.System,
-				Tag       = style,
-				Checked   = style == SelectedStyle,
-				Parent    = pnlStyles,
-			};
-			button.CheckedChanged += OnThemeRadioButtonCheckedChanged;
-			styleContent.Add(new GridContent(new ControlContent(button), row: row++));
+			styleRows.Add(LayoutConstants.RadioButtonRowHeight);
+			var button = GitterApplication.Style.RadioButtonFactory.Create();
+			button.Text      = style.DisplayName;
+			button.Tag       = style;
+			button.IsChecked = style == SelectedStyle;
+			button.Parent    = pnlStyles;
+			button.IsCheckedChanged += OnThemeRadioButtonCheckedChanged;
+			styleContent.Add(new GridContent(new WidgetContent(button, marginOverride: LayoutConstants.NoMargin), row: row++));
 		}
 
 		_ = new ControlLayout(pnlStyles)
 		{
 			Content = new Grid(
-				padding: DpiBoundValue.Padding(new(3, 0, 0, 0)),
-				rows:    styleRows.ToArray(),
-				content: styleContent.ToArray()),
+				padding: LayoutConstants.GroupPadding,
+				rows:    [.. styleRows],
+				content: [.. styleContent]),
 		};
 
 		PictureBox picWarning;
 		_ = new ControlLayout(_pnlRestartRequiredWarning)
 		{
 			Content = new Grid(
-				columns: new[]
-				{
+				columns:
+				[
 					SizeSpec.Absolute(16),
 					SizeSpec.Absolute(3),
 					SizeSpec.Everything(),
-				},
-				content: new[]
-				{
+				],
+				content:
+				[
 					new GridContent(new ControlContent(picWarning = new()
 					{
 						Margin   = Padding.Empty,
 						SizeMode = PictureBoxSizeMode.CenterImage,
 						Parent   = _pnlRestartRequiredWarning,
 					}), column: 0),
-					new GridContent(new ControlContent(new Label()
+					new GridContent(new ControlContent(new LabelControl()
 					{
 						AutoSize  = false,
-						TextAlign = ContentAlignment.MiddleLeft,
 						Margin    = Padding.Empty,
 						Text      = "Application must be restarted to apply style changes",
 						Parent    = _pnlRestartRequiredWarning,
 					}), column: 2),
-				}),
+				]),
 		};
 
 		ResumeLayout(false);
@@ -195,12 +184,11 @@ public partial class AppearancePage : PropertyPage, IExecutableDialog
 
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(391, 305));
 
-	private void OnThemeRadioButtonCheckedChanged(object sender, EventArgs e)
+	private void OnThemeRadioButtonCheckedChanged(object? sender, EventArgs e)
 	{
-		var radioButton = (RadioButton)sender;
-		if(radioButton.Checked)
+		if(sender is IRadioButtonWidget { IsChecked: true } button)
 		{
-			var style = (IGitterStyle)radioButton.Tag;
+			var style = (IGitterStyle)button.Tag!;
 			SelectedStyle = style;
 		}
 	}
@@ -220,14 +208,6 @@ public partial class AppearancePage : PropertyPage, IExecutableDialog
 
 	public bool Execute()
 	{
-		if(_radGdi.Checked)
-		{
-			GitterApplication.TextRenderer = GitterApplication.GdiTextRenderer;
-		}
-		else if(_radGdiPlus.Checked)
-		{
-			GitterApplication.TextRenderer = GitterApplication.GdiPlusTextRenderer;
-		}
 		GitterApplication.StyleOnNextStartup = SelectedStyle;
 		return true;
 	}

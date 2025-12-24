@@ -25,7 +25,7 @@ using System.Drawing;
 
 public class PropertyPageFactoryBase : IPropertyPageFactory
 {
-	public PropertyPageFactoryBase(Guid guid, string name, Bitmap icon, Guid groupGuid)
+	public PropertyPageFactoryBase(Guid guid, string name, Bitmap? icon, Guid groupGuid)
 	{
 		Guid      = guid;
 		Name      = name;
@@ -39,7 +39,7 @@ public class PropertyPageFactoryBase : IPropertyPageFactory
 
 	public string Name { get; }
 
-	public Bitmap Icon { get; }
+	public Bitmap? Icon { get; }
 
-	public virtual PropertyPage CreatePropertyPage(IWorkingEnvironment environment) => null;
+	public virtual PropertyPage? CreatePropertyPage(IWorkingEnvironment environment) => null;
 }

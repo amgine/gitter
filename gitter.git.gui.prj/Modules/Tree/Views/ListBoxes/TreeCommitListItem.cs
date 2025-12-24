@@ -24,6 +24,7 @@ using System;
 using System.Drawing;
 
 using gitter.Framework;
+using gitter.Framework.Controls;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
@@ -34,31 +35,31 @@ public class TreeCommitListItem : TreeItemListItem<TreeCommit>
 	{
 	}
 
-	/// <summary>Called when item is attached to listbox.</summary>
-	protected override void OnListBoxAttached()
+	/// <inheritdoc/>
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		DataContext.StagedStatusChanged += OnStagedStatusChanged;
 		DataContext.StatusChanged       += OnStatusChanged; 
 	}
 
-	/// <summary>Called when item is detached from listbox.</summary>
-	protected override void OnListBoxDetached()
+	/// <inheritdoc/>
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.StagedStatusChanged -= OnStagedStatusChanged;
 		DataContext.StatusChanged       -= OnStatusChanged;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
-	protected virtual void OnStatusChanged(object sender, EventArgs e)
+	protected virtual void OnStatusChanged(object? sender, EventArgs e)
 		=> InvalidateSubItemSafe((int)ColumnId.Name);
 
-	protected virtual void OnStagedStatusChanged(object sender, EventArgs e)
+	protected virtual void OnStagedStatusChanged(object? sender, EventArgs e)
 		=> InvalidateSubItemSafe((int)ColumnId.Name);
 
 	protected override FileSize? GetSize() => default;
 
-	protected override Image GetBitmapIcon(Dpi dpi)
+	protected override Image? GetBitmapIcon(Dpi dpi)
 		=> Icons.Submodule.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 
 	protected override string GetItemType()

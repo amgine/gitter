@@ -30,16 +30,16 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 
 public sealed class TreeDirectoryListItem : TreeItemListItem<TreeDirectory>
 {
-	private IDisposable _binding;
+	private IDisposable? _binding;
 	private TreeDirectoryListItemType _includeFiles;
-	private EventHandler<BoundItemActivatedEventArgs<TreeItem>> _itemActivated;
-	private EventHandler<ItemContextMenuRequestEventArgs> _itemContextMenuRequested;
+	private readonly EventHandler<BoundItemActivatedEventArgs<TreeItem>>? _itemActivated;
+	private readonly EventHandler<ItemContextMenuRequestEventArgs>? _itemContextMenuRequested;
 
 	public TreeDirectoryListItem(
 		TreeDirectory folder,
 		TreeDirectoryListItemType includeFiles,
-		EventHandler<BoundItemActivatedEventArgs<TreeItem>> onItemActivated = null,
-		EventHandler<ItemContextMenuRequestEventArgs> onItemContextMenuRequested = null)
+		EventHandler<BoundItemActivatedEventArgs<TreeItem>>? onItemActivated = null,
+		EventHandler<ItemContextMenuRequestEventArgs>? onItemContextMenuRequested = null)
 		: base(folder, false)
 	{
 		_includeFiles = includeFiles;
@@ -49,14 +49,14 @@ public sealed class TreeDirectoryListItem : TreeItemListItem<TreeDirectory>
 
 	public TreeDirectoryListItem(
 		TreeDirectory folder,
-		EventHandler<BoundItemActivatedEventArgs<TreeItem>> onItemActivated = null,
-		EventHandler<ItemContextMenuRequestEventArgs> onItemContextMenuRequested = null)
+		EventHandler<BoundItemActivatedEventArgs<TreeItem>>? onItemActivated = null,
+		EventHandler<ItemContextMenuRequestEventArgs>? onItemContextMenuRequested = null)
 		: this(folder, TreeDirectoryListItemType.ShowFilesAndFolders, onItemActivated, onItemContextMenuRequested)
 	{
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
 		switch(_includeFiles)
 		{
@@ -82,22 +82,18 @@ public sealed class TreeDirectoryListItem : TreeItemListItem<TreeDirectory>
 				}
 				break;
 		}
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
-		if(_binding is not null)
-		{
-			_binding.Dispose();
-			_binding = null;
-		}
-		base.OnListBoxDetached();
+		DisposableUtility.Dispose(ref _binding);
+		base.OnListBoxDetached(listBox);
 	}
 
 	/// <inheritdoc/>
-	protected override Image GetBitmapIcon(Dpi dpi)
+	protected override Image? GetBitmapIcon(Dpi dpi)
 		=> Icons.Folder.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 
 	/// <inheritdoc/>

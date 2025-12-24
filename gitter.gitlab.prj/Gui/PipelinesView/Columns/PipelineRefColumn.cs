@@ -21,6 +21,7 @@
 namespace gitter.GitLab.Gui;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Globalization;
 
@@ -41,7 +42,8 @@ public sealed class PipelineRefColumn : CustomListBoxColumn
 
 	protected override Comparison<CustomListBoxItem> SortComparison => PipelineListItem.CompareByRef;
 
-	private static bool TryGetContent(CustomListBoxItem item, out string value)
+	private static bool TryGetContent(CustomListBoxItem item,
+		[MaybeNullWhen(returnValue: false)] out string value)
 	{
 		if(item is PipelineListItem pipeline)
 		{

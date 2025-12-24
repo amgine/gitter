@@ -38,6 +38,8 @@ public sealed class DiffFileMenu : ContextMenuStrip
 		Verify.Argument.IsNotNull(diffSource);
 		Verify.Argument.IsNotNull(diffFile);
 
+		Renderer = GitterApplication.Style.ToolStripRenderer;
+
 		DiffSource = diffSource;
 		DiffFile   = diffFile;
 
@@ -60,11 +62,11 @@ public sealed class DiffFileMenu : ContextMenuStrip
 						Items.Add(GuiItemFactory.GetOpenUrlWithItem<ToolStripMenuItem>(
 							Resources.StrOpenWith.AddEllipsis(), null, fullPath));
 						Items.Add(GuiItemFactory.GetOpenUrlItem<ToolStripMenuItem>(
-							Resources.StrOpenContainingFolder, null, Path.GetDirectoryName(fullPath)));
+							Resources.StrOpenContainingFolder, null, Path.GetDirectoryName(fullPath) ?? ""));
 						Items.Add(new ToolStripSeparator());
 					}
 				}
-				catch(Exception exc) when(!exc.IsCritical())
+				catch(Exception exc) when(!exc.IsCritical)
 				{
 				}
 			}

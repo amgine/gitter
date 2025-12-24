@@ -76,10 +76,10 @@ public partial class ExceptionDialog : DialogBase
 
 		_lblExceptionName.Text = exception.GetType().FullName;
 		_lblMessage.Text = exception.Message;
-		string stackTrace;
+		string? stackTrace;
 		if(exception.Data.Contains("OriginalStackTrace"))
 		{
-			stackTrace = (string)exception.Data["OriginalStackTrace"];
+			stackTrace = (string?)exception.Data["OriginalStackTrace"];
 		}
 		else
 		{

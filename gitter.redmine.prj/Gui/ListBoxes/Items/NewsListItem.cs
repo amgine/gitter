@@ -21,9 +21,6 @@
 namespace gitter.Redmine.Gui;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -111,16 +108,16 @@ public sealed class NewsListItem : CustomListBoxItem<News>
 		Verify.Argument.IsNotNull(news);
 	}
 
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		DataContext.PropertyChanged += OnNewsPropertyChanged;
 	}
 
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.PropertyChanged -= OnNewsPropertyChanged;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
 	private void OnNewsPropertyChanged(object sender, RedmineObjectPropertyChangedEventArgs e)

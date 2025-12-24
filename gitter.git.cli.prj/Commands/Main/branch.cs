@@ -1,24 +1,22 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
-
-#nullable enable
 
 namespace gitter.Git.AccessLayer.CLI;
 
@@ -34,6 +32,39 @@ public enum BranchColorWhen
 }
 
 /// <summary>List, create, or delete branches.</summary>
+/// <remarks>
+/// <code>
+/// <![CDATA[
+/// git branch
+///   [--color[=<when>] | --no-color]
+///   [--show-current]
+///   [-v [--abbrev=<n> | --no-abbrev]]
+///   [--column[=<options>] | --no-column]
+///   [--sort=<key>]
+///   [--merged [<commit>]]
+///   [--no-merged [<commit>]]
+///   [--contains [<commit>]]
+///   [--no-contains [<commit>]]
+///   [--points-at <object>]
+///   [--format=<format>]
+///   [(-r | --remotes) | (-a|--all)]
+///   [--list]
+///   [<pattern>...]
+/// git branch
+///   [--track[=(direct|inherit)] | --no-track]
+///   [-f]
+///   [--recurse-submodules]
+///    <branch-name>
+///   [<start-point>]
+/// git branch (--set-upstream-to=<upstream>| -u <upstream>) [<branch-name>]
+/// git branch --unset-upstream [<branch-name>]
+/// git branch (-m|-M) [<old-branch>] <new-branch>
+/// git branch (-c|-C) [<old-branch>] <new-branch>
+/// git branch (-d|-D) [-r] <branch-name>...
+/// git branch --edit-description [<branch-name>]
+/// ]]>
+/// </code>
+/// </remarks>
 public sealed class BranchCommand : Command
 {
 	const string BranchCommandName = @"branch";
@@ -90,7 +121,7 @@ public sealed class BranchCommand : Command
 				BranchColorWhen.Always => ColorAlways,
 				BranchColorWhen.Never  => ColorNever,
 				BranchColorWhen.Auto   => ColorAuto,
-				_ => throw new ArgumentException(nameof(when)),
+				_ => throw new ArgumentException($"Unknown branch color value: {when}", nameof(when)),
 			};
 
 		/// <summary>Turn off branch colors, even when the configuration file gives the default to color output. Same as --color=never.</summary>
@@ -131,7 +162,8 @@ public sealed class BranchCommand : Command
 		public static ICommandArgument Quiet => CommonArguments.Quiet;
 
 		/// <summary>Display the full sha1s in the output listing rather than abbreviating them.</summary>
-		public static ICommandArgument Abbrev(int length = 7) => new CommandParameterValue("--abbrev", length.ToString(CultureInfo.InvariantCulture), '=');
+		public static ICommandArgument Abbrev(int length = 7)
+			=> new CommandParameterValue("--abbrev", length.ToString(CultureInfo.InvariantCulture), '=');
 
 		/// <summary>Display the full sha1s in the output listing rather than abbreviating them.</summary>
 		public static ICommandArgument NoAbbrev { get; } = new CommandFlag("--no-abbrev");
@@ -144,13 +176,17 @@ public sealed class BranchCommand : Command
 
 		private static ICommandArgument NoMergedHEAD { get; } = new CommandFlag("--no-merged");
 
-		public static ICommandArgument Contains(string? commit) => commit is null ? ContainsHEAD : new CommandParameterValue("--contains", commit, ' ');
+		public static ICommandArgument Contains(string? commit = default)
+			=> commit is null ? ContainsHEAD : new CommandParameterValue("--contains", commit, ' ');
 
-		public static ICommandArgument NoContains(string? commit) => commit is null ? NoContainsHEAD : new CommandParameterValue("--no-contains", commit, ' ');
+		public static ICommandArgument NoContains(string? commit = default)
+			=> commit is null ? NoContainsHEAD : new CommandParameterValue("--no-contains", commit, ' ');
 
-		public static ICommandArgument Merged(string? commit) => commit is null ? MergedHEAD : new CommandParameterValue("--merged", commit, ' ');
+		public static ICommandArgument Merged(string? commit = default)
+			=> commit is null ? MergedHEAD : new CommandParameterValue("--merged", commit, ' ');
 
-		public static ICommandArgument NoMerged(string? commit) => commit is null ? NoMergedHEAD : new CommandParameterValue("--no-merged", commit, ' ');
+		public static ICommandArgument NoMerged(string? commit = default)
+			=> commit is null ? NoMergedHEAD : new CommandParameterValue("--no-merged", commit, ' ');
 	}
 
 	public sealed class Builder(Version gitVersion) : CommandBuilderBase(BranchCommandName)

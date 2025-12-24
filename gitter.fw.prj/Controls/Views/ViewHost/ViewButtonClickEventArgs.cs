@@ -22,9 +22,7 @@ namespace gitter.Framework.Controls;
 
 using System;
 
-public sealed class ViewButtonClickEventArgs : EventArgs
+public sealed class ViewButtonClickEventArgs(ViewButtonType button) : EventArgs
 {
-	public ViewButtonClickEventArgs(ViewButtonType button) => Button = button;
-
-	public ViewButtonType Button { get; }
+	public ViewButtonType Button { get; } = button;
 }

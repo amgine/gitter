@@ -32,33 +32,23 @@ public static class StringExtensions
 {
 	/// <summary>Adds ...</summary>
 	public static string AddEllipsis(this string str)
-	{
-		return string.Format(Resources.StrAddEllipsis, str);
-	}
+		=> string.Format(Resources.StrAddEllipsis, str);
 
 	/// <summary>Adds .</summary>
 	public static string AddPeriod(this string str)
-	{
-		return string.Format(Resources.StrAddPeriod, str);
-	}
+		=> string.Format(Resources.StrAddPeriod, str);
 
 	/// <summary>Adds ,</summary>
 	public static string AddComma(this string str)
-	{
-		return string.Format(Resources.StrAddComma, str);
-	}
+		=> string.Format(Resources.StrAddComma, str);
 
 	/// <summary>Adds :</summary>
 	public static string AddColon(this string str)
-	{
-		return string.Format(Resources.StrAddColon, str);
-	}
+		=> string.Format(Resources.StrAddColon, str);
 
 	/// <summary>Surrounds with " "</summary>
 	public static string SurroundWithDoubleQuotes(this string str)
-	{
-		return string.Format(Resources.StrSurroundWithDoubleQuotes, str);
-	}
+		=> string.Format(Resources.StrSurroundWithDoubleQuotes, str);
 
 	/// <summary>Surrounds with ( )</summary>
 	public static string SurroundWithBraces(this string str)
@@ -77,27 +67,19 @@ public static class StringExtensions
 
 	/// <summary>Surrounds with ' '</summary>
 	public static string SurroundWithSingleQuotes(this string str)
-	{
-		return string.Format(Resources.StrSurroundWithDoubleQuotes, str);
-	}
+		=> string.Format(Resources.StrSurroundWithDoubleQuotes, str);
 
 	/// <summary>Surrounds with <paramref name="val"/>.</summary>
 	public static string SurroundWith(this string str, string val)
-	{
-		return val + str + val;
-	}
+		=> val + str + val;
 
 	/// <summary>Surrounds with <paramref name="val"/>.</summary>
 	public static string SurroundWith(this string str, char val)
-	{
-		return val + str + val;
-	}
+		=> val + str + val;
 
 	/// <summary>Surrounds with <paramref name="prefix"/> and <paramref name="postfix"/>.</summary>
 	public static string SurroundWith(this string str, string prefix, string postfix)
-	{
-		return prefix + str + postfix;
-	}
+		=> prefix + str + postfix;
 
 	/// <summary>Surrounds with <paramref name="prefix"/> and <paramref name="postfix"/>.</summary>
 	public static string SurroundWith(this string str, char prefix, char postfix)
@@ -162,28 +144,22 @@ public static class StringExtensions
 		return false;
 	}
 
+#if !NET6_0_OR_GREATER
+
 	public static bool StartsWith(this string str, char value)
-	{
-		return str.Length != 0 && str[0] == value;
-	}
+		=> str.Length != 0 && str[0] == value;
+
+#endif
 
 	public static string UseAsFormat(this string str, params object[] args)
-	{
-		return string.Format(CultureInfo.CurrentCulture, str, args);
-	}
+		=> string.Format(CultureInfo.CurrentCulture, str, args);
 
 	public static string UseAsFormat(this string str, IFormatProvider formatProvider, params object[] args)
-	{
-		return string.Format(formatProvider, str, args);
-	}
+		=> string.Format(formatProvider, str, args);
 
 	public static Substring GetSubstring(this string str, int start, int length)
-	{
-		return new Substring(str, start, length);
-	}
+		=> new(str, start, length);
 
-	public static bool IsNullOrEmpty(this string str)
-	{
-		return string.IsNullOrEmpty(str);
-	}
+	public static bool IsNullOrEmpty(this string? str)
+		=> string.IsNullOrEmpty(str);
 }

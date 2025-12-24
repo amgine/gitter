@@ -47,7 +47,7 @@ public class StashedStateListItem : RevisionPointerListItemBase<StashedState>
 				? CompareByIndex(i1, i2)
 				: 0;
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			return 0;
 		}
@@ -62,23 +62,23 @@ public class StashedStateListItem : RevisionPointerListItemBase<StashedState>
 	{
 	}
 
-	private void OnDeleted(object sender, EventArgs e)
+	private void OnDeleted(object? sender, EventArgs e)
 	{
 		RemoveSafe();
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		DataContext.Deleted += OnDeleted;
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.Deleted -= OnDeleted;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
 	/// <inheritdoc/>

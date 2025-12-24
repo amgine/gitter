@@ -22,31 +22,14 @@ namespace gitter.Framework.Services;
 
 using System;
 
-public sealed class TrackingEventArgs : EventArgs
+public class TrackingEventArgs(bool tracked, int index) : EventArgs
 {
-	public TrackingEventArgs(bool tracked, int index)
-	{
-		IsTracked = tracked;
-		Index = index;
-	}
+	public bool IsTracked { get; } = tracked;
 
-	public bool IsTracked { get; }
-
-	public int Index { get; }
+	public int Index { get; } = index;
 }
 
-public sealed class TrackingEventArgs<T> : EventArgs
+public class TrackingEventArgs<T>(bool tracked, int index, T? item) : TrackingEventArgs(tracked, index)
 {
-	public TrackingEventArgs(bool tracked, int index, T element)
-	{
-		IsTracked = tracked;
-		Index = index;
-		Item = element;
-	}
-
-	public bool IsTracked { get; }
-
-	public int Index { get; }
-
-	public T Item { get; }
+	public T? Item { get; } = item;
 }

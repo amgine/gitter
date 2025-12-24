@@ -21,8 +21,6 @@
 namespace gitter.GitLab.Gui;
 
 using System;
-using System.Drawing;
-using System.Globalization;
 
 using gitter.Framework.Controls;
 using gitter.Git.Gui.Controls;
@@ -44,7 +42,7 @@ public sealed class PipelineHashColumn : HashColumnBase
 		{
 			return pipeline.DataContext.Sha;
 		}
-		return default;
+		return NoHash;
 	}
 
 	protected override Comparison<CustomListBoxItem> SortComparison => PipelineListItem.CompareByHash;

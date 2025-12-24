@@ -72,11 +72,12 @@ public partial class ProviderSetupControl : DialogBase, IExecutableDialog
 
 	private HttpMessageInvoker HttpMessageInvoker { get; }
 
-	private async void OnAPIKeyTextChanged(object sender, EventArgs e)
+	private async void OnAPIKeyTextChanged(object? sender, EventArgs e)
 	{
 		if(string.IsNullOrWhiteSpace(ServiceUri)) return;
 		if(string.IsNullOrWhiteSpace(APIKey)) return;
-		var svc = new GitLabServiceContext(HttpMessageInvoker, new Uri(ServiceUri), APIKey);
+		var server = new ServerInfo(string.Empty, new Uri(ServiceUri), APIKey);
+		var svc = new GitLabServiceContext(HttpMessageInvoker, server);
 
 		var projects = await svc.GetProjectsAsync();
 
@@ -102,9 +103,9 @@ public partial class ProviderSetupControl : DialogBase, IExecutableDialog
 		return Convert.ToBase64String(Encoding.UTF8.GetBytes(str));
 	}
 
-	private static string Unmask(string str)
+	private static string Unmask(string? str)
 	{
-		if(str == string.Empty) return string.Empty;
+		if(str is not { Length: not 0 }) return string.Empty;
 
 		return Encoding.UTF8.GetString(Convert.FromBase64String(str));
 	}

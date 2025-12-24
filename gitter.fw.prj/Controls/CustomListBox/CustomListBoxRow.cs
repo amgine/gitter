@@ -76,7 +76,7 @@ public class CustomListBoxRow<TData> : CustomListBoxItem<TData>, IEnumerable<Cus
 	public CustomListBoxRow(TData data)
 		: base(data)
 	{
-		_subItems = new Dictionary<int, CustomListBoxSubItem>();
+		_subItems = [];
 	}
 
 	#endregion

@@ -26,7 +26,7 @@ using System.Collections.Generic;
 /// <summary>Extension methods for <see cref="LinkedList{T}"/>.</summary>
 public static class LinkedListExtensions
 {
-	/// <summary>Represent <see cref="LinkedList{T}"/> as <see cref="IEnumerable{LinkedListNode{T}}"/>.</summary>
+	/// <summary>Represent <see cref="LinkedList{T}"/> as <see cref="IEnumerable{T}"/> of <see cref="LinkedListNode{T}"/>.</summary>
 	/// <typeparam name="T">Type of list elements.</typeparam>
 	/// <param name="list">Linked list.</param>
 	/// <returns>LinkedListNode-enumerable representation of linked list.</returns>

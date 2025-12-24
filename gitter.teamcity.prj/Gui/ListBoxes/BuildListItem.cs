@@ -27,28 +27,24 @@ using System.Drawing;
 using gitter.Framework;
 using gitter.Framework.Controls;
 
-sealed class BuildListItem : CustomListBoxItem<Build>
+sealed class BuildListItem(Build buildType)
+	: CustomListBoxItem<Build>(buildType)
 {
-	public BuildListItem(Build buildType)
-		: base(buildType)
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-	}
-
-	protected override void OnListBoxAttached()
-	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 
 		DataContext.PropertyChanged += OnBuildPropertyChanged;
 	}
 
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.PropertyChanged -= OnBuildPropertyChanged;
 
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
-	private IImageProvider StatusImage
+	private IImageProvider? StatusImage
 		=> DataContext.Status switch
 		{
 			BuildStatus.Success => Icons.StatusSuccess,
@@ -57,25 +53,29 @@ sealed class BuildListItem : CustomListBoxItem<Build>
 			_ => null,
 		};
 
-	private void OnBuildPropertyChanged(object sender, TeamCityObjectPropertyChangedEventArgs e)
+	private void OnBuildPropertyChanged(object? sender, TeamCityObjectPropertyChangedEventArgs e)
 	{
 		if(e.Property == Build.IdProperty)
 		{
 			InvalidateSubItemSafe((int)ColumnId.Id);
 		}
-		else if(e.Property == Build.StatusProperty)
+		else if(e.Property == Build.Properties.Status)
 		{
 			InvalidateSubItemSafe((int)ColumnId.Status);
 		}
-		else if(e.Property == Build.BuildTypeProperty)
+		else if(e.Property == Build.Properties.BuildType)
 		{
 			InvalidateSubItemSafe((int)ColumnId.BuildType);
 		}
-		else if(e.Property == Build.StartDateProperty)
+		else if(e.Property == Build.Properties.StartDate)
 		{
 			InvalidateSubItemSafe((int)ColumnId.StartDate);
 		}
-		else if(e.Property == Build.NumberProperty)
+		else if(e.Property == Build.Properties.BranchName)
+		{
+			InvalidateSubItemSafe((int)ColumnId.BranchName);
+		}
+		else if(e.Property == Build.Properties.Number)
 		{
 			InvalidateSubItemSafe((int)ColumnId.Number);
 		}
@@ -98,6 +98,8 @@ sealed class BuildListItem : CustomListBoxItem<Build>
 				return measureEventArgs.MeasureImageAndText(StatusImage?.GetImage(measureEventArgs.Dpi.X * 16 / 96), DataContext.Status.ToString());
 			case ColumnId.Number:
 				return measureEventArgs.MeasureText(DataContext.Number);
+			case ColumnId.BranchName:
+				return measureEventArgs.MeasureText(DataContext.BranchName);
 			case ColumnId.StartDate:
 				return DateColumn.OnMeasureSubItem(measureEventArgs, DataContext.StartDate);
 			case ColumnId.WebUrl:
@@ -122,6 +124,9 @@ sealed class BuildListItem : CustomListBoxItem<Build>
 				break;
 			case ColumnId.Number:
 				paintEventArgs.PaintText(DataContext.Number);
+				break;
+			case ColumnId.BranchName:
+				paintEventArgs.PaintText(DataContext.BranchName);
 				break;
 			case ColumnId.StartDate:
 				DateColumn.OnPaintSubItem(paintEventArgs, DataContext.StartDate);

@@ -20,35 +20,23 @@
 
 namespace gitter.Git.AccessLayer;
 
-using System;
-
 using gitter.Framework;
 
-public sealed class UserData : INamedObject
+/// <param name="name">User name.</param>
+/// <param name="email">User email.</param>
+/// <param name="commits">Commit count.</param>
+public sealed class UserData(string name, string email, int commits) : INamedObject
 {
-	/// <summary>Create <see cref="UserData"/>.</summary>
-	/// <param name="name">User name.</param>
-	/// <param name="email">User email.</param>
-	/// <param name="commits">Commit count.</param>
-	public UserData(string name, string email, int commits)
-	{
-		UserName = name;
-		Email    = email;
-		Commits  = commits;
-	}
-
-	/// <summary>User id.</summary>
-	public string Name => UserName + "\n" + Email;
-
 	/// <summary>User name.</summary>
-	public string UserName { get; }
+	public string Name { get; } = name;
 
 	/// <summary>User email.</summary>
-	public string Email { get; set; }
+	public string Email { get; set; } = email;
 
 	/// <summary>Commit count.</summary>
-	public int Commits { get; set; }
+	public int Commits { get; set; } = commits;
 
+	/// <inheritdoc/>
 	public override string ToString()
-		=> $"{UserName} <{Email}>";
+		=> $"{Name} <{Email}>";
 }

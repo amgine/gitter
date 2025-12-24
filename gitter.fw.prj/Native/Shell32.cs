@@ -40,22 +40,22 @@ internal static class Shell32
 	[DllImport(DllName)]
 	public static extern IntPtr ExtractAssociatedIcon(
 		IntPtr hInst,
-		string lpIconPath,
+		string? lpIconPath,
 		ref short lpiIcon
 	);
 
 	[DllImport(DllName)]
 	public static extern int ExtractIconEx(
-		string lpszFile,
+		string? lpszFile,
 		int nIconIndex,
-		IntPtr[] phiconLarge,
-		IntPtr[] phiconSmall,
+		IntPtr[]? phiconLarge,
+		IntPtr[]? phiconSmall,
 		int nIcons
 	);
 
 	[DllImport(DllName)]
 	public static extern IntPtr SHGetFileInfo(
-		string pszPath,
+		string? pszPath,
 		int dwFileAttributes,
 		ref SHFILEINFO psfi,
 		int cbFileInfo,

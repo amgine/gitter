@@ -35,8 +35,8 @@ public sealed class RemoteReferencesCollection
 {
 	#region Events
 
-	public event EventHandler<RemoteReferenceEventArgs> TagDeleted;
-	public event EventHandler<RemoteReferenceEventArgs> BranchDeleted;
+	public event EventHandler<RemoteReferenceEventArgs>? TagDeleted;
+	public event EventHandler<RemoteReferenceEventArgs>? BranchDeleted;
 
 	private void InvokeTagDeleted(RemoteRepositoryTag tag)
 		=> TagDeleted?.Invoke(this, new RemoteReferenceEventArgs(tag));
@@ -44,8 +44,8 @@ public sealed class RemoteReferencesCollection
 	private void InvokeBranchDeleted(RemoteRepositoryBranch branch)
 		=> BranchDeleted?.Invoke(this, new RemoteReferenceEventArgs(branch));
 
-	public event EventHandler<RemoteReferenceEventArgs> TagCreated;
-	public event EventHandler<RemoteReferenceEventArgs> BranchCreated;
+	public event EventHandler<RemoteReferenceEventArgs>? TagCreated;
+	public event EventHandler<RemoteReferenceEventArgs>? BranchCreated;
 
 	private void InvokeTagCreated(RemoteRepositoryTag tag)
 		=> TagCreated?.Invoke(this, new RemoteReferenceEventArgs(tag));
@@ -57,8 +57,8 @@ public sealed class RemoteReferencesCollection
 
 	#region Data
 
-	private readonly Dictionary<string, RemoteRepositoryBranch> _remoteBranches = new();
-	private readonly Dictionary<string, RemoteRepositoryTag> _remoteTags = new();
+	private readonly Dictionary<string, RemoteRepositoryBranch> _remoteBranches = [];
+	private readonly Dictionary<string, RemoteRepositoryTag> _remoteTags = [];
 
 	#endregion
 
@@ -88,15 +88,15 @@ public sealed class RemoteReferencesCollection
 
 	public Remote Remote { get; }
 
-	public object SyncRoot { get; } = new();
+	public LockType SyncRoot { get; } = new();
 
 	#endregion
 
 	#region Methods
 
-	private RemoveRemoteReferencesParameters GetRemoveRemoteReferenceParameters(BaseRemoteReference remoteReference)
+	private RemoveRemoteReferencesRequest GetRemoveRemoteReferenceRequest(BaseRemoteReference remoteReference)
 	{
-		return new RemoveRemoteReferencesParameters(Remote.Name, remoteReference.FullName);
+		return new RemoveRemoteReferencesRequest(Remote.Name, remoteReference.FullName);
 	}
 
 	private void OnTagRemoved(RemoteRepositoryTag tag)
@@ -114,21 +114,21 @@ public sealed class RemoteReferencesCollection
 		Verify.Argument.IsFalse(tag.IsDeleted, nameof(tag),
 			Resources.ExcSuppliedObjectIsDeleted.UseAsFormat(nameof(tag)));
 
-		var parameters = GetRemoveRemoteReferenceParameters(tag);
-		Remote.Repository.Accessor.RemoveRemoteReferences.Invoke(parameters);
+		var request = GetRemoveRemoteReferenceRequest(tag);
+		Remote.Repository.Accessor.RemoveRemoteReferences.Invoke(request);
 		OnTagRemoved(tag);
 	}
 
 	internal async Task RemoveTagAsync(RemoteRepositoryTag tag,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(tag);
 		Verify.Argument.IsFalse(tag.IsDeleted, nameof(tag),
 			Resources.ExcSuppliedObjectIsDeleted.UseAsFormat(nameof(tag)));
 
-		var parameters = GetRemoveRemoteReferenceParameters(tag);
+		var request = GetRemoveRemoteReferenceRequest(tag);
 		await Remote.Repository.Accessor.RemoveRemoteReferences
-			.InvokeAsync(parameters, progress, cancellationToken)
+			.InvokeAsync(request, progress, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 		OnTagRemoved(tag);
 	}
@@ -148,28 +148,28 @@ public sealed class RemoteReferencesCollection
 		Verify.Argument.IsFalse(branch.IsDeleted, nameof(branch),
 			Resources.ExcSuppliedObjectIsDeleted.UseAsFormat(nameof(branch)));
 
-		var parameters = GetRemoveRemoteReferenceParameters(branch);
-		Remote.Repository.Accessor.RemoveRemoteReferences.Invoke(parameters);
+		var request = GetRemoveRemoteReferenceRequest(branch);
+		Remote.Repository.Accessor.RemoveRemoteReferences.Invoke(request);
 		OnBranchRemoved(branch);
 	}
 
 	internal async Task RemoveBranchAsync(RemoteRepositoryBranch branch,
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(branch);
 		Verify.Argument.IsFalse(branch.IsDeleted, nameof(branch),
 			Resources.ExcSuppliedObjectIsDeleted.UseAsFormat(nameof(branch)));
 
-		var parameters = GetRemoveRemoteReferenceParameters(branch);
+		var request = GetRemoveRemoteReferenceRequest(branch);
 		await Remote.Repository.Accessor.RemoveRemoteReferences
-			.InvokeAsync(parameters, progress, cancellationToken)
+			.InvokeAsync(request, progress, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 		OnBranchRemoved(branch);
 	}
 
-	private QueryRemoteReferencesParameters GetQueryParameters()
+	private QueryRemoteReferencesRequest GetQueryRequest()
 	{
-		return new QueryRemoteReferencesParameters(Remote.Name, true, true);
+		return new QueryRemoteReferencesRequest(Remote.Name, true, true);
 	}
 
 	private void OnFetchCompleted(IList<RemoteReferenceData> refs)
@@ -189,7 +189,7 @@ public sealed class RemoteReferencesCollection
 			}
 		}
 
-		List<RemoteRepositoryBranch> deletedBranches;
+		List<RemoteRepositoryBranch>? deletedBranches;
 		if(_remoteBranches.Count != 0)
 		{
 			deletedBranches = new List<RemoteRepositoryBranch>(_remoteBranches.Count);
@@ -229,7 +229,7 @@ public sealed class RemoteReferencesCollection
 				InvokeBranchCreated(branch);
 			}
 		}
-		if(deletedBranches != null && deletedBranches.Count != 0)
+		if(deletedBranches is { Count: not 0 })
 		{
 			foreach(var b in deletedBranches)
 			{
@@ -239,7 +239,7 @@ public sealed class RemoteReferencesCollection
 			}
 		}
 
-		List<RemoteRepositoryTag> deletedTags;
+		List<RemoteRepositoryTag>? deletedTags;
 		if(_remoteTags.Count != 0)
 		{
 			deletedTags = new List<RemoteRepositoryTag>(_remoteTags.Count);
@@ -282,7 +282,7 @@ public sealed class RemoteReferencesCollection
 				InvokeTagCreated(tag);
 			}
 		}
-		if(deletedTags != null && deletedTags.Count != 0)
+		if(deletedTags is { Count: not 0 })
 		{
 			foreach(var t in deletedTags)
 			{
@@ -295,21 +295,21 @@ public sealed class RemoteReferencesCollection
 
 	public void Refresh()
 	{
-		var parameters = GetQueryParameters();
-		var refs = Repository.Accessor.QueryRemoteReferences.Invoke(parameters);
+		var request = GetQueryRequest();
+		var refs = Repository.Accessor.QueryRemoteReferences.Invoke(request);
 		lock(SyncRoot)
 		{
 			OnFetchCompleted(refs);
 		}
 	}
 
-	public async Task RefreshAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+	public async Task RefreshAsync(IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
 		progress?.Report(new OperationProgress(Resources.StrFetchingDataFromRemoteRepository));
-		var parameters = GetQueryParameters();
+		var request = GetQueryRequest();
 		var refs = await Repository.Accessor
 			.QueryRemoteReferences
-			.InvokeAsync(parameters, progress, cancellationToken);
+			.InvokeAsync(request, progress, cancellationToken);
 			
 		lock(SyncRoot)
 		{

@@ -28,6 +28,7 @@ using System.Windows.Forms;
 
 using gitter.Framework;
 using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Services;
 
 using gitter.Git.Gui.Controls;
@@ -37,13 +38,160 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public partial class CleanDialog : DialogBase, IAsyncExecutableDialog
 {
-	#region Data
+	readonly struct DialogControls
+	{
+		public  readonly TextBox _txtPattern;
+		public  readonly LabelControl _lblIncludePattern;
+		public  readonly TreeListBox _lstPreview;
+		public  readonly IRadioButtonWidget _radIncludeUntracked;
+		public  readonly IRadioButtonWidget _radIncludeIgnored;
+		public  readonly IRadioButtonWidget _radIncludeBoth;
+		public  readonly LabelControl _lblExcludePattern;
+		public  readonly TextBox _txtExclude;
+		public  readonly LabelControl _lblType;
+		public  readonly ICheckBoxWidget _chkRemoveDirectories;
+		private readonly LabelControl _lblPreview;
 
-	private FilesToCleanBinding _dataBinding;
+		private static TreeListBox CreatePreviewList(IGitterStyle style)
+		{
+			var list = new TreeListBox
+			{
+				Style         = style,
+				ShowTreeLines = false,
+				HeaderStyle   = HeaderStyle.Hidden,
+			};
+			for(int i = 0; i < list.Columns.Count; ++i)
+			{
+				var col = list.Columns[i];
+				if(col.Id == (int)ColumnId.Name)
+				{
+					col.IsVisible = true;
+					col.SizeMode = ColumnSizeMode.Auto;
+				}
+				else
+				{
+					col.IsVisible = false;
+				}
+			}
+			return list;
+		}
 
-	#endregion
+		public DialogControls(IGitterStyle? style = default)
+		{
+			style ??= GitterApplication.Style;
 
-	#region .ctor
+			_txtPattern           = new();
+			_lblIncludePattern    = new();
+			_radIncludeUntracked  = style.RadioButtonFactory.Create();
+			_radIncludeIgnored    = style.RadioButtonFactory.Create();
+			_radIncludeBoth       = style.RadioButtonFactory.Create();
+			_lblExcludePattern    = new();
+			_txtExclude           = new();
+			_lblType              = new();
+			_chkRemoveDirectories = style.CheckBoxFactory.Create();
+			_lblPreview           = new();
+			_lstPreview           = CreatePreviewList(style);
+
+			GitterApplication.FontManager.InputFont.Apply(_txtPattern, _txtExclude);
+		}
+
+		public void Localize()
+		{
+			_lblIncludePattern.Text = Resources.StrsIncludePattern.AddColon();
+			_lblExcludePattern.Text = Resources.StrsExcludePattern.AddColon();
+
+			_lblType.Text = Resources.StrType.AddColon();
+
+			_radIncludeUntracked.Text = Resources.StrUntracked;
+			_radIncludeIgnored.Text = Resources.StrIgnored;
+			_radIncludeBoth.Text = Resources.StrBoth;
+
+			_chkRemoveDirectories.Text = Resources.StrsAlsoRemoveDirectories;
+
+			_lblPreview.Text = Resources.StrsObjectsThatWillBeRemoved.AddColon();
+			_lstPreview.Text = Resources.StrsNoFilesToRemove;
+		}
+
+		public void Layout(Control parent)
+		{
+			var includeDec = new TextBoxDecorator(_txtPattern);
+			var excludeDec = new TextBoxDecorator(_txtExclude);
+
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					columns:
+					[
+						SizeSpec.Absolute(120),
+						SizeSpec.Everything(),
+					],
+					rows:
+					[
+						/* 0 */ LayoutConstants.TextInputRowHeight,
+						/* 1 */ LayoutConstants.TextInputRowHeight,
+						/* 2 */ LayoutConstants.RadioButtonRowHeight,
+						/* 3 */ LayoutConstants.CheckBoxRowHeight,
+						/* 4 */ LayoutConstants.LabelRowSpacing,
+						/* 5 */ LayoutConstants.LabelRowHeight,
+						/* 6 */ LayoutConstants.LabelRowSpacing,
+						/* 7 */ SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblIncludePattern, marginOverride: LayoutConstants.NoMargin), column: 0, row: 0),
+						new GridContent(new ControlContent(includeDec,         marginOverride: LayoutConstants.TextBoxMargin), column: 1, row: 0),
+						new GridContent(new ControlContent(_lblExcludePattern, marginOverride: LayoutConstants.NoMargin), column: 0, row: 1),
+						new GridContent(new ControlContent(excludeDec,         marginOverride: LayoutConstants.TextBoxMargin), column: 1, row: 1),
+						new GridContent(new ControlContent(_lblType,           marginOverride: LayoutConstants.NoMargin), column: 0, row: 2),
+						new GridContent(new Grid(
+							columns:
+							[
+								SizeSpec.Absolute(100),
+								SizeSpec.Absolute(100),
+								SizeSpec.Absolute(100),
+								SizeSpec.Everything(),
+							],
+							content:
+							[
+								new GridContent(new WidgetContent(_radIncludeUntracked, marginOverride: LayoutConstants.TextBoxMargin), column: 0),
+								new GridContent(new WidgetContent(_radIncludeIgnored,   marginOverride: LayoutConstants.TextBoxMargin), column: 1),
+								new GridContent(new WidgetContent(_radIncludeBoth,      marginOverride: LayoutConstants.TextBoxMargin), column: 2),
+							]), column: 1, row: 2),
+						new GridContent(new WidgetContent(_chkRemoveDirectories, marginOverride: LayoutConstants.TextBoxMargin), column: 1, row: 3),
+						new GridContent(new ControlContent(_lblPreview, marginOverride: LayoutConstants.NoMargin), columnSpan: 2, row: 5),
+						new GridContent(new ControlContent(_lstPreview, marginOverride: LayoutConstants.NoMargin), columnSpan: 2, row: 7),
+					]),
+			};
+
+			var tabIndex = 0;
+			_lblIncludePattern.TabIndex = tabIndex++;
+			includeDec.TabIndex = tabIndex++;
+			_lblExcludePattern.TabIndex = tabIndex++;
+			excludeDec.TabIndex = tabIndex++;
+			_lblType.TabIndex = tabIndex++;
+			_radIncludeUntracked.TabIndex = tabIndex++;
+			_radIncludeIgnored.TabIndex = tabIndex++;
+			_radIncludeBoth.TabIndex = tabIndex++;
+			_chkRemoveDirectories.TabIndex = tabIndex++;
+			_lblPreview.TabIndex = tabIndex++;
+			_lstPreview.TabIndex = tabIndex++;
+
+			includeDec.Parent = parent;
+			_lblIncludePattern.Parent = parent;
+			_radIncludeUntracked.Parent = parent;
+			_radIncludeIgnored.Parent = parent;
+			_radIncludeBoth.Parent = parent;
+			_lblExcludePattern.Parent = parent;
+			excludeDec.Parent = parent;
+			_lblType.Parent = parent;
+			_chkRemoveDirectories.Parent = parent;
+			_lstPreview.Parent = parent;
+			_lblPreview.Parent = parent;
+		}
+	}
+
+	private readonly DialogControls _controls;
+	private FilesToCleanBinding? _dataBinding;
 
 	/// <summary>Create <see cref="CleanDialog"/>.</summary>
 	/// <param name="repository">Related <see cref="Repository"/>.</param>
@@ -51,67 +199,67 @@ public partial class CleanDialog : DialogBase, IAsyncExecutableDialog
 	{
 		Verify.Argument.IsNotNull(repository);
 
+		Name = nameof(CleanDialog);
+
 		Repository = repository;
-
-		InitializeComponent();
-
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode = AutoScaleMode.Dpi;
+		Size = ScalableSize.GetValue(Dpi.Default);
+		_controls = new(GitterApplication.Style);
+		_controls.Layout(this);
 		Localize();
-
-		for(int i = 0; i < _lstFilesToClear.Columns.Count; ++i)
-		{
-			var col = _lstFilesToClear.Columns[i];
-			col.IsVisible = col.Id == (int)ColumnId.Name;
-		}
-
-		_lstFilesToClear.Style = GitterApplication.DefaultStyle;
-		_lstFilesToClear.Columns[0].SizeMode = Framework.Controls.ColumnSizeMode.Auto;
-		_lstFilesToClear.ShowTreeLines = false;
+		ResumeLayout(false);
+		PerformLayout();
 
 		if(!GitFeatures.CleanExcludeOption.IsAvailableFor(repository))
 		{
-			_lblExcludePattern.Enabled = false;
-			_txtExclude.Enabled = false;
-			_txtExclude.Text = Resources.StrlRequiredVersionIs.UseAsFormat(
+			_controls._lblExcludePattern.Enabled = false;
+			_controls._txtExclude.Enabled = false;
+			_controls._txtExclude.Text = Resources.StrlRequiredVersionIs.UseAsFormat(
 				GitFeatures.CleanExcludeOption.RequiredVersion);
 		}
 
-		GitterApplication.FontManager.InputFont.Apply(_txtPattern, _txtExclude);
-
 		LoadConfig();
+
+		_controls._txtPattern.TextChanged += OnPatternTextChanged;
+		_controls._radIncludeUntracked.IsCheckedChanged += OnRadioButtonCheckedChanged;
+		_controls._radIncludeIgnored.IsCheckedChanged += OnRadioButtonCheckedChanged;
+		_controls._radIncludeBoth.IsCheckedChanged += OnRadioButtonCheckedChanged;
+		_controls._txtExclude.TextChanged += OnPatternTextChanged;
+		_controls._chkRemoveDirectories.IsCheckedChanged += OnRemoveDirectoriesCheckedChanged;
+		_controls._lstPreview.ItemActivated += OnFilesToClearItemActivated;
 	}
 
-	#endregion
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
+
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			DataBinding = null;
+		}
+		base.Dispose(disposing);
+	}
 
 	private void Localize()
 	{
 		Text = Resources.StrClean;
-
-		_lblIncludePattern.Text = Resources.StrsIncludePattern.AddColon();
-		_lblExcludePattern.Text = Resources.StrsExcludePattern.AddColon();
-
-		_lblType.Text = Resources.StrType.AddColon();
-
-		_radIncludeUntracked.Text = Resources.StrUntracked;
-		_radIncludeIgnored.Text = Resources.StrIgnored;
-		_radIncludeBoth.Text = Resources.StrBoth;
-
-		_chkRemoveDirectories.Text = Resources.StrsAlsoRemoveDirectories;
-
-		_lblObjectList.Text = Resources.StrsObjectsThatWillBeRemoved.AddColon();
-		_lstFilesToClear.Text = Resources.StrsNoFilesToRemove;
+		_controls.Localize();
 	}
 
-	private FilesToCleanBinding DataBinding
+	private FilesToCleanBinding? DataBinding
 	{
 		get => _dataBinding;
 		set
 		{
-			if(_dataBinding != value)
-			{
-				_dataBinding?.Dispose();
-				_dataBinding = value;
-				_dataBinding?.ReloadData();
-			}
+			if(_dataBinding == value) return;
+
+			_dataBinding?.Dispose();
+			_dataBinding = value;
+			_dataBinding?.ReloadData();
 		}
 	}
 
@@ -121,7 +269,7 @@ public partial class CleanDialog : DialogBase, IAsyncExecutableDialog
 	protected override void OnLoad(EventArgs e)
 	{
 		base.OnLoad(e);
-		BeginInvoke(_txtPattern.Focus);
+		BeginInvoke(_controls._txtPattern.Focus);
 	}
 
 	/// <inheritdoc/>
@@ -134,20 +282,27 @@ public partial class CleanDialog : DialogBase, IAsyncExecutableDialog
 	private void LoadConfig()
 	{
 		var section = Repository.ConfigSection.TryGetSection("CleanDialog");
-		if(section != null)
+		if(section is not null)
 		{
-			_txtPattern.Text = section.GetValue<string>("Pattern", string.Empty);
-			_txtExclude.Text = section.GetValue<string>("Exclude", string.Empty);
+			_controls._txtPattern.Text = section.GetValue<string>("Pattern", string.Empty);
+			_controls._txtExclude.Text = section.GetValue<string>("Exclude", string.Empty);
 			RemoveDirectories = section.GetValue<bool>("RemoveDirectories", false);
 			Mode = section.GetValue<CleanFilesMode>("Mode", CleanFilesMode.Default);
+		}
+		else
+		{
+			_controls._txtPattern.Text = string.Empty;
+			_controls._txtExclude.Text = string.Empty;
+			RemoveDirectories = false;
+			Mode = CleanFilesMode.Default;
 		}
 	}
 
 	private void SaveConfig()
 	{
 		var section = Repository.ConfigSection.GetCreateSection("CleanDialog");
-		section.SetValue<string>("Pattern", _txtPattern.Text);
-		section.SetValue<string>("Exclude", _txtExclude.Text);
+		section.SetValue<string>("Pattern", _controls._txtPattern.Text);
+		section.SetValue<string>("Exclude", _controls._txtExclude.Text);
 		section.SetValue<bool>("RemoveDirectories", RemoveDirectories);
 		section.SetValue<CleanFilesMode>("Mode", Mode);
 	}
@@ -169,87 +324,86 @@ public partial class CleanDialog : DialogBase, IAsyncExecutableDialog
 	{
 		get
 		{
-			if(_radIncludeUntracked.Checked)
+			if(_controls._radIncludeUntracked.IsChecked)
 				return CleanFilesMode.Default;
-			if(_radIncludeIgnored.Checked)
+			if(_controls._radIncludeIgnored.IsChecked)
 				return CleanFilesMode.OnlyIgnored;
-			if(_radIncludeBoth.Checked)
+			if(_controls._radIncludeBoth.IsChecked)
 				return CleanFilesMode.IncludeIgnored;
 			return CleanFilesMode.Default;
 		}
 		set
 		{
-			switch(value)
+			(value switch
 			{
-				case CleanFilesMode.Default:
-					_radIncludeUntracked.Checked = true;
-					break;
-				case CleanFilesMode.OnlyIgnored:
-					_radIncludeIgnored.Checked = true;
-					break;
-				case CleanFilesMode.IncludeIgnored:
-					_radIncludeBoth.Checked = true;
-					break;
-				default:
-					throw new ArgumentException(nameof(value));
-			}
+				CleanFilesMode.Default        => _controls._radIncludeUntracked,
+				CleanFilesMode.OnlyIgnored    => _controls._radIncludeIgnored,
+				CleanFilesMode.IncludeIgnored => _controls._radIncludeBoth,
+				_ => throw new ArgumentException($"Unknown mode: {value}", nameof(value)),
+			}).IsChecked = true;
 		}
 	}
 
-	public string IncludePattern
+	static string? GetPattern(TextBox input)
 	{
-		get => _txtPattern.Text.Trim();
-		set => _txtPattern.Text = value;
+		if(!input.Enabled) return default;
+		var text = input.Text;
+		if(string.IsNullOrWhiteSpace(text)) return default;
+		return text.Trim();
 	}
 
-	public string ExcludePattern
+	public string? IncludePattern
 	{
-		get =>  _txtExclude.Enabled ? _txtExclude.Text.Trim() : string.Empty;
+		get => GetPattern(_controls._txtPattern);
+		set => _controls._txtPattern.Text = value;
+	}
+
+	public string? ExcludePattern
+	{
+		get => GetPattern(_controls._txtExclude);
 		set
 		{
-			Verify.State.IsTrue(_txtExclude.Enabled, "Exclude pattern is not supported.");
+			Verify.State.IsTrue(_controls._txtExclude.Enabled, "Exclude pattern is not supported.");
 
-			_txtExclude.Text = value;
+			_controls._txtExclude.Text = value;
 		}
 	}
 
 	public bool RemoveDirectories
 	{
-		get => _chkRemoveDirectories.Checked;
-		set => _chkRemoveDirectories.Checked = value;
+		get => _controls._chkRemoveDirectories.IsChecked;
+		set => _controls._chkRemoveDirectories.IsChecked = value;
 	}
 
 	private void UpdateList()
 	{
 		if(IsDisposed) return;
 
-		DataBinding ??= new FilesToCleanBinding(Repository, _lstFilesToClear);
-		DataBinding.IncludePattern = IncludePattern;
-		DataBinding.ExcludePattern = ExcludePattern;
-		DataBinding.CleanFilesMode = Mode;
-		DataBinding.IncludeDirectories = RemoveDirectories;
-		DataBinding.ReloadData();
+		_dataBinding ??= new FilesToCleanBinding(Repository, _controls._lstPreview);
+		_dataBinding.IncludePattern = IncludePattern;
+		_dataBinding.ExcludePattern = ExcludePattern;
+		_dataBinding.CleanFilesMode = Mode;
+		_dataBinding.IncludeDirectories = RemoveDirectories;
+		_dataBinding.ReloadData();
 	}
 
-	private void OnPatternTextChanged(object sender, EventArgs e)
+	private void OnPatternTextChanged(object? sender, EventArgs e)
 	{
 		UpdateList();
 	}
 
-	private void OnRadioButtonCheckedChanged(object sender, EventArgs e)
+	private void OnRadioButtonCheckedChanged(object? sender, EventArgs e)
 	{
-		if(((RadioButton)sender).Checked)
-		{
-			UpdateList();
-		}
+		if(sender is not IRadioButtonWidget { IsChecked: true }) return;
+		UpdateList();
 	}
 
-	private void OnRemoveDirectoriesCheckedChanged(object sender, EventArgs e)
+	private void OnRemoveDirectoriesCheckedChanged(object? sender, EventArgs e)
 	{
 		UpdateList();
 	}
 
-	private void OnFilesToClearItemActivated(object sender, ItemEventArgs e)
+	private void OnFilesToClearItemActivated(object? sender, ItemEventArgs e)
 	{
 		if(e.Item is ITreeItemListItem item)
 		{

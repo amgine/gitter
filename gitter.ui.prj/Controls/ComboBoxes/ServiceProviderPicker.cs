@@ -26,11 +26,6 @@ using gitter.Framework.Controls;
 [System.ComponentModel.DesignerCategory("")]
 public sealed class ServiceProviderPicker : CustomObjectPicker<CustomListBox, ServiceProviderListItem, IRepositoryServiceProvider>
 {
-	/// <summary>Initializes a new instance of the <see cref="ServiceProviderPicker"/> class.</summary>
-	public ServiceProviderPicker()
-	{
-	}
-
 	/// <inheritdoc/>
-	protected override IRepositoryServiceProvider GetValue(ServiceProviderListItem item) => item?.DataContext;
+	protected override IRepositoryServiceProvider GetValue(ServiceProviderListItem item) => item.DataContext;
 }

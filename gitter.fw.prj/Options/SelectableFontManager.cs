@@ -46,12 +46,12 @@ public sealed class SelectableFontManager : IEnumerable<SelectableFont>
 
 	private static SelectableFont TryLoadFont(Section section, string id, string name, Func<Font> defaultFont)
 	{
-		section = section.TryGetSection(id);
-		if(section is not null)
+		var s = section.TryGetSection(id);
+		if(s is not null)
 		{
 			try
 			{
-				return new SelectableFont(id, name, section);
+				return new SelectableFont(id, name, s);
 			}
 			catch
 			{
@@ -62,13 +62,9 @@ public sealed class SelectableFontManager : IEnumerable<SelectableFont>
 
 	internal SelectableFontManager(Section section)
 	{
-		_fonts = new Dictionary<string, SelectableFont>();
+		_fonts = [];
 		_section = section;
-		LoadStandardFonts();
-	}
 
-	private void LoadStandardFonts()
-	{
 		_fonts.Add(IdFontUI, _uiFont = TryLoadFont(_section, IdFontUI, Resources.StrUIFont,
 			static () => new Font(@"Segoe UI", 9.0f, FontStyle.Regular, GraphicsUnit.Point)));
 		_fonts.Add(IdFontInput, _inputFont = TryLoadFont(_section, IdFontInput, Resources.StrInputFont,

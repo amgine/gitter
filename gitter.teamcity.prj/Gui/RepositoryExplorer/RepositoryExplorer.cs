@@ -20,12 +20,8 @@
 
 namespace gitter.TeamCity.Gui;
 
-using System;
-
 using gitter.Framework;
 using gitter.Framework.Controls;
-
-using gitter.TeamCity.Gui;
 
 sealed class RepositoryExplorer
 {

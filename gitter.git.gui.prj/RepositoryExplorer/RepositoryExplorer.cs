@@ -28,11 +28,16 @@ sealed class RepositoryExplorer
 {
 	private readonly GuiProvider _guiProvider;
 	private readonly RepositoryRootItem _rootItem;
-	private Repository _repository;
+	private Repository? _repository;
 
 	public RepositoryExplorer(GuiProvider guiProvider)
 	{
 		Verify.Argument.IsNotNull(guiProvider);
+
+		if(guiProvider.Environment is null)
+		{
+			throw new InvalidOperationException("Provider is not attached to the environment.");
+		}
 
 		_guiProvider = guiProvider;
 		_rootItem = new RepositoryRootItem(_guiProvider.Environment)
@@ -46,21 +51,20 @@ sealed class RepositoryExplorer
 
 	public CustomListBoxItem RootItem => _rootItem;
 
-	public Repository Repository
+	public Repository? Repository
 	{
 		get => _repository;
 		set
 		{
-			if(_repository != value)
+			if(_repository == value) return;
+
+			if(_repository is not null)
 			{
-				if(_repository is not null)
-				{
-					DetachFromRepository(_repository);
-				}
-				if(value is not null)
-				{
-					AttachToRepository(value);
-				}
+				DetachFromRepository(_repository);
+			}
+			if(value is not null)
+			{
+				AttachToRepository(value);
 			}
 		}
 	}

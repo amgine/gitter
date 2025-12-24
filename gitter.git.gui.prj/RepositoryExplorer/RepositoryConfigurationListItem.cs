@@ -31,30 +31,21 @@ using gitter.Git.Gui.Views;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class RepositoryConfigurationListItem : RepositoryExplorerItemBase
+sealed class RepositoryConfigurationListItem(IWorkingEnvironment environment)
+	: RepositoryExplorerItemBase(Icons.Configuration, Resources.StrConfig)
 {
-	private readonly IWorkingEnvironment _environment;
-
-	public RepositoryConfigurationListItem(IWorkingEnvironment environment)
-		: base(Icons.Configuration, Resources.StrConfig)
-	{
-		Verify.Argument.IsNotNull(environment);
-
-		_environment = environment;
-	}
-
 	/// <inheritdoc/>
 	protected override void OnActivate()
 	{
 		base.OnActivate();
-		_environment.ViewDockService.ShowView(Guids.ConfigViewGuid);
+		environment.ViewDockService.ShowView(Guids.ConfigViewGuid);
 	}
 
 	/// <inheritdoc/>
 	public override void OnDoubleClick(int x, int y) { }
 
 	/// <inheritdoc/>
-	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	public override ContextMenuStrip? GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
 		Assert.IsNotNull(requestEventArgs);
 

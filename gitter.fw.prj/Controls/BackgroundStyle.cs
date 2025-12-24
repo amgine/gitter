@@ -29,44 +29,37 @@ public static class BackgroundStyle
 {
 	const float cornerRadius = 2.0f;
 
-	private sealed class SolidBackgroundStyle : IBackgroundStyle
+	private sealed class SolidBackgroundStyle(
+		Color outerColor,
+		Color innerColor,
+		Color innerTop,
+		Color innerBottom) : IBackgroundStyle
 	{
-		private readonly Color _topColor;
-		private readonly Color _bottomColor;
+		public Pen InnerBorderPen { get; } = new Pen(innerColor);
 
-		public SolidBackgroundStyle(Color outerColor, Color innerColor, Color innerTop, Color innerBottom)
-		{
-			OuterBorderPen = new Pen(outerColor);
-			InnerBorderPen = new Pen(innerColor);
+		public Pen OuterBorderPen { get; } = new Pen(outerColor);
 
-			_topColor    = innerTop;
-			_bottomColor = innerBottom;
-		}
+		public Brush GetBackgroundBrush(Rectangle rcBackground)
+			=> new LinearGradientBrush(rcBackground, innerTop, innerBottom, LinearGradientMode.Vertical);
 
-		public Pen InnerBorderPen { get; }
-
-		public Pen OuterBorderPen { get; }
-
-		public Brush GetBackgroundBrush(int y1, int y2)
-			=> new LinearGradientBrush(new Point(0, y1), new Point(0, y2), _topColor, _bottomColor);
-
-		public void Draw(Graphics graphics, Dpi dpi, Rectangle bounds)
+		public void Draw(Graphics graphics, BackgroundBounds background)
 		{
 			const int PaddingX = 1;
 			const int PaddingY = 1;
 
-			var paddingX = PaddingX * dpi.X / 96;
-			var paddingY = PaddingY * dpi.Y / 96;
-			using(var brush = GetBackgroundBrush(bounds.Y + paddingY, bounds.Bottom - paddingY * 2))
+			var paddingX = PaddingX * background.Dpi.X / 96;
+			var paddingY = PaddingY * background.Dpi.Y / 96;
+			var rcBackground = new Rectangle(
+				background.X +      paddingX,
+				background.Y +      paddingY,
+				background.Width  - paddingX * 2,
+				background.Height - paddingY * 2);
+			using(var brush = GetBackgroundBrush(rcBackground))
 			{
-				graphics.FillRectangle(brush,
-					bounds.X +      paddingX,
-					bounds.Y +      paddingY,
-					bounds.Width  - paddingX * 2,
-					bounds.Height - paddingY * 2);
+				graphics.FillRectangle(brush, rcBackground);
 			}
-			graphics.DrawRectangle(InnerBorderPen, bounds.X + paddingX, bounds.Y + paddingY, bounds.Width - paddingX * 2 - 1, bounds.Height - paddingY * 2 - 1);
-			graphics.DrawRoundedRectangle(OuterBorderPen, bounds, cornerRadius * dpi.X / 96.0f);
+			graphics.DrawRectangle(InnerBorderPen, background.X + paddingX, background.Y + paddingY, background.Width - paddingX * 2 - 1, background.Height - paddingY * 2 - 1);
+			graphics.DrawRoundedRectangle(OuterBorderPen, background.Bounds, cornerRadius * background.Dpi.X / 96.0f);
 		}
 
 		public void Dispose()
@@ -76,22 +69,17 @@ public static class BackgroundStyle
 		}
 	}
 
-	private sealed class SimpleBackgroundStyle : IBackgroundStyle
+	private sealed class SimpleBackgroundStyle(Pen pen) : IBackgroundStyle
 	{
-		public SimpleBackgroundStyle(Pen pen)
-		{
-			OuterBorderPen = pen;
-		}
-
 		public SimpleBackgroundStyle(Color outerColor) : this(new Pen(outerColor))
 		{
 		}
 
-		public Pen OuterBorderPen { get; }
+		public Pen OuterBorderPen { get; } = pen;
 
-		public void Draw(Graphics graphics, Dpi dpi, Rectangle bounds)
+		public void Draw(Graphics graphics, BackgroundBounds background)
 		{
-			graphics.DrawRoundedRectangle(OuterBorderPen, bounds, cornerRadius * dpi.X / 96.0f);
+			graphics.DrawRoundedRectangle(OuterBorderPen, background.Bounds, cornerRadius * background.Dpi.X / 96.0f);
 		}
 
 		public void Dispose()

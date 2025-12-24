@@ -23,14 +23,17 @@ namespace gitter.TeamCity;
 using System;
 using System.Text;
 using System.IO;
-using System.Net;
 using System.Xml;
+using System.Text.Json;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
 public sealed class TeamCityServiceContext
 {
 	#region Data
 
-	private Uri _serviceUri;
+	private string _serviceUri;
 	private string _passphrase;
 
 	private readonly ProjectsCollection _projects;
@@ -54,10 +57,14 @@ public sealed class TeamCityServiceContext
 
 	#region .ctor
 
-	public TeamCityServiceContext(Uri serviceUri, string username, string password)
+	public TeamCityServiceContext(HttpMessageInvoker httpMessageInvoker, ServerInfo server)
 	{
-		_serviceUri = serviceUri;
-		_passphrase = GetPassphrase(username, password);
+		Verify.Argument.IsNotNull(httpMessageInvoker);
+
+		HttpMessageInvoker = httpMessageInvoker;
+
+		_serviceUri = server.ServiceUri.ToString();
+		_passphrase = server.ApiKey;
 
 		_projects	= new ProjectsCollection(this);
 		_buildTypes	= new BuildTypesCollection(this);
@@ -68,7 +75,9 @@ public sealed class TeamCityServiceContext
 
 	#region Properties
 
-	internal object SyncRoot { get; } = new();
+	private HttpMessageInvoker HttpMessageInvoker { get; }
+
+	internal LockType SyncRoot { get; } = new();
 
 	public ProjectsCollection Projects => _projects;
 
@@ -76,57 +85,79 @@ public sealed class TeamCityServiceContext
 
 	public BuildsCollection Builds => _builds;
 
-	public string DefaultProjectId { get; set; }
+	public string? DefaultProjectId { get; set; }
 
 	#endregion
 
+	public string ServiceUri => _serviceUri;
+
 	private Uri GetUri(string relativeUri)
-		=> new Uri(_serviceUri, @"/httpAuth/app/rest/" + relativeUri);
+		=> _serviceUri.EndsWith('/')
+			? new(_serviceUri + @"app/rest/" + relativeUri)
+			: new(_serviceUri + @"/app/rest/" + relativeUri);
 
-	private void SetupHttpBasicAuth(WebRequest request)
+	private void SetupHttpAuth(HttpRequestMessage request)
 	{
-		request.Headers.Add("Authorization: Basic " + _passphrase);
+		request.Headers.Authorization = new("Bearer", _passphrase);
 	}
 
-	private static void SetupContentType(WebRequest request, ResponseContentType contentType)
+	private static void SetupAcceptContentType(HttpRequestMessage request, ResponseContentType contentType)
 	{
-		switch(contentType)
+		if(contentType == ResponseContentType.Default) return;
+		var header = contentType switch
 		{
-			case ResponseContentType.PlainText:
-				request.ContentType = @"text/plain";
-				break;
-			case ResponseContentType.Xml:
-				request.ContentType = @"application/xml";
-				break;
-			case ResponseContentType.Json:
-				request.ContentType = @"application/json";
-				break;
-		}
+			ResponseContentType.PlainText => @"text/plain",
+			ResponseContentType.Xml       => @"application/xml",
+			ResponseContentType.Json      => @"application/json",
+			_ => throw new ArgumentException($"Unknown content type: {contentType}", nameof(contentType)),
+		};
+		request.Headers.Add(@"Accept", header);
 	}
 
-	private WebResponse GetResponse(string relativeUri, ResponseContentType contentType)
+	private Task<HttpResponseMessage> GetResponseAsync(string relativeUri, ResponseContentType contentType, CancellationToken cancellationToken)
 	{
 		var uri = GetUri(relativeUri);
-		var request = WebRequest.Create(uri);
-		SetupHttpBasicAuth(request);
-		SetupContentType(request, contentType);
-		return request.GetResponse();
+		using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+		SetupHttpAuth(request);
+		SetupAcceptContentType(request, contentType);
+		return HttpMessageInvoker.SendAsync(request, cancellationToken);
 	}
 
-	internal XmlDocument GetXml(string relativeUri)
+	internal async Task<XmlDocument> GetXmlAsync(string relativeUri, CancellationToken cancellationToken = default)
 	{
-		using var response = GetResponse(relativeUri, ResponseContentType.Xml);
-		using var stream   = response.GetResponseStream();
+		using var response = await GetResponseAsync(relativeUri, ResponseContentType.Xml, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		using var stream = await response.Content.ReadAsStreamAsync(cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
 		var xml = new XmlDocument();
 		xml.Load(stream);
 		return xml;
 	}
 
-	internal string GetPlainText(string relativeUri)
+	internal async Task<JsonDocument> GetJsonAsync(string relativeUri, CancellationToken cancellationToken = default)
 	{
-		using var response     = GetResponse(relativeUri, ResponseContentType.PlainText);
-		using var stream       = response.GetResponseStream();
+		using var response = await GetResponseAsync(relativeUri, ResponseContentType.Json, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		using var stream = await response.Content.ReadAsStreamAsync(cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		return await JsonDocument
+			.ParseAsync(stream, cancellationToken: cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+	}
+
+	internal async Task<string> GetPlainTextAsync(string relativeUri, CancellationToken cancellationToken = default)
+	{
+		using var response = await GetResponseAsync(relativeUri, ResponseContentType.Json, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		using var stream = await response.Content.ReadAsStreamAsync(cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
 		using var streamReader = new StreamReader(stream);
-		return streamReader.ReadToEnd();
+		return await streamReader
+#if NET9_0_OR_GREATER
+			.ReadToEndAsync(cancellationToken)
+#else
+			.ReadToEndAsync()
+#endif
+			.ConfigureAwait(continueOnCapturedContext: false);
 	}
 }

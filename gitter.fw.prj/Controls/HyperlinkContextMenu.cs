@@ -43,6 +43,8 @@ public class HyperlinkContextMenu : ContextMenuStrip
 	{
 		Verify.Argument.IsNotNull(hyperlink);
 
+		Renderer = GitterApplication.Style.ToolStripRenderer;
+
 		var dpiBindings = new DpiBindings(this);
 		AddItemsTo(dpiBindings, Items, hyperlink.Url);
 	}
@@ -50,6 +52,8 @@ public class HyperlinkContextMenu : ContextMenuStrip
 	public HyperlinkContextMenu(string url)
 	{
 		Verify.Argument.IsNotNull(url);
+
+		Renderer = GitterApplication.Style.ToolStripRenderer;
 
 		var dpiBindings = new DpiBindings(this);
 		AddItemsTo(dpiBindings, Items, url);
@@ -82,15 +86,17 @@ public class HyperlinkContextMenu : ContextMenuStrip
 		return item;
 	}
 
-	private static void OnCopyToClipboardClick(object sender, EventArgs e)
+	private static void OnCopyToClipboardClick(object? sender, EventArgs e)
 	{
-		var text = (string)((ToolStripItem)sender).Tag;
-		ClipboardEx.TrySetTextSafe(text);
+		if(sender is not ToolStripItem { Tag: string url }) return;
+
+		ClipboardEx.TrySetTextSafe(url);
 	}
 
-	private static void OnOpenInBrowserClick(object sender, EventArgs e)
+	private static void OnOpenInBrowserClick(object? sender, EventArgs e)
 	{
-		var url = (string)((ToolStripItem)sender).Tag;
+		if(sender is not ToolStripItem { Tag: string url }) return;
+
 		Utility.OpenUrl(url);
 	}
 }

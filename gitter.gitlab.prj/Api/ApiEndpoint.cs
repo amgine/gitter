@@ -39,7 +39,7 @@ using gitter.Framework;
 
 partial class ApiEndpoint
 {
-	private static string GetNextPageUrl(HttpResponseHeaders headers)
+	private static string? GetNextPageUrl(HttpResponseHeaders headers)
 	{
 		Assert.IsNotNull(headers);
 
@@ -65,16 +65,12 @@ partial class ApiEndpoint
 		return default;
 	}
 
-	private static async Task<T> ReadReponseAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken = default)
+	private static async Task<T?> ReadReponseAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken = default)
 	{
 		Assert.IsNotNull(response);
 
 		using var stream = await response.Content
-			#if NETCOREAPP
 			.ReadAsStreamAsync(cancellationToken)
-			#else
-			.ReadAsStreamAsync()
-			#endif
 			.ConfigureAwait(continueOnCapturedContext: false);
 
 #if SYSTEM_TEXT_JSON
@@ -96,11 +92,12 @@ partial class ApiEndpoint
 		Assert.IsNeitherNullNorWhitespace(url);
 
 		var result = default(List<T>);
+		string? next = url;
 		while(true)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 
-			using var message = CreateRequest(HttpMethod.Get, url);
+			using var message = CreateRequest(HttpMethod.Get, next);
 
 			using var response = await HttpMessageInvoker
 				.SendAsync(message, cancellationToken)
@@ -113,21 +110,32 @@ partial class ApiEndpoint
 
 			if(page is not { Length: not 0 }) break;
 
-			url = GetNextPageUrl(response.Headers);
-			if(url is null)
+			next = GetNextPageUrl(response.Headers);
+			if(next is null)
 			{
 				if(result is null) return page;
 			}
 
-			result ??= new List<T>();
+			result ??= [];
 			result.AddRange(page);
 
-			if(url is null) break;
+			if(next is null) break;
 		}
 		return result ?? (IReadOnlyList<T>)Preallocated<T>.EmptyArray;
 	}
 
-	private async Task<T> ReadResultAsync<T>(string url, CancellationToken cancellationToken = default)
+	private static void CheckResponse(HttpResponseMessage response)
+	{
+		if(response.IsSuccessStatusCode) return;
+
+		if(response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+		{
+			throw new UnauthorizedAccessException();
+		}
+		response.EnsureSuccessStatusCode();
+	}
+
+	private async Task<T?> GetAsync<T>(string url, CancellationToken cancellationToken = default)
 	{
 		Assert.IsNeitherNullNorWhitespace(url);
 
@@ -137,11 +145,23 @@ partial class ApiEndpoint
 			.SendAsync(message, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 
-		if(response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-		{
-			throw new UnauthorizedAccessException();
-		}
-		response.EnsureSuccessStatusCode();
+		CheckResponse(response);
+
+		return await ReadReponseAsync<T>(response, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+	}
+
+	private async Task<T?> PostAsync<T>(string url, CancellationToken cancellationToken = default)
+	{
+		Assert.IsNeitherNullNorWhitespace(url);
+
+		using var message = CreateRequest(HttpMethod.Post, url);
+
+		using var response = await HttpMessageInvoker
+			.SendAsync(message, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+
+		CheckResponse(response);
 
 		return await ReadReponseAsync<T>(response, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
@@ -156,21 +176,22 @@ partial class ApiEndpoint
 		response.EnsureSuccessStatusCode();
 	}
 
-	public ApiEndpoint(HttpMessageInvoker httpMessageInvoker, Uri serviceUri, string accessToken)
+	public ApiEndpoint(HttpMessageInvoker httpMessageInvoker, ServerInfo server)
 	{
 		Verify.Argument.IsNotNull(httpMessageInvoker);
-		Verify.Argument.IsNotNull(serviceUri);
+		Verify.Argument.IsNotNull(server);
 
 		HttpMessageInvoker = httpMessageInvoker;
-		ServiceUri         = serviceUri;
-		AccessToken        = accessToken;
+		Server             = server;
 	}
 
 	private HttpMessageInvoker HttpMessageInvoker { get; }
 
-	private Uri ServiceUri { get; }
+	private ServerInfo Server { get; }
 
-	private string AccessToken { get; }
+	private Uri ServiceUri => Server.ServiceUri;
+
+	private string AccessToken => Server.ApiKey;
 
 	private HttpRequestMessage CreateRequest(HttpMethod method, string relativeUri)
 	{
@@ -179,20 +200,20 @@ partial class ApiEndpoint
 		return message;
 	}
 
-	public Task<GitLabVersion> GetVersionAsync(CancellationToken cancellationToken = default)
+	public Task<GitLabVersion?> GetVersionAsync(CancellationToken cancellationToken = default)
 	{
-		return ReadResultAsync<GitLabVersion>("/api/v4/version", cancellationToken);
+		return GetAsync<GitLabVersion>("/api/v4/version", cancellationToken);
 	}
 
-	public Task<IReadOnlyList<Project>> GetProjectsAsync()
+	public Task<IReadOnlyList<Project>> GetProjectsAsync(CancellationToken cancellationToken = default)
 	{
 		var urlBuilder = new StringBuilder();
 		urlBuilder.Append("/api/v4/projects/");
 
-		return ReadPagedResultAsync<Project>(urlBuilder.ToString());
+		return ReadPagedResultAsync<Project>(urlBuilder.ToString(), cancellationToken);
 	}
 
-	private static void AppendProjectUrl(StringBuilder urlBuilder, NameOrNumericId projectId, string path = null)
+	private static void AppendProjectUrl(StringBuilder urlBuilder, NameOrNumericId projectId, string? path = null)
 	{
 		urlBuilder.Append(@"/api/v4/projects/");
 		projectId.AppendTo(urlBuilder);

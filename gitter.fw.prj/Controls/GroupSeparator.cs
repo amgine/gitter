@@ -29,76 +29,81 @@ using System.Windows.Forms;
 [DesignerCategory("")]
 public partial class GroupSeparator : Control
 {
-	private readonly Label _lblText;
-	private readonly Panel _line;
+	private Color? _separatorColor;
 
 	/// <summary>Create <see cref="GroupSeparator"/>.</summary>
 	public GroupSeparator()
 	{
-		SuspendLayout();
-		_line = new()
-		{
-			BackColor = SystemColors.ControlDark,
-			Name      = nameof(_line),
-			Size      = new(340, 1),
-			Parent    = this,
-		};
-		_lblText = new()
-		{
-			Name      = nameof(_lblText),
-			AutoSize  = false,
-			Margin    = Padding.Empty,
-			Padding   = Padding.Empty,
-			Dock      = DockStyle.Fill,
-			TextAlign = ContentAlignment.MiddleLeft,
-			Parent    = this,
-		};
 		Name = nameof(GroupSeparator);
 		Size = new(407, 19);
-		ResumeLayout(false);
-		PerformLayout();
 
-		SetStyle(ControlStyles.Selectable, false);
+		SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint, true);
+		SetStyle(ControlStyles.Selectable | ControlStyles.ContainerControl, false);
 	}
 
-	/// <inheritdoc/>
-	[Browsable(true)]
-	[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
-	[DefaultValue("")]
-	[Localizable(true)]
-	public override string Text
+	public IGitterStyle Style { get; set; } = GitterApplication.Style;
+
+	public Color? SeparatorColor
 	{
-		get => base.Text;
+		get => _separatorColor;
 		set
 		{
-			base.Text = value;
-			_lblText.Text = value;
-			UpdateLineBounds();
+			if(_separatorColor == value) return;
+			_separatorColor = value;
+			Invalidate();
 		}
 	}
 
-	private void UpdateLineBounds()
-	{
-		var dpi  = Dpi.FromControl(this);
-		var conv = DpiConverter.FromDefaultTo(dpi);
+	protected override bool ScaleChildren => false;
 
-		var x = _lblText.PreferredWidth + conv.ConvertX(4);
-		var w = Width - x;
+	private void PaintBackground(Graphics graphics, Rectangle bounds, Rectangle rcText, Rectangle clip)
+	{
+		var conv = DpiConverter.FromDefaultTo(this);
+		using var gdi = graphics.AsGdi();
+		gdi.Fill(BackColor, clip);
 		var h = conv.ConvertY(1);
-		_line.SetBounds(x, (Height - h) / 2 + dpi.Y * 2 / 96 - 1, w, h);
+		var t = conv.ConvertY(2);
+		var rcLine = new Rectangle(0, t + (bounds.Height - h) / 2, bounds.Width, h);
+		if(rcText.Width > 0)
+		{
+			var s = conv.ConvertX(4);
+			var dx = rcText.Right + s;
+			rcLine.X     += dx;
+			rcText.Width -= dx;
+		}
+		var color = SeparatorColor ?? Style.Colors.GrayText;
+		if(Rectangle.Intersect(rcLine, clip) is { Width: > 0, Height: > 0 } clippedLine)
+		{
+			gdi.Fill(color, clippedLine);
+		}
 	}
 
-	/// <inheritdoc/>
-	protected override void OnDpiChangedAfterParent(EventArgs e)
+	protected override void OnPaint(PaintEventArgs e)
 	{
-		base.OnDpiChangedAfterParent(e);
-		UpdateLineBounds();
+		Assert.IsNotNull(e);
+
+		const TextFormatFlags baseFlags    = TextFormatFlags.SingleLine | TextFormatFlags.NoPadding;
+		const TextFormatFlags measureFlags = baseFlags;
+		const TextFormatFlags drawFlags    = baseFlags | TextFormatFlags.Left | TextFormatFlags.Top | TextFormatFlags.EndEllipsis;
+
+		var rc   = ClientRectangle;
+		var text = Text;
+		if(string.IsNullOrEmpty(text))
+		{
+			PaintBackground(e.Graphics, rc, Rectangle.Empty, e.ClipRectangle);
+			return;
+		}
+		var font = Font;
+		var rcText = new Rectangle(rc.X, rc.Y, 0, rc.Height);
+		var textSize = TextRenderer.MeasureText(text, font, new(short.MaxValue, rc.Height), measureFlags);
+		rcText.Width  = Math.Min(textSize.Width, rc.Width);
+		rcText.Y += (rcText.Height - textSize.Height) / 2;
+		rcText.Height = textSize.Height;
+		PaintBackground(e.Graphics, rc, rcText, e.ClipRectangle);
+		TextRenderer.DrawText(e.Graphics, text, font, rcText, ForeColor, BackColor, drawFlags);
 	}
 
-	/// <inheritdoc/>
-	protected override void OnSizeChanged(EventArgs e)
+	protected override void OnPaintBackground(PaintEventArgs pevent)
 	{
-		base.OnSizeChanged(e);
-		UpdateLineBounds();
 	}
 }

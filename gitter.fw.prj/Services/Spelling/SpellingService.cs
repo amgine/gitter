@@ -34,7 +34,7 @@ public static class SpellingService
 {
 	#region Data
 
-	private static readonly Dictionary<string, Hunspell> _spellers;
+	private static readonly Dictionary<string, Hunspell> _spellers = [];
 	private static readonly string DictionaryPath;
 	private static int _loadCounter;
 	private static readonly ManualResetEvent _evtDictionariesReady;
@@ -43,10 +43,9 @@ public static class SpellingService
 
 	static SpellingService()
 	{
-		var asmPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+		var asmPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
 		Hunspell.NativeDllPath = Path.Combine(asmPath, "Hunspell");
 		DictionaryPath = Path.Combine(asmPath, "Dictionaries");
-		_spellers = new Dictionary<string, Hunspell>();
 		_evtDictionariesReady = new ManualResetEvent(true);
 	}
 
@@ -85,7 +84,7 @@ public static class SpellingService
 		var aff = Path.Combine(DictionaryPath, localeName + ".aff");
 		var dic = Path.Combine(DictionaryPath, localeName + ".dic");
 
-		Hunspell h;
+		Hunspell? h;
 		try
 		{
 			h = new Hunspell(aff, dic);
@@ -126,8 +125,7 @@ public static class SpellingService
 	public static void UnloadLocale(string localeName)
 	{
 		_evtDictionariesReady.WaitOne();
-		Hunspell speller;
-		if(_spellers.TryGetValue(localeName, out speller))
+		if(_spellers.TryGetValue(localeName, out var speller))
 		{
 			speller.Dispose();
 			_spellers.Remove(localeName);

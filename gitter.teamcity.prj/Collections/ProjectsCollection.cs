@@ -21,6 +21,8 @@
 namespace gitter.TeamCity;
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 public sealed class ProjectsCollection : NamedTeamCityObjectsCache<Project>
@@ -31,20 +33,26 @@ public sealed class ProjectsCollection : NamedTeamCityObjectsCache<Project>
 	}
 
 	protected override Project Create(string id, string name)
-		=> new Project(Context, id, name);
+		=> new(Context, id, name);
 
 	protected override Project Create(string id)
-		=> new Project(Context, id);
+		=> new(Context, id);
 
 	protected override Project Create(XmlNode node)
-		=> new Project(Context, node);
+		=> new(Context, node);
 
-	public void UpdateCache()
+	public async Task UpdateCacheAsync(CancellationToken cancellationToken = default)
 	{
-		var xml = Context.GetXml("projects");
-		foreach(XmlElement node in xml["projects"])
+		var xml = await Context
+			.GetXmlAsync("projects", cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		var projects = xml["projects"];
+		if(projects is not null)
 		{
-			Lookup(node);
+			foreach(XmlElement node in projects)
+			{
+				Lookup(node);
+			}
 		}
 	}
 }

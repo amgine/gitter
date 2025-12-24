@@ -25,7 +25,7 @@ using gitter.Framework.Mvc;
 
 interface ICloneView : IView, IRepositoryCloneDialog
 {
-	IUserInputSource<string> RemoteName { get; }
+	IUserInputSource<string?> RemoteName { get; }
 
 	IUserInputSource<bool> ShallowClone { get; }
 
@@ -33,7 +33,7 @@ interface ICloneView : IView, IRepositoryCloneDialog
 
 	IUserInputSource<bool> UseTemplate { get; }
 
-	IUserInputSource<string> TemplatePath { get; }
+	IUserInputSource<string?> TemplatePath { get; }
 
 	IUserInputSource<bool> Bare { get; }
 

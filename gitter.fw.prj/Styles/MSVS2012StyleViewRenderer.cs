@@ -25,8 +25,6 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-using Resources = gitter.Framework.Properties.Resources;
-
 public class MSVS2012StyleViewRenderer : ViewRenderer
 {
 	#region Color Tables
@@ -78,8 +76,8 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 
 	private sealed class DarkColorTable : IColorTable
 	{
-		private static readonly Color _BackgroundColor						= MSVS2012DarkColors.WORK_AREA;
-		private static readonly Color _ViewHostTabsBackground				= MSVS2012DarkColors.WORK_AREA;
+		private static readonly Color _BackgroundColor						= MSVS2012DarkColors.WINDOW;
+		private static readonly Color _ViewHostTabsBackground				= MSVS2012DarkColors.WINDOW;
 
 		private static readonly Color _DocTabsFooterActive					= Color.FromArgb(0, 122, 204);
 		private static readonly Color _DocTabsFooterNormal					= Color.FromArgb(63, 63, 70);
@@ -169,8 +167,8 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 
 	private sealed class LightColorTable : IColorTable
 	{
-		private static readonly Color _BackgroundColor						= MSVS2012LightColors.WORK_AREA;
-		private static readonly Color _ViewHostTabsBackground				= MSVS2012LightColors.WORK_AREA;
+		private static readonly Color _BackgroundColor						= MSVS2012LightColors.WINDOW;
+		private static readonly Color _ViewHostTabsBackground				= MSVS2012LightColors.WINDOW;
 
 		private static readonly Color _DocTabsFooterActive					= Color.FromArgb(0, 122, 204);
 		private static readonly Color _DocTabsFooterNormal					= Color.FromArgb(63, 63, 70);
@@ -258,8 +256,8 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		#endregion
 	}
 
-	private static IColorTable _darkColors;
-	private static IColorTable _lightColors;
+	private static IColorTable? _darkColors;
+	private static IColorTable? _lightColors;
 
 	public static IColorTable DarkColors => _darkColors ??= new DarkColorTable();
 
@@ -373,7 +371,21 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		return length;
 	}
 
-	private static void RenderTabContent(ViewTabBase tab, Rectangle bounds, Graphics graphics, Color foregroundColor)
+	private static Bitmap? _cache;
+
+	private static Bitmap GetCacheBitmap(int width, int height)
+	{
+		if(_cache is not null && _cache.Width >= width && _cache.Height >= height)
+		{
+			return _cache;
+		}
+		_cache?.Dispose();
+		if(width <= 0) width = 1;
+		if(height <= 0) height = 1;
+		return _cache = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+	}
+
+	private void RenderTabContent(ViewTabBase tab, Rectangle bounds, Graphics graphics, Color foregroundColor)
 	{
 		int x = bounds.X;
 		int y = bounds.Y;
@@ -434,9 +446,31 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 			case Orientation.Vertical:
 				bounds.Y      += conv.ConvertY(ViewConstants.BeforeTabContent);
 				bounds.Height -= conv.ConvertY(ViewConstants.BeforeTabContent) + conv.ConvertY(ViewConstants.AfterTabContent) - 1;
-				bounds.Height += 10;
-				GitterApplication.GdiPlusTextRenderer.DrawText(
-					graphics, tab.Text, font, foregroundColor, bounds, stringFormat);
+				var src = new Rectangle(0, 0, bounds.Height, bounds.Width);
+				var bitmap = GetCacheBitmap(src.Width, src.Height);
+				using(var g = Graphics.FromImage(bitmap))
+				{
+					const TextFormatFlags flags =
+						TextFormatFlags.VerticalCenter |
+						TextFormatFlags.EndEllipsis |
+						TextFormatFlags.GlyphOverhangPadding |
+						TextFormatFlags.NoClipping |
+						TextFormatFlags.NoPadding;
+					using var brush = SolidBrushCache.Get(_colorTable.BackgroundColor);
+					var fill = src;
+					fill.X -= 1;
+					fill.Y -= 1;
+					fill.Width += 2;
+					fill.Height += 2;
+					g.FillRectangle(brush, fill);
+					TextRenderer.DrawText(g, tab.Text, font, src, foregroundColor, _colorTable.BackgroundColor, flags);
+					graphics.DrawImage(bitmap,
+					[
+						new Point(bounds.X + bounds.Width, bounds.Y),
+						new Point(bounds.X + bounds.Width, bounds.Y + bounds.Height),
+						new Point(bounds.X, bounds.Y)
+					], src, GraphicsUnit.Pixel);
+				}
 				break;
 			default:
 				throw new ApplicationException($"Unexpected ViewTabBase.Orientation value: {tab.Orientation}");
@@ -501,8 +535,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 
 	public override void RenderViewHostTabBackground(ViewHostTab tab, Graphics graphics, Rectangle bounds)
 	{
-		var host = tab.View.Host;
-		if(host.IsDocumentWell)
+		if(tab.View.Host is { IsDocumentWell: true } host)
 		{
 			if(tab.IsActive)
 			{
@@ -542,7 +575,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		Assert.IsNotNull(tab);
 		Assert.IsNotNull(graphics);
 
-		if(tab.View.Host.IsDocumentWell)
+		if(tab.View.Host is { IsDocumentWell: true })
 		{
 			RenderTabContent(tab, bounds, graphics, Color.White);
 		}
@@ -566,7 +599,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		if(tab.Buttons is { Count: > 0 })
 		{
 			var buttonsBounds = new Rectangle(bounds.Right - tab.Buttons.Width - 2, 0, tab.Buttons.Width, bounds.Height);
-			tab.Buttons.OnPaint(graphics, buttonsBounds, !tab.IsActive || tab.View.Host.IsActive);
+			tab.Buttons.OnPaint(graphics, buttonsBounds, !tab.IsActive || tab.View.Host is { IsActive: true });
 		}
 	}
 
@@ -619,13 +652,13 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 					int y = bounds.Y + (bounds.Height - 8) / 2;
 					using(var brush = new SolidBrush(ColorTable.ViewButtonForeground))
 					{
-						graphics.FillPolygon(brush, new[]
-							{
+						graphics.FillPolygon(brush,
+							[
 								new Point(x + 1, y + 4),
 								new Point(x + 7, y + 4),
 								new Point(x + 4, y + 7),
 								new Point(x + 3, y + 7),
-							});
+							]);
 					}
 					using(var pen = new Pen(Color.FromArgb(120, ColorTable.ViewButtonForeground)))
 					{
@@ -638,16 +671,16 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 				{
 					int x = bounds.X + (bounds.Width - 8) / 2;
 					int y = bounds.Y + (bounds.Height - 8) / 2;
-					using(var brush = new SolidBrush(ColorTable.ViewButtonForeground))
+					using(var brush = SolidBrushCache.Get(ColorTable.ViewButtonForeground))
 					{
 						graphics.FillRectangle(brush, x, y, 8, 2);
-						graphics.FillPolygon(brush, new[]
-							{
+						graphics.FillPolygon(brush,
+							[
 								new Point(x + 1, y + 4),
 								new Point(x + 7, y + 4),
 								new Point(x + 4, y + 7),
 								new Point(x + 3, y + 7),
-							});
+							]);
 					}
 					using(var pen = new Pen(Color.FromArgb(120, ColorTable.ViewButtonForeground)))
 					{
@@ -658,26 +691,20 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 				break;
 			case ViewButtonType.ScrollTabsLeft:
 				{
-					using(var brush = new SolidBrush(ColorTable.ViewButtonForeground))
-					{
-						var p1 = new Point(bounds.X + (bounds.Width - 5) / 2, bounds.Y + bounds.Height / 2);
-						var p2 = new Point(p1.X + 5, p1.Y - 5);
-						var p3 = new Point(p1.X + 5, p1.Y + 5);
-						var triangle = new[] { p1, p2, p3 };
-						graphics.FillPolygon(brush, triangle);
-					}
+					var p1 = new Point(bounds.X + (bounds.Width - 5) / 2, bounds.Y + bounds.Height / 2);
+					var p2 = new Point(p1.X + 5, p1.Y - 5);
+					var p3 = new Point(p1.X + 5, p1.Y + 5);
+					using var brush = SolidBrushCache.Get(ColorTable.ViewButtonForeground);
+					graphics.FillPolygon(brush, [p1, p2, p3]);
 				}
 				break;
 			case ViewButtonType.ScrollTabsRight:
 				{
-					using(var brush = new SolidBrush(ColorTable.ViewButtonForeground))
-					{
-						var p1 = new Point(bounds.X + bounds.Width - (bounds.Width - 5) / 2, bounds.Y + bounds.Height / 2);
-						var p2 = new Point(p1.X - 5, p1.Y - 5);
-						var p3 = new Point(p1.X - 5, p1.Y + 5);
-						var triangle = new[] { p1, p2, p3 };
-						graphics.FillPolygon(brush, triangle);
-					}
+					var p1 = new Point(bounds.X + bounds.Width - (bounds.Width - 5) / 2, bounds.Y + bounds.Height / 2);
+					var p2 = new Point(p1.X - 5, p1.Y - 5);
+					var p3 = new Point(p1.X - 5, p1.Y + 5);
+					using var brush = SolidBrushCache.Get(ColorTable.ViewButtonForeground);
+					graphics.FillPolygon(brush, [p1, p2, p3]);
 				}
 				break;
 			case ViewButtonType.Normalize:
@@ -766,7 +793,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		}
 	}
 
-	#endregion
+#endregion
 
 	#region View Host Footer Rendering
 
@@ -852,25 +879,23 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 				client.Y      = (client.Height - accentHeight) / 2;
 				client.Height = accentHeight;
 
-				using(var brush = new HatchBrush(HatchStyle.Percent20, accentColor, backgroundColor))
+				using var brush = new HatchBrush(HatchStyle.Percent20, accentColor, backgroundColor);
+				var ro = default(Point);
+				try
 				{
-					var ro = default(Point);
-					try
-					{
-						ro = graphics.RenderingOrigin;
-						graphics.RenderingOrigin = new Point(client.X % 4, client.Y % 4);
-					}
-					catch(NotImplementedException)
-					{
-					}
-					graphics.FillRectangle(brush, client);
-					try
-					{
-						graphics.RenderingOrigin = ro;
-					}
-					catch(NotImplementedException)
-					{
-					}
+					ro = graphics.RenderingOrigin;
+					graphics.RenderingOrigin = new Point(client.X % 4, client.Y % 4);
+				}
+				catch(NotImplementedException)
+				{
+				}
+				graphics.FillRectangle(brush, client);
+				try
+				{
+					graphics.RenderingOrigin = ro;
+				}
+				catch(NotImplementedException)
+				{
 				}
 			}
 		}
@@ -928,11 +953,11 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 	}
 
 	[ThreadStatic]
-	private static readonly PointF[] _arrowPoints = new PointF[4];
+	private static PointF[]? _arrowPoints;
 
 	private static PointF[] SetupArrow(int x, int y, Size padding, Dpi dpi, Point p0, Point p1, Point p2, Point p3)
 	{
-		var points = _arrowPoints;
+		var points = _arrowPoints ??= new PointF[4];
 		x += padding.Width;
 		y += padding.Height;
 		var conv = DpiConverter.FromDefaultTo(dpi);
@@ -1236,7 +1261,7 @@ public class MSVS2012StyleViewRenderer : ViewRenderer
 		PaintDockMarkerButtonContent(button, graphics, dpi, hover);
 	}
 
-	#endregion
+#endregion
 
 	#region Popup Notifications
 

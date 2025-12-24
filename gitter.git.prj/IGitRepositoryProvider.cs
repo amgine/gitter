@@ -29,9 +29,9 @@ public interface IGitRepositoryProvider : IRepositoryProvider
 {
 	IReadOnlyList<IGitAccessorProvider> GitAccessorProviders { get; }
 
-	IGitAccessorProvider ActiveGitAccessorProvider { get; set; }
+	IGitAccessorProvider? ActiveGitAccessorProvider { get; set; }
 
-	IGitAccessor GitAccessor { get; set; }
+	IGitAccessor? GitAccessor { get; set; }
 
 	bool RunInitDialog();
 

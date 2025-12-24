@@ -25,18 +25,9 @@ using gitter.Framework.Controls;
 
 using Resources = gitter.GitLab.Properties.Resources;
 
-sealed class TestReportViewFactory : ViewFactoryBase
+sealed class TestReportViewFactory(GitLabGuiProvider guiProvider)
+	: ViewFactoryBase(Guids.TestReportViewGuid, Resources.StrTests, CommonIcons.Test, singleton: false)
 {
-	public TestReportViewFactory(GitLabGuiProvider guiProvider)
-		: base(Guids.TestReportViewGuid, Resources.StrTests, CommonIcons.Test, singleton: false)
-	{
-		Verify.Argument.IsNotNull(guiProvider);
-
-		GuiProvider = guiProvider;
-	}
-
-	private GitLabGuiProvider GuiProvider { get; }
-
 	/// <inheritdoc/>
 	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 	{
@@ -44,7 +35,7 @@ sealed class TestReportViewFactory : ViewFactoryBase
 
 		return new TestReportView(environment)
 		{
-			ServiceContext = GuiProvider.ServiceContext,
+			ServiceContext = guiProvider.ServiceContext,
 		};
 	}
 }

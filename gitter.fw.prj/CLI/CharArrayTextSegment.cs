@@ -27,7 +27,7 @@ public sealed class CharArrayTextSegment : ITextSegment
 {
 	#region Data
 
-	private char[] _buffer;
+	private char[] _buffer = Preallocated<char>.EmptyArray;
 	private int _offset;
 	private int _length;
 
@@ -67,7 +67,7 @@ public sealed class CharArrayTextSegment : ITextSegment
 		_length = buffer is not null ? buffer.Length : 0;
 	}
 
-	public override string ToString() => new string(_buffer, _offset, _length);
+	public override string ToString() => new(_buffer, _offset, _length);
 
 	#endregion
 
@@ -104,6 +104,7 @@ public sealed class CharArrayTextSegment : ITextSegment
 
 	public int IndexOf(char c)
 	{
+		if(_length == 0) return -1;
 		int index = Array.IndexOf(_buffer, c, _offset, _length);
 		if(index != -1)
 		{

@@ -29,37 +29,45 @@ using System.Windows.Forms;
 using Resources = gitter.Framework.Properties.Resources;
 
 [ToolboxItem(false)]
-public abstract class CustomObjectPicker<TListBox, TItem, TValue> : CustomPopupComboBox, IPicker<TValue>
+public abstract class CustomObjectPicker<TListBox, TItem, TValue> : BorderControl, IPicker<TValue>
 	where TListBox : CustomListBox, new()
 	where TItem : CustomListBoxItem
 {
-	#region Static
+	const int MaxDisplayedItems = 6;
 
 	protected static readonly StringFormat DefaultStringFormat = new(StringFormat.GenericTypographic)
 	{
 		LineAlignment = StringAlignment.Center,
 	};
 
-	#endregion
+	private static readonly object SelectedValueChangedEvent = new();
 
-	#region Data
+	public event EventHandler SelectedValueChanged
+	{
+		add    => Events.AddHandler    (SelectedValueChangedEvent, value);
+		remove => Events.RemoveHandler (SelectedValueChangedEvent, value);
+	}
 
-	private TItem _selectedItem;
+	protected virtual void OnSelectedValueChanged(EventArgs e)
+		=> Events.Raise(SelectedValueChangedEvent, this, e);
 
-	#endregion
-
-	#region .ctor
+	private TListBox _dropDownControl = default!;
+	private TItem? _selectedItem;
+	private Popup? _dropDown;
+	private long _lastHidden;
 
 	protected CustomObjectPicker()
 	{
+		SetStyle(ControlStyles.Selectable, true);
+		SetStyle(ControlStyles.StandardDoubleClick | ControlStyles.ContainerControl, false);
+
 		var listBox = new TListBox()
 		{
-			Style = GitterApplication.DefaultStyle,
 			HeaderStyle = HeaderStyle.Hidden,
-			ItemActivation = gitter.Framework.Controls.ItemActivation.SingleClick,
+			ItemActivation = ItemActivation.SingleClick,
 			DisableContextMenus = true,
-			Font = LicenseManager.UsageMode == LicenseUsageMode.Runtime?
-				GitterApplication.FontManager.UIFont.Font:
+			Font = LicenseManager.UsageMode == LicenseUsageMode.Runtime ?
+				GitterApplication.FontManager.UIFont.Font :
 				SystemFonts.MessageBoxFont,
 		};
 		listBox.Size = new Size(Width, 2 + 2 + listBox.CurrentItemHeight * 5);
@@ -72,24 +80,82 @@ public abstract class CustomObjectPicker<TListBox, TItem, TValue> : CustomPopupC
 					SizeMode = ColumnSizeMode.Auto,
 				});
 		}
-		listBox.ItemActivated += OnListBoxItemActivated;
+		listBox.ItemActivated              += OnListBoxItemActivated;
+		listBox.DisplayedItemsCountChanged += OnDropDownControlDisplayedItemsCountChanged;
 
-		DropDownStyle = ComboBoxStyle.DropDownList;
-		DrawMode      = DrawMode.OwnerDrawFixed;
-		ItemHeight    = SystemInformation.SmallIconSize.Height + 1;
-
-		base.DropDownControl = listBox;
+		DropDownControl = listBox;
 	}
 
-	#endregion
+	private void OnDropDownControlDisplayedItemsCountChanged(object? sender, EventArgs e)
+	{
+		if(sender is not TListBox listBox) return;
+		if(_dropDown is not { Visible: true }) return;
+		var count = Math.Min(MaxDisplayedItems, Math.Max(listBox.DisplayedItemsCount, 1));
+		_dropDown.Height = listBox.GetHeightToFitItems(count, Dpi.FromControl(this));
+	}
 
-	#region Properties
+	public TListBox DropDownControl
+	{
+		get => _dropDownControl;
+		private set
+		{
+			if(_dropDownControl == value) return;
 
+			_dropDownControl = value;
+			if(_dropDown is not null)
+			{
+				_dropDown.Closed -= OnDropDownClosed;
+				_dropDown.Dispose();
+				_dropDown = default;
+			}
+			_dropDown = new Popup(value)
+			{
+				PopupAnimation = PopupAnimations.Slide | PopupAnimations.TopToBottom,
+				AutoClose = true,
+			};
+			_dropDown.Closed += OnDropDownClosed;
+		}
+	}
+
+	public bool DroppedDown
+	{
+		get => _dropDown is { Visible: true };
+		set
+		{
+			if(value)
+			{
+				ShowDropDownCore();
+			}
+			else
+			{
+				HideDropDownCore();
+			}
+		}
+	}
+
+	private void ShowDropDownCore()
+	{
+		if(_dropDown is null) return;
+		if(DropDownControl.DisplayedItemsCount == 0) return;
+		var count = Math.Min(6, DropDownControl.DisplayedItemsCount);
+		_dropDown.Height = DropDownControl.GetHeightToFitItems(count, Dpi.FromControl(this));
+		_dropDown.Show(this);
+	}
+
+	private void HideDropDownCore(ToolStripDropDownCloseReason reason = ToolStripDropDownCloseReason.ItemClicked)
+		=> _dropDown?.Close(reason);
+
+	private void OnDropDownClosed(object? sender, ToolStripDropDownClosedEventArgs e)
+#if NETCOREAPP
+		=> _lastHidden = Environment.TickCount64;
+#else
+		=> _lastHidden = Environment.TickCount;
+#endif
+
+	/// <summary>Extracts value from the specified list item.</summary>
+	/// <param name="item">List item.</param>
+	/// <returns>Extracted value.</returns>
 	protected abstract TValue GetValue(TItem item);
-
-	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-	[EditorBrowsable(EditorBrowsableState.Never)]
-	public new TListBox DropDownControl => base.DropDownControl as TListBox;
 
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 	[EditorBrowsable(EditorBrowsableState.Never)]
@@ -97,63 +163,45 @@ public abstract class CustomObjectPicker<TListBox, TItem, TValue> : CustomPopupC
 
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 	[EditorBrowsable(EditorBrowsableState.Never)]
-	public new TItem SelectedItem
+	public TItem? SelectedItem
 	{
 		get => _selectedItem;
 		set
 		{
-			if(_selectedItem != value)
+			if(_selectedItem == value) return;
+
+			if(value is not null && value.ListBox != DropDownControl)
 			{
-				if(value != null && value.ListBox != DropDownControl)
-				{
-					throw new ArgumentException();
-				}
-				_selectedItem = value;
-				if(_selectedItem != null)
-				{
-					_selectedItem.FocusAndSelect();
-				}
-				OnSelectedItemChanged(EventArgs.Empty);
-				OnSelectedIndexChanged(EventArgs.Empty);
+				throw new ArgumentException($"Specified item does not belong to {nameof(DropDownControl)}", nameof(value));
 			}
+			_selectedItem = value;
+			_selectedItem?.FocusAndSelect();
+			Invalidate();
+			OnSelectedValueChanged(EventArgs.Empty);
 		}
 	}
 
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
 	[EditorBrowsable(EditorBrowsableState.Never)]
-	public new TValue SelectedValue
+	public TValue? SelectedValue
 	{
-		get
-		{
-			var selectedItem = SelectedItem;
-			if(selectedItem is not null)
-			{
-				return GetValue(selectedItem);
-			}
-			return default;
-		}
-		set
-		{
-			SelectedItem = FindItemByValue(DropDownControl.Items, value);
-		}
+		get => SelectedItem is { } item ? GetValue(item) : default;
+		set => SelectedItem = FindItemByValue(DropDownControl.Items, value);
 	}
 
-	#endregion
+	protected override bool IsFocused => Focused || _dropDown is { Visible: true };
 
-	#region Methods
-
-	protected virtual TItem FindItemByValue(CustomListBoxItemsCollection items, TValue value)
+	protected virtual TItem? FindItemByValue(CustomListBoxItemsCollection items, TValue? value)
 	{
 		Assert.IsNotNull(items);
 
 		foreach(var item in items)
 		{
-			if(item is TItem i)
+			if(item is TItem typedItem)
 			{
-				var v = GetValue(i);
-				if(EqualityComparer<TValue>.Default.Equals(v, value))
+				if(EqualityComparer<TValue?>.Default.Equals(GetValue(typedItem), value))
 				{
-					return i;
+					return typedItem;
 				}
 			}
 			if(item.Items.Count != 0)
@@ -165,91 +213,81 @@ public abstract class CustomObjectPicker<TListBox, TItem, TValue> : CustomPopupC
 				}
 			}
 		}
-		return null;
+		return default;
+	}
+
+	protected override void PaintContent(Graphics graphics, Rectangle bounds, Rectangle clip, Colors colors)
+	{
+		var conv        = DpiConverter.FromDefaultTo(this);
+		var glyphColor  = colors.ForeColor;
+		var glyphSize   = conv.ConvertX(8);
+		var glyphMargin = conv.ConvertX(4);
+
+		var glyphBounds = new Rectangle(
+			bounds.Right - (glyphMargin + glyphSize + BorderThickness.GetValue(conv.To)),
+			bounds.Y + (bounds.Height - glyphSize) / 2,
+			glyphSize, glyphSize);
+
+		using(var pen = new Pen(glyphColor, conv.ConvertX(1.5f)))
+		{
+			var h  = glyphBounds.Height / 4;
+			var y0 = glyphBounds.Y + h;
+			var y1 = glyphBounds.Y + h * 3;
+			var x0 = glyphBounds.X;
+			var x1 = glyphBounds.X + glyphBounds.Width / 2;
+			var x2 = glyphBounds.Right;
+#if NET9_0_OR_GREATER
+			Span<Point> points = stackalloc Point[3];
+#else
+			var points = new Point[3];
+#endif
+			points[0] = new(x0, y0);
+			points[1] = new(x1, y1);
+			points[2] = new(x2, y0);
+			using(graphics.SwitchSmoothingMode(System.Drawing.Drawing2D.SmoothingMode.HighQuality))
+			{
+				graphics.DrawLines(pen, points);
+			}
+		}
+
+		bounds.Width -= glyphMargin + glyphSize;
+
+		if(SelectedItem is { } selectedItem)
+		{
+			OnPaintItem(selectedItem, graphics, bounds, clip, colors);
+		}
+		else
+		{
+			OnPaintNullItem(graphics, bounds, clip, colors);
+		}
 	}
 
 	/// <inheritdoc/>
-	protected override void OnDrawItem(DrawItemEventArgs e)
-	{
-		Assert.IsNotNull(e);
-
-		e.DrawBackground();
-		e.Graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
-		e.Graphics.TextContrast      = GraphicsUtility.TextContrast;
-
-		var selectedItem = SelectedItem;
-		if(selectedItem is null)
-		{
-			OnPaintNullItem(e);
-		}
-		else
-		{
-			OnPaintItem(selectedItem, e);
-		}
-	}
-
-	protected virtual void OnPaintItem(TItem item, DrawItemEventArgs e)
+	protected virtual void OnPaintItem(TItem item, Graphics graphics, Rectangle bounds, Rectangle clip, Colors colors)
 	{
 		Assert.IsNotNull(item);
-		Assert.IsNotNull(e);
 
 		var itemState = ItemState.None;
-		if((e.State & DrawItemState.Selected) == DrawItemState.Selected)
-		{
-			itemState |= ItemState.Selected;
-		}
-		if((e.State & DrawItemState.Focus) == DrawItemState.Focus)
-		{
-			itemState |= ItemState.Focused;
-		}
-
 		var column = DropDownControl.Columns[0];
-		if((e.State & DrawItemState.Selected) == DrawItemState.Selected)
+		var args = new SubItemPaintEventArgs(graphics, Dpi.FromControl(this),
+			bounds,
+			bounds,
+			0,
+			itemState,
+			0,
+			Focused,
+			item,
+			0,
+			column)
 		{
-			var oldBrush = column.ContentBrush;
-			try
-			{
-				using var brush = SolidBrushCache.Get(e.ForeColor);
-				column.ContentBrush = brush;
-				var args = new SubItemPaintEventArgs(e.Graphics, Dpi.FromControl(this),
-					e.Bounds,
-					e.Bounds,
-					0,
-					itemState,
-					0,
-					Focused,
-					item,
-					0,
-					column);
-				item.PaintSubItem(args);
-			}
-			finally
-			{
-				column.ContentBrush = oldBrush;
-			}
-		}
-		else
-		{
-			var args = new SubItemPaintEventArgs(e.Graphics, Dpi.FromControl(this),
-				e.Bounds,
-				e.Bounds,
-				0,
-				itemState,
-				0,
-				Focused,
-				item,
-				0,
-				column);
-			item.PaintSubItem(args);
-		}
+			Font = Font,
+		};
+		item.PaintSubItem(args);
 	}
 
-	protected virtual void OnPaintNullItem(DrawItemEventArgs e)
+	protected virtual void OnPaintNullItem(Graphics graphics, Rectangle bounds, Rectangle clip, Colors colors)
 	{
-		Assert.IsNotNull(e);
-
-		var bounds = e.Bounds;
-		var iconBounds = e.Bounds;
+		var iconBounds = bounds;
 		iconBounds.Width = 16;
 		var d = (iconBounds.Height - 16);
 		iconBounds.Y += d / 2;
@@ -258,17 +296,43 @@ public abstract class CustomObjectPicker<TListBox, TItem, TValue> : CustomPopupC
 		bounds.Width -= iconBounds.Width + 3;
 
 		GitterApplication.TextRenderer.DrawText(
-			e.Graphics, "<none>", Font,
-			((e.State & DrawItemState.Selected) == DrawItemState.Selected) ?
-			SystemBrushes.HighlightText : SystemBrushes.GrayText, bounds, DefaultStringFormat);
+			graphics, "<none>", Font,
+			colors.ForeColor, bounds, DefaultStringFormat);
 	}
 
-	private void OnListBoxItemActivated(object sender, ItemEventArgs e)
+	private void OnListBoxItemActivated(object? sender, ItemEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
 		SelectedItem = e.Item as TItem;
-		HideDropDown();
+		HideDropDownCore();
+	}
+
+	/// <inheritdoc/>
+	protected override void OnMouseDown(MouseEventArgs e)
+	{
+		base.OnMouseDown(e);
+		if(e.Button == MouseButtons.Left)
+		{
+			Focus();
+#if NETCOREAPP
+			var delta = Environment.TickCount64 - _lastHidden;
+#else
+			var delta = Environment.TickCount - _lastHidden;
+#endif
+			if(delta < 0 || delta > 20)
+			{
+				if(_dropDown is { Visible: true })
+				{
+					HideDropDownCore();
+				}
+				else
+				{
+					ShowDropDownCore();
+				}
+			}
+			Invalidate();
+		}
 	}
 
 	/// <inheritdoc/>
@@ -290,8 +354,33 @@ public abstract class CustomObjectPicker<TListBox, TItem, TValue> : CustomPopupC
 		var item = items[index];
 		DropDownControl.FocusAndSelectItem(item);
 		SelectedItem = item as TItem;
-		Invalidate();
 		base.OnMouseWheel(e);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnSizeChanged(EventArgs e)
+	{
+		base.OnSizeChanged(e);
+		if(_dropDown is not null)
+		{
+			_dropDown.Width = Width;
+		}
+	}
+
+	/// <inheritdoc/>
+	protected override void OnGotFocus(EventArgs e)
+	{
+		base.OnGotFocus(e);
+		UpdateColors();
+		Invalidate();
+	}
+
+	/// <inheritdoc/>
+	protected override void OnLostFocus(EventArgs e)
+	{
+		base.OnLostFocus(e);
+		UpdateColors();
+		Invalidate();
 	}
 
 	/// <inheritdoc/>
@@ -299,15 +388,20 @@ public abstract class CustomObjectPicker<TListBox, TItem, TValue> : CustomPopupC
 	{
 		if(disposing)
 		{
-			var listBox = DropDownControl;
-			if(listBox != null)
+			if(_dropDown is not null)
 			{
-				listBox.ItemActivated -= OnListBoxItemActivated;
+				_dropDown.Closed -= OnDropDownClosed;
+				_dropDown.Dispose();
+				_dropDown = default;
+			}
+			var listBox = DropDownControl;
+			if(listBox is not null)
+			{
+				listBox.DisplayedItemsCountChanged -= OnDropDownControlDisplayedItemsCountChanged;
+				listBox.ItemActivated              -= OnListBoxItemActivated;
 				listBox.Dispose();
 			}
 		}
 		base.Dispose(disposing);
 	}
-
-	#endregion
 }

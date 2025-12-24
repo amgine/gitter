@@ -25,19 +25,12 @@ using System.Collections.Generic;
 
 public static class ComparisonExtensions
 {
-	private sealed class Comparer<T> : IComparer<T>
+	private sealed class Comparer<T>(Comparison<T?> comparison) : IComparer<T>
 	{
-		private readonly Comparison<T> _comparison;
-
-		public Comparer(Comparison<T> comparison)
-		{
-			_comparison = comparison;
-		}
-
-		int IComparer<T>.Compare(T x, T y) => _comparison(x, y);
+		int IComparer<T>.Compare(T? x, T? y) => comparison(x, y);
 	}
 
-	public static IComparer<T> AsComparer<T>(this Comparison<T> comparison)
+	public static IComparer<T> AsComparer<T>(this Comparison<T?> comparison)
 	{
 		Verify.Argument.IsNotNull(comparison);
 

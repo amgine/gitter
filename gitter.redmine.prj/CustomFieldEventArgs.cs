@@ -20,11 +20,11 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 
-public sealed class CustomFieldEventArgs : EventArgs
+public sealed class CustomFieldEventArgs(CustomField customField) : EventArgs
 {
-	public CustomFieldEventArgs(CustomField customField) => CustomField = customField;
-
-	public CustomField CustomField { get; }
+	public CustomField CustomField { get; } = customField;
 }

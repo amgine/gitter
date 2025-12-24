@@ -33,8 +33,6 @@ public partial class RebaseDialog : GitDialogBase
 {
 	public RebaseDialog()
 	{
-		InitializeComponent();
-
 		Text = Resources.StrRebase;
 	}
 

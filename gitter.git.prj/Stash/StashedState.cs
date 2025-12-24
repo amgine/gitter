@@ -18,19 +18,14 @@
  */
 #endregion
 
-#nullable enable
-
 namespace gitter.Git;
 
 using System;
-using System.Linq;
-using System.Collections.Generic;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 
 using gitter.Framework;
-
-using Resources = gitter.Git.Properties.Resources;
 
 /// <summary>Represents stashed state.</summary>
 public sealed class StashedState : GitNamedObjectWithLifetime, IRevisionPointer
@@ -128,13 +123,13 @@ public sealed class StashedState : GitNamedObjectWithLifetime, IRevisionPointer
 		return Repository.Stash.ToBranch(this, name);
 	}
 
-	public IRevisionDiffSource GetDiffSource(IEnumerable<string>? paths = null)
+	public IRevisionDiffSource GetDiffSource(Many<string> paths = default)
 	{
 		Verify.State.IsNotDeleted(this);
 
-		return paths == null
+		return paths.Count == 0
 			? new StashedChangesDiffSource(this)
-			: new StashedChangesDiffSource(this, paths.ToList());
+			: new StashedChangesDiffSource(this, paths);
 	}
 
 	#endregion
@@ -178,7 +173,7 @@ public sealed class StashedState : GitNamedObjectWithLifetime, IRevisionPointer
 	Revision IRevisionPointer.Dereference() => Revision;
 
 	/// <inheritdoc/>
-	ValueTask<Revision> IRevisionPointer.DereferenceAsync() => new(Revision);
+	ValueTask<Revision?> IRevisionPointer.DereferenceAsync(CancellationToken cancellationToken) => new(Revision);
 
 	#endregion
 }

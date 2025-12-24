@@ -31,10 +31,10 @@ public abstract class CustomListBoxRenderer
 
 	public virtual Color ColumnHeaderForeColor => SystemColors.GrayText;
 
-	private Brush _foregroundBrush;
+	private Brush? _foregroundBrush;
 	public Brush ForegroundBrush => _foregroundBrush ??= new SolidBrush(ForeColor);
 
-	private Brush _columnHeaderForegroundBrush;
+	private Brush? _columnHeaderForegroundBrush;
 	public Brush ColumnHeaderForegroundBrush => _columnHeaderForegroundBrush ??= new SolidBrush(ColumnHeaderForeColor);
 
 	public abstract void OnPaintColumnBackground(CustomListBoxColumn column, ItemPaintEventArgs paintEventArgs);

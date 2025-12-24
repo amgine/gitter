@@ -22,28 +22,14 @@ namespace gitter.Git.AccessLayer.CLI;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 using gitter.Framework;
 
-sealed class OutputParser
+sealed class OutputParser(GitCLI cli)
 {
-	#region Data
-
-	private readonly GitCLI _gitCLI;
-
-	#endregion
-
-	#region .ctor
-
-	public OutputParser(GitCLI gitCLI)
-	{
-		Verify.Argument.IsNotNull(gitCLI);
-
-		_gitCLI = gitCLI;
-	}
-
-	#endregion
+	public GitCLI CLI { get; } = cli;
 
 	#region Generic Errors
 
@@ -82,7 +68,8 @@ sealed class OutputParser
 		return StringUtility.CheckValues(error, errPrefix, pathspec, errPostfix);
 	}
 
-	private static bool IsUntrackedFileWouldBeOverwrittenError(string error, out string fileName)
+	private static bool IsUntrackedFileWouldBeOverwrittenError(string error,
+		[MaybeNullWhen(returnValue: false)] out string fileName)
 	{
 		const string errPrefix = "error: Untracked working tree file '";
 		const string errPostfix = "' would be overwritten by merge.\n";
@@ -100,7 +87,8 @@ sealed class OutputParser
 		}
 	}
 
-	private static bool IsHaveLocalChangesError(string error, out string fileName)
+	private static bool IsHaveLocalChangesError(string error,
+		[MaybeNullWhen(returnValue: false)] out string fileName)
 	{
 		const string errPrefix = "error: You have local changes to '";
 		const string errPostfix = "'; cannot switch branches.\n";
@@ -167,7 +155,7 @@ sealed class OutputParser
 				return true;
 			}
 		}
-		fileName = null;
+		fileName = null!;
 		return false;
 	}
 
@@ -241,7 +229,7 @@ sealed class OutputParser
 
 	#endregion
 
-	public RevisionData ParseSingleRevision(QueryRevisionParameters parameters, GitOutput output)
+	public RevisionData ParseSingleRevision(QueryRevisionRequest parameters, GitOutput output)
 	{
 		Assert.IsNotNull(parameters);
 		Assert.IsNotNull(output);
@@ -257,7 +245,7 @@ sealed class OutputParser
 		}
 		var parser = new GitParser(output.Output);
 		var rev = new RevisionData(parameters.SHA1);
-		parser.ParseRevisionData(rev, null);
+		parser.ParseRevisionData(rev, cache: null);
 		return rev;
 	}
 
@@ -276,14 +264,14 @@ sealed class OutputParser
 			if(numParents == 0)
 			{
 				parser.Position = end + 1;
-				result.Add(new RevisionGraphData(sha1, Preallocated<string>.EmptyArray));
+				result.Add(new RevisionGraphData(sha1, Many<string>.None));
 			}
 			else
 			{
-				var parents = new List<string>(numParents);
+				var parents = new string[numParents];
 				for(int i = 0; i < numParents; ++i)
 				{
-					parents.Add(parser.ReadString(40, 1));
+					parents[i] = parser.ReadString(40, 1);
 				}
 				result.Add(new RevisionGraphData(sha1, parents));
 			}
@@ -291,7 +279,7 @@ sealed class OutputParser
 		return result;
 	}
 
-	public RevisionData ParseDereferenceOutput(DereferenceParameters parameters, GitOutput output)
+	public RevisionData ParseDereferenceOutput(DereferenceRequest parameters, GitOutput output)
 	{
 		Assert.IsNotNull(parameters);
 		Assert.IsNotNull(output);
@@ -314,11 +302,7 @@ sealed class OutputParser
 			var parser = new GitParser(output.Output);
 			return parser.ParseRevision();
 		}
-		else
-		{
-			var hash = new Hash(output.Output);
-			return new RevisionData(hash);
-		}
+		return new(Sha1Hash.Parse(output.Output));
 	}
 
 	public IList<TreeFileData> ParseFilesToAdd(GitOutput output)
@@ -327,7 +311,7 @@ sealed class OutputParser
 
 		if(output.ExitCode != 0 && output.ExitCode != 128)
 		{
-			return new List<TreeFileData>(0);
+			return [];
 		}
 		var files = output.Output;
 		var l = files.Length;
@@ -338,7 +322,7 @@ sealed class OutputParser
 			int eol = files.IndexOf('\n', pos);
 			if(eol == -1) eol = l;
 			var status = FileStatus.Cached;
-			string filePath = null;
+			string filePath = null!;
 			switch(files[pos])
 			{
 				case 'a':
@@ -417,21 +401,21 @@ sealed class OutputParser
 		return res;
 	}
 
-	public Diff ParseDiff(QueryDiffParameters parameters, GitOutput output)
+	public Diff ParseDiff(QueryDiffRequest request, GitOutput output)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 		Assert.IsNotNull(output);
 
 		if(output.ExitCode != 0)
 		{
-			if(parameters.Cached && IsNoHEADCommitToCompareWithError(output.Error))
+			if(request.Cached && IsNoHEADCommitToCompareWithError(output.Error))
 			{
 				throw new RepositoryIsEmptyException(output.Error);
 			}
 			output.Throw();
 		}
 		var parser = new DiffParser(output.Output);
-		var diffType = GetDiffType(parameters);
+		var diffType = GetDiffType(request);
 		return parser.ReadDiff(diffType);
 	}
 
@@ -444,7 +428,7 @@ sealed class OutputParser
 		return parser.ReadDiff(DiffType.CommittedChanges);
 	}
 
-	private static DiffType GetDiffType(QueryDiffParameters parameters)
+	private static DiffType GetDiffType(QueryDiffRequest parameters)
 	{
 		Assert.IsNotNull(parameters);
 
@@ -472,8 +456,11 @@ sealed class OutputParser
 		while(!parser.IsAtEndOfString)
 		{
 			var tab = parser.FindNoAdvance('\t');
-			string commitsCountStr = parser.ReadStringUpTo(tab, 1);
-			int commitsCount = int.Parse(commitsCountStr, NumberStyles.Integer, CultureInfo.InvariantCulture);
+			#if NETCOREAPP
+			int commitsCount = int.Parse(parser.ReadSpanUpTo(tab, skip: 1), NumberStyles.Integer, CultureInfo.InvariantCulture);
+			#else
+			int commitsCount = int.Parse(parser.ReadStringUpTo(tab, skip: 1), NumberStyles.Integer, CultureInfo.InvariantCulture);
+			#endif
 			var eol = parser.FindLfLineEnding();
 			var emailSeparator = parser.String.LastIndexOf(" <", eol - 1, eol - tab - 1);
 			string name = parser.ReadStringUpTo(emailSeparator, 2);
@@ -501,31 +488,31 @@ sealed class OutputParser
 		{
 			if(parser.CheckValueAndSkip("count: "))
 			{
-				int.TryParse(parser.ReadLine(), NumberStyles.Integer, CultureInfo.InvariantCulture, out count);
+				count = parser.ReadLineAsInt32();
 			}
 			else if(parser.CheckValueAndSkip("size: "))
 			{
-				int.TryParse(parser.ReadLine(), NumberStyles.Integer, CultureInfo.InvariantCulture, out size);
+				size = parser.ReadLineAsInt32();
 			}
 			else if(parser.CheckValueAndSkip("in-pack: "))
 			{
-				int.TryParse(parser.ReadLine(), NumberStyles.Integer, CultureInfo.InvariantCulture, out inPack);
+				inPack = parser.ReadLineAsInt32();
 			}
 			else if(parser.CheckValueAndSkip("packs: "))
 			{
-				int.TryParse(parser.ReadLine(), NumberStyles.Integer, CultureInfo.InvariantCulture, out packs);
+				packs = parser.ReadLineAsInt32();
 			}
 			else if(parser.CheckValueAndSkip("size-pack: "))
 			{
-				int.TryParse(parser.ReadLine(), NumberStyles.Integer, CultureInfo.InvariantCulture, out sizePack);
+				sizePack = parser.ReadLineAsInt32();
 			}
 			else if(parser.CheckValueAndSkip("prune-packable: "))
 			{
-				int.TryParse(parser.ReadLine(), NumberStyles.Integer, CultureInfo.InvariantCulture, out prunePackable);
+				prunePackable = parser.ReadLineAsInt32();
 			}
 			else if(parser.CheckValueAndSkip("garbage: "))
 			{
-				int.TryParse(parser.ReadLine(), NumberStyles.Integer, CultureInfo.InvariantCulture, out garbage);
+				garbage = parser.ReadLineAsInt32();
 			}
 			else
 			{
@@ -535,7 +522,7 @@ sealed class OutputParser
 		return new ObjectCountData(count, size, inPack, packs, sizePack, prunePackable, garbage);
 	}
 
-	public RemoteData ParseSingleRemote(QueryRemoteParameters parameters, GitOutput output)
+	public RemoteData ParseSingleRemote(QueryRemoteRequest parameters, GitOutput output)
 	{
 		Assert.IsNotNull(parameters);
 		Assert.IsNotNull(output);
@@ -562,10 +549,9 @@ sealed class OutputParser
 		var res = new List<RemoteData>();
 		while(pos < l)
 		{
-			var r = ParseRemote(remotes, ref pos);
-			if(r != null)
+			if(ParseRemote(remotes, ref pos) is { } remote)
 			{
-				res.Add(r);
+				res.Add(remote);
 			}
 		}
 		return res;
@@ -616,7 +602,6 @@ sealed class OutputParser
 		output.ThrowOnBadReturnCode();
 
 		var srefs = output.Output;
-		var l = srefs.Length;
 		int pos = 0;
 		var refs = new List<RemoteReferenceData>();
 		while(pos != -1 && pos < srefs.Length)
@@ -631,9 +616,9 @@ sealed class OutputParser
 	{
 		Assert.IsNotNull(output);
 
-		var hash = output.Substring(pos, 40);
-		pos += 41;
-		while(output[pos] == ' ' || output[pos] == '\t') ++pos;
+		var hash = Sha1Hash.Parse(output, pos);
+		pos += Sha1Hash.HexStringLength + 1;
+		while(output[pos] is ' ' or '\t') ++pos;
 		int end = output.IndexOf('\n', pos);
 		if(end == -1) end = output.Length;
 		var name = output.Substring(pos, end - pos);
@@ -642,20 +627,20 @@ sealed class OutputParser
 		{
 			end = output.IndexOf('\n', pos);
 			if(end == -1) end = output.Length;
-			var hash2 = output.Substring(pos, 40);
-			int pos2 = pos + 41;
-			while(output[pos2] == ' ' || output[pos2] == '\t') ++pos2;
+			var hash2 = Sha1Hash.Parse(output, pos);
+			int pos2 = pos + Sha1Hash.HexStringLength + 1;
+			while(output[pos2] is ' ' or '\t') ++pos2;
 			int l = end - pos2;
 			if(l == name.Length + GitConstants.DereferencedTagPostfix.Length)
 			{
 				if(StringUtility.CheckValues(output, pos2, name, GitConstants.DereferencedTagPostfix))
 				{
 					pos = end + 1;
-					return new RemoteReferenceData(name, new Hash(hash2)) { TagType = TagType.Annotated };
+					return new RemoteReferenceData(name, hash2) { TagType = TagType.Annotated };
 				}
 			}
 		}
-		return new RemoteReferenceData(name, new Hash(hash));
+		return new RemoteReferenceData(name, hash);
 	}
 
 	public IList<string> ParsePrunedBranches(GitOutput output)
@@ -666,11 +651,10 @@ sealed class OutputParser
 		var res = new List<string>();
 		var branches = output.Output;
 		var pos = 0;
-		var l = branches.Length;
-		while(pos < l)
+		while(pos < branches.Length)
 		{
 			int end = branches.IndexOf('\n', pos);
-			if(end == -1) end = l;
+			if(end == -1) end = branches.Length;
 
 			if(StringUtility.CheckValue(branches, pos, " * [would prune] "))
 			{
@@ -689,13 +673,13 @@ sealed class OutputParser
 		output.ThrowOnBadReturnCode();
 		var res = new List<NoteData>();
 		var notes = output.Output;
-		if(notes.Length > 81)
+		if(notes.Length > Sha1Hash.HexStringLength * 2 + 1)
 		{
 			var parser = new GitParser(notes);
 			while(!parser.IsAtEndOfString)
 			{
-				var noteSHA1 = parser.ReadString(40, 1);
-				var objectSHA1 = parser.ReadString(40, 1);
+				var noteSHA1   = parser.ReadString(Sha1Hash.HexStringLength, 1);
+				var objectSHA1 = parser.ReadString(Sha1Hash.HexStringLength, 1);
 				res.Add(new NoteData(noteSHA1, objectSHA1, null));
 			}
 		}
@@ -717,61 +701,104 @@ sealed class OutputParser
 		return output.Output != "No local changes to save\n";
 	}
 
+	private static void SkipSpaces(string content, ref int pos)
+	{
+		while(pos < content.Length && content[pos] == ' ') ++pos;
+	}
+
 	public IList<TreeContentData> ParseTreeContent(GitOutput output)
 	{
 		Assert.IsNotNull(output);
 
+		static TreeContentType GetTreeObjectType(string content, ref int pos)
+		{
+			static bool Check(string content, string type, ref int pos)
+			{
+				if(!StringUtility.CheckValue(content, pos, type)) return false;
+				var space = pos + type.Length;
+				if(space >= content.Length || content[space] != ' ') return false;
+				pos = space + 1;
+				SkipSpaces(content, ref pos);
+				return true;
+			}
+
+			if(Check(content, GitConstants.TreeObjectType, ref pos))
+			{
+				return TreeContentType.Tree;
+			}
+			if(Check(content, GitConstants.BlobObjectType, ref pos))
+			{
+				return TreeContentType.Blob;
+			}
+			if(Check(content, GitConstants.CommitObjectType, ref pos))
+			{
+				return TreeContentType.Commit;
+			}
+			if(Check(content, GitConstants.TagObjectType, ref pos))
+			{
+				return (TreeContentType)(-1);
+			}
+			return (TreeContentType)(-1);
+		}
+
+		static int ParseMode(string content, ref int pos)
+		{
+			int delimeter = content.IndexOf(' ', pos);
+			#if NETCOREAPP
+			int mode = int.Parse(content.AsSpan(pos, delimeter - pos), NumberStyles.Integer, CultureInfo.InvariantCulture);
+			#else
+			int mode = int.Parse(content.Substring(pos, delimeter - pos), CultureInfo.InvariantCulture);
+			#endif
+			pos = delimeter + 1;
+			SkipSpaces(content, ref pos);
+			return mode;
+		}
+
+		static Sha1Hash ParseHash(string content, ref int pos)
+		{
+			var delimeter = content.IndexOf(' ', pos);
+			var hash = Sha1Hash.Parse(content, pos);
+			pos += Sha1Hash.HexStringLength + 1;
+			SkipSpaces(content, ref pos);
+			return hash;
+		}
+
 		output.ThrowOnBadReturnCode();
 		var content = output.Output;
 		int pos = 0;
-		int l = content.Length;
 		var res = new List<TreeContentData>();
 		// <mode> SP <type> SP <object> SP <object size> TAB <file>
-		while(pos < l)
+		while(pos < content.Length)
 		{
 			var end = content.IndexOf('\0', pos);
-			if(end == -1) end = l;
+			if(end == -1) end = content.Length;
 
-			int delimeter = content.IndexOf(' ', pos);
-			int mode = int.Parse(content.Substring(pos, delimeter - pos), CultureInfo.InvariantCulture);
-			pos = delimeter + 1;
-			while(content[pos] == ' ')
-			{
-				++pos;
-			}
+			var mode = ParseMode        (content, ref pos);
+			var type = GetTreeObjectType(content, ref pos);
+			var hash = ParseHash        (content, ref pos);
 
-			bool isTree		= StringUtility.CheckValue(content, pos, GitConstants.TreeObjectType);
-			bool isBlob		= !isTree && StringUtility.CheckValue(content, pos, GitConstants.BlobObjectType);
-			bool isCommit	= !isTree && !isBlob && StringUtility.CheckValue(content, pos, GitConstants.CommitObjectType);
-			bool isTag		= !isTree && !isBlob && !isCommit && StringUtility.CheckValue(content, pos, GitConstants.TagObjectType);
-
-			pos += 5;
-			delimeter = content.IndexOf(' ', pos);
-			var hash = content.Substring(pos, delimeter - pos);
-			pos += 41;
-			while(content[pos] == ' ')
-			{
-				++pos;
-			}
-			delimeter = content.IndexOf('\t', pos);
+			var delimeter = content.IndexOf('\t', pos);
 			long size = 0;
-			if(isBlob)
+			if(type == TreeContentType.Blob)
 			{
-				size = long.Parse(content.Substring(pos, delimeter - pos), CultureInfo.InvariantCulture);
+				#if NETCOREAPP
+				size = long.Parse(content.AsSpan(pos, delimeter - pos), NumberStyles.Integer, CultureInfo.InvariantCulture);
+				#else
+				size = long.Parse(content.Substring(pos, delimeter - pos), NumberStyles.Integer, CultureInfo.InvariantCulture);
+				#endif
 			}
 			pos = delimeter + 1;
 			var name = content.Substring(pos, end - pos);
-			if(isBlob)
+			TreeContentData? data = type switch
 			{
-				res.Add(new BlobData(hash, mode, name, size));
-			}
-			else if(isTree)
+				TreeContentType.Tree   => new TreeData(hash, mode, name),
+				TreeContentType.Blob   => new BlobData(hash, mode, name, size),
+				TreeContentType.Commit => new TreeCommitData(hash, mode, name),
+				_ => default,
+			};
+			if(data is not null)
 			{
-				res.Add(new TreeData(hash, mode, name));
-			}
-			else if(isCommit)
-			{
-				res.Add(new TreeCommitData(hash, mode, name));
+				res.Add(data);
 			}
 			pos = end + 1;
 		}
@@ -782,75 +809,72 @@ sealed class OutputParser
 	{
 		Assert.IsNotNull(output);
 
-		if(output.ExitCode != 0)
+		if(output.ExitCode == 0) return;
+
+		if(IsNothingToApplyError(output.Error))
 		{
-			if(IsNothingToApplyError(output.Error))
-			{
-				throw new StashIsEmptyException(output.Error);
-			}
-			if(IsCannotApplyToDirtyWorkingTreeError(output.Error))
-			{
-				throw new DirtyWorkingDirectoryException();
-			}
-			output.Throw();
+			throw new StashIsEmptyException(output.Error);
 		}
+		if(IsCannotApplyToDirtyWorkingTreeError(output.Error))
+		{
+			throw new DirtyWorkingDirectoryException();
+		}
+		output.Throw();
 	}
 
 	public void HandleStashPopResult(GitOutput output)
 	{
 		Assert.IsNotNull(output);
 
-		if(output.ExitCode != 0)
+		if(output.ExitCode == 0) return;
+
+		if(IsNothingToApplyError(output.Error))
 		{
-			if(IsNothingToApplyError(output.Error))
-			{
-				throw new StashIsEmptyException(output.Error);
-			}
-			if(IsCannotApplyToDirtyWorkingTreeError(output.Error))
-			{
-				throw new DirtyWorkingDirectoryException();
-			}
-			output.Throw();
+			throw new StashIsEmptyException(output.Error);
 		}
+		if(IsCannotApplyToDirtyWorkingTreeError(output.Error))
+		{
+			throw new DirtyWorkingDirectoryException();
+		}
+		output.Throw();
 	}
 
-	public void HandleCheckoutResult(CheckoutParameters parameters, GitOutput output)
+	public void HandleCheckoutResult(CheckoutRequest request, GitOutput output)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 		Assert.IsNotNull(output);
 
-		if(output.ExitCode != 0)
+		if(output.ExitCode == 0) return;
+
+		if(IsUnknownRevisionError(output.Error, request.Revision))
 		{
-			if(IsUnknownRevisionError(output.Error, parameters.Revision))
-			{
-				throw new UnknownRevisionException(parameters.Revision);
-			}
-			if(IsRefrerenceIsNotATreeError(output.Error, parameters.Revision))
-			{
-				throw new UnknownRevisionException(parameters.Revision);
-			}
-			if(IsUnknownPathspecError(output.Error, parameters.Revision))
-			{
-				throw new UnknownRevisionException(parameters.Revision);
-			}
-			if(!parameters.Force)
-			{
-				string fileName;
-				if(IsUntrackedFileWouldBeOverwrittenError(output.Error, out fileName))
-				{
-					throw new UntrackedFileWouldBeOverwrittenException(fileName);
-				}
-				if(IsHaveLocalChangesError(output.Error, out fileName))
-				{
-					throw new HaveLocalChangesException(fileName);
-				}
-				if(IsHaveConflictsError(output.Error))
-				{
-					throw new HaveConflictsException();
-				}
-			}
-			output.Throw();
+			throw new UnknownRevisionException(request.Revision);
 		}
+		if(IsRefrerenceIsNotATreeError(output.Error, request.Revision))
+		{
+			throw new UnknownRevisionException(request.Revision);
+		}
+		if(IsUnknownPathspecError(output.Error, request.Revision))
+		{
+			throw new UnknownRevisionException(request.Revision);
+		}
+		if(!request.Force)
+		{
+			string? fileName;
+			if(IsUntrackedFileWouldBeOverwrittenError(output.Error, out fileName))
+			{
+				throw new UntrackedFileWouldBeOverwrittenException(fileName);
+			}
+			if(IsHaveLocalChangesError(output.Error, out fileName))
+			{
+				throw new HaveLocalChangesException(fileName);
+			}
+			if(IsHaveConflictsError(output.Error))
+			{
+				throw new HaveConflictsException();
+			}
+		}
+		output.Throw();
 	}
 
 	public void HandleRevertResult(GitOutput output)
@@ -867,48 +891,46 @@ sealed class OutputParser
 	{
 		Assert.IsNotNull(output);
 
-		if(output.ExitCode != 0)
+		if(output.ExitCode == 0) return;
+
+		string fileName;
+		if(IsAutomaticCherryPickFailedError(output.Error))
 		{
-			string fileName;
-			if(IsAutomaticCherryPickFailedError(output.Error))
-			{
-				throw new AutomaticCherryPickFailedException();
-			}
-			if(IsCherryPickIsEmptyError(output.Error))
-			{
-				throw new CherryPickIsEmptyException(output.Error);
-			}
-			if(IsHaveLocalChangesMergeError(output.Error, out fileName))
-			{
-				throw new HaveLocalChangesException(fileName);
-			}
-			if(IsCherryPickNotPossibleBecauseOfMergeCommit(output.Error))
-			{
-				throw new CommitIsMergeException();
-			}
-			if(IsCherryPickNotPossibleBecauseOfConflictsError(output.Error))
-			{
-				throw new HaveConflictsException();
-			}
-			output.Throw();
+			throw new AutomaticCherryPickFailedException();
 		}
+		if(IsCherryPickIsEmptyError(output.Error))
+		{
+			throw new CherryPickIsEmptyException(output.Error);
+		}
+		if(IsHaveLocalChangesMergeError(output.Error, out fileName))
+		{
+			throw new HaveLocalChangesException(fileName);
+		}
+		if(IsCherryPickNotPossibleBecauseOfMergeCommit(output.Error))
+		{
+			throw new CommitIsMergeException();
+		}
+		if(IsCherryPickNotPossibleBecauseOfConflictsError(output.Error))
+		{
+			throw new HaveConflictsException();
+		}
+		output.Throw();
 	}
 
 	public void HandleMergeResult(GitOutput output)
 	{
 		Assert.IsNotNull(output);
 
-		if(output.ExitCode != 0)
+		if(output.ExitCode == 0) return;
+
+		if(IsAutomaticMergeFailedError(output.Output))
 		{
-			if(IsAutomaticMergeFailedError(output.Output))
-			{
-				throw new AutomaticMergeFailedException();
-			}
-			output.Throw();
+			throw new AutomaticMergeFailedException();
 		}
+		output.Throw();
 	}
 
-	public BlameFile ParseBlame(QueryBlameParameters parameters, GitOutput output)
+	public BlameFile ParseBlame(QueryBlameRequest parameters, GitOutput output)
 	{
 		Assert.IsNotNull(parameters);
 		Assert.IsNotNull(output);
@@ -918,12 +940,12 @@ sealed class OutputParser
 		return parser.ParseBlameFile(parameters.FileName);
 	}
 
-	public ReferencesData ParseReferences(QueryReferencesParameters parameters, GitOutput output)
+	public ReferencesData ParseReferences(QueryReferencesRequest request, GitOutput output)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 		Assert.IsNotNull(output);
 
-		var refTypes = parameters.ReferenceTypes;
+		var refTypes = request.ReferenceTypes;
 
 		bool needHeads		= (refTypes & ReferenceType.LocalBranch) == ReferenceType.LocalBranch;
 		bool needRemotes	= (refTypes & ReferenceType.RemoteBranch) == ReferenceType.RemoteBranch;
@@ -933,7 +955,7 @@ sealed class OutputParser
 		var heads	= needHeads   ? new List<BranchData>() : null;
 		var remotes	= needRemotes ? new List<BranchData>() : null;
 		var tags	= needTags    ? new List<TagData>()    : null;
-		RevisionData stash = null;
+		var stash   = default(RevisionData);
 
 		bool encounteredRemoteBranch = false;
 		bool encounteredStash = false;
@@ -944,7 +966,7 @@ sealed class OutputParser
 		int l = refs.Length;
 		while(pos < l)
 		{
-			var hash = new Hash(refs, pos);
+			var hash = Sha1Hash.Parse(refs, pos);
 			pos += 41;
 			var end = refs.IndexOf('\n', pos);
 			if(end == -1) end = l;
@@ -956,7 +978,7 @@ sealed class OutputParser
 					pos += GitConstants.LocalBranchPrefix.Length;
 					var name = refs.Substring(pos, end - pos);
 					var branch = new BranchData(name, hash, false, false, false);
-					heads.Add(branch);
+					heads!.Add(branch);
 				}
 			}
 			else if(!encounteredStash && StringUtility.CheckValue(refs, pos, GitConstants.RemoteBranchPrefix))
@@ -969,7 +991,7 @@ sealed class OutputParser
 					if(!name.EndsWith("/HEAD"))
 					{
 						var branch = new BranchData(name, hash, false, true, false);
-						remotes.Add(branch);
+						remotes!.Add(branch);
 					}
 				}
 			}
@@ -1003,13 +1025,13 @@ sealed class OutputParser
 							if(StringUtility.CheckValue(refs, pos2, name) && StringUtility.CheckValue(refs, pos2 + name.Length, GitConstants.DereferencedTagPostfix))
 							{
 								type = TagType.Annotated;
-								hash = new Hash(refs, s2);
+								hash = Sha1Hash.Parse(refs, s2);
 								end = end2;
 							}
 						}
 					}
 					var tag = new TagData(name, hash, type);
-					tags.Add(tag);
+					tags!.Add(tag);
 				}
 				else break;
 			}
@@ -1020,15 +1042,15 @@ sealed class OutputParser
 
 	#region Branches
 
-	public BranchData ParseSingleBranch(QueryBranchParameters parameters, GitOutput output)
+	public BranchData? ParseSingleBranch(QueryBranchRequest request, GitOutput output)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 		Assert.IsNotNull(output);
 
 		if(output.ExitCode == 0)
 		{
-			var hash = new Hash(output.Output);
-			return new BranchData(parameters.BranchName, hash, false, parameters.IsRemote, false);
+			var hash = Sha1Hash.Parse(output.Output);
+			return new BranchData(request.BranchName, hash, false, request.IsRemote, false);
 		}
 		else
 		{
@@ -1036,78 +1058,75 @@ sealed class OutputParser
 		}
 	}
 
-	public BranchesData ParseBranches(QueryBranchesParameters parameters, GitOutput output)
+	public BranchesData ParseBranches(QueryBranchesRequest request, GitOutput output)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 		Assert.IsNotNull(output);
 
 		output.ThrowOnBadReturnCode();
 		var parser = new GitParser(output.Output);
-		return parser.ParseBranches(parameters.Restriction, parameters.AllowFakeBranch);
+		return parser.ParseBranches(request.Restriction, request.AllowFakeBranch);
 	}
 
-	public void HandleCreateBranchResult(CreateBranchParameters parameters, GitOutput output)
+	public void HandleCreateBranchResult(CreateBranchRequest request, GitOutput output)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 		Assert.IsNotNull(output);
 
-		if(output.ExitCode != 0)
+		if(output.ExitCode == 0) return;
+
+		if(IsUnknownRevisionError(output.Error, request.StartingRevision))
 		{
-			if(IsUnknownRevisionError(output.Error, parameters.StartingRevision))
-			{
-				throw new UnknownRevisionException(parameters.StartingRevision);
-			}
-			if(IsBranchAlreadyExistsError(output.Error, parameters.BranchName))
-			{
-				throw new BranchAlreadyExistsException(parameters.BranchName);
-			}
-			if(IsInvalidBranchNameError(output.Error, parameters.BranchName))
-			{
-				throw new InvalidBranchNameException(parameters.BranchName);
-			}
-			output.Throw();
+			throw new UnknownRevisionException(request.StartingRevision);
 		}
+		if(IsBranchAlreadyExistsError(output.Error, request.BranchName))
+		{
+			throw new BranchAlreadyExistsException(request.BranchName);
+		}
+		if(IsInvalidBranchNameError(output.Error, request.BranchName))
+		{
+			throw new InvalidBranchNameException(request.BranchName);
+		}
+		output.Throw();
 	}
 
-	public void HandleDeleteBranchResult(DeleteBranchParameters parameters, GitOutput output)
+	public void HandleDeleteBranchResult(DeleteBranchRequest request, GitOutput output)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 		Assert.IsNotNull(output);
 
-		if(output.ExitCode != 0)
+		if(output.ExitCode == 0) return;
+
+		if(IsBranchNotFoundError(output.Error, request.Remote, request.BranchName))
 		{
-			if(IsBranchNotFoundError(output.Error, parameters.Remote, parameters.BranchName))
-			{
-				throw new BranchNotFoundException(parameters.BranchName);
-			}
-			if(!parameters.Force)
-			{
-				if(IsBranchNotFullyMergedError(output.Error, parameters.BranchName))
-				{
-					throw new BranchIsNotFullyMergedException(parameters.BranchName);
-				}
-			}
-			output.Throw();
+			throw new BranchNotFoundException(request.BranchName);
 		}
+		if(!request.Force)
+		{
+			if(IsBranchNotFullyMergedError(output.Error, request.BranchName))
+			{
+				throw new BranchIsNotFullyMergedException(request.BranchName);
+			}
+		}
+		output.Throw();
 	}
 
-	public void HandleRenameBranchResult(RenameBranchParameters parameters, GitOutput output)
+	public void HandleRenameBranchResult(RenameBranchRequest request, GitOutput output)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 		Assert.IsNotNull(output);
 
-		if(output.ExitCode != 0)
+		if(output.ExitCode == 0) return;
+
+		if(IsBranchAlreadyExistsError(output.Error, request.NewName))
 		{
-			if(IsBranchAlreadyExistsError(output.Error, parameters.NewName))
-			{
-				throw new BranchAlreadyExistsException(parameters.NewName);
-			}
-			if(IsInvalidBranchNameError(output.Error, parameters.NewName))
-			{
-				throw new InvalidBranchNameException(parameters.NewName);
-			}
-			output.Throw();
+			throw new BranchAlreadyExistsException(request.NewName);
 		}
+		if(IsInvalidBranchNameError(output.Error, request.NewName))
+		{
+			throw new InvalidBranchNameException(request.NewName);
+		}
+		output.Throw();
 	}
 
 	private static bool IsBranchNotFullyMergedError(string error, string branchName)
@@ -1187,27 +1206,27 @@ sealed class OutputParser
 
 	#region Tags
 
-	public TagData ParseTag(QueryTagParameters parameters, GitOutput output)
+	public TagData? ParseTag(QueryTagRequest request, GitOutput output)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 		Assert.IsNotNull(output);
 
 		var tag = output.Output;
-		if(output.ExitCode == 0 && tag.Length >= 40)
+		if(output.ExitCode == 0 && tag.Length >= Sha1Hash.HexStringLength)
 		{
-			Hash hash;
+			Sha1Hash hash;
 			TagType type;
-			if(tag.Length >= 81)
+			if(tag.Length >= Sha1Hash.HexStringLength * 2 + 1)
 			{
-				hash = new Hash(output.Output, 41);
+				hash = Sha1Hash.Parse(output.Output, Sha1Hash.HexStringLength + 1);
 				type = TagType.Annotated;
 			}
 			else
 			{
-				hash = new Hash(output.Output);
+				hash = Sha1Hash.Parse(output.Output);
 				type = TagType.Lightweight;
 			}
-			return new TagData(parameters.TagName, hash, type);
+			return new TagData(request.TagName, hash, type);
 		}
 		else
 		{
@@ -1230,7 +1249,7 @@ sealed class OutputParser
 		while(pos < l)
 		{
 			var tag = TryParseTag(tags, ref pos);
-			if(tag != null) res.Add(tag);
+			if(tag is not null) res.Add(tag);
 		}
 		return res;
 	}
@@ -1239,7 +1258,7 @@ sealed class OutputParser
 	{
 		Assert.IsNotNull(strTag);
 
-		var strHash = strTag.Substring(pos, 40);
+		var strHash = strTag.Substring(pos, Sha1Hash.HexStringLength);
 		int pos2 = strTag.IndexOf('\n', pos);
 		if(pos2 < 0) pos2 = strTag.Length;
 		pos += 41;
@@ -1254,22 +1273,22 @@ sealed class OutputParser
 				if(strTag[pos2 - 3] == '^')
 				{
 					type = TagType.Annotated;
-					strHash = strTag.Substring(pos, 40);
+					strHash = strTag.Substring(pos, Sha1Hash.HexStringLength);
 					pos = pos2 + 1;
 				}
 			}
 		}
-		return new TagData(strName, new Hash(strHash), type);
+		return new TagData(strName, Sha1Hash.Parse(strHash), type);
 	}
 
-	public string ParseDescribeResult(DescribeParameters parameters, GitOutput output)
+	public string? ParseDescribeResult(DescribeRequest parameters, GitOutput output)
 	{
 		Assert.IsNotNull(parameters);
 		Assert.IsNotNull(output);
 
 		if(output.ExitCode != 0)
 		{
-			if(parameters.Revision != null)
+			if(parameters.Revision is not null)
 			{
 				if(IsUnknownRevisionError(output.Error, parameters.Revision))
 				{
@@ -1285,18 +1304,17 @@ sealed class OutputParser
 		return output.Output;
 	}
 
-	public string ParseCommitResult(CommitParameters parameters, GitOutput output)
+	public string ParseCommitResult(CommitRequest parameters, GitOutput output)
 	{
 		return output.Output;
 	}
 
-	public IList<ReferencePushResult> ParsePushResults(string output)
+	public Many<ReferencePushResult> ParsePushResults(string output)
 	{
 		Assert.IsNotNull(output);
 
 		int pos = 0;
 		int l = output.Length;
-		var res = new List<ReferencePushResult>();
 		if(output.StartsWith("To "))
 		{
 			pos = output.IndexOf('\n');
@@ -1309,16 +1327,16 @@ sealed class OutputParser
 				++pos;
 			}
 		}
+		var builder = new Many<ReferencePushResult>.Builder();
 		while(pos < l)
 		{
 			if(StringUtility.CheckValue(output, pos, "Done\n")) break;
-			var refPushResult = ParsePushResult(output, ref pos);
-			if(refPushResult != null)
+			if(ParsePushResult(output, ref pos) is { } result)
 			{
-				res.Add(refPushResult);
+				builder.Add(result);
 			}
 		}
-		return res;
+		return builder;
 	}
 
 	private static PushResultType? GetPushResultType(string output, int pos)
@@ -1332,11 +1350,11 @@ sealed class OutputParser
 			'*' => PushResultType.CreatedReference,
 			'!' => PushResultType.Rejected,
 			'=' => PushResultType.UpToDate,
-			_ => default,
+			 _  => default,
 		};
 	}
 
-	private static ReferencePushResult ParsePushResult(string output, ref int pos)
+	private static ReferencePushResult? ParsePushResult(string output, ref int pos)
 	{
 		var type = GetPushResultType(output, pos);
 		if(!type.HasValue)
@@ -1357,42 +1375,40 @@ sealed class OutputParser
 		return new ReferencePushResult(type.Value, from, to, summary);
 	}
 
-	public void HandleCreateTagResult(CreateTagParameters parameters, GitOutput output)
+	public void HandleCreateTagResult(CreateTagRequest request, GitOutput output)
 	{
-		Assert.IsNotNull(parameters);
+		Assert.IsNotNull(request);
 		Assert.IsNotNull(output);
 
-		if(output.ExitCode != 0)
+		if(output.ExitCode == 0) return;
+
+		if(IsUnknownRevisionError(output.Error, request.TaggedObject))
 		{
-			if(IsUnknownRevisionError(output.Error, parameters.TaggedObject))
-			{
-				throw new UnknownRevisionException(parameters.TaggedObject);
-			}
-			if(IsTagAlreadyExistsError(output.Error, parameters.TagName))
-			{
-				throw new TagAlreadyExistsException(parameters.TagName);
-			}
-			if(IsInvalidTagNameError(output.Error, parameters.TagName))
-			{
-				throw new InvalidTagNameException(parameters.TagName);
-			}
-			output.Throw();
+			throw new UnknownRevisionException(request.TaggedObject);
 		}
+		if(IsTagAlreadyExistsError(output.Error, request.TagName))
+		{
+			throw new TagAlreadyExistsException(request.TagName);
+		}
+		if(IsInvalidTagNameError(output.Error, request.TagName))
+		{
+			throw new InvalidTagNameException(request.TagName);
+		}
+		output.Throw();
 	}
 
-	public void HandleDeleteTagResult(DeleteTagParameters parameters, GitOutput output)
+	public void HandleDeleteTagResult(DeleteTagRequest parameters, GitOutput output)
 	{
 		Assert.IsNotNull(parameters);
 		Assert.IsNotNull(output);
 
-		if(output.ExitCode != 0)
+		if(output.ExitCode == 0) return;
+
+		if(IsTagNotFoundError(output.Error, parameters.TagName))
 		{
-			if(IsTagNotFoundError(output.Error, parameters.TagName))
-			{
-				throw new TagNotFoundException(parameters.TagName);
-			}
-			output.Throw();
+			throw new TagNotFoundException(parameters.TagName);
 		}
+		output.Throw();
 	}
 
 	private static bool IsTagAlreadyExistsError(string error, string tagName)
@@ -1424,7 +1440,7 @@ sealed class OutputParser
 
 	#endregion
 
-	public RevisionData ParseQueryStashTopOutput(QueryStashTopParameters parameters, GitOutput output)
+	public RevisionData? ParseQueryStashTopOutput(QueryStashTopRequest parameters, GitOutput output)
 	{
 		Assert.IsNotNull(parameters);
 		Assert.IsNotNull(output);
@@ -1433,16 +1449,12 @@ sealed class OutputParser
 		{
 			return new GitParser(output.Output).ParseRevision();
 		}
-		else
+		if(output.ExitCode != 0 || output.Output.Length < 40)
 		{
-			if(output.ExitCode != 0 || output.Output.Length < 40)
-			{
-				return null;
-			}
-
-			var hash = new Hash(output.Output);
-			return new RevisionData(hash);
+			return null;
 		}
+		var hash = Sha1Hash.Parse(output.Output);
+		return new RevisionData(hash);
 	}
 
 	public string ParseObjects(GitOutput output)
@@ -1468,23 +1480,18 @@ sealed class OutputParser
 		}
 	}
 
-	public ConfigParameterData ParseQueryConfigParameterResult(QueryConfigParameterParameters parameters, GitOutput output)
+	public ConfigParameterData? ParseQueryConfigParameterResult(QueryConfigParameterRequest parameters, GitOutput output)
 	{
 		Assert.IsNotNull(parameters);
 		Assert.IsNotNull(output);
 
-		if(output.ExitCode == 0)
-		{
-			var value = output.Output.TrimEnd('\n');
-			return new ConfigParameterData(parameters.ParameterName, value, parameters.ConfigFile, parameters.FileName);
-		}
-		else
-		{
-			return null;
-		}
+		if(output.ExitCode != 0) return default;
+
+		var value = output.Output.TrimEnd('\n');
+		return new ConfigParameterData(parameters.ParameterName, value, parameters.ConfigFile, parameters.FileName);
 	}
 
-	public IList<ConfigParameterData> ParseQueryConfigResults(QueryConfigParameters parameters, GitOutput output)
+	public IList<ConfigParameterData> ParseQueryConfigResults(QueryConfigRequest parameters, GitOutput output)
 	{
 		Assert.IsNotNull(parameters);
 		Assert.IsNotNull(output);
@@ -1502,7 +1509,7 @@ sealed class OutputParser
 			var value = parser.ReadStringUpTo(parser.FindNullOrEndOfString(), skip: 1);
 			res.Add(parameters.ConfigFile != ConfigFile.Other
 				? new ConfigParameterData(name, value, parameters.ConfigFile)
-				: new ConfigParameterData(name, value, parameters.FileName));
+				: new ConfigParameterData(name, value, parameters.FileName!));
 		}
 		return res;
 	}

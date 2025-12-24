@@ -20,64 +20,52 @@
 
 namespace gitter.Git.Gui.Controls;
 
-using System.Drawing;
-
+using gitter.Framework;
 using gitter.Framework.Controls;
 
 using Resources = Properties.Resources;
 
 sealed class UsersListBox : CustomListBox
 {
-	#region Data
-
-	private Repository _repository;
-	private UserListBinding _binding;
-
-	#endregion
-
-	#region .ctor
+	private Repository? _repository;
+	private UserListBinding? _binding;
 
 	public UsersListBox()
 	{
 		Columns.AddRange(
-			new[]
-			{
+			[
 				new NameColumn(),
 				new EmailColumn(new UserEmailPainter()),
 				new CustomListBoxColumn((int)ColumnId.Commits, Resources.StrCommits) { Width = 80 },
-			});
+			]);
 	}
 
-	#endregion
-
-	public void Load(Repository repository)
+	public void Load(Repository? repository)
 	{
-		if(_repository != repository)
+		if(_repository == repository) return;
+
+		if(_repository is not null)
 		{
-			if(_repository is not null)
-			{
-				DetachFromRepositoy();
-			}
-			_repository = repository;
-			if(_repository is not null)
-			{
-				AttachToRepository();
-			}
+			DetachFromRepositoy();
+		}
+		_repository = repository;
+		if(_repository is not null)
+		{
+			AttachToRepository(_repository);
 		}
 	}
 
-	private void AttachToRepository()
+	private void AttachToRepository(Repository repository)
 	{
 		BeginUpdate();
-		_binding = new UserListBinding(Items, _repository);
+		_binding = new UserListBinding(Items, repository);
 		EndUpdate();
 	}
 
 	private void DetachFromRepositoy()
 	{
 		BeginUpdate();
-		_binding.Dispose();
-		_binding = null;
+		DisposableUtility.Dispose(ref _binding);
 		EndUpdate();
 	}
 
@@ -88,8 +76,7 @@ sealed class UsersListBox : CustomListBox
 		{
 			if(_repository is not null)
 			{
-				_binding.Dispose();
-				_binding = null;
+				DisposableUtility.Dispose(ref _binding);
 				_repository = null;
 			}
 		}

@@ -97,12 +97,12 @@ partial class ApiEndpoint
 
 	public Task<IReadOnlyList<Pipeline>> GetPipelinesAsync(
 		NameOrNumericId projectId,
-		string          sha           = default,
-		string          reference     = default,
+		string?         sha           = default,
+		string?         reference     = default,
 		PipelineScope?  scope         = default,
 		PipelineStatus? status        = default,
 		PipelineSource? source        = default,
-		string          username      = default,
+		string?         username      = default,
 		DateTimeOffset? updatedBefore = default,
 		DateTimeOffset? updatedAfter  = default,
 		PipelineOrder?  orderBy       = default,
@@ -128,16 +128,16 @@ partial class ApiEndpoint
 		return ReadPagedResultAsync<Pipeline>(query.ToString(), cancellationToken);
 	}
 
-	public Task<PipelineEx> GetPipelineAsync(NameOrNumericId projectId, long pipelineId,
+	public Task<PipelineEx?> GetPipelineAsync(NameOrNumericId projectId, long pipelineId,
 		CancellationToken cancellationToken = default)
 	{
 		var query = new StringBuilder();
 		AppendPipelineUrl(query, projectId, pipelineId);
 
-		return ReadResultAsync<PipelineEx>(query.ToString(), cancellationToken);
+		return GetAsync<PipelineEx>(query.ToString(), cancellationToken);
 	}
 
-	private Task<T> GetPipelineInfoAsync<T>(NameOrNumericId projectId, long pipelineId, string suffix,
+	private Task<T?> GetPipelineInfoAsync<T>(NameOrNumericId projectId, long pipelineId, string suffix,
 		CancellationToken cancellationToken = default)
 	{
 		var query = new StringBuilder();
@@ -145,17 +145,17 @@ partial class ApiEndpoint
 		query.Append('/');
 		query.Append(suffix);
 
-		return ReadResultAsync<T>(query.ToString(), cancellationToken);
+		return GetAsync<T>(query.ToString(), cancellationToken);
 	}
 
-	public Task<TestReport> GetTestReportAsync(NameOrNumericId projectId, long pipelineId,
+	public Task<TestReport?> GetTestReportAsync(NameOrNumericId projectId, long pipelineId,
 		CancellationToken cancellationToken = default)
 	{
 		return GetPipelineInfoAsync<TestReport>(
 			projectId, pipelineId, @"test_report", cancellationToken);
 	}
 
-	public Task<TestReportSummary> GetTestReportSummaryAsync(NameOrNumericId projectId, long pipelineId,
+	public Task<TestReportSummary?> GetTestReportSummaryAsync(NameOrNumericId projectId, long pipelineId,
 		CancellationToken cancellationToken = default)
 	{
 		return GetPipelineInfoAsync<TestReportSummary>(

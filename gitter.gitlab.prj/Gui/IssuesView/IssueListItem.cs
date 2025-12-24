@@ -39,11 +39,11 @@ sealed class IssueListItem : CustomListBoxItem<Issue>
 {
 	#region Comparers
 
-	private static int CompareString(string data1, string data2)
+	private static int CompareString(string? data1, string? data2)
 	{
 		if(data1 == data2) return 0;
-		if(data1 == null) return 1;
-		else if(data2 == null) return -1;
+		if(data1 is null) return 1;
+		else if(data2 is null) return -1;
 		return string.Compare(data1, data2);
 	}
 
@@ -147,16 +147,16 @@ sealed class IssueListItem : CustomListBoxItem<Issue>
 		Verify.Argument.IsNotNull(issue);
 	}
 
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		//DataContext.PropertyChanged += OnIssuePropertyChanged;
 	}
 
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		//DataContext.PropertyChanged -= OnIssuePropertyChanged;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
 	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)

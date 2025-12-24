@@ -45,7 +45,7 @@ public class UrlColumn : CustomListBoxColumn
 	/// <inheritdoc/>
 	public override string IdentificationString => "Url";
 
-	protected virtual string GetUrl(CustomListBoxItem item) => null;
+	protected virtual string? GetUrl(CustomListBoxItem item) => null;
 
 	/// <inheritdoc/>
 	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)

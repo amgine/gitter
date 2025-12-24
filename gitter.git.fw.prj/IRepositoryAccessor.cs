@@ -22,6 +22,8 @@ namespace gitter.Git.AccessLayer;
 
 using System.Collections.Generic;
 
+using gitter.Framework;
+
 /// <summary>Interface of repository accessor object.</summary>
 public interface IRepositoryAccessor : IConfigAccessor
 {
@@ -30,233 +32,233 @@ public interface IRepositoryAccessor : IConfigAccessor
 	IGitAccessor GitAccessor { get; }
 
 	/// <summary>Add file to index.</summary>
-	IGitAction<AddFilesParameters> AddFiles { get; }
+	IGitAction<AddFilesRequest> AddFiles { get; }
 
 	/// <summary>Add remote repository.</summary>
-	IGitAction<AddRemoteParameters> AddRemote { get; }
+	IGitAction<AddRemoteRequest> AddRemote { get; }
 
 	/// <summary>Add new submodule.</summary>
-	IGitAction<AddSubmoduleParameters> AddSubmodule { get; }
+	IGitAction<AddSubmoduleRequest> AddSubmodule { get; }
 
 	/// <summary>Append new note to object.</summary>
-	IGitAction<AppendNoteParameters> AppendNote { get; }
+	IGitAction<AppendNoteRequest> AppendNote { get; }
 
 	/// <summary>Apply patches to working directory and/or index.</summary>
-	IGitAction<ApplyPatchParameters> ApplyPatch { get; }
+	IGitAction<ApplyPatchRequest> ApplyPatch { get; }
 
 	/// <summary>Create an archive of files from a named tree.</summary>
-	IGitAction<ArchiveParameters> Archive { get; }
+	IGitAction<ArchiveRequest> Archive { get; }
 
 	/// <summary>Remove untracked files from the working tree.</summary>
-	IGitAction<CleanFilesParameters> CleanFiles { get; }
+	IGitAction<CleanFilesRequest> CleanFiles { get; }
 
 	/// <summary>Checkout branch/revision.</summary>
-	IGitAction<CheckoutParameters> Checkout { get; }
+	IGitAction<CheckoutRequest> Checkout { get; }
 
 	/// <summary>Checkout files from tree object to working directory.</summary>
-	IGitAction<CheckoutFilesParameters> CheckoutFiles { get; }
+	IGitAction<CheckoutFilesRequest> CheckoutFiles { get; }
 
 	/// <summary>Performs a cherry-pick operation.</summary>
-	IGitAction<CherryPickParameters> CherryPick { get; }
+	IGitAction<CherryPickRequest> CherryPick { get; }
 
 	/// <summary>Commit changes.</summary>
-	IGitFunction<CommitParameters, string> Commit { get; }
+	IGitFunction<CommitRequest, string> Commit { get; }
 
 	/// <summary>Calculate object count.</summary>
-	IGitFunction<CountObjectsParameters, ObjectCountData> CountObjects { get; }
+	IGitFunction<CountObjectsRequest, ObjectCountData> CountObjects { get; }
 
 	/// <summary>Create local branch.</summary>
-	IGitAction<CreateBranchParameters> CreateBranch { get; }
+	IGitAction<CreateBranchRequest> CreateBranch { get; }
 
 	/// <summary>Create new tag object.</summary>
-	IGitAction<CreateTagParameters> CreateTag { get; }
+	IGitAction<CreateTagRequest> CreateTag { get; }
 
 	/// <summary>Remove local branch.</summary>
-	IGitAction<DeleteBranchParameters> DeleteBranch { get; }
+	IGitAction<DeleteBranchRequest> DeleteBranch { get; }
 
 	/// <summary>Delete tag.</summary>
-	IGitAction<DeleteTagParameters> DeleteTag { get; }
+	IGitAction<DeleteTagRequest> DeleteTag { get; }
 
 	/// <summary>Dereference valid ref.</summary>
-	IGitFunction<DereferenceParameters, RevisionData> Dereference { get; }
+	IGitFunction<DereferenceRequest, RevisionData> Dereference { get; }
 
 	/// <summary>Describe revision.</summary>
-	IGitFunction<DescribeParameters, string> Describe { get; }
+	IGitFunction<DescribeRequest, string?> Describe { get; }
 
 	/// <summary>Download objects and refs from another repository.</summary>
-	IGitAction<FetchParameters> Fetch { get; }
+	IGitAction<FetchRequest> Fetch { get; }
 
 	/// <summary>Formats merge message using commit messages.</summary>
-	IGitFunction<FormatMergeMessageParameters, string> FormatMergeMessage { get; }
+	IGitFunction<FormatMergeMessageRequest, string> FormatMergeMessage { get; }
 
 	/// <summary>Cleanup unnecessary files and optimize the local repository.</summary>
-	IGitAction<GarbageCollectParameters> GarbageCollect { get; }
+	IGitAction<GarbageCollectRequest> GarbageCollect { get; }
 
 	/// <summary>Merge development histories together.</summary>
-	IGitAction<MergeParameters> Merge { get; }
+	IGitAction<MergeRequest> Merge { get; }
 
 	/// <summary>Remove stale remote tracking branches.</summary>
-	IGitAction<PruneRemoteParameters> PruneRemote { get; }
+	IGitAction<PruneRemoteRequest> PruneRemote { get; }
 
 	/// <summary>Download objects and refs from another repository and merge with local branches configured for this.</summary>
-	IGitAction<PullParameters> Pull { get; }
+	IGitAction<PullRequest> Pull { get; }
 
 	/// <summary>Update remote refs along with associated objects.</summary>
-	IGitFunction<PushParameters, IList<ReferencePushResult>> Push { get; }
+	IGitFunction<PushRequest, Many<ReferencePushResult>> Push { get; }
 
 	/// <summary>Annotate each line of file with commit information.</summary>
-	IGitFunction<QueryBlameParameters, BlameFile> QueryBlame { get; }
+	IGitFunction<QueryBlameRequest, BlameFile> QueryBlame { get; }
 
 	/// <summary>Queries the BLOB bytes.</summary>
-	IGitFunction<QueryBlobBytesParameters, byte[]> QueryBlobBytes { get; }
+	IGitFunction<QueryBlobBytesRequest, byte[]> QueryBlobBytes { get; }
 
 	/// <summary>Check if branch exists and get its position.</summary>
-	IGitFunction<QueryBranchParameters, BranchData> QueryBranch { get; }
+	IGitFunction<QueryBranchRequest, BranchData?> QueryBranch { get; }
 
 	/// <summary>Query branch list.</summary>
-	IGitFunction<QueryBranchesParameters, BranchesData> QueryBranches { get; }
+	IGitFunction<QueryBranchesRequest, BranchesData> QueryBranches { get; }
 
 	/// <summary>Get list of stale remote tracking branches that are subject to pruning.</summary>
-	IGitFunction<PruneRemoteParameters, IList<string>> QueryBranchesToPrune { get; }
+	IGitFunction<PruneRemoteRequest, IList<string>> QueryBranchesToPrune { get; }
 
 	/// <summary>Get <see cref="Diff"/>, representing difference between specified objects.</summary>
-	IGitFunction<QueryDiffParameters, Diff> QueryDiff { get; }
+	IGitFunction<QueryDiffRequest, Diff> QueryDiff { get; }
 
 	/// <summary>Get the list of files that can be added.</summary>
-	IGitFunction<AddFilesParameters, IList<TreeFileData>> QueryFilesToAdd { get; }
+	IGitFunction<AddFilesRequest, IList<TreeFileData>> QueryFilesToAdd { get; }
 
 	/// <summary>Get list of files which will be removed by a remove files call.</summary>
-	IGitFunction<RemoveFilesParameters, IList<string>> QueryFilesToRemove { get; }
+	IGitFunction<RemoveFilesRequest, IList<string>> QueryFilesToRemove { get; }
 
 	/// <summary>Get list of files and directories which will be removed by a clean call.</summary>
-	IGitFunction<CleanFilesParameters, IList<string>> QueryFilesToClean { get; }
+	IGitFunction<CleanFilesRequest, IList<string>> QueryFilesToClean { get; }
 
 	/// <summary>Get list of all note objects.</summary>
-	IGitFunction<QueryNotesParameters, IList<NoteData>> QueryNotes { get; }
+	IGitFunction<QueryNotesRequest, IList<NoteData>> QueryNotes { get; }
 
 	/// <summary>Get contents of requested objects.</summary>
-	IGitFunction<QueryObjectsParameters, string> QueryObjects { get; }
+	IGitFunction<QueryObjectsRequest, string> QueryObjects { get; }
 
 	/// <summary>Get revision information.</summary>
-	IGitFunction<QueryRevisionParameters, RevisionData> QueryRevision { get; }
+	IGitFunction<QueryRevisionRequest, RevisionData> QueryRevision { get; }
 
 	/// <summary>Get revision list.</summary>
-	IGitFunction<QueryRevisionsParameters, IList<RevisionData>> QueryRevisions { get; }
+	IGitFunction<QueryRevisionsRequest, IList<RevisionData>> QueryRevisions { get; }
 
 	/// <summary>Get <see cref="Diff"/>, representing changes made by specified commit.</summary>
-	IGitFunction<QueryRevisionDiffParameters, Diff> QueryRevisionDiff { get; }
+	IGitFunction<QueryRevisionDiffRequest, Diff> QueryRevisionDiff { get; }
 
 	/// <summary>Get revision graph.</summary>
-	IGitFunction<QueryRevisionsParameters, IList<RevisionGraphData>> QueryRevisionGraph { get; }
+	IGitFunction<QueryRevisionsRequest, IList<RevisionGraphData>> QueryRevisionGraph { get; }
 
 	/// <summary>Get patch representing changes made by specified commit.</summary>
-	IGitFunction<QueryRevisionDiffParameters, byte[]> QueryRevisionPatch { get; }
+	IGitFunction<QueryRevisionDiffRequest, byte[]> QueryRevisionPatch { get; }
 
 	/// <summary>Get list of references.</summary>
-	IGitFunction<QueryReferencesParameters, ReferencesData> QueryReferences { get; }
+	IGitFunction<QueryReferencesRequest, ReferencesData> QueryReferences { get; }
 
 	/// <summary>Get reference reflog.</summary>
-	IGitFunction<QueryReflogParameters, IList<ReflogRecordData>> QueryReflog { get; }
+	IGitFunction<QueryReflogRequest, IList<ReflogRecordData>> QueryReflog { get; }
 
 	/// <summary>Get information about remote.</summary>
-	IGitFunction<QueryRemoteParameters, RemoteData> QueryRemote { get; }
+	IGitFunction<QueryRemoteRequest, RemoteData> QueryRemote { get; }
 
 	/// <summary>Get list of references on remote repository.</summary>
-	IGitFunction<QueryRemoteReferencesParameters, IList<RemoteReferenceData>> QueryRemoteReferences { get; }
+	IGitFunction<QueryRemoteReferencesRequest, IList<RemoteReferenceData>> QueryRemoteReferences { get; }
 
 	/// <summary>Query list of remotes.</summary>
-	IGitFunction<QueryRemotesParameters, IList<RemoteData>> QueryRemotes { get; }
+	IGitFunction<QueryRemotesRequest, IList<RemoteData>> QueryRemotes { get; }
 
 	/// <summary>Query all stashed states.</summary>
-	IGitFunction<QueryStashParameters, IList<StashedStateData>> QueryStash { get; }
+	IGitFunction<QueryStashRequest, IList<StashedStateData>> QueryStash { get; }
 
 	/// <summary>Get patch representing stashed changes.</summary>
-	IGitFunction<QueryRevisionDiffParameters, byte[]> QueryStashPatch { get; }
+	IGitFunction<QueryRevisionDiffRequest, byte[]> QueryStashPatch { get; }
 
 	/// <summary>Query most recent stashed state.</summary>
-	IGitFunction<QueryStashTopParameters, RevisionData> QueryStashTop { get; }
+	IGitFunction<QueryStashTopRequest, RevisionData?> QueryStashTop { get; }
 
 	/// <summary>Get patch representing stashed changes.</summary>
-	IGitFunction<QueryRevisionDiffParameters, Diff> QueryStashDiff { get; }
+	IGitFunction<QueryRevisionDiffRequest, Diff> QueryStashDiff { get; }
 
 	/// <summary>Get working directory status information.</summary>
-	IGitFunction<QueryStatusParameters, StatusData> QueryStatus { get; }
+	IGitFunction<QueryStatusRequest, StatusData> QueryStatus { get; }
 
 	/// <summary>Get symbolic reference target.</summary>
-	IGitFunction<QuerySymbolicReferenceParameters, SymbolicReferenceData> QuerySymbolicReference { get; }
+	IGitFunction<QuerySymbolicReferenceRequest, SymbolicReferenceData> QuerySymbolicReference { get; }
 
 	/// <summary>Get objects contained in a tree.</summary>
-	IGitFunction<QueryTreeContentParameters, IList<TreeContentData>> QueryTreeContent { get; }
+	IGitFunction<QueryTreeContentRequest, IList<TreeContentData>> QueryTreeContent { get; }
 
 	/// <summary>Check if tag exists and get its position.</summary>
-	IGitFunction<QueryTagParameters, TagData> QueryTag { get; }
+	IGitFunction<QueryTagRequest, TagData?> QueryTag { get; }
 
 	/// <summary>Query tag message.</summary>
-	IGitFunction<QueryTagMessageParameters, string> QueryTagMessage { get; }
+	IGitFunction<QueryTagMessageRequest, string> QueryTagMessage { get; }
 
 	/// <summary>Query tag list.</summary>
-	IGitFunction<QueryTagsParameters, IList<TagData>> QueryTags { get; }
+	IGitFunction<QueryTagsRequest, IList<TagData>> QueryTags { get; }
 
 	/// <summary>Get user list.</summary>
-	IGitFunction<QueryUsersParameters, IList<UserData>> QueryUsers { get; }
+	IGitFunction<QueryUsersRequest, IList<UserData>> QueryUsers { get; }
 
 	/// <summary>Remove file from index and/or working directory.</summary>
-	IGitAction<RemoveFilesParameters> RemoveFiles { get; }
+	IGitAction<RemoveFilesRequest> RemoveFiles { get; }
 
 	/// <summary>Remove reference on remote repository.</summary>
-	IGitAction<RemoveRemoteReferencesParameters> RemoveRemoteReferences { get; }
+	IGitAction<RemoveRemoteReferencesRequest> RemoveRemoteReferences { get; }
 
 	/// <summary>Forward-port local commits to the updated upstream head.</summary>
-	IGitAction<RebaseParameters> Rebase { get; }
+	IGitAction<RebaseRequest> Rebase { get; }
 
 	/// <summary>Remove remote repository.</summary>
-	IGitAction<RemoveRemoteParameters> RemoveRemote { get; }
+	IGitAction<RemoveRemoteRequest> RemoveRemote { get; }
 
 	/// <summary>Rename local branch.</summary>
-	IGitAction<RenameBranchParameters> RenameBranch { get; }
+	IGitAction<RenameBranchRequest> RenameBranch { get; }
 
 	/// <summary>Rename remote repository.</summary>
-	IGitAction<RenameRemoteParameters> RenameRemote { get; }
+	IGitAction<RenameRemoteRequest> RenameRemote { get; }
 
 	/// <summary>Reset HEAD.</summary>
-	IGitAction<ResetParameters> Reset { get; }
+	IGitAction<ResetRequest> Reset { get; }
 
 	/// <summary>Resets files.</summary>
-	IGitAction<ResetFilesParameters> ResetFiles { get; }
+	IGitAction<ResetFilesRequest> ResetFiles { get; }
 
 	/// <summary>Reset local branch.</summary>
-	IGitAction<ResetBranchParameters> ResetBranch { get; }
+	IGitAction<ResetBranchRequest> ResetBranch { get; }
 
 	/// <summary>Performs a revert operation.</summary>
-	IGitAction<RevertParameters> Revert { get; }
+	IGitAction<RevertRequest> Revert { get; }
 
 	/// <summary>Run merge tool to resolve conflicts.</summary>
-	IGitAction<RunMergeToolParameters> RunMergeTool { get; }
+	IGitAction<RunMergeToolRequest> RunMergeTool { get; }
 
 	/// <summary>Apply stashed changes and do not remove stashed state.</summary>
-	IGitAction<StashApplyParameters> StashApply { get; }
+	IGitAction<StashApplyRequest> StashApply { get; }
 
 	/// <summary>Remove stashed state.</summary>
-	IGitAction<StashDropParameters> StashDrop { get; }
+	IGitAction<StashDropRequest> StashDrop { get; }
 
 	/// <summary>Clear stash.</summary>
-	IGitAction<StashClearParameters> StashClear { get; }
+	IGitAction<StashClearRequest> StashClear { get; }
 
 	/// <summary>Apply stashed changes and remove stashed state.</summary>
-	IGitAction<StashPopParameters> StashPop { get; }
+	IGitAction<StashPopRequest> StashPop { get; }
 
 	/// <summary>Stash changes in working directory.</summary>
-	IGitFunction<StashSaveParameters, bool> StashSave { get; }
+	IGitFunction<StashSaveRequest, bool> StashSave { get; }
 
 	/// <summary>Create new branch, checkout that branch and pop stashed state.</summary>
-	IGitAction<StashToBranchParameters> StashToBranch { get; }
+	IGitAction<StashToBranchRequest> StashToBranch { get; }
 
 	/// <summary>Updates submodule.</summary>
-	IGitAction<UpdateSubmoduleParameters> UpdateSubmodule { get; }
+	IGitAction<UpdateSubmoduleRequest> UpdateSubmodule { get; }
 
 	/// <summary>Synchronizes submodule.</summary>
-	IGitAction<SyncSubmoduleParameters> SyncSubmodule { get; }
+	IGitAction<SyncSubmoduleRequest> SyncSubmodule { get; }
 
 	/// <summary>Verify tags GPG signatures.</summary>
-	IGitAction<VerifyTagsParameters> VerifyTags { get; }
+	IGitAction<VerifyTagsRequest> VerifyTags { get; }
 }

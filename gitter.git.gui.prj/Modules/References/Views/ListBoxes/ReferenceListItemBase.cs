@@ -54,7 +54,7 @@ public static class ReferenceListItemBase
 	}
 }
 
-public abstract class ReferenceListItemBase<T> : RevisionPointerListItemBase<T>
+public abstract class ReferenceListItemBase<T>(T data) : RevisionPointerListItemBase<T>(data)
 	where T : Reference
 {
 	public static int CompareByName(ReferenceListItemBase<T> item1, ReferenceListItemBase<T> item2)
@@ -73,7 +73,7 @@ public abstract class ReferenceListItemBase<T> : RevisionPointerListItemBase<T>
 	{
 		var data1 = item1.DataContext;
 		var data2 = item2.DataContext;
-		return string.Compare(data1.Revision.HashString, data2.Revision.HashString);
+		return string.Compare(data1.Revision?.HashString, data2.Revision?.HashString);
 	}
 
 	public static int CompareByPosition(CustomListBoxItem item1, CustomListBoxItem item2)
@@ -81,35 +81,30 @@ public abstract class ReferenceListItemBase<T> : RevisionPointerListItemBase<T>
 			? CompareByPosition(i1, i2)
 			: 0;
 
-	protected ReferenceListItemBase(T data)
-		: base(data)
-	{
-	}
+	protected abstract Image? GetImage(Dpi dpi);
 
-	protected abstract Image GetImage(Dpi dpi);
-
-	private void OnPositionChanged(object sender, RevisionChangedEventArgs e)
+	private void OnPositionChanged(object? sender, RevisionChangedEventArgs e)
 	{
 		InvalidateSafe();
 	}
 
-	private void OnReferenceDeleted(object sender, EventArgs e)
+	private void OnReferenceDeleted(object? sender, EventArgs e)
 	{
 		RemoveSafe();
 	}
 
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		DataContext.Deleted += OnReferenceDeleted;
 		DataContext.PositionChanged += OnPositionChanged;
 	}
 
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.Deleted -= OnReferenceDeleted;
 		DataContext.PositionChanged -= OnPositionChanged;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
 	protected override Size OnMeasureSubItem(SubItemMeasureEventArgs measureEventArgs)

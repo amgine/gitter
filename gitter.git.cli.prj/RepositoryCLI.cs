@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git.AccessLayer;
@@ -23,6 +23,7 @@ namespace gitter.Git.AccessLayer;
 using System;
 using System.Collections.Generic;
 
+using gitter.Framework;
 using gitter.Git.AccessLayer.CLI;
 
 /// <summary>Accesses repository through git command line interface.</summary>
@@ -34,91 +35,91 @@ internal sealed partial class RepositoryCLI : IRepositoryAccessor
 	private readonly IGitRepository _repository;
 	private readonly ICommandExecutor _executor;
 
-	private readonly IGitAction   < AddConfigValueParameters                                     > _addConfigValue;
-	private readonly IGitAction   < AddFilesParameters                                           > _addFiles;
-	private readonly IGitAction   < AddRemoteParameters                                          > _addRemote;
-	private readonly IGitAction   < AddSubmoduleParameters                                       > _addSubmodule;
-	private readonly IGitAction   < AppendNoteParameters                                         > _appendNote;
-	private readonly IGitAction   < ApplyPatchParameters                                         > _applyPatch;
-	private readonly IGitAction   < ArchiveParameters                                            > _archive;
-	private readonly IGitAction   < CleanFilesParameters                                         > _cleanFiles;
-	private readonly IGitAction   < CheckoutParameters                                           > _checkout;
-	private readonly IGitAction   < CheckoutFilesParameters                                      > _checkoutFiles;
-	private readonly IGitAction   < CherryPickParameters                                         > _cherryPick;
-	private readonly IGitFunction < CommitParameters,                 string                     > _commit;
-	private readonly IGitFunction < CountObjectsParameters,           ObjectCountData            > _countObjects;
-	private readonly IGitAction   < CreateBranchParameters                                       > _createBranch;
-	private readonly IGitAction   < CreateTagParameters                                          > _createTag;
-	private readonly IGitAction   < DeleteBranchParameters                                       > _deleteBranch;
-	private readonly IGitAction   < DeleteConfigSectionParameters                                > _deleteConfigSection;
-	private readonly IGitAction   < DeleteTagParameters                                          > _deleteTag;
-	private readonly IGitFunction < DereferenceParameters,            RevisionData               > _dereference;
-	private readonly IGitFunction < DescribeParameters,               string                     > _describe;
-	private readonly IGitAction   < FetchParameters                                              > _fetch;
-	private readonly IGitFunction < FormatMergeMessageParameters,     string                     > _formatMergeMessage;
-	private readonly IGitAction   < GarbageCollectParameters                                     > _garbageCollect;
-	private readonly IGitAction   < MergeParameters                                              > _merge;
-	private readonly IGitAction   < PruneNotesParameters                                         > _pruneNotes;
-	private readonly IGitAction   < PruneRemoteParameters                                        > _pruneRemote;
-	private readonly IGitAction   < PullParameters                                               > _pull;
-	private readonly IGitFunction < PushParameters,                   IList<ReferencePushResult> > _push;
-	private readonly IGitFunction < QueryBlameParameters,             BlameFile                  > _queryBlame;
-	private readonly IGitFunction < QueryBlobBytesParameters,         byte[]                     > _queryBlobBytes;
-	private readonly IGitFunction < QueryBranchParameters,            BranchData                 > _queryBranch;
-	private readonly IGitFunction < QueryBranchesParameters,          BranchesData               > _queryBranches;
-	private readonly IGitFunction < PruneRemoteParameters,            IList<string>              > _queryBranchesToPrune;
-	private readonly IGitFunction < QueryConfigParameters,            IList<ConfigParameterData> > _queryConfig;
-	private readonly IGitFunction < QueryConfigParameterParameters,   ConfigParameterData        > _queryConfigParameter;
-	private readonly IGitFunction < QueryDiffParameters,              Diff                       > _queryDiff;
-	private readonly IGitFunction < AddFilesParameters,               IList<TreeFileData>        > _queryFilesToAdd;
-	private readonly IGitFunction < RemoveFilesParameters,            IList<string>              > _queryFilesToRemove;
-	private readonly IGitFunction < CleanFilesParameters,             IList<string>              > _queryFilesToClean;
-	private readonly IGitFunction < QueryNotesParameters,             IList<NoteData>            > _queryNotes;
-	private readonly IGitFunction < QueryObjectsParameters,           string                     > _queryObjects;
-	private readonly IGitFunction < QueryRevisionParameters,          RevisionData               > _queryRevision;
-	private readonly IGitFunction < QueryRevisionsParameters,         IList<RevisionData>        > _queryRevisions;
-	private readonly IGitFunction < QueryRevisionsParameters,         IList<RevisionGraphData>   > _queryRevisionGraph;
-	private readonly IGitFunction < QueryRevisionDiffParameters,      byte[]                     > _queryRevisionPatch;
-	private readonly IGitFunction < QueryReferencesParameters,        ReferencesData             > _queryReferences;
-	private readonly IGitFunction < QueryReflogParameters,            IList<ReflogRecordData>    > _queryReflog;
-	private readonly IGitFunction < QueryRemoteParameters,            RemoteData                 > _queryRemote;
-	private readonly IGitFunction < QueryRemoteReferencesParameters,  IList<RemoteReferenceData> > _queryRemoteReferences;
-	private readonly IGitFunction < QueryRemotesParameters,           IList<RemoteData>          > _queryRemotes;
-	private readonly IGitFunction < QueryRevisionDiffParameters,      Diff                       > _queryRevisionDiff;
-	private readonly IGitFunction < QueryStashParameters,             IList<StashedStateData>    > _queryStash;
-	private readonly IGitFunction < QueryRevisionDiffParameters,      byte[]                     > _queryStashPatch;
-	private readonly IGitFunction < QueryStashTopParameters,          RevisionData               > _queryStashTop;
-	private readonly IGitFunction < QueryRevisionDiffParameters,      Diff                       > _queryStashDiff;
-	private readonly IGitFunction < QueryStatusParameters,            StatusData                 > _queryStatus;
-	private readonly IGitFunction < QuerySymbolicReferenceParameters, SymbolicReferenceData      > _querySymbolicReference;
-	private readonly IGitFunction < QueryTreeContentParameters,       IList<TreeContentData>     > _queryTreeContent;
-	private readonly IGitFunction < QueryTagParameters,               TagData                    > _queryTag;
-	private readonly IGitFunction < QueryTagMessageParameters,        string                     > _queryTagMessage;
-	private readonly IGitFunction < QueryTagsParameters,              IList<TagData>             > _queryTags;
-	private readonly IGitFunction < QueryUsersParameters,             IList<UserData>            > _queryUsers;
-	private readonly IGitAction   < RemoveFilesParameters                                        > _removeFiles;
-	private readonly IGitAction   < RemoveRemoteReferencesParameters                             > _removeRemoteReferences;
-	private readonly IGitAction   < RebaseParameters                                             > _rebase;
-	private readonly IGitAction   < RemoveRemoteParameters                                       > _removeRemote;
-	private readonly IGitAction   < RenameConfigSectionParameters                                > _renameConfigSection;
-	private readonly IGitAction   < RenameBranchParameters                                       > _renameBranch;
-	private readonly IGitAction   < RenameRemoteParameters                                       > _renameRemote;
-	private readonly IGitAction   < ResetParameters                                              > _reset;
-	private readonly IGitAction   < ResetFilesParameters                                         > _resetFiles;
-	private readonly IGitAction   < ResetBranchParameters                                        > _resetBranch;
-	private readonly IGitAction   < RevertParameters                                             > _revert;
-	private readonly IGitAction   < RunMergeToolParameters                                       > _runMergeTool;
-	private readonly IGitAction   < SetConfigValueParameters                                     > _setConfigValue;
-	private readonly IGitAction   < StashApplyParameters                                         > _stashApply;
-	private readonly IGitAction   < StashDropParameters                                          > _stashDrop;
-	private readonly IGitAction   < StashClearParameters                                         > _stashClear;
-	private readonly IGitAction   < StashPopParameters                                           > _stashPop;
-	private readonly IGitFunction < StashSaveParameters,              bool                       > _stashSave;
-	private readonly IGitAction   < StashToBranchParameters                                      > _stashToBranch;
-	private readonly IGitAction   < UnsetConfigValueParameters                                   > _unsetConfigValue;
-	private readonly IGitAction   < UpdateSubmoduleParameters                                    > _updateSubmodule;
-	private readonly IGitAction   < SyncSubmoduleParameters                                      > _syncSubmodule;
-	private readonly IGitAction   < VerifyTagsParameters                                         > _verifyTags;
+	private readonly IGitAction   < AddConfigValueRequest                                     > _addConfigValue;
+	private readonly IGitAction   < AddFilesRequest                                           > _addFiles;
+	private readonly IGitAction   < AddRemoteRequest                                          > _addRemote;
+	private readonly IGitAction   < AddSubmoduleRequest                                       > _addSubmodule;
+	private readonly IGitAction   < AppendNoteRequest                                         > _appendNote;
+	private readonly IGitAction   < ApplyPatchRequest                                         > _applyPatch;
+	private readonly IGitAction   < ArchiveRequest                                            > _archive;
+	private readonly IGitAction   < CleanFilesRequest                                         > _cleanFiles;
+	private readonly IGitAction   < CheckoutRequest                                           > _checkout;
+	private readonly IGitAction   < CheckoutFilesRequest                                      > _checkoutFiles;
+	private readonly IGitAction   < CherryPickRequest                                         > _cherryPick;
+	private readonly IGitFunction < CommitRequest,                 string                     > _commit;
+	private readonly IGitFunction < CountObjectsRequest,           ObjectCountData            > _countObjects;
+	private readonly IGitAction   < CreateBranchRequest                                       > _createBranch;
+	private readonly IGitAction   < CreateTagRequest                                          > _createTag;
+	private readonly IGitAction   < DeleteBranchRequest                                       > _deleteBranch;
+	private readonly IGitAction   < DeleteConfigSectionRequest                                > _deleteConfigSection;
+	private readonly IGitAction   < DeleteTagRequest                                          > _deleteTag;
+	private readonly IGitFunction < DereferenceRequest,            RevisionData               > _dereference;
+	private readonly IGitFunction < DescribeRequest,               string?                    > _describe;
+	private readonly IGitAction   < FetchRequest                                              > _fetch;
+	private readonly IGitFunction < FormatMergeMessageRequest,     string                     > _formatMergeMessage;
+	private readonly IGitAction   < GarbageCollectRequest                                     > _garbageCollect;
+	private readonly IGitAction   < MergeRequest                                              > _merge;
+	private readonly IGitAction   < PruneNotesRequest                                         > _pruneNotes;
+	private readonly IGitAction   < PruneRemoteRequest                                        > _pruneRemote;
+	private readonly IGitAction   < PullRequest                                               > _pull;
+	private readonly IGitFunction < PushRequest,                   Many<ReferencePushResult>  > _push;
+	private readonly IGitFunction < QueryBlameRequest,             BlameFile                  > _queryBlame;
+	private readonly IGitFunction < QueryBlobBytesRequest,         byte[]                     > _queryBlobBytes;
+	private readonly IGitFunction < QueryBranchRequest,            BranchData?                > _queryBranch;
+	private readonly IGitFunction < QueryBranchesRequest,          BranchesData               > _queryBranches;
+	private readonly IGitFunction < PruneRemoteRequest,            IList<string>              > _queryBranchesToPrune;
+	private readonly IGitFunction < QueryConfigRequest,            IList<ConfigParameterData> > _queryConfig;
+	private readonly IGitFunction < QueryConfigParameterRequest,   ConfigParameterData?       > _queryConfigParameter;
+	private readonly IGitFunction < QueryDiffRequest,              Diff                       > _queryDiff;
+	private readonly IGitFunction < AddFilesRequest,               IList<TreeFileData>        > _queryFilesToAdd;
+	private readonly IGitFunction < RemoveFilesRequest,            IList<string>              > _queryFilesToRemove;
+	private readonly IGitFunction < CleanFilesRequest,             IList<string>              > _queryFilesToClean;
+	private readonly IGitFunction < QueryNotesRequest,             IList<NoteData>            > _queryNotes;
+	private readonly IGitFunction < QueryObjectsRequest,           string                     > _queryObjects;
+	private readonly IGitFunction < QueryRevisionRequest,          RevisionData               > _queryRevision;
+	private readonly IGitFunction < QueryRevisionsRequest,         IList<RevisionData>        > _queryRevisions;
+	private readonly IGitFunction < QueryRevisionsRequest,         IList<RevisionGraphData>   > _queryRevisionGraph;
+	private readonly IGitFunction < QueryRevisionDiffRequest,      byte[]                     > _queryRevisionPatch;
+	private readonly IGitFunction < QueryReferencesRequest,        ReferencesData             > _queryReferences;
+	private readonly IGitFunction < QueryReflogRequest,            IList<ReflogRecordData>    > _queryReflog;
+	private readonly IGitFunction < QueryRemoteRequest,            RemoteData                 > _queryRemote;
+	private readonly IGitFunction < QueryRemoteReferencesRequest,  IList<RemoteReferenceData> > _queryRemoteReferences;
+	private readonly IGitFunction < QueryRemotesRequest,           IList<RemoteData>          > _queryRemotes;
+	private readonly IGitFunction < QueryRevisionDiffRequest,      Diff                       > _queryRevisionDiff;
+	private readonly IGitFunction < QueryStashRequest,             IList<StashedStateData>    > _queryStash;
+	private readonly IGitFunction < QueryRevisionDiffRequest,      byte[]                     > _queryStashPatch;
+	private readonly IGitFunction < QueryStashTopRequest,          RevisionData?              > _queryStashTop;
+	private readonly IGitFunction < QueryRevisionDiffRequest,      Diff                       > _queryStashDiff;
+	private readonly IGitFunction < QueryStatusRequest,            StatusData                 > _queryStatus;
+	private readonly IGitFunction < QuerySymbolicReferenceRequest, SymbolicReferenceData      > _querySymbolicReference;
+	private readonly IGitFunction < QueryTreeContentRequest,       IList<TreeContentData>     > _queryTreeContent;
+	private readonly IGitFunction < QueryTagRequest,               TagData?                   > _queryTag;
+	private readonly IGitFunction < QueryTagMessageRequest,        string                     > _queryTagMessage;
+	private readonly IGitFunction < QueryTagsRequest,              IList<TagData>             > _queryTags;
+	private readonly IGitFunction < QueryUsersRequest,             IList<UserData>            > _queryUsers;
+	private readonly IGitAction   < RemoveFilesRequest                                        > _removeFiles;
+	private readonly IGitAction   < RemoveRemoteReferencesRequest                             > _removeRemoteReferences;
+	private readonly IGitAction   < RebaseRequest                                             > _rebase;
+	private readonly IGitAction   < RemoveRemoteRequest                                       > _removeRemote;
+	private readonly IGitAction   < RenameConfigSectionRequest                                > _renameConfigSection;
+	private readonly IGitAction   < RenameBranchRequest                                       > _renameBranch;
+	private readonly IGitAction   < RenameRemoteRequest                                       > _renameRemote;
+	private readonly IGitAction   < ResetRequest                                              > _reset;
+	private readonly IGitAction   < ResetFilesRequest                                         > _resetFiles;
+	private readonly IGitAction   < ResetBranchRequest                                        > _resetBranch;
+	private readonly IGitAction   < RevertRequest                                             > _revert;
+	private readonly IGitAction   < RunMergeToolRequest                                       > _runMergeTool;
+	private readonly IGitAction   < SetConfigValueRequest                                     > _setConfigValue;
+	private readonly IGitAction   < StashApplyRequest                                         > _stashApply;
+	private readonly IGitAction   < StashDropRequest                                          > _stashDrop;
+	private readonly IGitAction   < StashClearRequest                                         > _stashClear;
+	private readonly IGitAction   < StashPopRequest                                           > _stashPop;
+	private readonly IGitFunction < StashSaveRequest,              bool                       > _stashSave;
+	private readonly IGitAction   < StashToBranchRequest                                      > _stashToBranch;
+	private readonly IGitAction   < UnsetConfigValueRequest                                   > _unsetConfigValue;
+	private readonly IGitAction   < UpdateSubmoduleRequest                                    > _updateSubmodule;
+	private readonly IGitAction   < SyncSubmoduleRequest                                      > _syncSubmodule;
+	private readonly IGitAction   < VerifyTagsRequest                                         > _verifyTags;
 
 	#endregion
 
@@ -232,173 +233,173 @@ internal sealed partial class RepositoryCLI : IRepositoryAccessor
 
 	private ICommandExecutor CommandExecutor => _executor;
 
-	public IGitAction<AddFilesParameters> AddFiles => _addFiles;
+	public IGitAction<AddFilesRequest> AddFiles => _addFiles;
 
-	public IGitAction<AddRemoteParameters> AddRemote => _addRemote;
+	public IGitAction<AddRemoteRequest> AddRemote => _addRemote;
 
-	public IGitAction<AddSubmoduleParameters> AddSubmodule => _addSubmodule;
+	public IGitAction<AddSubmoduleRequest> AddSubmodule => _addSubmodule;
 
-	public IGitAction<AppendNoteParameters> AppendNote => _appendNote;
+	public IGitAction<AppendNoteRequest> AppendNote => _appendNote;
 
-	public IGitAction<ApplyPatchParameters> ApplyPatch => _applyPatch;
+	public IGitAction<ApplyPatchRequest> ApplyPatch => _applyPatch;
 
-	public IGitAction<ArchiveParameters> Archive => _archive;
+	public IGitAction<ArchiveRequest> Archive => _archive;
 
-	public IGitAction<CleanFilesParameters> CleanFiles => _cleanFiles;
+	public IGitAction<CleanFilesRequest> CleanFiles => _cleanFiles;
 
-	public IGitAction<CheckoutParameters> Checkout => _checkout;
+	public IGitAction<CheckoutRequest> Checkout => _checkout;
 
-	public IGitAction<CheckoutFilesParameters> CheckoutFiles => _checkoutFiles;
+	public IGitAction<CheckoutFilesRequest> CheckoutFiles => _checkoutFiles;
 
-	public IGitAction<CherryPickParameters> CherryPick => _cherryPick;
+	public IGitAction<CherryPickRequest> CherryPick => _cherryPick;
 
-	public IGitFunction<CommitParameters, string> Commit => _commit;
+	public IGitFunction<CommitRequest, string> Commit => _commit;
 
-	public IGitFunction<CountObjectsParameters, ObjectCountData> CountObjects => _countObjects;
+	public IGitFunction<CountObjectsRequest, ObjectCountData> CountObjects => _countObjects;
 
-	public IGitAction<CreateBranchParameters> CreateBranch => _createBranch;
+	public IGitAction<CreateBranchRequest> CreateBranch => _createBranch;
 
-	public IGitAction<CreateTagParameters> CreateTag => _createTag;
+	public IGitAction<CreateTagRequest> CreateTag => _createTag;
 
-	public IGitAction<DeleteBranchParameters> DeleteBranch => _deleteBranch;
+	public IGitAction<DeleteBranchRequest> DeleteBranch => _deleteBranch;
 
-	public IGitAction<DeleteTagParameters> DeleteTag => _deleteTag;
+	public IGitAction<DeleteTagRequest> DeleteTag => _deleteTag;
 
-	public IGitFunction<DereferenceParameters, RevisionData> Dereference => _dereference;
+	public IGitFunction<DereferenceRequest, RevisionData> Dereference => _dereference;
 
-	public IGitFunction<DescribeParameters, string> Describe => _describe;
+	public IGitFunction<DescribeRequest, string?> Describe => _describe;
 
-	public IGitAction<FetchParameters> Fetch => _fetch;
+	public IGitAction<FetchRequest> Fetch => _fetch;
 
-	public IGitFunction<FormatMergeMessageParameters, string> FormatMergeMessage => _formatMergeMessage;
+	public IGitFunction<FormatMergeMessageRequest, string> FormatMergeMessage => _formatMergeMessage;
 
-	public IGitAction<GarbageCollectParameters> GarbageCollect => _garbageCollect;
+	public IGitAction<GarbageCollectRequest> GarbageCollect => _garbageCollect;
 
-	public IGitAction<MergeParameters> Merge => _merge;
+	public IGitAction<MergeRequest> Merge => _merge;
 
-	public IGitAction<PruneRemoteParameters> PruneRemote => _pruneRemote;
+	public IGitAction<PruneRemoteRequest> PruneRemote => _pruneRemote;
 
-	public IGitAction<PullParameters> Pull => _pull;
+	public IGitAction<PullRequest> Pull => _pull;
 
-	public IGitFunction<PushParameters, IList<ReferencePushResult>> Push => _push;
+	public IGitFunction<PushRequest, Many<ReferencePushResult>> Push => _push;
 
-	public IGitFunction<QueryBlameParameters, BlameFile> QueryBlame => _queryBlame;
+	public IGitFunction<QueryBlameRequest, BlameFile> QueryBlame => _queryBlame;
 
-	public IGitFunction<QueryBlobBytesParameters, byte[]> QueryBlobBytes => _queryBlobBytes;
+	public IGitFunction<QueryBlobBytesRequest, byte[]> QueryBlobBytes => _queryBlobBytes;
 
-	public IGitFunction<QueryBranchParameters, BranchData> QueryBranch => _queryBranch;
+	public IGitFunction<QueryBranchRequest, BranchData?> QueryBranch => _queryBranch;
 
-	public IGitFunction<QueryBranchesParameters, BranchesData> QueryBranches => _queryBranches;
+	public IGitFunction<QueryBranchesRequest, BranchesData> QueryBranches => _queryBranches;
 
-	public IGitFunction<PruneRemoteParameters, IList<string>> QueryBranchesToPrune => _queryBranchesToPrune;
+	public IGitFunction<PruneRemoteRequest, IList<string>> QueryBranchesToPrune => _queryBranchesToPrune;
 
-	public IGitFunction<QueryDiffParameters, Diff> QueryDiff => _queryDiff;
+	public IGitFunction<QueryDiffRequest, Diff> QueryDiff => _queryDiff;
 
-	public IGitFunction<AddFilesParameters, IList<TreeFileData>> QueryFilesToAdd => _queryFilesToAdd;
+	public IGitFunction<AddFilesRequest, IList<TreeFileData>> QueryFilesToAdd => _queryFilesToAdd;
 
-	public IGitFunction<RemoveFilesParameters, IList<string>> QueryFilesToRemove => _queryFilesToRemove;
+	public IGitFunction<RemoveFilesRequest, IList<string>> QueryFilesToRemove => _queryFilesToRemove;
 
-	public IGitFunction<CleanFilesParameters, IList<string>> QueryFilesToClean => _queryFilesToClean;
+	public IGitFunction<CleanFilesRequest, IList<string>> QueryFilesToClean => _queryFilesToClean;
 
-	public IGitFunction<QueryNotesParameters, IList<NoteData>> QueryNotes => _queryNotes;
+	public IGitFunction<QueryNotesRequest, IList<NoteData>> QueryNotes => _queryNotes;
 
-	public IGitFunction<QueryObjectsParameters, string> QueryObjects => _queryObjects;
+	public IGitFunction<QueryObjectsRequest, string> QueryObjects => _queryObjects;
 
-	public IGitFunction<QueryRevisionParameters, RevisionData> QueryRevision => _queryRevision;
+	public IGitFunction<QueryRevisionRequest, RevisionData> QueryRevision => _queryRevision;
 
-	public IGitFunction<QueryRevisionsParameters, IList<RevisionData>> QueryRevisions => _queryRevisions;
+	public IGitFunction<QueryRevisionsRequest, IList<RevisionData>> QueryRevisions => _queryRevisions;
 
-	public IGitFunction<QueryRevisionsParameters, IList<RevisionGraphData>> QueryRevisionGraph => _queryRevisionGraph;
+	public IGitFunction<QueryRevisionsRequest, IList<RevisionGraphData>> QueryRevisionGraph => _queryRevisionGraph;
 
-	public IGitFunction<QueryRevisionDiffParameters, byte[]> QueryRevisionPatch => _queryRevisionPatch;
+	public IGitFunction<QueryRevisionDiffRequest, byte[]> QueryRevisionPatch => _queryRevisionPatch;
 
-	public IGitFunction<QueryReferencesParameters, ReferencesData> QueryReferences => _queryReferences;
+	public IGitFunction<QueryReferencesRequest, ReferencesData> QueryReferences => _queryReferences;
 
-	public IGitFunction<QueryReflogParameters, IList<ReflogRecordData>> QueryReflog => _queryReflog;
+	public IGitFunction<QueryReflogRequest, IList<ReflogRecordData>> QueryReflog => _queryReflog;
 
-	public IGitFunction<QueryRemoteParameters, RemoteData> QueryRemote => _queryRemote;
+	public IGitFunction<QueryRemoteRequest, RemoteData> QueryRemote => _queryRemote;
 
-	public IGitFunction<QueryRemoteReferencesParameters, IList<RemoteReferenceData>> QueryRemoteReferences => _queryRemoteReferences;
+	public IGitFunction<QueryRemoteReferencesRequest, IList<RemoteReferenceData>> QueryRemoteReferences => _queryRemoteReferences;
 
-	public IGitFunction<QueryRemotesParameters, IList<RemoteData>> QueryRemotes => _queryRemotes;
+	public IGitFunction<QueryRemotesRequest, IList<RemoteData>> QueryRemotes => _queryRemotes;
 
-	public IGitFunction<QueryRevisionDiffParameters, Diff> QueryRevisionDiff => _queryRevisionDiff;
+	public IGitFunction<QueryRevisionDiffRequest, Diff> QueryRevisionDiff => _queryRevisionDiff;
 
-	public IGitFunction<QueryStashParameters, IList<StashedStateData>> QueryStash => _queryStash;
+	public IGitFunction<QueryStashRequest, IList<StashedStateData>> QueryStash => _queryStash;
 
-	public IGitFunction<QueryRevisionDiffParameters, byte[]> QueryStashPatch => _queryStashPatch;
+	public IGitFunction<QueryRevisionDiffRequest, byte[]> QueryStashPatch => _queryStashPatch;
 
-	public IGitFunction<QueryStashTopParameters, RevisionData> QueryStashTop => _queryStashTop;
+	public IGitFunction<QueryStashTopRequest, RevisionData?> QueryStashTop => _queryStashTop;
 
-	public IGitFunction<QueryRevisionDiffParameters, Diff> QueryStashDiff => _queryStashDiff;
+	public IGitFunction<QueryRevisionDiffRequest, Diff> QueryStashDiff => _queryStashDiff;
 
-	public IGitFunction<QueryStatusParameters, StatusData> QueryStatus => _queryStatus;
+	public IGitFunction<QueryStatusRequest, StatusData> QueryStatus => _queryStatus;
 
-	public IGitFunction<QuerySymbolicReferenceParameters, SymbolicReferenceData> QuerySymbolicReference => _querySymbolicReference;
+	public IGitFunction<QuerySymbolicReferenceRequest, SymbolicReferenceData> QuerySymbolicReference => _querySymbolicReference;
 
-	public IGitFunction<QueryTreeContentParameters, IList<TreeContentData>> QueryTreeContent => _queryTreeContent;
+	public IGitFunction<QueryTreeContentRequest, IList<TreeContentData>> QueryTreeContent => _queryTreeContent;
 
-	public IGitFunction<QueryTagParameters, TagData> QueryTag => _queryTag;
+	public IGitFunction<QueryTagRequest, TagData?> QueryTag => _queryTag;
 
-	public IGitFunction<QueryTagMessageParameters, string> QueryTagMessage => _queryTagMessage;
+	public IGitFunction<QueryTagMessageRequest, string> QueryTagMessage => _queryTagMessage;
 
-	public IGitFunction<QueryTagsParameters, IList<TagData>> QueryTags => _queryTags;
+	public IGitFunction<QueryTagsRequest, IList<TagData>> QueryTags => _queryTags;
 
-	public IGitFunction<QueryUsersParameters, IList<UserData>> QueryUsers => _queryUsers;
+	public IGitFunction<QueryUsersRequest, IList<UserData>> QueryUsers => _queryUsers;
 
-	public IGitAction<RemoveFilesParameters> RemoveFiles => _removeFiles;
+	public IGitAction<RemoveFilesRequest> RemoveFiles => _removeFiles;
 
-	public IGitAction<RemoveRemoteReferencesParameters> RemoveRemoteReferences => _removeRemoteReferences;
+	public IGitAction<RemoveRemoteReferencesRequest> RemoveRemoteReferences => _removeRemoteReferences;
 
-	public IGitAction<RebaseParameters> Rebase => _rebase;
+	public IGitAction<RebaseRequest> Rebase => _rebase;
 
-	public IGitAction<RemoveRemoteParameters> RemoveRemote => _removeRemote;
+	public IGitAction<RemoveRemoteRequest> RemoveRemote => _removeRemote;
 
-	public IGitAction<RenameBranchParameters> RenameBranch => _renameBranch;
+	public IGitAction<RenameBranchRequest> RenameBranch => _renameBranch;
 
-	public IGitAction<RenameRemoteParameters> RenameRemote => _renameRemote;
+	public IGitAction<RenameRemoteRequest> RenameRemote => _renameRemote;
 
-	public IGitAction<ResetParameters> Reset => _reset;
+	public IGitAction<ResetRequest> Reset => _reset;
 
-	public IGitAction<ResetFilesParameters> ResetFiles => _resetFiles;
+	public IGitAction<ResetFilesRequest> ResetFiles => _resetFiles;
 
-	public IGitAction<ResetBranchParameters> ResetBranch => _resetBranch;
+	public IGitAction<ResetBranchRequest> ResetBranch => _resetBranch;
 
-	public IGitAction<RevertParameters> Revert => _revert;
+	public IGitAction<RevertRequest> Revert => _revert;
 
-	public IGitAction<RunMergeToolParameters> RunMergeTool => _runMergeTool;
+	public IGitAction<RunMergeToolRequest> RunMergeTool => _runMergeTool;
 
-	public IGitAction<StashApplyParameters> StashApply => _stashApply;
+	public IGitAction<StashApplyRequest> StashApply => _stashApply;
 
-	public IGitAction<StashDropParameters> StashDrop => _stashDrop;
+	public IGitAction<StashDropRequest> StashDrop => _stashDrop;
 
-	public IGitAction<StashClearParameters> StashClear => _stashClear;
+	public IGitAction<StashClearRequest> StashClear => _stashClear;
 
-	public IGitAction<StashPopParameters> StashPop => _stashPop;
+	public IGitAction<StashPopRequest> StashPop => _stashPop;
 
-	public IGitFunction<StashSaveParameters, bool> StashSave => _stashSave;
+	public IGitFunction<StashSaveRequest, bool> StashSave => _stashSave;
 
-	public IGitAction<StashToBranchParameters> StashToBranch => _stashToBranch;
+	public IGitAction<StashToBranchRequest> StashToBranch => _stashToBranch;
 
-	public IGitAction<UpdateSubmoduleParameters> UpdateSubmodule => _updateSubmodule;
+	public IGitAction<UpdateSubmoduleRequest> UpdateSubmodule => _updateSubmodule;
 
-	public IGitAction<SyncSubmoduleParameters> SyncSubmodule => _syncSubmodule;
+	public IGitAction<SyncSubmoduleRequest> SyncSubmodule => _syncSubmodule;
 
-	public IGitAction<VerifyTagsParameters> VerifyTags => _verifyTags;
+	public IGitAction<VerifyTagsRequest> VerifyTags => _verifyTags;
 
-	public IGitFunction<QueryConfigParameters, IList<ConfigParameterData>> QueryConfig => _queryConfig;
+	public IGitFunction<QueryConfigRequest, IList<ConfigParameterData>> QueryConfig => _queryConfig;
 
-	public IGitFunction<QueryConfigParameterParameters, ConfigParameterData> QueryConfigParameter => _queryConfigParameter;
+	public IGitFunction<QueryConfigParameterRequest, ConfigParameterData?> QueryConfigParameter => _queryConfigParameter;
 
-	public IGitAction<AddConfigValueParameters> AddConfigValue => _addConfigValue;
+	public IGitAction<AddConfigValueRequest> AddConfigValue => _addConfigValue;
 
-	public IGitAction<SetConfigValueParameters> SetConfigValue => _setConfigValue;
+	public IGitAction<SetConfigValueRequest> SetConfigValue => _setConfigValue;
 
-	public IGitAction<UnsetConfigValueParameters> UnsetConfigValue => _unsetConfigValue;
+	public IGitAction<UnsetConfigValueRequest> UnsetConfigValue => _unsetConfigValue;
 
-	public IGitAction<RenameConfigSectionParameters> RenameConfigSection => _renameConfigSection;
+	public IGitAction<RenameConfigSectionRequest> RenameConfigSection => _renameConfigSection;
 
-	public IGitAction<DeleteConfigSectionParameters> DeleteConfigSection => _deleteConfigSection;
+	public IGitAction<DeleteConfigSectionRequest> DeleteConfigSection => _deleteConfigSection;
 
 	#endregion
 }

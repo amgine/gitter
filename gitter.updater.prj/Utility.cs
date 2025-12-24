@@ -131,15 +131,13 @@ public static class Utility
 
 	public static void StartApplication(string fileName)
 	{
-		using(var p = new Process())
+		using var p = new Process();
+		p.StartInfo = new ProcessStartInfo()
 		{
-			p.StartInfo = new ProcessStartInfo()
-			{
-				FileName = fileName,
-				WorkingDirectory = Path.GetDirectoryName(fileName),
-			};
-			p.Start();
-		}
+			FileName = fileName,
+			WorkingDirectory = Path.GetDirectoryName(fileName),
+		};
+		p.Start();
 	}
 
 	public static void KillAllGitterProcesses(string targetDirectory)
@@ -150,7 +148,7 @@ public static class Utility
 			var processes = Process.GetProcesses();
 			foreach(var p in processes)
 			{
-				ProcessModule module;
+				ProcessModule? module;
 				try
 				{
 					module = p.MainModule;
@@ -161,20 +159,23 @@ public static class Utility
 				}
 
 				bool kill = false;
-				if(module?.ModuleName == @"gitter.exe")
+				if(module?.ModuleName is @"gitter.exe")
 				{
 					try
 					{
-						var dir = Path.GetDirectoryName(p.MainModule.FileName);
-						var d = new DirectoryInfo(dir);
-						while(d != null)
+						var dir = Path.GetDirectoryName(module.FileName);
+						if(dir is not null)
 						{
-							if(di.FullName == d.FullName)
+							var d = new DirectoryInfo(dir);
+							while(d is not null)
 							{
-								kill = true;
-								break;
+								if(di.FullName == d.FullName)
+								{
+									kill = true;
+									break;
+								}
+								d = d.Parent;
 							}
-							d = d.Parent;
 						}
 					}
 					catch
@@ -255,7 +256,7 @@ public static class Utility
 			string exeFileName;
 			using(var p = Process.GetCurrentProcess())
 			{
-				exeFileName = p.MainModule.FileName;
+				exeFileName = p.MainModule!.FileName!;
 			}
 			using(var p = new Process()
 				{

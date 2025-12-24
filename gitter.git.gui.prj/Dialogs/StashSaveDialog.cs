@@ -23,8 +23,11 @@ namespace gitter.Git.Gui.Dialogs;
 using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Windows.Forms;
 
 using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Services;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
@@ -33,7 +36,92 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public partial class StashSaveDialog : GitDialogBase, IExecutableDialog
 {
-	private TextBoxSpellChecker _speller;
+	readonly struct DialogControls
+	{
+		private readonly LabelControl    _lblMessage;
+		public  readonly TextBox         _txtMessage;
+		public  readonly ICheckBoxWidget _chkKeepIndex;
+		public  readonly ICheckBoxWidget _chkIncludeUntrackedFiles;
+		private readonly GroupSeparator  _grpOptions;
+
+		public DialogControls(IGitterStyle style)
+		{
+			style ??= GitterApplication.Style;
+
+			_lblMessage = new();
+			_txtMessage = new()
+			{
+				AcceptsReturn = true,
+				AcceptsTab = true,
+				Multiline = true,
+			};
+			_grpOptions = new();
+			var cbf = style.CheckBoxFactory;
+			_chkKeepIndex             = cbf.Create();
+			_chkIncludeUntrackedFiles = cbf.Create();
+
+			GitterApplication.FontManager.InputFont.Apply(_txtMessage);
+		}
+
+		public void Localize(Repository repository)
+		{
+			_lblMessage.Text = Resources.StrOptionalMessage.AddColon();
+			_grpOptions.Text = Resources.StrOptions;
+			_chkKeepIndex.Text = Resources.StrKeepIndex;
+			_chkIncludeUntrackedFiles.Text = Resources.StrsIncludeUntrackedFiles;
+			if(!GitFeatures.StashIncludeUntrackedOption.IsAvailableFor(repository))
+			{
+				_chkIncludeUntrackedFiles.Enabled = false;
+				_chkIncludeUntrackedFiles.Text += " " +
+					Resources.StrfVersionRequired
+								.UseAsFormat(GitFeatures.StashIncludeUntrackedOption.RequiredVersion)
+								.SurroundWithBraces();
+			}
+		}
+
+		public void Layout(Control parent)
+		{
+			var messageDec = new TextBoxDecorator(_txtMessage);
+
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					rows:
+					[
+						LayoutConstants.LabelRowHeight,
+						LayoutConstants.LabelRowSpacing,
+						SizeSpec.Everything(),
+						LayoutConstants.GroupSeparatorRowHeight,
+						LayoutConstants.CheckBoxRowHeight,
+						LayoutConstants.CheckBoxRowHeight,
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblMessage,               marginOverride: LayoutConstants.NoMargin),     row: 0),
+						new GridContent(new ControlContent(messageDec,                marginOverride: LayoutConstants.NoMargin),     row: 2),
+						new GridContent(new ControlContent(_grpOptions,               marginOverride: LayoutConstants.NoMargin),     row: 3),
+						new GridContent(new WidgetContent (_chkKeepIndex,             marginOverride: LayoutConstants.GroupPadding), row: 4),
+						new GridContent(new WidgetContent (_chkIncludeUntrackedFiles, marginOverride: LayoutConstants.GroupPadding), row: 5),
+					]),
+			};
+
+			var tabIndex = 0;
+			_lblMessage.TabIndex = tabIndex++;
+			messageDec.TabIndex = tabIndex++;
+			_grpOptions.TabIndex = tabIndex++;
+			_chkKeepIndex.TabIndex = tabIndex++;
+			_chkIncludeUntrackedFiles.TabIndex = tabIndex++;
+
+			_lblMessage.Parent               = parent;
+			messageDec.Parent                = parent;
+			_grpOptions.Parent               = parent;
+			_chkKeepIndex.Parent             = parent;
+			_chkIncludeUntrackedFiles.Parent = parent;
+		}
+	}
+
+	private readonly DialogControls _controls;
+	private TextBoxSpellChecker? _speller;
 
 	/// <summary>Create <see cref="StashSaveDialog"/>.</summary>
 	/// <param name="repository">Repository for performing stash save.</param>
@@ -44,30 +132,35 @@ public partial class StashSaveDialog : GitDialogBase, IExecutableDialog
 
 		Repository = repository;
 
-		InitializeComponent();
-
+		Name = nameof(StashSaveDialog);
 		Text = Resources.StrStashSave;
 
-		_lblMessage.Text = Resources.StrOptionalMessage.AddColon();
-		_chkKeepIndex.Text = Resources.StrKeepIndex;
-		_chkIncludeUntrackedFiles.Text = Resources.StrsIncludeUntrackedFiles;
-		if(!GitFeatures.StashIncludeUntrackedOption.IsAvailableFor(repository))
-		{
-			_chkIncludeUntrackedFiles.Enabled = false;
-			_chkIncludeUntrackedFiles.Text += " " +
-				Resources.StrfVersionRequired
-							.UseAsFormat(GitFeatures.StashIncludeUntrackedOption.RequiredVersion)
-							.SurroundWithBraces();
-		}
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		Size                = ScalableSize.GetValue(Dpi.Default);
+		_controls = new(GitterApplication.Style);
+		_controls.Localize(repository);
+		_controls.Layout(this);
+		ResumeLayout(false);
+		PerformLayout();
 
-		ToolTipService.Register(_chkKeepIndex, Resources.TipStashKeepIndex);
-
-		GitterApplication.FontManager.InputFont.Apply(_txtMessage);
+		ToolTipService.Register(_controls._chkKeepIndex.Control, Resources.TipStashKeepIndex);
 
 		if(SpellingService.Enabled)
 		{
-			_speller = new TextBoxSpellChecker(_txtMessage, true);
+			_speller = new TextBoxSpellChecker(_controls._txtMessage, true);
 		}
+	}
+
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			DisposableUtility.Dispose(ref _speller);
+		}
+		base.Dispose(disposing);
 	}
 
 	public Repository Repository { get; private set; }
@@ -75,26 +168,29 @@ public partial class StashSaveDialog : GitDialogBase, IExecutableDialog
 	/// <summary>Do not stash staged changes.</summary>
 	public bool KeepIndex
 	{
-		get => _chkKeepIndex.Checked;
-		set => _chkKeepIndex.Checked = value;
+		get => _controls._chkKeepIndex.IsChecked;
+		set => _controls._chkKeepIndex.IsChecked = value;
 	}
 
 	/// <summary>Include untracked files in stash.</summary>
 	public bool IncludeUntrackedFiles
 	{
-		get => _chkIncludeUntrackedFiles.Checked;
-		set => _chkIncludeUntrackedFiles.Checked = value;
+		get => _controls._chkIncludeUntrackedFiles.IsChecked;
+		set => _controls._chkIncludeUntrackedFiles.IsChecked = value;
 	}
 
 	/// <summary>Custom commit message (optional).</summary>
 	public string Message
 	{
-		get => _txtMessage.Text;
-		set => _txtMessage.Text = value;
+		get => _controls._txtMessage.Text;
+		set => _controls._txtMessage.Text = value;
 	}
 
 	/// <inheritdoc/>
 	protected override string ActionVerb => Resources.StrSave;
+
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
 
 	/// <inheritdoc/>
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(400, 156));
@@ -103,7 +199,7 @@ public partial class StashSaveDialog : GitDialogBase, IExecutableDialog
 	protected override void OnLoad(EventArgs e)
 	{
 		base.OnLoad(e);
-		BeginInvoke(_txtMessage.Focus);
+		BeginInvoke(_controls._txtMessage.Focus);
 	}
 
 	/// <summary>Perform stash save.</summary>

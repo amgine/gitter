@@ -27,18 +27,12 @@ public sealed class News : RedmineObject
 {
 	#region Static
 
-	public static readonly RedmineObjectProperty<Project> ProjectProperty =
-		new RedmineObjectProperty<Project>("project", "Project");
-	public static readonly RedmineObjectProperty<User> AuthorProperty =
-		new RedmineObjectProperty<User>("author", "Author");
-	public static readonly RedmineObjectProperty<string> TitleProperty =
-		new RedmineObjectProperty<string>("title", "Title");
-	public static readonly RedmineObjectProperty<string> SummaryProperty =
-		new RedmineObjectProperty<string>("summary", "Summary");
-	public static readonly RedmineObjectProperty<string> DescriptionProperty =
-		new RedmineObjectProperty<string>("description", "Description");
-	public static readonly RedmineObjectProperty<DateTime> CreatedOnProperty =
-		new RedmineObjectProperty<DateTime>("created_on", "CreatedOn");
+	public static readonly RedmineObjectProperty<Project>  ProjectProperty     = new("project",     nameof(Project));
+	public static readonly RedmineObjectProperty<User>     AuthorProperty      = new("author",      nameof(Author));
+	public static readonly RedmineObjectProperty<string>   TitleProperty       = new("title",       nameof(Title));
+	public static readonly RedmineObjectProperty<string>   SummaryProperty     = new("summary",     nameof(Summary));
+	public static readonly RedmineObjectProperty<string>   DescriptionProperty = new("description", nameof(Description));
+	public static readonly RedmineObjectProperty<DateTime> CreatedOnProperty   = new("created_on",  nameof(CreatedOn));
 
 	#endregion
 
@@ -68,7 +62,7 @@ public sealed class News : RedmineObject
 		_title			= RedmineUtility.LoadString(node[TitleProperty.XmlNodeName]);
 		_description	= RedmineUtility.LoadString(node[SummaryProperty.XmlNodeName]);
 		_summary		= RedmineUtility.LoadString(node[SummaryProperty.XmlNodeName]);
-		_createdOn		= RedmineUtility.LoadDateForSure(node[CreatedOnProperty.XmlNodeName]);
+		_createdOn		= RedmineUtility.LoadDateRequired(node[CreatedOnProperty.XmlNodeName]);
 	}
 
 	#endregion
@@ -79,12 +73,12 @@ public sealed class News : RedmineObject
 	{
 		base.Update(node);
 
-		Project		= RedmineUtility.LoadNamedObject(node[ProjectProperty.XmlNodeName], Context.Projects.Lookup);
-		Author		= RedmineUtility.LoadNamedObject(node[AuthorProperty.XmlNodeName], Context.Users.Lookup);
-		Title		= RedmineUtility.LoadString(node[TitleProperty.XmlNodeName]);
-		Description	= RedmineUtility.LoadString(node[SummaryProperty.XmlNodeName]);
-		Summary		= RedmineUtility.LoadString(node[SummaryProperty.XmlNodeName]);
-		CreatedOn	= RedmineUtility.LoadDateForSure(node[CreatedOnProperty.XmlNodeName]);
+		Project     = RedmineUtility.LoadNamedObject(node[ProjectProperty.XmlNodeName], Context.Projects.Lookup);
+		Author      = RedmineUtility.LoadNamedObject(node[AuthorProperty.XmlNodeName], Context.Users.Lookup);
+		Title       = RedmineUtility.LoadString(node[TitleProperty.XmlNodeName]);
+		Description = RedmineUtility.LoadString(node[SummaryProperty.XmlNodeName]);
+		Summary     = RedmineUtility.LoadString(node[SummaryProperty.XmlNodeName]);
+		CreatedOn   = RedmineUtility.LoadDateRequired(node[CreatedOnProperty.XmlNodeName]);
 	}
 
 	#endregion
@@ -93,44 +87,42 @@ public sealed class News : RedmineObject
 
 	public Project Project
 	{
-		get { return _project; }
-		private set { UpdatePropertyValue(ref _project, value, ProjectProperty); }
+		get => _project;
+		private set => UpdatePropertyValue(ref _project, value, ProjectProperty);
 	}
 
 	public User Author
 	{
-		get { return _author; }
-		private set { UpdatePropertyValue(ref _author, value, AuthorProperty); }
+		get => _author;
+		private set => UpdatePropertyValue(ref _author, value, AuthorProperty);
 	}
 
 	public string Title
 	{
-		get { return _title; }
-		private set { UpdatePropertyValue(ref _title, value, TitleProperty); }
+		get => _title;
+		private set => UpdatePropertyValue(ref _title, value, TitleProperty);
 	}
 
 	public string Description
 	{
-		get { return _description; }
-		private set { UpdatePropertyValue(ref _description, value, DescriptionProperty); }
+		get => _description;
+		private set => UpdatePropertyValue(ref _description, value, DescriptionProperty);
 	}
 
 	public string Summary
 	{
-		get { return _summary; }
-		private set { UpdatePropertyValue(ref _summary, value, SummaryProperty); }
+		get => _summary;
+		private set => UpdatePropertyValue(ref _summary, value, SummaryProperty);
 	}
 
 	public DateTime CreatedOn
 	{
-		get { return _createdOn; }
-		private set { UpdatePropertyValue(ref _createdOn, value, CreatedOnProperty); }
+		get => _createdOn;
+		private set => UpdatePropertyValue(ref _createdOn, value, CreatedOnProperty);
 	}
 
 	#endregion
 
-	public override string ToString()
-	{
-		return Title;
-	}
+	/// <inheritdoc/>
+	public override string ToString() => Title;
 }

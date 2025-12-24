@@ -23,18 +23,92 @@ namespace gitter.Framework;
 using System;
 using System.Collections.Generic;
 
+public abstract class CacheUpdater<TKey, TObject, TData>(
+	Dictionary<TKey, TObject> dictionary,
+	LockType                  syncRoot)
+	where TKey : notnull
+{
+	protected abstract TKey GetKey(TObject @object);
+
+	protected abstract TKey GetKey(TData data);
+
+	protected abstract void UpdateObject(TObject @object, TData data);
+
+	protected abstract TObject CreateObject(TData data);
+
+	protected virtual void OnObjectAdded(TObject @object) { }
+
+	protected virtual void OnObjectRemoved(TObject @object) { }
+
+	protected virtual bool Filter(TObject @object) => true;
+
+	protected virtual bool Filter(TData data) => true;
+
+	public void Update(IEnumerable<TData> dataList)
+	{
+		lock(syncRoot)
+		{
+			var hset = default(HashSet<TKey>);
+			if(dictionary.Count != 0)
+			{
+				hset = new HashSet<TKey>(capacity: dictionary.Count);
+				foreach(var kvp in dictionary)
+				{
+					if(!Filter(kvp.Value)) continue;
+					hset.Add(kvp.Key);
+				}
+			}
+
+			foreach(var data in dataList)
+			{
+				if(!Filter(data)) continue;
+
+				var key = GetKey(data);
+				if(!dictionary.TryGetValue(key, out var obj))
+				{
+					dictionary.Add(key, obj = CreateObject(data));
+					OnObjectAdded(obj);
+				}
+				else
+				{
+					UpdateObject(obj, data);
+					hset?.Remove(key);
+				}
+			}
+
+			if(hset is not { Count: not 0 }) return;
+
+			foreach(var key in hset)
+			{
+#if NETCOREAPP
+				if(dictionary.Remove(key, out var removed))
+				{
+					OnObjectRemoved(removed);
+				}
+#else
+				if(dictionary.TryGetValue(key, out var removed))
+				{
+					dictionary.Remove(key);
+					OnObjectRemoved(removed);
+				}
+#endif
+			}
+		}
+	}
+}
+
 /// <summary>Helper class to update data cached in dictionary or list.</summary>
 public static class CacheUpdater
 {
 	public static void UpdateObjectDictionary<TObject, TInfo>(
 		IDictionary<string, TObject> dictionary,
-		Predicate<TObject> validateObject,
-		Predicate<TInfo> validateInfo,
+		Predicate<TObject>? validateObject,
+		Predicate<TInfo>? validateInfo,
 		IEnumerable<TInfo> actualList,
 		Func<TInfo, TObject> factory,
 		Action<TObject, TInfo> updater,
-		Action<TObject> objectCreated,
-		Action<TObject> objectDeleted,
+		Action<TObject>? objectCreated,
+		Action<TObject>? objectDeleted,
 		bool callUpdate)
 		where TObject : INamedObject
 		where TInfo : INamedObject
@@ -42,7 +116,7 @@ public static class CacheUpdater
 		var hset = default(HashSet<TObject>);
 		if(dictionary.Count != 0)
 		{
-			hset = new HashSet<TObject>();
+			hset = [];
 			foreach(var kvp in dictionary)
 			{
 				if(validateObject is null || validateObject(kvp.Value))
@@ -85,13 +159,13 @@ public static class CacheUpdater
 
 	public static void UpdateObjectDictionary<TObject, TInfo>(
 		IDictionary<string, TObject> dictionary,
-		Predicate<TObject> validateObject,
-		Predicate<TInfo> validateInfo,
+		Predicate<TObject>? validateObject,
+		Predicate<TInfo>? validateInfo,
 		IDictionary<string, TInfo> actualDictionary,
 		Func<TInfo, TObject> factory,
 		Action<TObject, TInfo> updater,
-		Action<TObject> objectCreated,
-		Action<TObject> objectDeleted,
+		Action<TObject>? objectCreated,
+		Action<TObject>? objectDeleted,
 		bool callUpdate)
 		where TObject : INamedObject
 		where TInfo : INamedObject
@@ -156,7 +230,7 @@ public static class CacheUpdater
 		var hset = default(HashSet<TObject>);
 		if(dictionary.Count != 0)
 		{
-			hset = new HashSet<TObject>();
+			hset = [];
 			foreach(var kvp in dictionary)
 			{
 				if(validateObject is null || validateObject(kvp.Value))
@@ -246,7 +320,7 @@ public static class CacheUpdater
 		var hset = default(HashSet<TObject>);
 		if(list.Count != 0)
 		{
-			hset = new HashSet<TObject>();
+			hset = [];
 			foreach(var obj in list)
 			{
 				if(validateObject == null || validateObject(obj))

@@ -23,31 +23,48 @@ namespace gitter.Git;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>Cached collection of git objects.</summary>
 /// <typeparam name="TObject">The type of the object.</typeparam>
 /// <typeparam name="TEventArgs">The type of the event args.</typeparam>
-public abstract class GitObjectsCollection<TObject, TEventArgs> : GitObject, INotifyCollectionChanged, IReadOnlyCollection<TObject>
-	where TObject : GitNamedObjectWithLifetime
+/// <param name="repository">Related repository.</param>
+public abstract class GitObjectsCollection<TObject, TEventArgs>(Repository repository)
+	: GitObjectsCollection<string, TObject, TEventArgs>(repository)
+	where TObject    : GitNamedObjectWithLifetime
+	where TEventArgs : ObjectEventArgs<TObject>
+{
+	protected override string GetKey(TObject @object) => @object.Name;
+}
+
+/// <summary>Cached collection of git objects.</summary>
+/// <typeparam name="TKey">Object key.</typeparam>
+/// <typeparam name="TObject">The type of the object.</typeparam>
+/// <typeparam name="TEventArgs">The type of the event args.</typeparam>
+/// <param name="repository">Related repository.</param>
+public abstract class GitObjectsCollection<TKey, TObject, TEventArgs>(Repository repository)
+	: GitObject(repository, false), INotifyCollectionChanged, IReadOnlyCollection<TObject>
+	where TKey       : notnull
+	where TObject    : GitNamedObjectWithLifetime
 	where TEventArgs : ObjectEventArgs<TObject>
 {
 	#region Data
 
 	/// <summary>Object cache.</summary>
-	private readonly Dictionary<string, TObject> _dictionary = new();
+	protected readonly Dictionary<TKey, TObject> _dictionary = [];
 
 	#endregion
 
 	#region Events
 
 	/// <summary>Occurs when the collection changes.</summary>
-	public event NotifyCollectionChangedEventHandler CollectionChanged;
+	public event NotifyCollectionChangedEventHandler? CollectionChanged;
 
 	/// <summary>Occurs when object is added.</summary>
-	public event EventHandler<TEventArgs> ObjectAdded;
+	public event EventHandler<TEventArgs>? ObjectAdded;
 
 	/// <summary>Occurs when object is removed.</summary>
-	public event EventHandler<TEventArgs> ObjectRemoved;
+	public event EventHandler<TEventArgs>? ObjectRemoved;
 
 	/// <summary>Creates the event args, associated with specified <paramref name="item"/>.</summary>
 	/// <param name="item">The item.</param>
@@ -79,43 +96,31 @@ public abstract class GitObjectsCollection<TObject, TEventArgs> : GitObject, INo
 
 	#endregion
 
-	#region .ctor
-
-	/// <summary>Initializes a new instance of the <see cref="GitObjectsCollection&lt;TObject, TEventArgs&gt;"/> class.</summary>
-	/// <param name="repository">Related repository.</param>
-	/// <exception cref="T:System.ArgumentNullException"><paramref name="repository"/> == <c>null</c>.</exception>
-	protected GitObjectsCollection(Repository repository)
-		: base(repository, false)
-	{
-	}
-
-	#endregion
+	protected abstract TKey GetKey(TObject @object);
 
 	/// <summary>Determines whether this collection contains object with the specified <paramref name="name"/>.</summary>
 	/// <param name="name">Object name.</param>
 	/// <returns>
 	/// 	<c>true</c> if this collection contains object with the specified <paramref name="name"/>; otherwise, <c>false</c>.
 	/// </returns>
-	protected bool ContainsObjectName(string name)
-	{
-		return _dictionary.ContainsKey(name);
-	}
+	protected bool ContainsObjectName(TKey name)
+		=> _dictionary.ContainsKey(name);
 
 	/// <summary>Gets the internal object storage.</summary>
 	/// <value>Internal object storage.</value>
-	protected IDictionary<string, TObject> ObjectStorage => _dictionary;
+	protected IDictionary<TKey, TObject> ObjectStorage => _dictionary;
 
 	/// <summary>Removes object from this collection.</summary>
 	/// <param name="name">Object name.</param>
-	protected void RemoveObject(string name)
+	protected void RemoveObject(TKey name)
 	{
 		lock(SyncRoot)
 		{
 			Verify.Argument.IsTrue(
-				_dictionary.TryGetValue(name, out TObject item),
+				_dictionary.TryGetValue(name, out var item),
 				"name", "Object not found.");
 			_dictionary.Remove(name);
-			InvokeObjectRemoved(item);
+			InvokeObjectRemoved(item!);
 		}
 	}
 
@@ -125,8 +130,10 @@ public abstract class GitObjectsCollection<TObject, TEventArgs> : GitObject, INo
 	{
 		lock(SyncRoot)
 		{
-			_dictionary.Remove(item.Name);
-			InvokeObjectRemoved(item);
+			if(_dictionary.Remove(GetKey(item)))
+			{
+				InvokeObjectRemoved(item);
+			}
 		}
 	}
 
@@ -136,7 +143,7 @@ public abstract class GitObjectsCollection<TObject, TEventArgs> : GitObject, INo
 	{
 		lock(SyncRoot)
 		{
-			_dictionary.Add(item.Name, item);
+			_dictionary.Add(GetKey(item), item);
 			InvokeObjectAdded(item);
 		}
 	}
@@ -144,15 +151,15 @@ public abstract class GitObjectsCollection<TObject, TEventArgs> : GitObject, INo
 	/// <summary>Returns non-ambiguous object name.</summary>
 	/// <param name="name">Object name.</param>
 	/// <returns>Non-ambiguous object name.</returns>
-	protected virtual string FixInputName(string name) => name;
+	protected virtual TKey FixInputName(TKey name) => name;
 
 	/// <summary>Gets the collection of object names.</summary>
 	/// <value>Collection of object names.</value>
-	public ICollection<string> Names => _dictionary.Keys;
+	public ICollection<TKey> Names => _dictionary.Keys;
 
 	/// <summary>Gets the <typeparamref name="TObject"/> with the specified <paramref name="name"/>.</summary>
 	/// <value><typeparamref name="TObject"/> with the specified <paramref name="name"/>.</value>
-	public TObject this[string name]
+	public TObject this[TKey name]
 	{
 		get { lock(SyncRoot) return _dictionary[FixInputName(name)]; }
 	}
@@ -176,7 +183,7 @@ public abstract class GitObjectsCollection<TObject, TEventArgs> : GitObject, INo
 	/// <returns>
 	/// 	<c>true</c> if this collection contains object with the specified <paramref name="name"/>; otherwise, <c>false</c>.
 	/// </returns>
-	public virtual bool Contains(string name)
+	public virtual bool Contains(TKey name)
 	{
 		lock(SyncRoot)
 		{
@@ -190,11 +197,11 @@ public abstract class GitObjectsCollection<TObject, TEventArgs> : GitObject, INo
 	/// Object with the specified <paramref name="name"/> or
 	/// <c>default(<typeparamref name="TObject"/>)</c>.
 	/// </returns>
-	public TObject TryGetItem(string name)
+	public TObject? TryGetItem(TKey name)
 	{
 		lock(SyncRoot)
 		{
-			if(_dictionary.TryGetValue(FixInputName(name), out TObject value))
+			if(_dictionary.TryGetValue(FixInputName(name), out var value))
 			{
 				return value;
 			}
@@ -206,14 +213,14 @@ public abstract class GitObjectsCollection<TObject, TEventArgs> : GitObject, INo
 	/// <param name="name">Object name.</param>
 	/// <param name="value">Object with the specified <paramref name="name"/> or <c>default(<typeparamref name="TObject"/>)</c>.</param>
 	/// <returns><c>true</c> if this collection contains object with the specified <paramref name="name"/>; otherwise, <c>false</c>.</returns>
-	public bool TryGetItem(string name, out TObject value)
+	public bool TryGetItem(TKey name, [MaybeNullWhen(returnValue: false)] out TObject value)
 	{
 		lock(SyncRoot) return _dictionary.TryGetValue(FixInputName(name), out value);
 	}
 
 	/// <summary>Gets the sync root object.</summary>
 	/// <value>The sync root object.</value>
-	public object SyncRoot => _dictionary;
+	public LockType SyncRoot { get; } = new();
 
 	#region Notify()
 
@@ -228,10 +235,8 @@ public abstract class GitObjectsCollection<TObject, TEventArgs> : GitObject, INo
 
 	/// <summary>Notifies that object was removed externally.</summary>
 	/// <param name="name">Removed object name.</param>
-	internal void NotifyRemoved(string name)
+	internal void NotifyRemoved(TKey name)
 	{
-		Verify.Argument.IsNotNull(name);
-
 		RemoveObject(name);
 	}
 
@@ -243,7 +248,7 @@ public abstract class GitObjectsCollection<TObject, TEventArgs> : GitObject, INo
 	/// <returns>
 	/// An <see cref="T:System.Collections.IEnumerator{TObject}"/> object that can be used to iterate through the collection.
 	/// </returns>
-	public Dictionary<string, TObject>.ValueCollection.Enumerator GetEnumerator()
+	public Dictionary<TKey, TObject>.ValueCollection.Enumerator GetEnumerator()
 		=> _dictionary.Values.GetEnumerator();
 
 	/// <summary>Returns an enumerator that iterates through a collection.</summary>

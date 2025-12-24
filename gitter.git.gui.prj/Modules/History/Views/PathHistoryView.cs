@@ -22,7 +22,6 @@ namespace gitter.Git.Gui.Views;
 
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.Windows.Forms;
 
 using gitter.Framework;
@@ -68,9 +67,9 @@ partial class PathHistoryView : HistoryViewBase
 		}
 	}
 
-	protected new PathLogSource LogSource
+	protected new PathLogSource? LogSource
 	{
-		get => (PathLogSource)base.LogSource;
+		get => (PathLogSource?)base.LogSource;
 		set => base.LogSource = value;
 	}
 
@@ -112,7 +111,7 @@ partial class PathHistoryView : HistoryViewBase
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 

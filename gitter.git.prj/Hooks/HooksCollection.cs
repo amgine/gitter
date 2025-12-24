@@ -1,32 +1,33 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 /// <summary>Repository <see cref="Hook"/> objects collection.</summary>
 public sealed class HooksCollection : GitObject, IEnumerable<Hook>
 {
-	private readonly Dictionary<string, Hook> _hooks = new();
+	private readonly Dictionary<string, Hook> _hooks = [];
 
 	/// <summary>Create <see cref="HooksCollection"/>.</summary>
 	/// <param name="repository">Related <see cref="Repository"/>.</param>
@@ -90,10 +91,10 @@ public sealed class HooksCollection : GitObject, IEnumerable<Hook>
 
 	public Hook this[string name] => _hooks[name];
 
-	public bool TryGetHook(string name, out Hook hook)
+	public bool TryGetHook(string name, [MaybeNullWhen(returnValue: false)] out Hook hook)
 		=> _hooks.TryGetValue(name, out hook);
 
-	public Hook TryGetHook(string name)
+	public Hook? TryGetHook(string name)
 		=> _hooks.TryGetValue(name, out var hook)
 			? hook
 			: default;

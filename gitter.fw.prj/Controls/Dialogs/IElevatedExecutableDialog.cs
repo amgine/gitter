@@ -32,5 +32,5 @@ public interface IElevatedExecutableDialog
 	bool RequireElevation { get; }
 
 	/// <summary>Action which performs operations requiring elevation.</summary>
-	string[] ElevatedExecutionActions { get; }
+	string[]? ElevatedExecutionActions { get; }
 }

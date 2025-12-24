@@ -111,7 +111,7 @@ public class ComboFileStatusItem : CustomListBoxItem
 		base.OnListBoxDetached();
 	}
 
-	private void OnStagedDeleted(object sender, EventArgs e)
+	private void OnStagedDeleted(object? sender, EventArgs e)
 	{
 		_staged = null;
 		if(_unstaged == null)
@@ -124,7 +124,7 @@ public class ComboFileStatusItem : CustomListBoxItem
 		}
 	}
 
-	private void OnUnstagedDeleted(object sender, EventArgs e)
+	private void OnUnstagedDeleted(object? sender, EventArgs e)
 	{
 		_unstaged = null;
 		if(_staged == null)
@@ -158,7 +158,7 @@ public class ComboFileStatusItem : CustomListBoxItem
 		CheckedStateChanged += OnCSChanged;
 	}
 
-	private void OnCSChanged(object sender, EventArgs e)
+	private void OnCSChanged(object? sender, EventArgs e)
 	{
 		switch(CheckedState)
 		{

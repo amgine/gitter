@@ -92,7 +92,7 @@ public abstract class GitNamedObject : GitObject, INamedObject
 	protected GitNamedObject(Repository repository, string name)
 		: base(repository)
 	{
-		Verify.Argument.IsNeitherNullNorWhitespace(name);
+		Verify.Argument.IsNotNull(name);
 
 		_name = name;
 	}
@@ -100,9 +100,9 @@ public abstract class GitNamedObject : GitObject, INamedObject
 	/// <summary>Create <see cref="GitNamedObject"/>.</summary>
 	/// <param name="name">Object name.</param>
 	protected GitNamedObject(string name)
-		: base(null, true)
+		: base(null!, true)
 	{
-		Verify.Argument.IsNeitherNullNorWhitespace(name);
+		Verify.Argument.IsNotNull(name);
 
 		_name = name;
 	}
@@ -113,7 +113,7 @@ public abstract class GitNamedObject : GitObject, INamedObject
 		get => _name;
 		set
 		{
-			Verify.Argument.IsNeitherNullNorWhitespace(value);
+			Verify.Argument.IsNotNull(value);
 
 			RenameCore(value);
 			string oldName = _name;
@@ -153,7 +153,7 @@ public abstract class GitDynamicNamedObject : GitObject, INamedObject
 
 	/// <summary>Create <see cref="GitNamedObject"/>.</summary>
 	protected GitDynamicNamedObject()
-		: base(null, true)
+		: base(null!, true)
 	{
 	}
 
@@ -171,10 +171,10 @@ public abstract class GitDynamicNamedObject : GitObject, INamedObject
 public abstract class GitNamedObjectWithLifetime : GitNamedObject
 {
 	/// <summary>This object has been deleted.</summary>
-	public event EventHandler Deleted;
+	public event EventHandler? Deleted;
 
 	/// <summary>This object has been revived.</summary>
-	public event EventHandler Revived;
+	public event EventHandler? Revived;
 
 	/// <summary>Create <see cref="GitNamedObjectWithLifetime"/>.</summary>
 	/// <param name="repository">Host repository.</param>
@@ -231,10 +231,10 @@ public abstract class GitNamedObjectWithLifetime : GitNamedObject
 public abstract class GitLifeTimeDynamicNamedObject : GitDynamicNamedObject
 {
 	/// <summary>This object has been deleted.</summary>
-	public event EventHandler Deleted;
+	public event EventHandler? Deleted;
 
 	/// <summary>This object has been revived.</summary>
-	public event EventHandler Revived;
+	public event EventHandler? Revived;
 
 	/// <summary>Create <see cref="GitNamedObjectWithLifetime"/>.</summary>
 	/// <param name="repository">Host repository.</param>

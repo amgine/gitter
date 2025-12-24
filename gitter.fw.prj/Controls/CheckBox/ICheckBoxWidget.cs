@@ -21,16 +21,13 @@
 namespace gitter.Framework.Controls;
 
 using System;
-using System.Drawing;
 using System.Windows.Forms;
 
-public interface ICheckBoxWidget : IImageWidget, IDisposable
+public interface ICheckBoxWidget : IWidget, IImageWidget, IDisposable
 {
 	event EventHandler IsCheckedChanged;
 
 	event EventHandler CheckStateChanged;
-
-	Control Control { get; }
 
 	string Text { get; set; }
 

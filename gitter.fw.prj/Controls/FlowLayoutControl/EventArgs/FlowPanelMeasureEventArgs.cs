@@ -23,18 +23,11 @@ namespace gitter.Framework.Controls;
 using System;
 using System.Drawing;
 
-public class FlowPanelMeasureEventArgs : EventArgs
+public class FlowPanelMeasureEventArgs(Graphics graphics, Dpi dpi, int width) : EventArgs
 {
-	public FlowPanelMeasureEventArgs(Graphics graphics, Dpi dpi, int width)
-	{
-		Graphics = graphics;
-		Dpi      = dpi;
-		Width    = width;
-	}
+	public Graphics Graphics { get; } = graphics;
 
-	public Graphics Graphics { get; }
+	public Dpi Dpi { get; } = dpi;
 
-	public Dpi Dpi { get; }
-
-	public int Width { get; }
+	public int Width { get; } = width;
 }

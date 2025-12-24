@@ -163,16 +163,16 @@ public sealed class VersionListItem : CustomListBoxItem<ProjectVersion>
 		Verify.Argument.IsNotNull(version);
 	}
 
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		DataContext.PropertyChanged += OnVersionPropertyChanged;
 	}
 
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.PropertyChanged -= OnVersionPropertyChanged;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
 	private void OnVersionPropertyChanged(object sender, RedmineObjectPropertyChangedEventArgs e)

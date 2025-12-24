@@ -35,9 +35,10 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 {
 	#region Data
 
+	private readonly IssuesListBox _lstIssues;
 	private readonly IssuesToolbar _toolbar;
 	private ISearchToolBarController _searchToolbar;
-	private IssuesListBinding _dataSource;
+	private IssuesListBinding? _dataSource;
 	private IssueState? _issueState = Api.IssueState.Opened;
 
 	#endregion
@@ -47,18 +48,32 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 	public IssuesView(IWorkingEnvironment environment)
 		: base(Guids.IssuesViewGuid, environment)
 	{
-		InitializeComponent();
-		_lstIssues.Text = Resources.StrsNoIssuesToDisplay;
-
+		SuspendLayout();
+		Name = nameof(IssuesView);
 		Text   = Resources.StrIssues;
+		_lstIssues = new()
+		{
+			Dock        = DockStyle.Fill,
+			BorderStyle = BorderStyle.None,
+			Text        = Resources.StrsNoIssuesToDisplay,
+			Parent      = this,
+		};
 		Search = new IssuesSearch(_lstIssues);
-
 		_searchToolbar = CreateSearchToolbarController<IssuesView, IssuesSearchToolBar, IssuesSearchOptions>(this);
-
 		AddTopToolStrip(_toolbar = new(this));
-
 		_lstIssues.ItemActivated += OnItemActivated;
 		_lstIssues.PreviewKeyDown += OnKeyDown;
+		ResumeLayout(performLayout: false);
+	}
+
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			DataSource = null;
+		}
+		base.Dispose(disposing);
 	}
 
 	#endregion
@@ -67,17 +82,16 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 
 	public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"issues");
 
-	private IssuesListBinding DataSource
+	private IssuesListBinding? DataSource
 	{
 		get => _dataSource;
 		set
 		{
-			if(_dataSource != value)
-			{
-				_dataSource?.Dispose();
-				_dataSource = value;
-				_dataSource?.ReloadData();
-			}
+			if(_dataSource == value) return;
+
+			_dataSource?.Dispose();
+			_dataSource = value;
+			_dataSource?.ReloadData();
 		}
 	}
 
@@ -86,13 +100,12 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 		get => _issueState;
 		set
 		{
-			if(_issueState != value)
+			if(_issueState == value) return;
+
+			_issueState = value;
+			if(DataSource is not null)
 			{
-				_issueState = value;
-				if(DataSource is not null)
-				{
-					DataSource.IssueState = value;
-				}
+				DataSource.IssueState = value;
 			}
 		}
 	}
@@ -111,7 +124,7 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 		DataSource = new IssuesListBinding(serviceContext, _lstIssues, IssueState);
 	}
 
-	private void OnItemActivated(object sender, ItemEventArgs e)
+	private void OnItemActivated(object? sender, ItemEventArgs e)
 	{
 		if(e.Item is IssueListItem item)
 		{
@@ -147,7 +160,7 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 

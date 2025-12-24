@@ -26,6 +26,8 @@ using System.Drawing;
 using System.Windows.Forms;
 
 using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Services;
 
 using gitter.Git.AccessLayer;
@@ -35,8 +37,75 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public partial class AddParameterDialog : GitDialogBase, IExecutableDialog
 {
+	readonly struct DialogControl
+	{
+		private readonly LabelControl _lblName;
+		private readonly LabelControl _lblValue;
+		public  readonly TextBox _txtName;
+		public  readonly TextBox _txtValue;
+
+		public DialogControl(IGitterStyle style)
+		{
+			style ??= GitterApplication.Style;
+
+			_lblName  = new();
+			_lblValue = new();
+			_txtName  = new();
+			_txtValue = new();
+
+			GitterApplication.FontManager.InputFont.Apply(_txtName, _txtValue);
+		}
+
+		public void Localize()
+		{
+			_lblName.Text  = Resources.StrName.AddColon();
+			_lblValue.Text = Resources.StrValue.AddColon();
+		}
+
+		public void Layout(Control parent)
+		{
+			var nameDec  = new TextBoxDecorator(_txtName);
+			var valueDec = new TextBoxDecorator(_txtValue);
+
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					columns:
+					[
+						SizeSpec.Absolute(94),
+						SizeSpec.Everything(),
+					],
+					rows:
+					[
+						LayoutConstants.TextInputRowHeight,
+						LayoutConstants.TextInputRowHeight,
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblName,  marginOverride: LayoutConstants.NoMargin),      column: 0, row: 0),
+						new GridContent(new ControlContent(nameDec,   marginOverride: LayoutConstants.TextBoxMargin), column: 1, row: 0),
+						new GridContent(new ControlContent(_lblValue, marginOverride: LayoutConstants.NoMargin),      column: 0, row: 1),
+						new GridContent(new ControlContent(valueDec,  marginOverride: LayoutConstants.TextBoxMargin), column: 1, row: 1),
+					]),
+			};
+
+			var tabIndex = 0;
+			_lblName.TabIndex  = tabIndex++;
+			nameDec.TabIndex   = tabIndex++;
+			_lblValue.TabIndex = tabIndex++;
+			valueDec.TabIndex  = tabIndex++;
+
+			_lblName.Parent  = parent;
+			nameDec.Parent   = parent;
+			_lblValue.Parent = parent;
+			valueDec.Parent  = parent;
+		}
+	}
+
+	private readonly DialogControl _controls;
 	private readonly IWorkingEnvironment _environment;
-	private Repository _repository;
+	private Repository? _repository;
 	private ConfigFile _configFile;
 
 	/// <summary>Create <see cref="AddParameterDialog"/>.</summary>
@@ -47,14 +116,18 @@ public partial class AddParameterDialog : GitDialogBase, IExecutableDialog
 
 		_environment = environment;
 
-		InitializeComponent();
-
+		Name = nameof(AddParameterDialog);
 		Text = Resources.StrAddParameter;
 
-		_lblName.Text = Resources.StrName.AddColon();
-		_lblValue.Text = Resources.StrValue.AddColon();
-
-		GitterApplication.FontManager.InputFont.Apply(_txtName, _txtValue);
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		Size                = ScalableSize.GetValue(Dpi.Default);
+		_controls = new(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
 	}
 
 	/// <summary>Create <see cref="AddParameterDialog"/>.</summary>
@@ -75,7 +148,7 @@ public partial class AddParameterDialog : GitDialogBase, IExecutableDialog
 	public AddParameterDialog(IWorkingEnvironment environment, ConfigFile configFile)
 		: this(environment)
 	{
-		Verify.Argument.IsFalse(configFile != ConfigFile.System && configFile != ConfigFile.User, nameof(configFile));
+		Verify.Argument.IsTrue(configFile is ConfigFile.LocalSystem or ConfigFile.CurrentUser, nameof(configFile));
 
 		_configFile = configFile;
 	}
@@ -89,33 +162,33 @@ public partial class AddParameterDialog : GitDialogBase, IExecutableDialog
 	/// <summary>Parameter name.</summary>
 	public string ParameterName
 	{
-		get => _txtName.Text;
-		set => _txtName.Text = value;
+		get => _controls._txtName.Text;
+		set => _controls._txtName.Text = value;
 	}
 
 	/// <summary>Parameter value.</summary>
 	public string ParameterValue
 	{
-		get => _txtValue.Text;
-		set => _txtValue.Text = value;
+		get => _controls._txtValue.Text;
+		set => _controls._txtValue.Text = value;
 	}
 
 	/// <inheritdoc/>
 	protected override void OnLoad(EventArgs e)
 	{
 		base.OnLoad(e);
-		BeginInvoke(_txtName.Focus);
+		BeginInvoke(_controls._txtName.Focus);
 	}
 
 	/// <inheritdoc/>
 	public bool Execute()
 	{
-		string name = _txtName.Text.Trim();
-		string value = _txtValue.Text.Trim();
+		var name  = _controls._txtName.Text.Trim();
+		var value = _controls._txtValue.Text.Trim();
 		if(name.Length == 0)
 		{
 			NotificationService.NotifyInputError(
-				_txtName,
+				_controls._txtName,
 				Resources.ErrInvalidParameterName,
 				Resources.ErrParameterNameCannotBeEmpty);
 			return false;
@@ -126,23 +199,23 @@ public partial class AddParameterDialog : GitDialogBase, IExecutableDialog
 			{
 				if(_configFile == ConfigFile.Repository)
 				{
-					var p = _repository.Configuration.TryGetParameter(name);
+					var p = _repository!.Configuration.TryGetParameter(name);
 					if(p is not null)
 					{
 						p.Value = value;
 					}
 					else
 					{
-						_repository.Configuration.CreateParameter(name, value);
+						_ = _repository.Configuration.CreateParameter(name, value);
 					}
 				}
 				else
 				{
-					var gitRepositoryProvider = _environment.GetRepositoryProvider<IGitRepositoryProvider>();
-					if(gitRepositoryProvider is not null)
+					var accessor = _environment.GetRepositoryProvider<IGitRepositoryProvider>()?.GitAccessor;
+					if(accessor is not null)
 					{
-						gitRepositoryProvider.GitAccessor.SetConfigValue.Invoke(
-							new SetConfigValueParameters(name, value)
+						accessor.SetConfigValue.Invoke(
+							new SetConfigValueRequest(name, value)
 							{
 								ConfigFile = _configFile,
 							});

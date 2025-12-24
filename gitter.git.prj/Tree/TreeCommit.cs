@@ -21,13 +21,9 @@
 namespace gitter.Git;
 
 /// <summary>Represents a submodule commit.</summary>
-public sealed class TreeCommit : TreeItem
+public sealed class TreeCommit(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name)
+	: TreeItem(repository, relativePath, parent, status, name)
 {
-	public TreeCommit(Repository repository, string relativePath, TreeDirectory parent, FileStatus status, string name)
-		: base(repository, relativePath, parent, status, name)
-	{
-	}
-
 	/// <inheritdoc/>
 	public override TreeItemType ItemType => TreeItemType.Commit;
 }

@@ -27,25 +27,30 @@ using System.Windows.Forms;
 
 using gitter.Native;
 
-sealed class ViewHostDockingProcess : IMouseDragProcess, IDisposable
+sealed class ViewHostDockingProcess(ViewHost viewHost) : IMouseDragProcess, IDisposable
 {
-	public ViewHostDockingProcess(ViewHost viewHost)
-	{
-		Verify.Argument.IsNotNull(viewHost);
-
-		ViewHost = viewHost;
-	}
-
-	public ViewHost ViewHost { get; }
+	public ViewHost ViewHost { get; } = viewHost;
 
 	public bool IsActive { get; private set; }
 
-	public ViewHost HoveredViewHost { get; private set; }
+	public ViewHost? HoveredViewHost { get; private set; }
 
-	public DockPanel HoveredDockGrid { get; private set; }
+	public DockPanel? HoveredDockGrid { get; private set; }
 
 	private static int ZOrderComparison(Control control1, Control control2)
-		=> ZOrderComparison(control1.TopLevelControl.Handle, control2.TopLevelControl.Handle);
+	{
+		var top1 = control1.TopLevelControl;
+		var top2 = control2.TopLevelControl;
+		if(top1 is null)
+		{
+			return top2 is null ? 0 : 1;
+		}
+		else if(top2 is null)
+		{
+			return -1;
+		}
+		return ZOrderComparison(top1.Handle, top2.Handle);
+	}
 
 	private static int ZOrderComparison(IntPtr hWnd1, IntPtr hWnd2)
 	{
@@ -67,7 +72,7 @@ sealed class ViewHostDockingProcess : IMouseDragProcess, IDisposable
 		return 0;
 	}
 
-	private static DockPanel HitTestGrid(Point point)
+	private static DockPanel? HitTestGrid(Point point)
 	{
 		var candidates = new List<DockPanel>();
 		foreach(var dockPanel in DockElements<DockPanel>.Instances)
@@ -88,7 +93,7 @@ sealed class ViewHostDockingProcess : IMouseDragProcess, IDisposable
 		return candidates[0];
 	}
 
-	private ViewHost HitTestViewHost(Point point)
+	private ViewHost? HitTestViewHost(Point point)
 	{
 		var candidates = new List<ViewHost>();
 		foreach(var host in DockElements<ViewHost>.Instances)

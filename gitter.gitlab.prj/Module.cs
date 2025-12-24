@@ -25,7 +25,6 @@ using System;
 using Autofac;
 
 using gitter.Framework;
-using gitter.Framework.Controls;
 using gitter.Framework.Options;
 
 using gitter.GitLab.Gui;

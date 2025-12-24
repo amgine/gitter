@@ -1,6 +1,7 @@
 ﻿namespace gitter.Git.Gui.Controls;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 
 using gitter.Framework;
@@ -8,7 +9,8 @@ using gitter.Framework.Controls;
 
 static class FakeRevisionPainterHelper
 {
-	public static bool TryGetTextBrush(SubItemPaintEventArgs paintEventArgs, out Brush textBrush, out bool disposeBrush)
+	public static bool TryGetTextBrush(SubItemPaintEventArgs paintEventArgs,
+		[MaybeNullWhen(returnValue: false)] out Brush textBrush, out bool disposeBrush)
 	{
 		Assert.IsNotNull(paintEventArgs);
 

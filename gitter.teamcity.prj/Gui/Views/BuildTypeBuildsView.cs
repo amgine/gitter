@@ -20,12 +20,6 @@
 
 namespace gitter.TeamCity.Gui.Views;
 
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-
 using gitter.Framework;
 using gitter.Framework.Controls;
 
@@ -33,22 +27,23 @@ using Resources = gitter.TeamCity.Properties.Resources;
 
 sealed class BuildTypeBuildsView : TeamCityViewBase
 {
-	private BuildType _buildType;
-	private CustomListBox _lstBuilds;
+	private BuildType? _buildType;
+	private readonly CustomListBox _lstBuilds;
 
 	public BuildTypeBuildsView(IWorkingEnvironment environment)
 		: base(Guids.BuildTypeBuildsViewGuid, environment)
 	{
 		_lstBuilds = new CustomListBox();
 		_lstBuilds.BorderStyle = System.Windows.Forms.BorderStyle.None;
-		_lstBuilds.Columns.AddRange(new CustomListBoxColumn[]
-			{
+		_lstBuilds.Columns.AddRange(
+			[
 				new CustomListBoxColumn((int)ColumnId.Id, Resources.StrId) { Width = 50 },
 				new CustomListBoxColumn((int)ColumnId.Number, Resources.StrNumber) { Width = 150 },
+				new CustomListBoxColumn((int)ColumnId.BranchName, Resources.StrBranchName) { Width = 150 },
 				new DateColumn((int)ColumnId.StartDate, Resources.StrStartDate, true) { Width = 150 },
 				new CustomListBoxColumn((int)ColumnId.Status, Resources.StrStatus) { Width = 100 },
-			});
-		_lstBuilds.Bounds = this.ClientRectangle;
+			]);
+		_lstBuilds.Bounds = ClientRectangle;
 		_lstBuilds.Anchor = System.Windows.Forms.AnchorStyles.Left |
 							System.Windows.Forms.AnchorStyles.Top |
 							System.Windows.Forms.AnchorStyles.Right |
@@ -62,14 +57,13 @@ sealed class BuildTypeBuildsView : TeamCityViewBase
 	{
 		base.AttachViewModel(viewModel);
 
-		var vm = viewModel as BuildTypeBuildsViewModel;
-		if(vm != null)
+		if(viewModel is BuildTypeBuildsViewModel vm)
 		{
 			_buildType = vm.BuildType;
-			if(_buildType != null)
+			if(_buildType is not null)
 			{
 				Text = _buildType.Name;
-				if(ServiceContext != null)
+				if(ServiceContext is not null)
 				{
 					RefreshContent();
 				}
@@ -81,27 +75,26 @@ sealed class BuildTypeBuildsView : TeamCityViewBase
 	{
 		base.DetachViewModel(viewModel);
 
-		var vm = viewModel as BuildTypeBuildsViewModel;
-		if(vm != null)
+		if(viewModel is BuildTypeBuildsViewModel)
 		{
 			_buildType = null;
 			Text = string.Empty;
 		}
 	}
 
-	protected override void OnContextAttached()
+	protected override void OnContextAttached(TeamCityServiceContext context)
 	{
-		base.OnContextAttached();
+		base.OnContextAttached(context);
 		RefreshContent();
 	}
 
-	protected override void OnContextDetached()
+	protected override void OnContextDetached(TeamCityServiceContext context)
 	{
-		base.OnContextDetached();
+		base.OnContextDetached(context);
 		RefreshContent();
 	}
 
-	public override void RefreshContent()
+	public override async void RefreshContent()
 	{
 		base.RefreshContent();
 
@@ -109,7 +102,7 @@ sealed class BuildTypeBuildsView : TeamCityViewBase
 		{
 			_lstBuilds.BeginUpdate();
 			_lstBuilds.Items.Clear();
-			_buildType.Builds.Refresh();
+			await _buildType.Builds.RefreshAsync();
 			lock(_buildType.Builds.SyncRoot)
 			{
 				foreach(var build in _buildType.Builds)

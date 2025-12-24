@@ -31,49 +31,22 @@ using gitter.Git.Gui.Interfaces;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class MergeController : ViewControllerBase<IMergeView>, IMergeController
+sealed class MergeController(Repository repository)
+	: ViewControllerBase<IMergeView>, IMergeController
 {
-	#region .ctor
-
-	public MergeController(Repository repository)
-	{
-		Verify.Argument.IsNotNull(repository);
-
-		Repository = repository;
-	}
-
-	#endregion
-
-	#region Properties
-
-	private Repository Repository { get; }
-
-	#endregion
-
-	#region IMergeController Members
-
 	public bool TryMerge()
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
+		var view          = RequireView();
+		var noCommit      = view.NoCommit.Value;
+		var noFastForward = view.NoFastForward.Value;
+		var squash        = view.Squash.Value;
+		var message       = view.Message.Value;
 
-		var noCommit      = View.NoCommit.Value;
-		var noFastForward = View.NoFastForward.Value;
-		var squash        = View.Squash.Value;
-		var message       = View.Message.Value;
+		message = !string.IsNullOrWhiteSpace(message) ? message!.Trim() : null;
 
-		if(!string.IsNullOrWhiteSpace(message))
+		if(view.Revisions.Value is not { Count: not 0 } revisions)
 		{
-			message = message.Trim();
-		}
-		else
-		{
-			message = null;
-		}
-
-		var revisions = View.Revisions.Value;
-		if(revisions is not { Count: not 0 })
-		{
-			View.ErrorNotifier.NotifyError(View.Revisions,
+			view.ErrorNotifier.NotifyError(view.Revisions,
 				new UserInputError(
 					Resources.ErrNoBranchNameSpecified,
 					Resources.ErrYouMustSpecifyBranchToMergeWith));
@@ -81,15 +54,15 @@ sealed class MergeController : ViewControllerBase<IMergeView>, IMergeController
 		}
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				Repository.Head.Merge(revisions, noCommit, noFastForward, squash, message);
+				repository.Head.Merge(revisions, noCommit, noFastForward, squash, message);
 			}
 		}
 		catch(AutomaticMergeFailedException exc)
 		{
 			GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
+				view as IWin32Window,
 				exc.Message,
 				Resources.StrMerge,
 				MessageBoxButton.Close,
@@ -102,7 +75,7 @@ sealed class MergeController : ViewControllerBase<IMergeView>, IMergeController
 				string.Format(Resources.ErrFailedToMergeWith, revisions[0].Pointer) :
 				Resources.ErrFailedToMerge;
 			GitterApplication.MessageBoxService.Show(
-				View as IWin32Window,
+				view as IWin32Window,
 				exc.Message,
 				title,
 				MessageBoxButton.Close,
@@ -111,6 +84,4 @@ sealed class MergeController : ViewControllerBase<IMergeView>, IMergeController
 		}
 		return true;
 	}
-
-	#endregion
 }

@@ -20,6 +20,8 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -39,39 +41,34 @@ public sealed class ProjectVersionsCollection : NamedRedmineObjectsCache<Project
 	}
 
 	protected override ProjectVersion Create(int id, string name)
-	{
-		return new ProjectVersion(Context, id, name);
-	}
+		=> new(Context, id, name);
 
 	protected override ProjectVersion Create(XmlNode node)
-	{
-		return new ProjectVersion(Context, node);
-	}
+		=> new(Context, node);
 
-	public LinkedList<ProjectVersion> Fetch(Project project)
+	public Task<List<ProjectVersion>> FetchAsync(Project project, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(project);
 
-		return Fetch(project.Id);
+		return FetchAsync(project.Id, cancellationToken);
 	}
 
-	public LinkedList<ProjectVersion> Fetch(int projectId)
-	{
-		return Fetch(projectId.ToString(CultureInfo.InvariantCulture));
-	}
+	public Task<List<ProjectVersion>> FetchAsync(int projectId, CancellationToken cancellationToken = default)
+		=> FetchAsync(projectId.ToString(CultureInfo.InvariantCulture), cancellationToken);
 
-	public LinkedList<ProjectVersion> Fetch(string projectId)
+	public Task<List<ProjectVersion>> FetchAsync(string projectId, CancellationToken cancellationToken = default)
 	{
 		var url = string.Format(CultureInfo.InvariantCulture,
 			"projects/{0}/versions.xml", projectId);
-		return FetchItemsFromSinglePage(url);
+		return FetchItemsFromSinglePageAsync(url, cancellationToken);
 	}
 
-	public Task<LinkedList<ProjectVersion>> FetchAsync(string projectId, System.IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	public Task<List<ProjectVersion>> FetchAsync(string projectId,
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
+		progress?.Report(OperationProgress.Indeterminate(Resources.StrsFetchingNews.AddEllipsis()));
 		var url = string.Format(CultureInfo.InvariantCulture,
 			@"projects/{0}/versions.xml", projectId);
-		progress?.Report(new OperationProgress(Resources.StrsFetchingNews.AddEllipsis()));
 		return FetchItemsFromAllPagesAsync(url, cancellationToken);
 	}
 }

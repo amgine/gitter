@@ -26,13 +26,9 @@ using gitter.Framework;
 using gitter.Framework.Controls;
 using gitter.GitLab.Api;
 
-sealed class TestCaseListBoxItem : CustomListBoxItem<TestCase>
+sealed class TestCaseListBoxItem(TestCase testCase) : CustomListBoxItem<TestCase>(testCase)
 {
-	public TestCaseListBoxItem(TestCase testCase) : base(testCase)
-	{
-	}
-
-	private static IImageProvider GetIcon(TestCaseStatus status)
+	private static IImageProvider? GetIcon(TestCaseStatus status)
 		=> status switch
 		{
 			TestCaseStatus.Success => Icons.TestSuccess,
@@ -51,7 +47,7 @@ sealed class TestCaseListBoxItem : CustomListBoxItem<TestCase>
 		{
 			case 0:
 				var icon  = GetIcon(DataContext.Status);
-				var image = icon.GetImage(16 * paintEventArgs.Dpi.X / 96);
+				var image = icon?.GetImage(16 * paintEventArgs.Dpi.X / 96);
 				paintEventArgs.PaintImageAndText(image, DataContext.Name);
 				break;
 			default:
@@ -65,7 +61,10 @@ sealed class TestCaseListBoxItem : CustomListBoxItem<TestCase>
 	{
 		Assert.IsNotNull(requestEventArgs);
 
-		var menu = new ContextMenuStrip();
+		var menu = new ContextMenuStrip
+		{
+			Renderer = GitterApplication.Style.ToolStripRenderer,
+		};
 		var dpiBindings = new DpiBindings(menu);
 
 		var copyName = new ToolStripMenuItem("Name", null, (_, _) => ClipboardEx.TrySetTextSafe(DataContext.Name))

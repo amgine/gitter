@@ -47,30 +47,34 @@ public abstract class ObjectLocator
 			BuildStatus.Error   => "ERROR",
 			BuildStatus.Failure => "FAILURE",
 			BuildStatus.Success => "SUCCESS",
-			_ => throw new ApplicationException(),
+			_ => throw new ArgumentException($"Unknown build status: {value}", nameof(value)),
 		};
 		BeginArgument(sb, argname);
 		sb.Append(strValue);
 	}
 
-	protected static void AppendArgument(StringBuilder sb, string argname, string value)
+	protected static void AppendArgument(StringBuilder sb, string argname, string? value)
 	{
 		Assert.IsNotNull(sb);
 		Assert.IsNeitherNullNorWhitespace(argname);
 
-		if(!string.IsNullOrWhiteSpace(value))
+		if(value is not { Length: not 0 } || string.IsNullOrWhiteSpace(value)) return;
+
+		BeginArgument(sb, argname);
+#if NETCOREAPP
+		var useBraces = value.Contains(',');
+#else
+		var useBraces = value.Contains(",");
+#endif
+		if(useBraces)
 		{
-			BeginArgument(sb, argname);
-			if(value.Contains(","))
-			{
-				sb.Append('(');
-				sb.Append(value);
-				sb.Append(')');
-			}
-			else
-			{
-				sb.Append(value);
-			}
+			sb.Append('(');
+			sb.Append(value);
+			sb.Append(')');
+		}
+		else
+		{
+			sb.Append(value);
 		}
 	}
 
@@ -98,13 +102,13 @@ public abstract class ObjectLocator
 			FlagSelector.True  => "true",
 			FlagSelector.False => "false",
 			FlagSelector.Any   => "any",
-			_ => throw new ApplicationException(),
+			_ => throw new ArgumentException($"Unknown flag selector: {value}", nameof(value)),
 		};
 		BeginArgument(sb, argname);
 		sb.Append(strValue);
 	}
 
-	protected static void AppendArgument(StringBuilder sb, string argname, ObjectLocator locator)
+	protected static void AppendArgument(StringBuilder sb, string argname, ObjectLocator? locator)
 	{
 		Assert.IsNotNull(sb);
 		Assert.IsNeitherNullNorWhitespace(argname);
@@ -118,5 +122,14 @@ public abstract class ObjectLocator
 			sb.Append(value);
 			sb.Append(')');
 		}
+	}
+
+	public abstract void ToString(StringBuilder sb);
+
+	public override string ToString()
+	{
+		var sb = new StringBuilder();
+		ToString(sb);
+		return sb.ToString();
 	}
 }

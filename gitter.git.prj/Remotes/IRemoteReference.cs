@@ -38,14 +38,14 @@ public interface IRemoteReference
 	string Name { get; }
 
 	/// <summary>Commit hash.</summary>
-	Hash Hash { get; }
+	Sha1Hash Hash { get; }
 
 	ReferenceType ReferenceType { get; }
 
 	/// <summary>Remove reference from remote repository.</summary>
 	void Delete();
 
-	Task DeleteAsync(IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default);
+	Task DeleteAsync(IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default);
 
 	bool IsDeleted { get; }
 }

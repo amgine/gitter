@@ -31,22 +31,22 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 
 static class TreeExtensions
 {
-	public static string ExtractBlobToFile(this Tree tree, string blobPath)
+	public static string? ExtractBlobToFile(this Tree tree, string blobPath)
 	{
 		Verify.Argument.IsNotNull(tree);
 		Verify.Argument.IsNeitherNullNorWhitespace(blobPath);
 
-		string fileName = null;
-		using(var dlg = new SaveFileDialog()
+		var fileName = default(string);
+		using(var dialog = new SaveFileDialog()
 		{
 			FileName = Path.GetFileName(blobPath),
 		})
 		{
-			if(dlg.ShowDialog() != DialogResult.OK)
+			if(dialog.ShowDialog() != DialogResult.OK)
 			{
 				return null;
 			}
-			fileName = dlg.FileName;
+			fileName = dialog.FileName;
 		}
 		return ExtractBlobToFile(tree, blobPath, fileName)
 			? fileName
@@ -76,10 +76,9 @@ static class TreeExtensions
 		}
 		try
 		{
-			using var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None);
-			fs.Write(bytes, 0, bytes.Length);
+			File.WriteAllBytes(fileName, bytes);
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			GitterApplication.MessageBoxService.Show(
 				null,
@@ -92,7 +91,7 @@ static class TreeExtensions
 		return true;
 	}
 
-	public static string ExtractBlobToTemporaryFile(this Tree tree, string blobPath)
+	public static string? ExtractBlobToTemporaryFile(this Tree tree, string blobPath)
 	{
 		Verify.Argument.IsNotNull(tree);
 		Verify.Argument.IsNeitherNullNorWhitespace(blobPath);
@@ -116,10 +115,9 @@ static class TreeExtensions
 		}
 		if(bytes is not null)
 		{
-			path = Path.GetDirectoryName(fileName);
+			path = Path.GetDirectoryName(fileName)!;
 			if(!Directory.Exists(path)) Directory.CreateDirectory(path);
-			using var fs = new FileStream(fileName, FileMode.Create, FileAccess.Write, FileShare.None);
-			fs.Write(bytes, 0, bytes.Length);
+			File.WriteAllBytes(path, bytes);
 		}
 		return fileName;
 	}

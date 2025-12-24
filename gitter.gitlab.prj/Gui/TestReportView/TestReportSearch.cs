@@ -20,18 +20,10 @@
 
 namespace gitter.GitLab.Gui;
 
-using System;
-using System.Globalization;
-
 using gitter.Framework.Controls;
 
-sealed class TestReportSearch : ListBoxTreeSearch<TestReportSearchOptions>
+sealed class TestReportSearch(CustomListBox listBox) : ListBoxTreeSearch<TestReportSearchOptions>(listBox)
 {
-	public TestReportSearch(CustomListBox listBox)
-		: base(listBox)
-	{
-	}
-
 	private static bool TestTestClass(string className, TestReportSearchOptions search)
 	{
 		Assert.IsNotNull(className);

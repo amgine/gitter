@@ -27,13 +27,13 @@ using System;
 public enum ItemState
 {
 	/// <summary>Default state.</summary>
-	None		= 0,
+	None     = 0,
 	/// <summary>Item is selected.</summary>
-	Selected	= (1 << 0),
+	Selected = (1 << 0),
 	/// <summary>Item is hovered.</summary>
-	Hovered		= (1 << 1),
+	Hovered  = (1 << 1),
 	/// <summary>Item is focused.</summary>
-	Focused		= (1 << 2),
+	Focused  = (1 << 2),
 	/// <summary>Item is pressed.</summary>
-	Pressed		= (1 << 3),
+	Pressed  = (1 << 3),
 }

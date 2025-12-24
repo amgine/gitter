@@ -20,22 +20,13 @@
 
 namespace gitter.Git.AccessLayer;
 
-using System;
-
 using gitter.Framework;
 
-public sealed class NoteData : INamedObject
+public sealed class NoteData(string name, string objectName, string? message) : INamedObject
 {
-	public NoteData(string name, string objectName, string message)
-	{
-		Name       = name;
-		ObjectName = objectName;
-		Message    = message;
-	}
+	public string Name { get; } = name;
 
-	public string Name { get; }
+	public string ObjectName { get; } = objectName;
 
-	public string ObjectName { get; }
-
-	public string Message { get; set; }
+	public string? Message { get; set; } = message;
 }

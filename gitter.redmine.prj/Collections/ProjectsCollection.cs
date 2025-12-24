@@ -20,10 +20,12 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 public sealed class ProjectsCollection : NamedRedmineObjectsCache<Project>
@@ -34,18 +36,14 @@ public sealed class ProjectsCollection : NamedRedmineObjectsCache<Project>
 	}
 
 	protected override Project Create(int id, string name)
-	{
-		return new Project(Context, id, name);
-	}
+		=> new(Context, id, name);
 
 	protected override Project Create(XmlNode node)
-	{
-		return new Project(Context, node);
-	}
+		=> new(Context, node);
 
-	public LinkedList<Project> Fetch()
+	public Task<List<Project>> FetchAsync(CancellationToken cancellationToken = default)
 	{
 		const string url = "projects.xml";
-		return FetchItemsFromAllPages(url);
+		return FetchItemsFromAllPagesAsync(url, cancellationToken);
 	}
 }

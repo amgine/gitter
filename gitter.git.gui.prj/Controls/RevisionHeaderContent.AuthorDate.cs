@@ -24,14 +24,11 @@ using System;
 
 partial class RevisionHeaderContent
 {
-	sealed class AuthorDateElement : TimestampElement
+	sealed class AuthorDateElement(RevisionHeaderContent owner)
+		: TimestampElement(owner)
 	{
-		public AuthorDateElement(RevisionHeaderContent owner)
-			: base(owner)
-		{
-		}
-
-		public override Element Element => Element.AuthorDate;
+		public override Element Element
+			=> Element.AuthorDate;
 
 		protected override DateTimeOffset GetTimestamp(Revision revision)
 			=> revision.AuthorDate;

@@ -20,8 +20,9 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
-using System.Globalization;
 using System.Collections.Generic;
 using System.Xml;
 
@@ -29,26 +30,24 @@ public sealed class CustomFieldsDefinition : IEnumerable<CustomFieldValue>
 {
 	#region Data
 
-	private readonly Dictionary<int, CustomFieldValue> _original;
-	private readonly Dictionary<int, CustomFieldValue> _values;
+	private readonly Dictionary<int, CustomFieldValue> _original = [];
+	private readonly Dictionary<int, CustomFieldValue> _values   = [];
 
 	#endregion
 
-	internal CustomFieldsDefinition(CustomFields original)
+	internal CustomFieldsDefinition(CustomFields? original)
 	{
-		_original = new Dictionary<int, CustomFieldValue>();
-		if(original != null)
+		if(original is not null)
 		{
 			foreach(var value in original)
 			{
 				_original.Add(value.Field.Id, new CustomFieldValue(value.Field, value.Value));
-				_values.Add(value.Field.Id, new CustomFieldValue(value.Field, value.Value));
+				_values.Add  (value.Field.Id, new CustomFieldValue(value.Field, value.Value));
 			}
 		}
-		_values = new Dictionary<int, CustomFieldValue>();
 	}
 
-	public string this[CustomField field]
+	public string? this[CustomField field]
 	{
 		get
 		{
@@ -86,8 +85,7 @@ public sealed class CustomFieldsDefinition : IEnumerable<CustomFieldValue>
 		}
 		foreach(var v in _values.Values)
 		{
-			CustomFieldValue original;
-			if(_original.TryGetValue(v.Field.Id, out original) && original.Value == v.Value)
+			if(_original.TryGetValue(v.Field.Id, out var original) && original.Value == v.Value)
 			{
 				continue;
 			}
@@ -96,7 +94,7 @@ public sealed class CustomFieldsDefinition : IEnumerable<CustomFieldValue>
 			attr.Value = XmlConvert.ToString(v.Field.Id);
 			e.Attributes.Append(attr);
 			var ev = xml.CreateElement("value");
-			RedmineUtility.EmitString(ev, v.Value);
+			RedmineUtility.EmitString(ev, v.Value ?? "");
 			e.AppendChild(ev);
 			root.AppendChild(e);
 		}

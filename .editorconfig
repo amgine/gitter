@@ -34,6 +34,7 @@ dotnet_sort_system_directives_first = true
 
 # Space preferences
 csharp_space_after_keywords_in_control_flow_statements = false
+csharp_int_align_assignments = true
 
 # _ prefix
 dotnet_naming_rule.private_members_with_underscore.symbols  = private_fields
@@ -42,4 +43,6 @@ dotnet_naming_rule.private_members_with_underscore.severity = suggestion
 dotnet_naming_symbols.private_fields.applicable_kinds           = field
 dotnet_naming_symbols.private_fields.applicable_accessibilities = private
 dotnet_naming_style.prefix_underscore.capitalization = camel_case
+dotnet_naming_rule.private_fields_underscored.symbols = private_fields
+dotnet_naming_rule.private_fields_underscored.style = underscored
 dotnet_naming_style.prefix_underscore.required_prefix = _

@@ -18,8 +18,6 @@
  */
 #endregion
 
-#nullable enable
-
 namespace gitter.Git;
 
 using System;
@@ -27,9 +25,9 @@ using System.Collections.Generic;
 
 public sealed class TreeDirectory : TreeItem
 {
-	private readonly List<TreeDirectory> _directories = new();
-	private readonly List<TreeFile>      _files       = new();
-	private readonly List<TreeCommit>    _commits     = new();
+	private readonly List<TreeDirectory> _directories = [];
+	private readonly List<TreeFile>      _files       = [];
+	private readonly List<TreeCommit>    _commits     = [];
 
 	public event EventHandler<TreeDirectoryEventArgs>? DirectoryAdded;
 	public event EventHandler<TreeDirectoryEventArgs>? DirectoryDeleted;

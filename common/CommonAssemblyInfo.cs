@@ -21,6 +21,7 @@
 using System;
 using System.Reflection;
 using System.Resources;
+using System.Runtime.CompilerServices;
 
 [assembly: AssemblyCompany("amgine")]
 [assembly: AssemblyProduct("gitter")]
@@ -36,3 +37,5 @@ using System.Resources;
 #if NET6_0_OR_GREATER
 [module: System.Runtime.Versioning.SupportedOSPlatform("windows")]
 #endif
+
+[assembly: InternalsVisibleTo("gitter.tests")]

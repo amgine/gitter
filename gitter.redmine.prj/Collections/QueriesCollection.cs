@@ -20,10 +20,12 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 public sealed class QueriesCollection : NamedRedmineObjectsCache<Query>
@@ -34,18 +36,14 @@ public sealed class QueriesCollection : NamedRedmineObjectsCache<Query>
 	}
 
 	protected override Query Create(int id, string name)
-	{
-		return new Query(Context, id, name);
-	}
+		=> new(Context, id, name);
 
 	protected override Query Create(XmlNode node)
-	{
-		return new Query(Context, node);
-	}
+		=> new(Context, node);
 
-	public LinkedList<Query> Fetch()
+	public Task<List<Query>> FetchAsync(CancellationToken cancellationToken = default)
 	{
 		const string url = "queries.xml";
-		return FetchItemsFromAllPages(url);
+		return FetchItemsFromAllPagesAsync(url, cancellationToken);
 	}
 }

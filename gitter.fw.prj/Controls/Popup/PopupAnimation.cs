@@ -28,7 +28,7 @@ public enum PopupAnimations : int
 {
 	None = 0,
 
-	LeftToRight = 0x00001,
+	LeftToRight = 0x00001, 
 	RightToLeft = 0x00002,
 	TopToBottom = 0x00004,
 	BottomToTop = 0x00008,

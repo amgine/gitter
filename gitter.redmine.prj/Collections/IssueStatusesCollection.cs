@@ -20,10 +20,12 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 public sealed class IssueStatusesCollection : NamedRedmineObjectsCache<IssueStatus>
@@ -34,18 +36,14 @@ public sealed class IssueStatusesCollection : NamedRedmineObjectsCache<IssueStat
 	}
 
 	protected override IssueStatus Create(int id, string name)
-	{
-		return new IssueStatus(Context, id, name);
-	}
+		=> new(Context, id, name);
 
 	protected override IssueStatus Create(XmlNode node)
-	{
-		return new IssueStatus(Context, node);
-	}
+		=> new(Context, node);
 
-	public LinkedList<IssueStatus> Fetch()
+	public Task<List<IssueStatus>> FetchAsync(CancellationToken cancellationToken = default)
 	{
 		const string url = "issue_statuses.xml";
-		return FetchItemsFromSinglePage(url);
+		return FetchItemsFromSinglePageAsync(url, cancellationToken);
 	}
 }

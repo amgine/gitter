@@ -24,15 +24,9 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-sealed class ContentContextMenuEventArgs : EventArgs
+sealed class ContentContextMenuEventArgs(ContextMenuStrip contextMenu, Point position) : EventArgs
 {
-	public ContentContextMenuEventArgs(ContextMenuStrip contextMenu, Point position)
-	{
-		ContextMenu = contextMenu;
-		Position    = position;
-	}
+	public ContextMenuStrip ContextMenu { get; } = contextMenu;
 
-	public ContextMenuStrip ContextMenu { get; }
-
-	public Point Position { get; }
+	public Point Position { get; } = position;
 }

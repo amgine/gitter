@@ -38,5 +38,5 @@ public class ScaledImageProvider : IImageProvider
 
 	private string ImageName { get; }
 
-	public Image GetImage(int size) => Resources[ImageName, size];
+	public Image? GetImage(int size) => Resources[ImageName, size];
 }

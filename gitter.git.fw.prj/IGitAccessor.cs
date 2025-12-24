@@ -38,10 +38,10 @@ public interface IGitAccessor : IConfigAccessor
 	Version GitVersion { get; }
 
 	/// <summary>Create an empty git repository or reinitialize an existing one.</summary>
-	IGitAction<InitRepositoryParameters> InitRepository { get; }
+	IGitAction<InitRepositoryRequest> InitRepository { get; }
 
 	/// <summary>Clone existing repository.</summary>
-	IGitAction<CloneRepositoryParameters> CloneRepository { get; }
+	IGitAction<CloneRepositoryRequest> CloneRepository { get; }
 
 	#endregion
 

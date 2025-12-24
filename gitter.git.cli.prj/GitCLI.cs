@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git.AccessLayer.CLI;
@@ -42,20 +42,20 @@ internal sealed partial class GitCLI : IGitAccessor, ICliOptionsProvider
 	private readonly ICommandExecutor _executor;
 	private readonly CommandBuilder _commandBuilder;
 	private readonly OutputParser _outputParser;
-	private Version _gitVersion;
+	private Version? _gitVersion;
 	private bool _autodetectGitExePath;
-	private string _manualGitExePath;
-	private string _gitExePath;
+	private string? _manualGitExePath;
+	private string? _gitExePath;
 
-	private readonly IGitAction<InitRepositoryParameters> _init;
-	private readonly IGitAction<CloneRepositoryParameters> _clone;
-	private readonly IGitFunction<QueryConfigParameters, IList<ConfigParameterData>> _queryConfig;
-	private readonly IGitFunction<QueryConfigParameterParameters, ConfigParameterData> _queryConfigParameter;
-	private readonly IGitAction<AddConfigValueParameters> _addConfigValue;
-	private readonly IGitAction<SetConfigValueParameters> _setConfigValue;
-	private readonly IGitAction<UnsetConfigValueParameters> _unsetConfigValue;
-	private readonly IGitAction<RenameConfigSectionParameters> _renameConfigSection;
-	private readonly IGitAction<DeleteConfigSectionParameters> _deleteConfigSection;
+	private readonly IGitAction<InitRepositoryRequest> _init;
+	private readonly IGitAction<CloneRepositoryRequest> _clone;
+	private readonly IGitFunction<QueryConfigRequest, IList<ConfigParameterData>> _queryConfig;
+	private readonly IGitFunction<QueryConfigParameterRequest, ConfigParameterData?> _queryConfigParameter;
+	private readonly IGitAction<AddConfigValueRequest> _addConfigValue;
+	private readonly IGitAction<SetConfigValueRequest> _setConfigValue;
+	private readonly IGitAction<UnsetConfigValueRequest> _unsetConfigValue;
+	private readonly IGitAction<RenameConfigSectionRequest> _renameConfigSection;
+	private readonly IGitAction<DeleteConfigSectionRequest> _deleteConfigSection;
 
 	#endregion
 
@@ -92,7 +92,7 @@ internal sealed partial class GitCLI : IGitAccessor, ICliOptionsProvider
 	#region Properties
 
 	/// <summary>Returns provider of this accessor.</summary>
-	/// <value>Provider of this accessor</value>
+	/// <value>Provider of this accessor.</value>
 	public IGitAccessorProvider Provider => _provider;
 
 	internal OutputParser OutputParser => _outputParser;
@@ -101,7 +101,7 @@ internal sealed partial class GitCLI : IGitAccessor, ICliOptionsProvider
 
 	private ICommandExecutor CommandExecutor => _executor;
 
-	public string GitExecutablePath
+	public string? GitExecutablePath
 	{
 		get
 		{
@@ -142,7 +142,7 @@ internal sealed partial class GitCLI : IGitAccessor, ICliOptionsProvider
 		}
 	}
 
-	public string ManualGitExePath
+	public string? ManualGitExePath
 	{
 		get => _manualGitExePath;
 		set
@@ -166,7 +166,7 @@ internal sealed partial class GitCLI : IGitAccessor, ICliOptionsProvider
 		get
 		{
 			var gitVersion = _gitVersion;
-			if(gitVersion == null)
+			if(gitVersion is null)
 			{
 				gitVersion = QueryVersion();
 				_gitVersion = gitVersion;
@@ -176,24 +176,24 @@ internal sealed partial class GitCLI : IGitAccessor, ICliOptionsProvider
 	}
 
 	/// <summary>Create an empty git repository or reinitialize an existing one.</summary>
-	public IGitAction<InitRepositoryParameters> InitRepository => _init;
+	public IGitAction<InitRepositoryRequest> InitRepository => _init;
 
 	/// <summary>Clone existing repository.</summary>
-	public IGitAction<CloneRepositoryParameters> CloneRepository => _clone;
+	public IGitAction<CloneRepositoryRequest> CloneRepository => _clone;
 
-	public IGitFunction<QueryConfigParameters, IList<ConfigParameterData>> QueryConfig => _queryConfig;
+	public IGitFunction<QueryConfigRequest, IList<ConfigParameterData>> QueryConfig => _queryConfig;
 
-	public IGitFunction<QueryConfigParameterParameters, ConfigParameterData> QueryConfigParameter => _queryConfigParameter;
+	public IGitFunction<QueryConfigParameterRequest, ConfigParameterData?> QueryConfigParameter => _queryConfigParameter;
 
-	public IGitAction<AddConfigValueParameters> AddConfigValue => _addConfigValue;
+	public IGitAction<AddConfigValueRequest> AddConfigValue => _addConfigValue;
 
-	public IGitAction<SetConfigValueParameters> SetConfigValue => _setConfigValue;
+	public IGitAction<SetConfigValueRequest> SetConfigValue => _setConfigValue;
 
-	public IGitAction<UnsetConfigValueParameters> UnsetConfigValue => _unsetConfigValue;
+	public IGitAction<UnsetConfigValueRequest> UnsetConfigValue => _unsetConfigValue;
 
-	public IGitAction<RenameConfigSectionParameters> RenameConfigSection => _renameConfigSection;
+	public IGitAction<RenameConfigSectionRequest> RenameConfigSection => _renameConfigSection;
 
-	public IGitAction<DeleteConfigSectionParameters> DeleteConfigSection => _deleteConfigSection;
+	public IGitAction<DeleteConfigSectionRequest> DeleteConfigSection => _deleteConfigSection;
 
 	#endregion
 

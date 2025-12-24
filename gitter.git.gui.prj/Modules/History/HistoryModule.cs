@@ -22,6 +22,7 @@ namespace gitter.Git.Gui.Modules;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 using Autofac;
@@ -35,13 +36,15 @@ using gitter.Git.Gui.Views;
 sealed class HistoryModule : Autofac.Module
 {
 	sealed class NamedFactoryParameter<T>(string name) : Parameter
+		where T : notnull
 	{
 		sealed class Factory(IComponentContext componentContext, string name) : IFactory<T>
 		{
 			public T Create() => componentContext.ResolveNamed<T>(name);
 		}
 
-		public override bool CanSupplyValue(ParameterInfo pi, IComponentContext context, out Func<object> valueProvider)
+		public override bool CanSupplyValue(ParameterInfo pi, IComponentContext context,
+			[MaybeNullWhen(returnValue: false)] out Func<object> valueProvider)
 		{
 			Assert.IsNotNull(pi);
 			Assert.IsNotNull(context);

@@ -29,24 +29,17 @@ using gitter.Framework;
 using gitter.Framework.Controls;
 
 /// <summary><see cref="CustomListBoxItem"/>, representing <see cref="Revision"/>.</summary>
-public class RevisionListItem : RevisionPointerListItemBase<Revision>, IRevisionGraphListItem
+/// <param name="revision">Associated revision.</param>
+public class RevisionListItem(Revision revision)
+	: RevisionPointerListItemBase<Revision>(revision), IRevisionGraphListItem
 {
-	private readonly List<PointerBounds> _drawnPointers = new();
+	public GraphCell[]? Graph { get; set; }
 
-	/// <summary>Create <see cref="RevisionListItem"/>.</summary>
-	/// <param name="revision">Associated revision.</param>
-	public RevisionListItem(Revision revision)
-		: base(revision)
-	{
-	}
-
-	public GraphCell[] Graph { get; set; }
-
-	internal List<PointerBounds> DrawnPointers => _drawnPointers;
+	internal List<PointerBounds>? DrawnPointers { get; set; }
 
 	private void DrawBranchDragImage(Branch branch, Graphics graphics, Size size)
 	{
-		var dpi  = Dpi.FromControl(ListBox);
+		var dpi  = ListBox is not null ? Dpi.FromControl(ListBox) : Dpi.Default;
 		var font = GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi);
 		graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
 		graphics.TextContrast      = GraphicsUtility.TextContrast;
@@ -59,29 +52,31 @@ public class RevisionListItem : RevisionPointerListItemBase<Revision>, IRevision
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
 		DataContext.References.Changed += OnReferenceListChanged;
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.References.Changed -= OnReferenceListChanged;
-		_drawnPointers?.Clear();
-		base.OnListBoxDetached();
+		DrawnPointers?.Clear();
+		base.OnListBoxDetached(listBox);
 	}
 
-	private void OnReferenceListChanged(object sender, EventArgs e)
+	private void OnReferenceListChanged(object? sender, EventArgs e)
 	{
 		InvalidateSafe();
 	}
 
 	/// <inheritdoc/>
-	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	public override ContextMenuStrip? GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
 		Assert.IsNotNull(requestEventArgs);
+
+		if(ListBox is null) return default;
 
 		var menu = default(ContextMenuStrip);
 		if(requestEventArgs.Column is not null)
@@ -104,7 +99,7 @@ public class RevisionListItem : RevisionPointerListItemBase<Revision>, IRevision
 				case ColumnId.Subject:
 					var x = requestEventArgs.X - requestEventArgs.ItemBounds.X;
 					var y = requestEventArgs.Y - requestEventArgs.ItemBounds.Y;
-					menu = PointerBounds.GetContextMenu(_drawnPointers, x, y);
+					menu = PointerBounds.GetContextMenu(DrawnPointers, x, y);
 					break;
 			}
 		}
@@ -118,23 +113,23 @@ public class RevisionListItem : RevisionPointerListItemBase<Revision>, IRevision
 	{
 		if(button == MouseButtons.Left)
 		{
-			if(_drawnPointers is not null)
+			if(DrawnPointers is not null)
 			{
-				for(int i = 0; i < _drawnPointers.Count; ++i)
+				for(int i = 0; i < DrawnPointers.Count; ++i)
 				{
-					if(GlobalBehavior.GraphStyle.HitTestReference(_drawnPointers[i].Bounds, x, y))
+					if(GlobalBehavior.GraphStyle.HitTestReference(DrawnPointers[i].Bounds, x, y))
 					{
-						if(_drawnPointers[i].RevisionPointer is Branch { IsRemote: false } branch)
+						if(DrawnPointers[i].RevisionPointer is Branch { IsRemote: false } branch)
 						{
-							var dpi = Dpi.FromControl(ListBox);
-							int dx = _drawnPointers[i].Bounds.X - x - 1;
+							var dpi = Dpi.FromControlOrSystem(ListBox);
+							int dx  = DrawnPointers[i].Bounds.X - x - 1;
 							var w = GlobalBehavior.GraphStyle.MeasureBranch(
 								GraphicsUtility.MeasurementGraphics,
 								dpi,
 								GitterApplication.FontManager.UIFont.ScalableFont.GetValue(dpi),
 								GitterApplication.TextRenderer.LeftAlign,
 								branch);
-							var h = ListBox.CurrentItemHeight;
+							var h = ListBox!.CurrentItemHeight;
 							var size = new Size(w, h);
 							using(var dragImage = new DragImage(size, -dx, y,
 								eargs => DrawBranchDragImage(branch, eargs.Graphics, size)))
@@ -146,7 +141,7 @@ public class RevisionListItem : RevisionPointerListItemBase<Revision>, IRevision
 						}
 						else
 						{
-							if(_drawnPointers[i].RevisionPointer is Tag { TagType: TagType.Annotated } tag)
+							if(DrawnPointers[i].RevisionPointer is Tag { TagType: TagType.Annotated } tag)
 							{
 								//var message = tag.Message;
 								//if(!string.IsNullOrEmpty(message))
@@ -175,11 +170,11 @@ public class RevisionListItem : RevisionPointerListItemBase<Revision>, IRevision
 	/// <inheritdoc/>
 	protected override int OnHitTest(int x, int y)
 	{
-		if(_drawnPointers is { Count: not 0 })
+		if(DrawnPointers is { Count: not 0 } pointers)
 		{
-			for(int i = 0; i < _drawnPointers.Count; ++i)
+			for(int i = 0; i < pointers.Count; ++i)
 			{
-				if(GlobalBehavior.GraphStyle.HitTestReference(_drawnPointers[i].Bounds, x, y))
+				if(GlobalBehavior.GraphStyle.HitTestReference(pointers[i].Bounds, x, y))
 				{
 					return SubjectColumn.PointerTagHitOffset + i;
 				}

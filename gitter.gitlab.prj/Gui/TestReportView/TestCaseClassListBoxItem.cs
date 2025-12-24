@@ -20,18 +20,11 @@
 
 namespace gitter.GitLab.Gui;
 
-using System.Windows.Forms;
-
 using gitter.Framework;
 using gitter.Framework.Controls;
-using gitter.Git.Gui;
 
-sealed class TestCaseClassListBoxItem : CustomListBoxItem<string>
+sealed class TestCaseClassListBoxItem(string className) : CustomListBoxItem<string>(className)
 {
-	public TestCaseClassListBoxItem(string className) : base(className)
-	{
-	}
-
 	/// <inheritdoc/>
 	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 	{
@@ -46,14 +39,5 @@ sealed class TestCaseClassListBoxItem : CustomListBoxItem<string>
 				base.OnPaintSubItem(paintEventArgs);
 				break;
 		}
-	}
-
-	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
-	{
-		Assert.IsNotNull(requestEventArgs);
-
-
-
-		return base.GetContextMenu(requestEventArgs);
 	}
 }

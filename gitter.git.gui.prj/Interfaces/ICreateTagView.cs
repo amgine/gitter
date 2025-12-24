@@ -24,11 +24,11 @@ using gitter.Framework.Mvc;
 
 interface ICreateTagView : IView
 {
-	IUserInputSource<string> TagName { get; }
+	IUserInputSource<string?> TagName { get; }
 
 	IUserInputSource<string> Revision { get; }
 
-	IUserInputSource<string> Message { get; }
+	IUserInputSource<string?> Message { get; }
 
 	IUserInputSource<bool> Signed { get; }
 
@@ -36,7 +36,7 @@ interface ICreateTagView : IView
 
 	IUserInputSource<bool> UseKeyId { get; }
 
-	IUserInputSource<string> KeyId { get; }
+	IUserInputSource<string?> KeyId { get; }
 
 	IUserInputErrorNotifier ErrorNotifier { get; }
 }

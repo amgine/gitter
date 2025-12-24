@@ -23,17 +23,12 @@ namespace gitter.Framework.Controls;
 using System;
 using System.Drawing;
 
-internal readonly struct GripBounds
+internal readonly struct GripBounds(Rectangle clientRectangle)
 {
 	private const int GripSize = 6;
 	private const int CornerGripSize = GripSize << 1;
 
-	public GripBounds(Rectangle clientRectangle)
-	{
-		ClientRectangle = clientRectangle;
-	}
-
-	public Rectangle ClientRectangle { get; }
+	public Rectangle ClientRectangle { get; } = clientRectangle;
 
 	public Rectangle Bottom
 	{

@@ -26,8 +26,6 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
-using Resources = gitter.Framework.Properties.Resources;
-
 /// <summary>Command button with WinVista/Win7 Command Link style.</summary>
 [ToolboxBitmap(typeof(CommandLink), "gitter.Framework.Properties.ui-button.png")]
 [DesignerCategory("")]
@@ -38,9 +36,9 @@ public class CommandLink : Control
 {
 	#region Static
 
-	private static readonly IDpiBoundValue<Font> _titleFont       = DpiBoundValue.Font(new(SystemFonts.IconTitleFont.FontFamily, 12f, FontStyle.Regular));
-	private static readonly IDpiBoundValue<Font> _descriptionFont = DpiBoundValue.Font(new(SystemFonts.IconTitleFont.FontFamily, 8.25f, FontStyle.Regular));
-	private static readonly Brush _textBrush = new SolidBrush(Color.FromArgb(0, 51, 153));
+	private static readonly IDpiBoundValue<Font> _titleFont       = DpiBoundValue.Font(new((SystemFonts.IconTitleFont ?? SystemFonts.DefaultFont).FontFamily, 12f, FontStyle.Regular));
+	private static readonly IDpiBoundValue<Font> _descriptionFont = DpiBoundValue.Font(new((SystemFonts.IconTitleFont ?? SystemFonts.DefaultFont).FontFamily, 8.25f, FontStyle.Regular));
+	private static readonly Color _textColor = Color.FromArgb(0, 51, 153);
 
 	private static readonly StringFormat _descriptionStringFormat = new(StringFormat.GenericTypographic)
 	{
@@ -55,8 +53,6 @@ public class CommandLink : Control
 
 	private bool _hovered;
 	private bool _pressed;
-	private string _description;
-	private IImageProvider _image;
 
 	#endregion
 
@@ -85,25 +81,25 @@ public class CommandLink : Control
 	/// <summary>Button image.</summary>
 	[DefaultValue(null)]
 	[Description("Button image")]
-	public IImageProvider Image
+	public IImageProvider? Image
 	{
-		get => _image;
+		get;
 		set
 		{
-			_image = value;
+			field = value;
 			Invalidate();
 		}
 	}
 
 	/// <summary>Description text.</summary>
-	[DefaultValue("")]
+	[DefaultValue(null)]
 	[Description("Description text")]
-	public string Description
+	public string? Description
 	{
-		get => _description;
+		get;
 		set
 		{
-			_description = value;
+			field = value;
 			Invalidate();
 		}
 	}
@@ -222,19 +218,29 @@ public class CommandLink : Control
 		base.OnTextChanged(e);
 	}
 
-	private IBackgroundStyle GetBackgroundStyle()
+	private IBackgroundStyle? GetBackgroundStyle()
 	{
+		var styles = GitterApplication.Style.ItemBackgroundStyles;
 		if(Focused)
 		{
-			if(_pressed) return BackgroundStyle.SelectedFocused;
-			if(_hovered) return BackgroundStyle.SelectedFocused;
-			return BackgroundStyle.SelectedNoFocus;
+			if(_pressed) return styles.SelectedFocused;
+			if(_hovered) return styles.SelectedFocused;
+			return styles.SelectedNoFocus;
 		}
 		else
 		{
-			if(_hovered) return BackgroundStyle.Hovered;
+			if(_hovered) return styles.Hovered;
 		}
 		return default;
+	}
+
+	private bool PaintIcon(Graphics graphics, Rectangle iconBounds)
+	{
+		var imageProvider = Image ?? (_hovered ? CommonIcons.ActionHover : CommonIcons.Action);
+		var image = imageProvider.GetImage(iconBounds.Width);
+		if(image is null) return false;
+		graphics.DrawImage(image, iconBounds);
+		return true;
 	}
 
 	/// <inheritdoc/>
@@ -248,56 +254,63 @@ public class CommandLink : Control
 
 		var graphics = e.Graphics;
 		graphics.GdiFill(BackColor, e.ClipRectangle);
-		graphics.SmoothingMode = SmoothingMode.HighQuality;
-		graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
-
-		GetBackgroundStyle()?.Draw(graphics, dpi, ClientRectangle);
-
-		if(!string.IsNullOrEmpty(_description))
+		using(graphics.SwitchSmoothingMode(SmoothingMode.HighQuality))
 		{
-			var iconBounds = dpiConv.Convert(new Rectangle(5, 15, 16, 16));
-			if(_hovered && _pressed)
-			{
-				iconBounds.Offset(dpiConv.ConvertX(1), dpiConv.ConvertY(1));
-			}
-			var image = _image ?? (_hovered ? CommonIcons.ActionHover : CommonIcons.Action);
-			graphics.DrawImage(image.GetImage(iconBounds.Width), iconBounds);
+			graphics.TextRenderingHint = GraphicsUtility.TextRenderingHint;
 
-			var textBounds = new Rectangle(dpiConv.ConvertX(25), dpiConv.ConvertY(8), Width - dpiConv.ConvertX(30), dpiConv.ConvertY(21));
-			if(_hovered && _pressed)
-			{
-				textBounds.Offset(dpiConv.ConvertX(1), dpiConv.ConvertY(1));
-			}
-			if(!string.IsNullOrEmpty(Text))
-			{
-				GitterApplication.TextRenderer.DrawText(
-					graphics, Text, _titleFont.GetValue(dpi), _textBrush, textBounds);
-			}
-			textBounds = new Rectangle(
-				textBounds.X,
-				textBounds.Y + textBounds.Height,
-				textBounds.Width,
-				Height - dpiConv.ConvertY(4) - textBounds.Bottom);
-			GitterApplication.TextRenderer.DrawText(
-				graphics, _description, _descriptionFont.GetValue(dpi), _textBrush, textBounds, _descriptionStringFormat);
-		}
-		else
-		{
-			var iconSize   = dpiConv.Convert(new Size(16, 16));
-			var iconBounds = new Rectangle(dpiConv.ConvertX(5), (Height - iconSize.Height) / 2, iconSize.Width, iconSize.Height);
-			if(_hovered && _pressed) iconBounds.Offset(1, 1);
-			var image = _image ?? (_hovered ? CommonIcons.ActionHover : CommonIcons.Action);
-			graphics.DrawImage(image.GetImage(iconBounds.Width), iconBounds);
+			GetBackgroundStyle()?.Draw(graphics, new(dpi, ClientRectangle, e.ClipRectangle));
 
-			var textBounds = new Rectangle(25, 0, Width - 30, Height);
-			if(_hovered && _pressed)
+			var textColor = GitterApplication.Style.Type == GitterStyleType.DarkBackground
+				? GitterApplication.Style.Colors.WindowText
+				: _textColor;
+
+			if(!string.IsNullOrEmpty(Description))
 			{
-				textBounds.Offset(dpiConv.ConvertX(1), dpiConv.ConvertY(1));
-			}
-			if(!string.IsNullOrEmpty(Text))
-			{
+				var iconBounds = dpiConv.Convert(new Rectangle(5, 15, 16, 16));
+				if(_hovered && _pressed)
+				{
+					iconBounds.Offset(dpiConv.ConvertX(1), dpiConv.ConvertY(1));
+				}
+				PaintIcon(graphics, iconBounds);
+
+				var textBounds = new Rectangle(dpiConv.ConvertX(25), dpiConv.ConvertY(8), Width - dpiConv.ConvertX(30), dpiConv.ConvertY(21));
+				if(_hovered && _pressed)
+				{
+					textBounds.Offset(dpiConv.ConvertX(1), dpiConv.ConvertY(1));
+				}
+				if(!string.IsNullOrEmpty(Text))
+				{
+					GitterApplication.TextRenderer.DrawText(
+						graphics, Text, _titleFont.GetValue(dpi), textColor, textBounds);
+				}
+				textBounds = new Rectangle(
+					textBounds.X,
+					textBounds.Y + textBounds.Height,
+					textBounds.Width,
+					Height - dpiConv.ConvertY(4) - textBounds.Bottom);
 				GitterApplication.TextRenderer.DrawText(
-					graphics, Text, _titleFont.GetValue(dpi), _textBrush, textBounds);
+					graphics, Description!, _descriptionFont.GetValue(dpi), textColor, textBounds, _descriptionStringFormat);
+			}
+			else
+			{
+				var iconSize   = dpiConv.Convert(new Size(16, 16));
+				var iconBounds = new Rectangle(dpiConv.ConvertX(5), (Height - iconSize.Height) / 2, iconSize.Width, iconSize.Height);
+				if(_hovered && _pressed)
+				{
+					iconBounds.Offset(dpiConv.ConvertX(1), dpiConv.ConvertY(1));
+				}
+				PaintIcon(graphics, iconBounds);
+
+				var textBounds = new Rectangle(dpiConv.ConvertX(25), 0, Width - dpiConv.ConvertX(30), Height);
+				if(_hovered && _pressed)
+				{
+					textBounds.Offset(dpiConv.ConvertX(1), dpiConv.ConvertY(1));
+				}
+				if(!string.IsNullOrEmpty(Text))
+				{
+					GitterApplication.TextRenderer.DrawText(
+						graphics, Text, _titleFont.GetValue(dpi), textColor, textBounds);
+				}
 			}
 		}
 	}

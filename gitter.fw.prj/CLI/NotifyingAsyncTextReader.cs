@@ -32,7 +32,7 @@ public class NotifyingAsyncTextReader : AsyncTextReader
 
 	#region Events
 
-	public event EventHandler<TextLineReceivedEventArgs> TextLineReceived;
+	public event EventHandler<TextLineReceivedEventArgs>? TextLineReceived;
 
 	private void OnTextLineReceived(string text)
 		=> TextLineReceived?.Invoke(this, new TextLineReceivedEventArgs(text));

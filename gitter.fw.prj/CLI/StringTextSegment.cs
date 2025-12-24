@@ -27,7 +27,7 @@ public sealed class StringTextSegment : ITextSegment
 {
 	#region Data
 
-	private string _buffer;
+	private string _buffer = "";
 	private int _offset;
 	private int _length;
 

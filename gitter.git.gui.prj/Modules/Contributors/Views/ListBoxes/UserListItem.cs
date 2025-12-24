@@ -37,7 +37,7 @@ namespace gitter.Git.Gui.Controls
 		{
 			var data1 = item1.DataContext.Name;
 			var data2 = item2.DataContext.Name;
-			return string.Compare(data1, data2);
+			return string.Compare(data2, data1);
 		}
 
 		public static int CompareByName(CustomListBoxItem item1, CustomListBoxItem item2)
@@ -49,7 +49,7 @@ namespace gitter.Git.Gui.Controls
 		{
 			var data1 = item1.DataContext.Email;
 			var data2 = item2.DataContext.Email;
-			return string.Compare(data1, data2);
+			return string.Compare(data2, data1);
 		}
 
 		public static int CompareByEmail(CustomListBoxItem item1, CustomListBoxItem item2)
@@ -78,24 +78,24 @@ namespace gitter.Git.Gui.Controls
 			Verify.Argument.IsNotNull(user);
 		}
 
-		private void OnDataAvatarUpdated(object sender, EventArgs e)
+		private void OnDataAvatarUpdated(object? sender, EventArgs e)
 		{
 			InvalidateSafe();
 		}
 
-		protected override void OnListBoxAttached()
+		protected override void OnListBoxAttached(CustomListBox listBox)
 		{
-			base.OnListBoxAttached();
+			base.OnListBoxAttached(listBox);
 			DataContext.Avatar.Updated += OnDataAvatarUpdated;
 		}
 
-		protected override void OnListBoxDetached()
+		protected override void OnListBoxDetached(CustomListBox listBox)
 		{
 			DataContext.Avatar.Updated -= OnDataAvatarUpdated;
-			base.OnListBoxDetached();
+			base.OnListBoxDetached(listBox);
 		}
 
-		private static Image GetIcon(Dpi dpi)
+		private static Image? GetIcon(Dpi dpi)
 			=> Icons.User.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 
 		private static async void UpdateAvatarAsync(IAvatar avatar, CustomListBoxItem item, CustomListBoxColumn column)
@@ -116,7 +116,7 @@ namespace gitter.Git.Gui.Controls
 					var imgAvatar = avatar.Image;
 					if(imgAvatar is not null)
 					{
-						paintEventArgs.PaintImageAndText(imgAvatar, ImagePainter.Circle, DataContext.Name);
+						paintEventArgs.PaintImageAndText(imgAvatar, ImagePainter.Circle, DataContext?.Name);
 						return;
 					}
 					else
@@ -126,7 +126,7 @@ namespace gitter.Git.Gui.Controls
 				}
 			}
 			var image = GetIcon(paintEventArgs.Dpi);
-			paintEventArgs.PaintImageAndText(image, DataContext.Name);
+			paintEventArgs.PaintImageAndText(image, DataContext?.Name);
 		}
 
 		/// <inheritdoc/>

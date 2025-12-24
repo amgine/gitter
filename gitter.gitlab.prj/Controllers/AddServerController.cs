@@ -22,6 +22,7 @@ namespace gitter.GitLab;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -44,74 +45,112 @@ class AddServerController : ViewControllerBase<IAddServerView>
 
 	private IList<ServerInfo> Servers { get; }
 
-	public async Task<bool> TryAddServerAsync()
+	private static bool TryGetServerName(IAddServerView view,
+		[MaybeNullWhen(returnValue: false)] out string name)
 	{
-		Verify.State.IsTrue(View is not null, "Controller is not attached to a view.");
-
-		var name = View.ServerName.Value.Trim();
-		if(string.IsNullOrWhiteSpace(name))
+		name = view.ServerName.Value?.Trim();
+		if(name is not { Length: not 0 } || string.IsNullOrWhiteSpace(name))
 		{
-			View.UserInputErrorNotifier.NotifyError(View.ServerName, new UserInputError(
+			view.UserInputErrorNotifier.NotifyError(view.ServerName, new UserInputError(
 				Resources.ErrNoServerNameSpecified, Resources.ErrServerNameCannotBeEmpty));
 			return false;
 		}
-		var url = View.ServiceUrl.Value.Trim();
+		return true;
+	}
+
+	private bool TryGetServiceUri(IAddServerView view,
+		[MaybeNullWhen(returnValue: false)] out Uri serviceUri)
+	{
+		var url = view.ServiceUrl.Value?.Trim();
 		if(string.IsNullOrWhiteSpace(url))
 		{
-			View.UserInputErrorNotifier.NotifyError(View.ServiceUrl, new UserInputError(
+			view.UserInputErrorNotifier.NotifyError(view.ServiceUrl, new UserInputError(
 				Resources.ErrNoServiceUriSpecified, Resources.ErrServiceUriCannotBeEmpty));
+			serviceUri = default;
 			return false;
 		}
-		if(!Uri.TryCreate(url, UriKind.Absolute, out var serviceUri) || (serviceUri.Scheme != "http" && serviceUri.Scheme != "https"))
+		if(!Uri.TryCreate(url, UriKind.Absolute, out serviceUri) || !(serviceUri.Scheme is "http" or "https"))
 		{
-			View.UserInputErrorNotifier.NotifyError(View.ServiceUrl, new UserInputError(
+			view.UserInputErrorNotifier.NotifyError(view.ServiceUrl, new UserInputError(
 				Resources.ErrInvalidServiceUri, Resources.ErrServiceUriIsNotValid));
 			return false;
 		}
 		foreach(var existing in Servers)
 		{
-			if(Equals(existing.ServiceUrl, serviceUri))
+			if(Equals(existing.ServiceUri, serviceUri))
 			{
-				View.UserInputErrorNotifier.NotifyError(View.ServiceUrl, new UserInputError(
+				view.UserInputErrorNotifier.NotifyError(view.ServiceUrl, new UserInputError(
 					Resources.ErrDuplicateServiceUri, Resources.ErrSpecifiedServiceUriAlreadyExists));
 				return false;
 			}
 		}
-		var key = View.APIKey.Value.Trim();
-		if(string.IsNullOrWhiteSpace(key))
+		return true;
+	}
+
+	private static bool TryGetApiKey(IAddServerView view,
+		[MaybeNullWhen(returnValue: false)] out string apiKey)
+	{
+		apiKey = view.APIKey.Value?.Trim();
+		if(apiKey is not { Length: not 0 } || string.IsNullOrWhiteSpace(apiKey))
 		{
-			View.UserInputErrorNotifier.NotifyError(View.APIKey, new UserInputError(
+			view.UserInputErrorNotifier.NotifyError(view.APIKey, new UserInputError(
 				Resources.ErrNoAPIKeySpecified, Resources.ErrAPIKeyCannotBeEmpty));
 			return false;
 		}
+		return true;
+	}
 
-		var api = new Api.ApiEndpoint(HttpMessageInvoker, serviceUri, key);
+	private bool TryCollectUserInput(IAddServerView view,
+		[MaybeNullWhen(returnValue: false)] out ServerInfo server)
+	{
+		if(!TryGetServerName(view, out var name))       goto fail;
+		if(!TryGetServiceUri(view, out var serviceUri)) goto fail;
+		if(!TryGetApiKey    (view, out var apiKey))     goto fail;
+
+		server = new ServerInfo(
+			name:       name,
+			serviceUri: serviceUri,
+			apiKey:     apiKey);
+		return true;
+
+	fail:
+		server = default;
+		return false;
+	}
+
+	private async Task<bool> ValidateAsync(IAddServerView view, ServerInfo server)
+	{
+		Assert.IsNotNull(server);
+
+		var api = new Api.ApiEndpoint(HttpMessageInvoker, server);
 		try
 		{
-			using(View.ChangeCursor(MouseCursor.WaitCursor))
+			using(view.ChangeCursor(MouseCursor.WaitCursor))
 			{
-				await api.GetVersionAsync();
+				_ = await api.GetVersionAsync();
 			}
 		}
 		catch(UnauthorizedAccessException)
 		{
-			View.UserInputErrorNotifier.NotifyError(View.APIKey, new UserInputError(
+			view.UserInputErrorNotifier.NotifyError(view.APIKey, new UserInputError(
 				Resources.ErrApiKeyIsInvalid, Resources.ErrUnableToAuthorize));
 			return false;
 		}
 		catch
 		{
-			View.UserInputErrorNotifier.NotifyError(View.ServiceUrl, new UserInputError(
+			view.UserInputErrorNotifier.NotifyError(view.ServiceUrl, new UserInputError(
 				Resources.ErrInvalidServiceUri, Resources.ErrServiceUriIsNotGitLab));
 			return false;
 		}
+		return true;
+	}
 
-		var server = new ServerInfo
-		{
-			Name       = name,
-			ServiceUrl = serviceUri,
-			ApiKey     = key,
-		};
+	public async Task<bool> TryAddServerAsync()
+	{
+		var view = RequireView();
+
+		if(!TryCollectUserInput(view, out var server)) return false;
+		if(!await ValidateAsync(view, server)) return false;
 
 		Servers.Add(server);
 

@@ -52,8 +52,10 @@ internal sealed class RemotesToolbar : ToolStrip
 		Items.Add(_btnAddRemote = new ToolStripButton(Resources.StrAddRemote, default,
 			(_, _) =>
 			{
-				using var dlg = new AddRemoteDialog(_remotesView.Repository);
-				dlg.Run(_remotesView);
+				if(_remotesView.Repository is null) return;
+
+				using var dialog = new AddRemoteDialog(_remotesView.Repository);
+				dialog.Run(_remotesView);
 			}));
 
 		dpiBindings.BindImage(_btnAddRemote, Icons.RemoteAdd);

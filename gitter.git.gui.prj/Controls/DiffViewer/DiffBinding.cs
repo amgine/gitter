@@ -51,9 +51,9 @@ sealed class DiffBinding : AsyncDataBinding<Diff>
 		DiffViewer = diffViewer;
 		_diffOptions = diffOptions;
 
-		_allDiffPanels = new List<FileDiffPanel>();
+		_allDiffPanels = [];
 		_progressPanel = new FlowProgressPanel();
-		Progress = _progressPanel.ProgressMonitor;
+		Progress = _progressPanel;
 	}
 
 	#endregion
@@ -86,9 +86,9 @@ sealed class DiffBinding : AsyncDataBinding<Diff>
 	}
 
 	protected override Task<Diff> FetchDataAsync(
-		IProgress<OperationProgress> progress = default, CancellationToken cancellationToken = default)
+		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
-		Verify.State.IsFalse(IsDisposed, "DiffBinding is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		if(!DiffViewer.Created)
 		{
@@ -117,7 +117,7 @@ sealed class DiffBinding : AsyncDataBinding<Diff>
 		_progressPanel.Remove();
 		if(diff is not null)
 		{
-			FlowPanelSeparator separator = null;
+			var separator = default(FlowPanelSeparator);
 			var changedFilesPanel = new ChangedFilesPanel() { Diff = diff };
 			changedFilesPanel.StatusFilterChanged += OnStatusFilterChanged;
 			DiffViewer.Panels.Add(changedFilesPanel);
@@ -129,7 +129,7 @@ sealed class DiffBinding : AsyncDataBinding<Diff>
 				DiffViewer.Panels.Add(fileDiffPanel);
 				DiffViewer.Panels.Add(separator = new FlowPanelSeparator() { SeparatorStyle = FlowPanelSeparatorStyle.Simple });
 			}
-			if(separator != null)
+			if(separator is not null)
 			{
 				separator.Height = 6;
 			}
@@ -150,16 +150,16 @@ sealed class DiffBinding : AsyncDataBinding<Diff>
 		DiffViewer.VScrollBar.Value = scrollPos;
 	}
 
-	private void OnStatusFilterChanged(object sender, EventArgs e)
+	private void OnStatusFilterChanged(object? sender, EventArgs e)
 	{
-		var changedFilesPanel = (ChangedFilesPanel)sender;
+		var changedFilesPanel = (ChangedFilesPanel)sender!;
 		var index = DiffViewer.Panels.IndexOf(changedFilesPanel) + 2;
 		DiffViewer.BeginUpdate();
 		if(index < DiffViewer.Panels.Count)
 		{
 			DiffViewer.Panels.RemoveRange(index, DiffViewer.Panels.Count - index);
 		}
-		FlowPanelSeparator separator = null;
+		var separator = default(FlowPanelSeparator);
 		for(int i = 0; i < _allDiffPanels.Count; ++i)
 		{
 			if((_allDiffPanels[i].DiffFile.Status & changedFilesPanel.StatusFilter) != FileStatus.Unknown)

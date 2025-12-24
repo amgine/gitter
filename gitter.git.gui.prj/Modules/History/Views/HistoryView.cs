@@ -37,7 +37,7 @@ using Resources = Properties.Resources;
 partial class HistoryView : HistoryViewBase
 {
 	private readonly HistoryToolbar _toolbar;
-	private IDisposable _urlHandler;
+	private IDisposable? _urlHandler;
 
 	public HistoryView(GuiProvider gui, IFactory<RevisionListBox> revisionListBoxFactory)
 		: base(Guids.HistoryViewGuid, gui, revisionListBoxFactory)
@@ -52,11 +52,7 @@ partial class HistoryView : HistoryViewBase
 	/// <inheritdoc/>
 	protected override void Dispose(bool disposing)
 	{
-		if(_urlHandler is not null)
-		{
-			_urlHandler.Dispose();
-			_urlHandler = null;
-		}
+		DisposableUtility.Dispose(ref _urlHandler);
 		base.Dispose(disposing);
 	}
 
@@ -72,7 +68,7 @@ partial class HistoryView : HistoryViewBase
 			var ptr = Repository.GetRevisionPointer(url.Substring(prefix.Length));
 			return SelectRevision(ptr);
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			return false;
 		}
@@ -130,17 +126,17 @@ partial class HistoryView : HistoryViewBase
 		LogOptions.SaveTo(logOptionsNode);
 	}
 
-	private void OnCommitCreated(object sender, RevisionEventArgs e)
+	private void OnCommitCreated(object? sender, RevisionEventArgs e)
 	{
 		RefreshContent();
 	}
 
-	private void OnRepositoryUpdated(object sender, EventArgs e)
+	private void OnRepositoryUpdated(object? sender, EventArgs e)
 	{
 		RefreshContent();
 	}
 
-	private void OnStashDeleted(object sender, StashedStateEventArgs e)
+	private void OnStashDeleted(object? sender, StashedStateEventArgs e)
 	{
 		if(e.Object.Index == 0)
 		{
@@ -188,7 +184,7 @@ partial class HistoryView : HistoryViewBase
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 

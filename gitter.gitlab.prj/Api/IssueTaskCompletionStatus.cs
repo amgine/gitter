@@ -22,11 +22,6 @@ namespace gitter.GitLab.Api;
 
 using System;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
-using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 [DataContract]
 class IssueTaskCompletionStatus
@@ -38,18 +33,10 @@ class IssueTaskCompletionStatus
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Count)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Count)]
-#endif
 	public int Count { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Completed)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Completed)]
-#endif
 	public int Completed { get; set; }
 }

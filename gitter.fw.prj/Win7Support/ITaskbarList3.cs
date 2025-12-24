@@ -71,9 +71,9 @@ internal interface ITaskbarList
 		
 	void ThumbBarSetImageList(IntPtr hWnd, IntPtr himl);
 		
-	void SetOverlayIcon(IntPtr hWnd, IntPtr hIcon, [MarshalAs(UnmanagedType.LPWStr)]string pszDescription);
+	void SetOverlayIcon(IntPtr hWnd, IntPtr hIcon, [MarshalAs(UnmanagedType.LPWStr)]string? pszDescription);
 		
-	void SetThumbnailTooltip(IntPtr hWnd, [MarshalAs(UnmanagedType.LPWStr)]string pszTip);
+	void SetThumbnailTooltip(IntPtr hWnd, [MarshalAs(UnmanagedType.LPWStr)]string? pszTip);
 
 	void SetThumbnailClip(IntPtr hWnd, ref RECT prcClip);
 

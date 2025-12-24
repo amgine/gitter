@@ -22,23 +22,21 @@ namespace gitter.TeamCity;
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 
 public abstract class TeamCityObjectsCacheBase<T> : IEnumerable<T>
 	where T : TeamCityObject
 {
-	#region Data
-
 	private readonly Dictionary<string, T> _cache;
 	private readonly TeamCityServiceContext _context;
-
-	#endregion
 
 	internal TeamCityObjectsCacheBase(TeamCityServiceContext context)
 	{
 		Verify.Argument.IsNotNull(context);
 
-		_cache = new Dictionary<string, T>();
+		_cache   = [];
 		_context = context;
 	}
 
@@ -48,20 +46,21 @@ public abstract class TeamCityObjectsCacheBase<T> : IEnumerable<T>
 
 	protected internal TeamCityServiceContext Context => _context;
 
-	public object SyncRoot => _context.SyncRoot;
+	public LockType SyncRoot => _context.SyncRoot;
 
 	internal T Lookup(XmlNode node)
 	{
 		Verify.Argument.IsNotNull(node);
 
-		var id = TeamCityUtility.LoadString(node.Attributes[TeamCityObject.IdProperty.XmlNodeName]);
-		T obj;
+		var id = TeamCityUtility.LoadString(node.Attributes?[TeamCityObject.IdProperty.XmlNodeName]);
+		if(id is not { Length: not 0 }) throw new ArgumentException("Id is not defined.", nameof(node));
+
+		T? obj;
 		lock(SyncRoot)
 		{
 			if(!_cache.TryGetValue(id, out obj))
 			{
-				obj = Create(node);
-				_cache.Add(id, obj);
+				_cache.Add(id, obj = Create(node));
 			}
 			else
 			{
@@ -71,19 +70,23 @@ public abstract class TeamCityObjectsCacheBase<T> : IEnumerable<T>
 		return obj;
 	}
 
-	protected internal T FetchSingleItem(string url)
+	protected internal async Task<T> FetchSingleItemAsync(string url, CancellationToken cancellationToken = default)
 	{
-		var xml = Context.GetXml(url);
-		return Lookup(xml.DocumentElement);
+		var xml = await Context
+			.GetXmlAsync(url, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		return Lookup(xml.DocumentElement ?? throw new ApplicationException("XML is empty."));
 	}
 
-	protected LinkedList<T> FetchItemsFromSinglePage(string url)
+	protected async Task<List<T>> FetchItemsFromSinglePageAsync(string url, CancellationToken cancellationToken = default)
 	{
-		var xml = Context.GetXml(url);
-		var list = new LinkedList<T>();
-		foreach(var item in Select(xml.DocumentElement))
+		var xml = await Context
+			.GetXmlAsync(url, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		var list = new List<T>();
+		foreach(var item in Select(xml.DocumentElement ?? throw new ApplicationException("XML is empty.")))
 		{
-			list.AddLast(item);
+			list.Add(item);
 		}
 		return list;
 	}

@@ -26,6 +26,8 @@ using System.Drawing;
 using System.Windows.Forms;
 
 using gitter.Framework;
+using gitter.Framework.Controls;
+using gitter.Framework.Layout;
 using gitter.Framework.Services;
 
 using gitter.Git.Gui.Controls;
@@ -35,13 +37,110 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 public partial class StageDialog : DialogBase, IExecutableDialog
 {
-	#region Data
+	readonly struct DialogControls
+	{
+		public readonly TextBox         _txtPattern;
+		public readonly LabelControl    _lblPattern;
+		public readonly TreeListBox     _lstUnstaged;
+		public readonly ICheckBoxWidget _chkIncludeUntracked;
+		public readonly ICheckBoxWidget _chkIncludeIgnored;
 
-	private FilesToAddBinding _dataBinding;
+		public DialogControls(IGitterStyle style)
+		{
+			style ??= GitterApplication.Style;
 
-	#endregion
+			_txtPattern = new();
+			_lblPattern = new();
+			_lstUnstaged = new()
+			{
+				Style = style,
+				HeaderStyle = HeaderStyle.Hidden,
+				ShowTreeLines = false,
+			};
+			_chkIncludeUntracked = style.CheckBoxFactory.Create();
+			_chkIncludeIgnored   = style.CheckBoxFactory.Create();
 
-	#region .ctor
+			for(int i = 0; i < _lstUnstaged.Columns.Count; ++i)
+			{
+				var col = _lstUnstaged.Columns[i];
+				if(col.Id == (int)ColumnId.Name)
+				{
+					col.IsVisible = true;
+					col.SizeMode  = ColumnSizeMode.Auto;
+				}
+				else
+				{
+					col.IsVisible = false;
+				}
+			}
+
+			GitterApplication.FontManager.InputFont.Apply(_txtPattern);
+		}
+
+		public void Localize()
+		{
+			_lblPattern.Text          = Resources.StrPattern.AddColon();
+			_chkIncludeUntracked.Text = Resources.StrIncludeUntracked;
+			_chkIncludeIgnored.Text   = Resources.StrIncludeIgnored;
+			_lstUnstaged.Text         = Resources.StrsNoUnstagedChanges;
+		}
+
+		public void Layout(Control parent)
+		{
+			var patternDec = new TextBoxDecorator(_txtPattern);
+
+			_ = new ControlLayout(parent)
+			{
+				Content = new Grid(
+					rows:
+					[
+						LayoutConstants.TextInputRowHeight,
+						LayoutConstants.CheckBoxRowHeight,
+						LayoutConstants.RowSpacing,
+						SizeSpec.Everything(),
+					],
+					columns:
+					[
+						SizeSpec.Absolute(64),
+						SizeSpec.Everything(),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_lblPattern, marginOverride: LayoutConstants.NoMargin),      column: 0, row: 0),
+						new GridContent(new ControlContent(patternDec,  marginOverride: LayoutConstants.TextBoxMargin), column: 1, row: 0),
+						new GridContent(new Grid(
+							columns:
+							[
+								SizeSpec.Absolute(130),
+								SizeSpec.Absolute(130),
+								SizeSpec.Everything(),
+							],
+							content:
+							[
+								new GridContent(new WidgetContent(_chkIncludeUntracked, marginOverride: LayoutConstants.NoMargin), column: 0),
+								new GridContent(new WidgetContent(_chkIncludeIgnored,   marginOverride: LayoutConstants.NoMargin), column: 1),
+							]), row: 1, column: 1),
+						new GridContent(new ControlContent(_lstUnstaged, marginOverride: LayoutConstants.NoMargin), columnSpan: 2, row: 3),
+					]),
+			};
+
+			var tabIndex = 0;
+			_lblPattern.TabIndex = tabIndex++;
+			patternDec.TabIndex = tabIndex++;
+			_chkIncludeUntracked.TabIndex = tabIndex++;
+			_chkIncludeIgnored.TabIndex = tabIndex++;
+			_lstUnstaged.TabIndex = tabIndex++;
+
+			_lblPattern.Parent = parent;
+			patternDec.Parent = parent;
+			_chkIncludeUntracked.Parent = parent;
+			_chkIncludeIgnored.Parent = parent;
+			_lstUnstaged.Parent = parent;
+		}
+	}
+
+	private readonly DialogControls _controls;
+	private FilesToAddBinding? _dataBinding;
 
 	/// <summary>Create <see cref="StageDialog"/>.</summary>
 	/// <param name="repository">Related <see cref="Repository"/>.</param>
@@ -51,46 +150,54 @@ public partial class StageDialog : DialogBase, IExecutableDialog
 
 		Repository = repository;
 
-		InitializeComponent();
-
+		Name = nameof(StageDialog);
 		Text = Resources.StrStageFiles;
 
-		_lblPattern.Text = Resources.StrPattern.AddColon();
-		_chkIncludeUntracked.Text = Resources.StrIncludeUntracked;
-		_chkIncludeIgnored.Text = Resources.StrIncludeIgnored;
-		_lstUnstaged.Style = GitterApplication.DefaultStyle;
-		_lstUnstaged.Text = Resources.StrsNoUnstagedChanges;
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		Size                = ScalableSize.GetValue(Dpi.Default);
+		_controls = new(GitterApplication.Style);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
 
-		for(int i = 0; i < _lstUnstaged.Columns.Count; ++i)
-		{
-			var col = _lstUnstaged.Columns[i];
-			col.IsVisible = col.Id == (int)ColumnId.Name;
-		}
-		_lstUnstaged.Columns[0].SizeMode = Framework.Controls.ColumnSizeMode.Auto;
-		_lstUnstaged.ShowTreeLines = false;
-
-		GitterApplication.FontManager.InputFont.Apply(_txtPattern);
+		_controls._txtPattern.TextChanged               += OnPatternTextChanged;
+		_controls._lstUnstaged.ItemActivated            += OnFilesItemActivated;
+		_controls._chkIncludeUntracked.IsCheckedChanged += OnIncludeUntrackedCheckedChanged;
+		_controls._chkIncludeIgnored.IsCheckedChanged   += OnIncludeIgnoredCheckedChanged;
 	}
 
-	#endregion
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			DataBinding = null;
+		}
+		base.Dispose(disposing);
+	}
 
 	#region Properties
+
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
 
 	/// <inheritdoc/>
 	public override IDpiBoundValue<Size> ScalableSize { get; } = DpiBoundValue.Size(new(DefaultWidth, 325));
 
 	public Repository Repository { get; }
 
-	private FilesToAddBinding DataBinding
+	private FilesToAddBinding? DataBinding
 	{
 		get => _dataBinding;
 		set
 		{
-			if(_dataBinding != value)
-			{
-				_dataBinding?.Dispose();
-				_dataBinding = value;
-			}
+			if(_dataBinding == value) return;
+
+			DisposableUtility.Dispose(ref _dataBinding);
+			_dataBinding = value;
 		}
 	}
 
@@ -98,20 +205,20 @@ public partial class StageDialog : DialogBase, IExecutableDialog
 
 	public string Pattern
 	{
-		get => _txtPattern.Text.Trim();
-		set => _txtPattern.Text = value;
+		get => _controls._txtPattern.Text.Trim();
+		set => _controls._txtPattern.Text = value;
 	}
 
 	public bool IncludeUntracked
 	{
-		get => _chkIncludeUntracked.Checked;
-		set => _chkIncludeUntracked.Checked = value;
+		get => _controls._chkIncludeUntracked.IsChecked;
+		set => _controls._chkIncludeUntracked.IsChecked = value;
 	}
 
 	public bool IncludeIgnored
 	{
-		get => _chkIncludeIgnored.Checked;
-		set => _chkIncludeIgnored.Checked = value;
+		get => _controls._chkIncludeIgnored.IsChecked;
+		set => _controls._chkIncludeIgnored.IsChecked = value;
 	}
 
 	#endregion
@@ -126,32 +233,31 @@ public partial class StageDialog : DialogBase, IExecutableDialog
 
 	private void UpdateList()
 	{
-		DataBinding ??= new FilesToAddBinding(Repository, _lstUnstaged);
+		DataBinding ??= new FilesToAddBinding(Repository, _controls._lstUnstaged);
 		DataBinding.Pattern          = Pattern;
 		DataBinding.IncludeUntracked = IncludeUntracked;
 		DataBinding.IncludeIgnored   = IncludeIgnored;
 		DataBinding.ReloadData();
 	}
 
-	private void OnPatternTextChanged(object sender, EventArgs e)
+	private void OnPatternTextChanged(object? sender, EventArgs e)
 	{
 		UpdateList();
 	}
 
-	private void OnIncludeUntrackedCheckedChanged(object sender, EventArgs e)
+	private void OnIncludeUntrackedCheckedChanged(object? sender, EventArgs e)
 	{
 		UpdateList();
 	}
 
-	private void OnIncludeIgnoredCheckedChanged(object sender, EventArgs e)
+	private void OnIncludeIgnoredCheckedChanged(object? sender, EventArgs e)
 	{
 		UpdateList();
 	}
 
-	private void OnFilesItemActivated(object sender, Framework.Controls.ItemEventArgs e)
+	private void OnFilesItemActivated(object? sender, ItemEventArgs e)
 	{
-		var item = e.Item as ITreeItemListItem;
-		if(item.TreeItem.Status != FileStatus.Removed)
+		if(e.Item is ITreeItemListItem { TreeItem.Status: not FileStatus.Removed } item)
 		{
 			if(item is not null) Utility.OpenUrl(System.IO.Path.Combine(
 				item.TreeItem.Repository.WorkingDirectory, item.TreeItem.RelativePath));
@@ -162,10 +268,10 @@ public partial class StageDialog : DialogBase, IExecutableDialog
 	{
 		try
 		{
-			if(_lstUnstaged.Items.Count == 0) return true;
-			var pattern = _txtPattern.Text.Trim();
-			bool addIgnored = _chkIncludeIgnored.Checked;
-			bool addUntracked = _chkIncludeUntracked.Checked;
+			if(_controls._lstUnstaged.Items.Count == 0) return true;
+			var pattern       = _controls._txtPattern.Text.Trim();
+			bool addIgnored   = _controls._chkIncludeIgnored.IsChecked;
+			bool addUntracked = _controls._chkIncludeUntracked.IsChecked;
 			Repository.Status.Stage(pattern, addUntracked, addIgnored);
 		}
 		catch(GitException exc)

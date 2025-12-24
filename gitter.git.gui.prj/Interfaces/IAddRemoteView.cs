@@ -24,9 +24,9 @@ using gitter.Framework.Mvc;
 
 interface IAddRemoteView : IView
 {
-	IUserInputSource<string> RemoteName { get; }
+	IUserInputSource<string?> RemoteName { get; }
 
-	IUserInputSource<string> Url { get; }
+	IUserInputSource<string?> Url { get; }
 
 	IUserInputSource<bool> Fetch { get; }
 

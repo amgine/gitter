@@ -22,16 +22,10 @@ namespace gitter.Framework.Controls;
 
 using System.Drawing;
 
-public class ItemContextMenuRequestEventArgs : ContextMenuRequestEventArgs
+public class ItemContextMenuRequestEventArgs(CustomListBoxItem item, CustomListBoxColumn? column, Rectangle itemBounds, int columnIndex, int x, int y)
+	: ContextMenuRequestEventArgs(column, columnIndex, x, y)
 {
-	public ItemContextMenuRequestEventArgs(CustomListBoxItem item, CustomListBoxColumn column, Rectangle itemBounds, int columnIndex, int x, int y)
-		: base(column, columnIndex, x, y)
-	{
-		Item       = item;
-		ItemBounds = itemBounds;
-	}
+	public CustomListBoxItem Item { get; } = item;
 
-	public CustomListBoxItem Item { get; }
-
-	public Rectangle ItemBounds { get; }
+	public Rectangle ItemBounds { get; } = itemBounds;
 }

@@ -37,40 +37,45 @@ sealed class RepositoryRootItem : RepositoryExplorerItemBase
 		Verify.Argument.IsNotNull(environment);
 
 		Items.AddRange(
-			new CustomListBoxItem[]
-			{
-				new RepositoryHistoryListItem(environment),
-				new RepositoryCommitListItem(environment),
-				new RepositoryStashListItem(environment),
-				new RepositoryReferencesListItem(environment),
-				new RepositoryRemotesListItem(environment),
-				new RepositorySubmodulesListItem(environment),
+			[
+				new RepositoryHistoryListItem         (environment),
+				new RepositoryCommitListItem          (environment),
+				new RepositoryStashListItem           (environment),
+				new RepositoryReferencesListItem      (environment),
+				new RepositoryRemotesListItem         (environment),
+				new RepositorySubmodulesListItem      (environment),
 				new RepositoryWorkingDirectoryListItem(),
-				new RepositoryConfigurationListItem(environment),
-				new RepositoryContributorsListItem(environment),
-			});
+				new RepositoryConfigurationListItem   (environment),
+				new RepositoryContributorsListItem    (environment),
+			]);
 	}
 
 	/// <inheritdoc/>
-	protected override void AttachToRepository()
+	protected override void AttachToRepository(Repository repository)
 	{
-		foreach(var item in Items.OfType<RepositoryExplorerItemBase>())
+		foreach(var item in Items)
 		{
-			item.Repository = Repository;
+			if(item is RepositoryExplorerItemBase e)
+			{
+				e.Repository = repository;
+			}
 		}
 	}
 
 	/// <inheritdoc/>
-	protected override void DetachFromRepository()
+	protected override void DetachFromRepository(Repository repository)
 	{
-		foreach(var item in Items.OfType<RepositoryExplorerItemBase>())
+		foreach(var item in Items)
 		{
-			item.Repository = null;
+			if(item is RepositoryExplorerItemBase e)
+			{
+				e.Repository = null;
+			}
 		}
 	}
 
 	/// <inheritdoc/>
-	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	public override ContextMenuStrip? GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
 		Assert.IsNotNull(requestEventArgs);
 

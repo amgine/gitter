@@ -26,23 +26,14 @@ using gitter.Git.Gui.Views;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class RepositoryCommitListItem : RepositoryExplorerItemBase
+sealed class RepositoryCommitListItem(IWorkingEnvironment environment)
+	: RepositoryExplorerItemBase(Icons.Commit, Resources.StrCommit)
 {
-	private readonly IWorkingEnvironment _environment;
-
-	public RepositoryCommitListItem(IWorkingEnvironment environment)
-		: base(Icons.Commit, Resources.StrCommit)
-	{
-		Verify.Argument.IsNotNull(environment);
-
-		_environment = environment;
-	}
-
 	/// <inheritdoc/>
 	protected override void OnActivate()
 	{
 		base.OnActivate();
-		_environment.ViewDockService.ShowView(Guids.CommitViewGuid);
+		environment.ViewDockService.ShowView(Guids.CommitViewGuid);
 	}
 
 	/// <inheritdoc/>

@@ -30,77 +30,261 @@ using gitter.Framework.Controls;
 using gitter.Framework.Configuration;
 
 using gitter.Git.Gui.Controls;
+using gitter.Framework.Layout;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
 [ToolboxItem(false)]
 partial class CommitView : GitViewBase
 {
-	private readonly CommitToolbar _toolbar;
-	private TextBoxSpellChecker _speller;
+	readonly struct ViewControls
+	{
+		public readonly CommitToolbar _toolbar;
+		public readonly TextBox _txtMessage;
+		public readonly TableLayoutPanel _tableChanges;
+		public readonly LabelControl _lblUnstaged;
+		public readonly LabelControl _lblStaged;
+		public readonly TreeListBox _lstUnstaged;
+		public readonly TreeListBox _lstStaged;
+		public readonly LabelControl _lblMessage;
+		public readonly ICheckBoxWidget _chkAmend;
+		public readonly IButtonWidget _btnCommit;
+
+		public ViewControls(IGitterStyle? style, CommitView parent)
+		{
+			style ??= GitterApplication.Style;
+
+			_toolbar = new(parent)
+			{
+				GripStyle = ToolStripGripStyle.Hidden,
+				Stretch = true,
+				Padding = new Padding(2),
+				Dock = DockStyle.Top,
+				Renderer = GitterApplication.Style.ToolStripRenderer,
+			};
+			_toolbar.MouseDown += (_, _) => parent.Focus();
+
+			_tableChanges = new();
+			_lblUnstaged = new();
+			_lblStaged = new();
+			_lstUnstaged  = new()
+			{
+				Style = style,
+				ShowTreeLines = true,
+				HeaderStyle = HeaderStyle.Hidden,
+				Multiselect = true,
+			};
+			_lstStaged = new()
+			{
+				Style = style,
+				ShowTreeLines = true,
+				HeaderStyle = HeaderStyle.Hidden,
+				Multiselect = true,
+			};
+			_lblMessage   = new();
+			_txtMessage = new()
+			{
+				AcceptsReturn = true,
+				AcceptsTab = true,
+				Multiline = true,
+				ScrollBars = ScrollBars.None,
+			};
+			_chkAmend  = style.CheckBoxFactory.Create();
+			_btnCommit = style.ButtonFactory.Create();
+
+			GitterApplication.FontManager.InputFont.Apply(_txtMessage);
+
+			if(style.Type == GitterStyleType.DarkBackground)
+			{
+				_txtMessage.BorderStyle = BorderStyle.FixedSingle;
+			}
+
+			_txtMessage.BackColor = style.Colors.Window;
+			_txtMessage.ForeColor = style.Colors.WindowText;
+
+			for(int i = 0; i < _lstUnstaged.Columns.Count; ++i)
+			{
+				var column = _lstUnstaged.Columns[i];
+				column.IsVisible = column.Id == (int)ColumnId.Name;
+			}
+
+			for(int i = 0; i < _lstStaged.Columns.Count; ++i)
+			{
+				var column = _lstStaged.Columns[i];
+				column.IsVisible = column.Id == (int)ColumnId.Name;
+			}
+		}
+
+		public void Localize()
+		{
+			_lblStaged.Text = Resources.StrsStagedChanges.AddColon();
+			_lstStaged.Text = Resources.StrsNoStagedChanges;
+			_lblUnstaged.Text = Resources.StrsUnstagedChanges.AddColon();
+			_lstUnstaged.Text = Resources.StrsNoUnstagedChanges;
+			_lblMessage.Text = Resources.StrMessage.AddColon();
+			_chkAmend.Text = Resources.StrAmend;
+			_btnCommit.Text = Resources.StrCommit;
+		}
+
+		public void Layout(Control parent)
+		{
+			var decMessage = new TextBoxDecorator(_txtMessage);
+			Panel grip;
+			Grid grid;
+
+			_ = new ControlLayout(parent)
+			{
+				Content = grid = new Grid(
+					rows:
+					[
+						/* 0 */ LayoutConstants.ToolbarHeight,
+						/* 1 */ SizeSpec.Absolute(2),
+						/* 2 */ SizeSpec.Everything(),
+						/* 3 */ SizeSpec.Absolute(4),
+						/* 4 */ LayoutConstants.LabelRowHeight,
+						/* 5 */ LayoutConstants.LabelRowSpacing,
+						/* 6 */ SizeSpec.Absolute(100),
+					],
+					content:
+					[
+						new GridContent(new ControlContent(_toolbar, marginOverride: LayoutConstants.NoMargin), row: 0),
+						new GridContent(new Grid(
+							padding: DpiBoundValue.Padding(new(2, 0, 2, 0)),
+							rows:
+							[
+								LayoutConstants.LabelRowHeight,
+								LayoutConstants.LabelRowSpacing,
+								SizeSpec.Everything(),
+							],
+							columns:
+							[
+								SizeSpec.Relative(0.5f),
+								SizeSpec.Absolute(4),
+								SizeSpec.RelativeToLeftover(1),
+							],
+							content:
+							[
+								new GridContent(new ControlContent(_lblUnstaged, marginOverride: LayoutConstants.NoMargin), column: 0, row: 0),
+								new GridContent(new ControlContent(_lblStaged,   marginOverride: LayoutConstants.NoMargin), column: 2, row: 0),
+								new GridContent(new ControlContent(_lstUnstaged, marginOverride: LayoutConstants.NoMargin), column: 0, row: 2),
+								new GridContent(new ControlContent(_lstStaged,   marginOverride: LayoutConstants.NoMargin), column: 2, row: 2),
+							]), row: 2),
+						new GridContent(new ControlContent(grip = new()
+						{
+							Cursor = Cursors.SizeNS,
+						}, marginOverride: LayoutConstants.NoMargin), row: 3),
+						new GridContent(new ControlContent(_lblMessage, marginOverride: LayoutConstants.NoMargin), row: 4),
+						new GridContent(new Grid(
+							padding: DpiBoundValue.Padding(new(2, 0, 2, 2)),
+							columns:
+							[
+								SizeSpec.Everything(),
+								SizeSpec.Absolute(8),
+								SizeSpec.Absolute(74),
+							],
+							rows:
+							[
+								SizeSpec.Everything(),
+								LayoutConstants.CheckBoxRowHeight,
+								LayoutConstants.RowSpacing,
+								SizeSpec.Absolute(22),
+							],
+							content:
+							[
+								new GridContent(new ControlContent(decMessage, marginOverride: LayoutConstants.NoMargin), row: 0, rowSpan: 4, column: 0),
+								new GridContent(new WidgetContent(_chkAmend,  marginOverride: LayoutConstants.NoMargin), row: 1, column: 2),
+								new GridContent(new WidgetContent(_btnCommit, marginOverride: LayoutConstants.NoMargin), row: 3, column: 2),
+							]), row: 6),
+					]),
+			};
+
+			_toolbar.Parent = parent;
+			_lblUnstaged.Parent = parent;
+			_lblStaged.Parent = parent;
+			_lstUnstaged.Parent = parent;
+			_lstStaged.Parent = parent;
+			grip.Parent = parent;
+			_lblMessage.Parent = parent;
+			decMessage.Parent = parent;
+			_chkAmend.Parent = parent;
+			_btnCommit.Parent = parent;
+
+			var tabIndex = 0;
+			_toolbar.TabIndex = tabIndex++;
+			_lblUnstaged.TabIndex = tabIndex++;
+			_lblStaged.TabIndex = tabIndex++;
+			_lstUnstaged.TabIndex = tabIndex++;
+			_lstStaged.TabIndex = tabIndex++;
+			grip.TabIndex = tabIndex++;
+			_lblMessage.TabIndex = tabIndex++;
+			decMessage.TabIndex = tabIndex++;
+			_chkAmend.TabIndex = tabIndex++;
+			_btnCommit.TabIndex = tabIndex++;
+
+			_ = new VerticalResizer(grip, grid.Rows[6], -1, DpiBoundValue.ScaleY(100));
+		}
+
+		public void Dispose()
+		{
+			_chkAmend.Dispose();
+			_btnCommit.Dispose();
+		}
+	}
+
+	private readonly ViewControls _controls;
+	private readonly TextBoxSpellChecker? _speller;
 	private bool _treeMode;
 	private bool _suppressDiffUpdate;
 
 	public CommitView(GuiProvider gui)
 		: base(Guids.CommitViewGuid, gui)
 	{
-		InitializeComponent();
-
-		Text = Resources.StrCommit;
+		SuspendLayout();
+		AutoScaleDimensions = Dpi.Default;
+		AutoScaleMode       = AutoScaleMode.Dpi;
+		Name                = nameof(CommitView);
+		Text                = Resources.StrCommit;
+		_controls = new ViewControls(GitterApplication.Style, this);
+		_controls.Localize();
+		_controls.Layout(this);
+		ResumeLayout(performLayout: false);
+		PerformLayout();
 
 		_treeMode = true;
 
-		_splitContainer.BackColor = GitterApplication.Style.Colors.WorkArea;
-		_splitContainer.Panel1.BackColor = GitterApplication.Style.Colors.Window;
-		_splitContainer.Panel2.BackColor = GitterApplication.Style.Colors.Window;
+		_controls._lstStaged.PreviewKeyDown += OnKeyDown;
+		_controls._lstUnstaged.PreviewKeyDown += OnKeyDown;
+		_controls._txtMessage.PreviewKeyDown += OnKeyDown;
+		_controls._chkAmend.Control.PreviewKeyDown += OnKeyDown;
+		_controls._btnCommit.Control.PreviewKeyDown += OnKeyDown;
 
-		_lblStaged.Text = Resources.StrsStagedChanges.AddColon();
-		_lstStaged.Text = Resources.StrsNoStagedChanges;
-		_lblUnstaged.Text = Resources.StrsUnstagedChanges.AddColon();
-		_lstUnstaged.Text = Resources.StrsNoUnstagedChanges;
-		_lblMessage.Text = Resources.StrMessage.AddColon();
-		_chkAmend.Text = Resources.StrAmend;
-		_btnCommit.Text = Resources.StrCommit;
+		_controls._lstStaged.Columns[0].SizeMode = ColumnSizeMode.Auto;
+		_controls._lstUnstaged.Columns[0].SizeMode = ColumnSizeMode.Auto;
 
-		_lstStaged.PreviewKeyDown += OnKeyDown;
-		_lstUnstaged.PreviewKeyDown += OnKeyDown;
-		_txtMessage.PreviewKeyDown += OnKeyDown;
-		_chkAmend.Control.PreviewKeyDown += OnKeyDown;
-		_btnCommit.Control.PreviewKeyDown += OnKeyDown;
+		_controls._lstStaged.ItemActivated += OnStagedItemActivated;
+		_controls._lstUnstaged.ItemActivated += OnUnstagedItemActivated;
 
-		if(GitterApplication.Style.Type == GitterStyleType.DarkBackground)
+		_controls._lstStaged.GotFocus += OnStagedGotFocus;
+		_controls._lstUnstaged.GotFocus += OnUnstagedGotFocus;
+
+		if(SpellingService.Enabled)
 		{
-			_txtMessage.BorderStyle = BorderStyle.FixedSingle;
+			_speller = new TextBoxSpellChecker(_controls._txtMessage, true);
 		}
+	}
 
-		GitterApplication.FontManager.InputFont.Apply(_txtMessage);
+	/// <inheritdoc/>
+	protected override bool ScaleChildren => false;
 
-		_lstStaged.Columns[0].SizeMode = ColumnSizeMode.Auto;
-		_lstUnstaged.Columns[0].SizeMode = ColumnSizeMode.Auto;
-
-		_lstStaged.ItemActivated += OnStagedItemActivated;
-		_lstUnstaged.ItemActivated += OnUnstagedItemActivated;
-
-		_lstStaged.GotFocus += OnStagedGotFocus;
-		_lstUnstaged.GotFocus += OnUnstagedGotFocus;
-
-		for(int i = 0; i < _lstUnstaged.Columns.Count; ++i)
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
 		{
-			var column = _lstUnstaged.Columns[i];
-			column.IsVisible = column.Id == (int)ColumnId.Name;
+			_controls.Dispose();
+			_speller?.Dispose();
 		}
-
-		for(int i = 0; i < _lstStaged.Columns.Count; ++i)
-		{
-			var column = _lstStaged.Columns[i];
-			column.IsVisible = column.Id == (int)ColumnId.Name;
-		}
-
-		_txtMessage.BackColor = GitterApplication.Style.Colors.Window;
-		_txtMessage.ForeColor = GitterApplication.Style.Colors.WindowText;
-
-		AddTopToolStrip(_toolbar = new CommitToolbar(this));
-		_speller = new TextBoxSpellChecker(_txtMessage, true);
+		base.Dispose(disposing);
 	}
 
 	private void LoadCommitMessage()
@@ -127,14 +311,14 @@ partial class CommitView : GitViewBase
 
 		lock(repository.Status.SyncRoot)
 		{
-			_lstUnstaged.SetTree(Repository.Status.UnstagedRoot, _treeMode ?
+			_controls._lstUnstaged.SetTree(repository.Status.UnstagedRoot, _treeMode ?
 				TreeListBoxMode.ShowFullTree : TreeListBoxMode.ShowPlainFileList);
-			_lstStaged.SetTree(Repository.Status.StagedRoot, _treeMode ?
+			_controls._lstStaged.SetTree(repository.Status.StagedRoot, _treeMode ?
 				TreeListBoxMode.ShowFullTree : TreeListBoxMode.ShowPlainFileList);
 		}
 
-		_lstStaged.SelectionChanged += OnSelectedStagedItemsChanged;
-		_lstUnstaged.SelectionChanged += OnSelectedUnstagedItemsChanged;
+		_controls._lstStaged.SelectionChanged += OnSelectedStagedItemsChanged;
+		_controls._lstUnstaged.SelectionChanged += OnSelectedUnstagedItemsChanged;
 		LoadCommitMessage();
 	}
 
@@ -143,11 +327,11 @@ partial class CommitView : GitViewBase
 		Assert.IsNotNull(repository);
 
 		SaveCommitMessage();
-		_lstStaged.Clear();
-		_lstUnstaged.Clear();
-		_lstStaged.SelectionChanged -= OnSelectedStagedItemsChanged;
-		_lstUnstaged.SelectionChanged -= OnSelectedUnstagedItemsChanged;
-		_txtMessage.Text = string.Empty;
+		_controls._lstStaged.Clear();
+		_controls._lstUnstaged.Clear();
+		_controls._lstStaged.SelectionChanged -= OnSelectedStagedItemsChanged;
+		_controls._lstUnstaged.SelectionChanged -= OnSelectedUnstagedItemsChanged;
+		_controls._txtMessage.Text = string.Empty;
 	}
 
 	public bool TreeMode
@@ -155,31 +339,33 @@ partial class CommitView : GitViewBase
 		get => _treeMode;
 		set
 		{
-			if(_treeMode != value)
+			if(_treeMode == value) return;
+
+			_treeMode = value;
+
+			if(Repository is null) return;
+
+			lock(Repository.Status.SyncRoot)
 			{
-				_treeMode = value;
-				lock(Repository.Status.SyncRoot)
-				{
-					_lstUnstaged.SetTree(Repository.Status.UnstagedRoot, _treeMode ?
-						TreeListBoxMode.ShowFullTree : TreeListBoxMode.ShowPlainFileList);
-					_lstStaged.SetTree(Repository.Status.StagedRoot, _treeMode?
-						TreeListBoxMode.ShowFullTree : TreeListBoxMode.ShowPlainFileList);
-				}
+				_controls._lstUnstaged.SetTree(Repository.Status.UnstagedRoot, _treeMode ?
+					TreeListBoxMode.ShowFullTree : TreeListBoxMode.ShowPlainFileList);
+				_controls._lstStaged.SetTree(Repository.Status.StagedRoot, _treeMode?
+					TreeListBoxMode.ShowFullTree : TreeListBoxMode.ShowPlainFileList);
 			}
 		}
 	}
 
 	public string Message
 	{
-		get => _txtMessage.Text;
-		set => _txtMessage.Text = value;
+		get => _controls._txtMessage.Text;
+		set => _controls._txtMessage.Text = value;
 	}
 
 	public override IImageProvider ImageProvider => Icons.Commit;
 
 	public override void OnActivated()
 	{
-		_chkAmend.Control.Enabled = !Repository.Head.IsEmpty;
+		_controls._chkAmend.Control.Enabled = Repository is { Head.IsEmpty: false };
 	}
 
 	protected override void OnClosing()
@@ -214,40 +400,42 @@ partial class CommitView : GitViewBase
 
 		using(this.ChangeCursor(Cursors.WaitCursor))
 		{
-			_lstStaged.BeginUpdate();
-			_lstUnstaged.BeginUpdate();
+			_controls._lstStaged.BeginUpdate();
+			_controls._lstUnstaged.BeginUpdate();
 			Repository.Status.Refresh();
-			_lstStaged.EndUpdate();
-			_lstUnstaged.EndUpdate();
+			_controls._lstStaged.EndUpdate();
+			_controls._lstUnstaged.EndUpdate();
 		}
 	}
 
-	private void OnStagedGotFocus(object sender, EventArgs e)
+	private void OnStagedGotFocus(object? sender, EventArgs e)
 	{
-		if(_lstUnstaged.SelectedItems.Count != 0)
+		if(_controls._lstUnstaged.SelectedItems.Count != 0)
 		{
 			_suppressDiffUpdate = true;
-			_lstUnstaged.SelectedItems.Clear();
+			_controls._lstUnstaged.SelectedItems.Clear();
 			_suppressDiffUpdate = false;
 			ShowContextualDiffView(null);
 		}
 	}
 
-	private void OnUnstagedGotFocus(object sender, EventArgs e)
+	private void OnUnstagedGotFocus(object? sender, EventArgs e)
 	{
-		if(_lstStaged.SelectedItems.Count != 0)
+		if(_controls._lstStaged.SelectedItems.Count != 0)
 		{
 			_suppressDiffUpdate = true;
-			_lstStaged.SelectedItems.Clear();
+			_controls._lstStaged.SelectedItems.Clear();
 			_suppressDiffUpdate = false;
 			ShowContextualDiffView(null);
 		}
 	}
 
-	private void OnSelectedUnstagedItemsChanged(object sender, EventArgs e)
+	private void OnSelectedUnstagedItemsChanged(object? sender, EventArgs e)
 	{
+		if(Repository is null) return;
+
 		if(_suppressDiffUpdate) return;
-		var items = ((CustomListBox)sender).SelectedItems;
+		var items = ((CustomListBox)sender!).SelectedItems;
 		if(items.Count == 0)
 		{
 			ShowContextualDiffView(null);
@@ -264,10 +452,12 @@ partial class CommitView : GitViewBase
 		}
 	}
 
-	private void OnSelectedStagedItemsChanged(object sender, EventArgs e)
+	private void OnSelectedStagedItemsChanged(object? sender, EventArgs e)
 	{
+		if(Repository is null) return;
+
 		if(_suppressDiffUpdate) return;
-		var items = ((CustomListBox)sender).SelectedItems;
+		var items = ((CustomListBox)sender!).SelectedItems;
 		if(items.Count == 0)
 		{
 			ShowContextualDiffView(null);
@@ -284,24 +474,25 @@ partial class CommitView : GitViewBase
 		}
 	}
 
-	private void OnAmendCheckedChanged(object sender, EventArgs e)
+	private void OnAmendCheckedChanged(object? sender, EventArgs e)
 	{
-		if(_chkAmend.IsChecked)
+		if(Repository is null) return;
+
+		if(_controls._chkAmend.IsChecked)
 		{
-			if(_txtMessage.TextLength == 0)
+			if(_controls._txtMessage.TextLength == 0)
 			{
-				var head = Repository.Head;
-				if(head is not null)
+				var rev = Repository.Head.Revision;
+				if(rev is not null)
 				{
-					var rev = head.Revision;
-					_txtMessage.AppendText(Utility.ExpandNewLineCharacters(rev.Subject));
+					_controls._txtMessage.AppendText(Utility.ExpandNewLineCharacters(rev.Subject));
 					if(!string.IsNullOrEmpty(rev.Body))
 					{
-						_txtMessage.AppendText(Environment.NewLine);
-						_txtMessage.AppendText(Environment.NewLine);
-						_txtMessage.AppendText(Utility.ExpandNewLineCharacters(rev.Body));
+						_controls._txtMessage.AppendText(Environment.NewLine);
+						_controls._txtMessage.AppendText(Environment.NewLine);
+						_controls._txtMessage.AppendText(Utility.ExpandNewLineCharacters(rev.Body));
 					}
-					_txtMessage.SelectAll();
+					_controls._txtMessage.SelectAll();
 				}
 			}
 		}
@@ -315,7 +506,7 @@ partial class CommitView : GitViewBase
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
@@ -328,7 +519,7 @@ partial class CommitView : GitViewBase
 		}
 	}
 
-	private void OnStagedItemActivated(object sender, ItemEventArgs e)
+	private void OnStagedItemActivated(object? sender, ItemEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
@@ -352,7 +543,7 @@ partial class CommitView : GitViewBase
 		}
 	}
 
-	private void OnUnstagedItemActivated(object sender, ItemEventArgs e)
+	private void OnUnstagedItemActivated(object? sender, ItemEventArgs e)
 	{
 		Assert.IsNotNull(e);
 
@@ -376,15 +567,17 @@ partial class CommitView : GitViewBase
 		}
 	}
 
-	private void OnCommitClick(object sender, EventArgs e)
+	private void OnCommitClick(object? sender, EventArgs e)
 	{
-		string message = _txtMessage.Text.Trim();
-		bool amend = _chkAmend.Control.Enabled && _chkAmend.IsChecked;
+		if(Repository is null) return;
+
+		string message = _controls._txtMessage.Text.Trim();
+		bool amend = _controls._chkAmend.Control.Enabled && _controls._chkAmend.IsChecked;
 		bool merging = Repository.State == RepositoryState.Merging;
-		if(_lstStaged.Items.Count == 0 && !merging && !amend)
+		if(_controls._lstStaged.Items.Count == 0 && !merging && !amend)
 		{
 			NotificationService.NotifyInputError(
-				_lstStaged,
+				_controls._lstStaged,
 				Resources.ErrNothingToCommit,
 				Resources.ErrNofilesStagedForCommit);
 			return;
@@ -392,7 +585,7 @@ partial class CommitView : GitViewBase
 		if(message.Length == 0)
 		{
 			NotificationService.NotifyInputError(
-				_txtMessage,
+				_controls._txtMessage,
 				Resources.ErrEmptyCommitMessage,
 				Resources.ErrEnterCommitMessage);
 			return;
@@ -400,7 +593,7 @@ partial class CommitView : GitViewBase
 		if(message.Length < 2)
 		{
 			NotificationService.NotifyInputError(
-				_txtMessage,
+				_controls._txtMessage,
 				Resources.ErrShortCommitMessage,
 				Resources.ErrEnterLongerCommitMessage.UseAsFormat(2));
 			return;
@@ -422,8 +615,8 @@ partial class CommitView : GitViewBase
 				MessageBoxIcon.Error);
 			return;
 		}
-		_txtMessage.Text = string.Empty;
-		_chkAmend.IsChecked = false;
+		_controls._txtMessage.Text = string.Empty;
+		_controls._chkAmend.IsChecked = false;
 	}
 
 	protected override void SaveMoreViewTo(Section section)
@@ -432,25 +625,25 @@ partial class CommitView : GitViewBase
 
 		section.SetValue<bool>("TreeMode", _treeMode);
 		var stagedListSection = section.GetCreateSection("StagedList");
-		_lstStaged.SaveViewTo(stagedListSection);
+		_controls._lstStaged.SaveViewTo(stagedListSection);
 		var unstagedListSection = section.GetCreateSection("UnstagedList");
-		_lstUnstaged.SaveViewTo(unstagedListSection);
+		_controls._lstUnstaged.SaveViewTo(unstagedListSection);
 	}
 
 	protected override void LoadMoreViewFrom(Section section)
 	{
 		base.LoadMoreViewFrom(section);
 
-		_toolbar.TreeModeButton.Checked = _treeMode = section.GetValue<bool>("TreeMode", true);
+		_controls._toolbar.TreeModeButton.Checked = _treeMode = section.GetValue<bool>("TreeMode", true);
 		var stagedListSection = section.TryGetSection("StagedList");
 		if(stagedListSection is not null)
 		{
-			_lstStaged.LoadViewFrom(stagedListSection);
+			_controls._lstStaged.LoadViewFrom(stagedListSection);
 		}
 		var unstagedListSection = section.TryGetSection("UnstagedList");
 		if(unstagedListSection is not null)
 		{
-			_lstUnstaged.LoadViewFrom(unstagedListSection);
+			_controls._lstUnstaged.LoadViewFrom(unstagedListSection);
 		}
 	}
 }

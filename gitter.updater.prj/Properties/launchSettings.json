@@ -1,7 +1,8 @@
 {
   "profiles": {
     "gitter.updater": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "\"/driver:download+unzip\" \"/source:https://github.com/amgine/gitter/releases/download/v1.1.3/gitter-net6.0-binaries.zip\" \"/target:D:\\projects\\github\\gitter\\gitter.ui.prj\\bin\\Debug\\net6.0-windows\\\""
     }
   }
 }

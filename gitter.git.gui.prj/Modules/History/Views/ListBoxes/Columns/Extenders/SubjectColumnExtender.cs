@@ -22,6 +22,7 @@ namespace gitter.Git.Gui.Controls;
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -84,12 +85,18 @@ class SubjectColumnExtender : ExtenderBase
 
 	#region Methods
 
+	[MemberNotNull(nameof(_grpVisibleReferences))]
+	[MemberNotNull(nameof(_chkAlignToGraph))]
+	[MemberNotNull(nameof(_chkLocalBranches))]
+	[MemberNotNull(nameof(_chkRemoteBranches))]
+	[MemberNotNull(nameof(_chkTags))]
+	[MemberNotNull(nameof(_chkStash))]
 	private void CreateControls()
 	{
 		_dpiBindings.UnbindAll();
 
 		_chkAlignToGraph?.Dispose();
-		_chkAlignToGraph = Style.CreateCheckBox();
+		_chkAlignToGraph = Style.CheckBoxFactory.Create();
 		_chkAlignToGraph.Text = Resources.StrAlignToGraph;
 		_chkAlignToGraph.IsChecked = Column.AlignToGraph;
 		_chkAlignToGraph.IsCheckedChanged += OnAlignToGraphCheckedChanged;
@@ -101,28 +108,28 @@ class SubjectColumnExtender : ExtenderBase
 		};
 
 		_chkLocalBranches?.Dispose();
-		_chkLocalBranches = Style.CreateCheckBox();
+		_chkLocalBranches = Style.CheckBoxFactory.Create();
 		_chkLocalBranches.Text  = Resources.StrLocalBranches;
 		_chkLocalBranches.IsChecked = Column.ShowLocalBranches;
 		_chkLocalBranches.IsCheckedChanged += OnLocalBranchesCheckedChanged;
 		_dpiBindings.BindImage(_chkLocalBranches, Icons.Branch);
 
 		_chkRemoteBranches?.Dispose();
-		_chkRemoteBranches = Style.CreateCheckBox();
+		_chkRemoteBranches = Style.CheckBoxFactory.Create();
 		_chkRemoteBranches.Text = Resources.StrRemoteBranches;
 		_chkRemoteBranches.IsChecked = Column.ShowRemoteBranches;
 		_chkRemoteBranches.IsCheckedChanged += OnRemoteBranchesCheckedChanged;
 		_dpiBindings.BindImage(_chkRemoteBranches, Icons.RemoteBranch);
 
 		_chkTags?.Dispose();
-		_chkTags = Style.CreateCheckBox();
+		_chkTags = Style.CheckBoxFactory.Create();
 		_chkTags.Text = Resources.StrTags;
 		_chkTags.IsChecked = Column.ShowTags;
 		_chkTags.IsCheckedChanged += OnTagsCheckedChanged;
 		_dpiBindings.BindImage(_chkTags, Icons.Tag);
 
 		_chkStash?.Dispose();
-		_chkStash = Style.CreateCheckBox();
+		_chkStash = Style.CheckBoxFactory.Create();
 		_chkStash.Text = Resources.StrStash;
 		_chkStash.IsChecked = Column.ShowStash;
 		_chkStash.IsCheckedChanged += OnStashCheckedChanged;
@@ -133,24 +140,24 @@ class SubjectColumnExtender : ExtenderBase
 		{
 			Content = new Grid(
 				padding: DpiBoundValue.Padding(new Padding(6, 2, 6, 2)),
-				rows: new[]
-				{
+				rows:
+				[
 					SizeSpec.Absolute(23),
 					SizeSpec.Absolute(23),
 					SizeSpec.Absolute(23),
 					SizeSpec.Absolute(23),
 					SizeSpec.Absolute(23),
 					SizeSpec.Absolute(23),
-				},
-				content: new[]
-				{
+				],
+				content:
+				[
 					new GridContent(new ControlContent(_chkAlignToGraph.Control, marginOverride: noMargin), row: 0),
 					new GridContent(new ControlContent(_grpVisibleReferences, marginOverride: DpiBoundValue.Padding(new(-3, 3, 0, 0))), row: 1),
 					new GridContent(new ControlContent(_chkLocalBranches.Control, marginOverride: noMargin), row: 2),
 					new GridContent(new ControlContent(_chkRemoteBranches.Control, marginOverride: noMargin), row: 3),
 					new GridContent(new ControlContent(_chkTags.Control, marginOverride: noMargin), row: 4),
 					new GridContent(new ControlContent(_chkStash.Control, marginOverride: noMargin), row: 5),
-				}),
+				]),
 		};
 
 		_chkAlignToGraph.Control.Parent = this;
@@ -200,77 +207,77 @@ class SubjectColumnExtender : ExtenderBase
 
 	#region EVent Handlers
 
-	private void OnColumnAlignToGraphChanged(object sender, EventArgs e)
+	private void OnColumnAlignToGraphChanged(object? sender, EventArgs e)
 	{
 		AlignToGraph = Column.AlignToGraph;
 	}
 
-	private void OnColumnShowLocalBranchesChanged(object sender, EventArgs e)
+	private void OnColumnShowLocalBranchesChanged(object? sender, EventArgs e)
 	{
 		ShowLocalBranches = Column.ShowLocalBranches;
 	}
 
-	private void OnColumnShowRemoteBranchesChanged(object sender, EventArgs e)
+	private void OnColumnShowRemoteBranchesChanged(object? sender, EventArgs e)
 	{
 		ShowRemoteBranches = Column.ShowRemoteBranches;
 	}
 
-	private void OnColumnShowTagsChanged(object sender, EventArgs e)
+	private void OnColumnShowTagsChanged(object? sender, EventArgs e)
 	{
 		ShowTags = Column.ShowTags;
 	}
 
-	private void OnColumnShowStashChanged(object sender, EventArgs e)
+	private void OnColumnShowStashChanged(object? sender, EventArgs e)
 	{
 		ShowStash = Column.ShowStash;
 	}
 
-	private void OnAlignToGraphCheckedChanged(object sender, EventArgs e)
+	private void OnAlignToGraphCheckedChanged(object? sender, EventArgs e)
 	{
 		if(!_disableEvents)
 		{
 			_disableEvents = true;
-			Column.AlignToGraph = ((ICheckBoxWidget)sender).IsChecked;
+			Column.AlignToGraph = ((ICheckBoxWidget)sender!).IsChecked;
 			_disableEvents = false;
 		}
 	}
 
-	private void OnLocalBranchesCheckedChanged(object sender, EventArgs e)
+	private void OnLocalBranchesCheckedChanged(object? sender, EventArgs e)
 	{
 		if(!_disableEvents)
 		{
 			_disableEvents = true;
-			Column.ShowLocalBranches = ((ICheckBoxWidget)sender).IsChecked;
+			Column.ShowLocalBranches = ((ICheckBoxWidget)sender!).IsChecked;
 			_disableEvents = false;
 		}
 	}
 
-	private void OnRemoteBranchesCheckedChanged(object sender, EventArgs e)
+	private void OnRemoteBranchesCheckedChanged(object? sender, EventArgs e)
 	{
 		if(!_disableEvents)
 		{
 			_disableEvents = true;
-			Column.ShowRemoteBranches = ((ICheckBoxWidget)sender).IsChecked;
+			Column.ShowRemoteBranches = ((ICheckBoxWidget)sender!).IsChecked;
 			_disableEvents = false;
 		}
 	}
 
-	private void OnTagsCheckedChanged(object sender, EventArgs e)
+	private void OnTagsCheckedChanged(object? sender, EventArgs e)
 	{
 		if(!_disableEvents)
 		{
 			_disableEvents = true;
-			Column.ShowTags = ((ICheckBoxWidget)sender).IsChecked;
+			Column.ShowTags = ((ICheckBoxWidget)sender!).IsChecked;
 			_disableEvents = false;
 		}
 	}
 
-	private void OnStashCheckedChanged(object sender, EventArgs e)
+	private void OnStashCheckedChanged(object? sender, EventArgs e)
 	{
 		if(!_disableEvents)
 		{
 			_disableEvents = true;
-			Column.ShowStash = ((ICheckBoxWidget)sender).IsChecked;
+			Column.ShowStash = ((ICheckBoxWidget)sender!).IsChecked;
 			_disableEvents = false;
 		}
 	}

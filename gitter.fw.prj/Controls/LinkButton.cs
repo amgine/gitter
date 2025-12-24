@@ -22,6 +22,7 @@ namespace gitter.Framework.Controls;
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -30,7 +31,7 @@ using System.Windows.Forms;
 [DesignerCategory("")]
 public class LinkButton : UserControl
 {
-	private Font _underlineFont;
+	private Font? _underlineFont;
 
 	private static readonly object LinkClickedEvent = new();
 	public event EventHandler LinkClicked
@@ -40,7 +41,7 @@ public class LinkButton : UserControl
 	}
 
 	protected virtual void OnLinkClicked()
-		=> ((EventHandler)Events[LinkClickedEvent])?.Invoke(this, EventArgs.Empty);
+		=> ((EventHandler?)Events[LinkClickedEvent])?.Invoke(this, EventArgs.Empty);
 
 	/// <inheritdoc/>
 	protected override void Dispose(bool disposing)
@@ -96,23 +97,23 @@ public class LinkButton : UserControl
 		_lblText.Text = Text;
 		_lblText.ForeColor = GitterApplication.Style.Colors.HyperlinkText;
 
-		if(LicenseManager.UsageMode == LicenseUsageMode.Designtime)
-		{
-			Font = SystemFonts.MessageBoxFont ?? SystemFonts.DefaultFont;
-		}
-		else
-		{
-			Font = GitterApplication.FontManager.UIFont;
-		}
+		Font = GitterApplication.FontManager.UIFont;
 	}
 
 	/// <inheritdoc/>
 	protected override void OnResize(EventArgs e)
 	{
 		base.OnResize(e);
-		var conv = new DpiConverter(this);
-		var x = _picImage.Right + conv.ConvertX(3);
-		_lblText.SetBounds(x, 0, Width - x, Height);
+		var x = _picImage.Right;
+		_lblText.SetBounds(x, (Height - _lblText.Height) / 2, Width - x, _lblText.Height);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnDpiChangedAfterParent(EventArgs e)
+	{
+		base.OnDpiChangedAfterParent(e);
+		var x = _picImage.Right;
+		_lblText.SetBounds(x, (Height - _lblText.Height) / 2, Width - x, _lblText.Height);
 	}
 
 	/// <inheritdoc/>
@@ -133,13 +134,13 @@ public class LinkButton : UserControl
 		{
 			_underlineFont = new Font(Font, FontStyle.Underline);
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			_underlineFont = (Font)Font.Clone();
 		}
 	}
 
-	public Image Image
+	public Image? Image
 	{
 		get => _picImage.Image;
 		set => _picImage.Image = value;
@@ -147,6 +148,9 @@ public class LinkButton : UserControl
 
 	[Browsable(true)]
 	[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+	#if NETCOREAPP
+	[AllowNull]
+	#endif
 	public override string Text
 	{
 		get => base.Text;
@@ -157,17 +161,17 @@ public class LinkButton : UserControl
 		}
 	}
 
-	private void OnTextLabelClick(object sender, EventArgs e)
+	private void OnTextLabelClick(object? sender, EventArgs e)
 	{
 		OnLinkClicked();
 	}
 
-	private void OnImageClick(object sender, EventArgs e)
+	private void OnImageClick(object? sender, EventArgs e)
 	{
 		OnLinkClicked();
 	}
 
-	private void OnInteractivePartMouseEnter(object sender, EventArgs e)
+	private void OnInteractivePartMouseEnter(object? sender, EventArgs e)
 	{
 		if(_underlineFont is null)
 		{
@@ -177,7 +181,7 @@ public class LinkButton : UserControl
 		_lblText.ForeColor = GitterApplication.Style.Colors.HyperlinkTextHotTrack;
 	}
 
-	private void OnInteractivePartMouseLeave(object sender, EventArgs e)
+	private void OnInteractivePartMouseLeave(object? sender, EventArgs e)
 	{
 		_lblText.Font = null;
 		_lblText.ForeColor = GitterApplication.Style.Colors.HyperlinkText;

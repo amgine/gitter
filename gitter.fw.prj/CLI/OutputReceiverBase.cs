@@ -36,9 +36,10 @@ public abstract class OutputReceiverBase
 	{
 		if(IsCompleted) return;
 
-		Monitor.Enter(_syncRoot);
+		var lockTaken = false;
 		try
 		{
+			Monitor.Enter(_syncRoot, ref lockTaken);
 			while(!IsCompleted)
 			{
 				Monitor.Wait(_syncRoot);
@@ -46,7 +47,7 @@ public abstract class OutputReceiverBase
 		}
 		finally
 		{
-			Monitor.Exit(_syncRoot);
+			if(lockTaken) Monitor.Exit(_syncRoot);
 		}
 	}
 
@@ -56,9 +57,10 @@ public abstract class OutputReceiverBase
 
 		if(IsCanceled) return;
 
-		Monitor.Enter(_syncRoot);
+		var lockTaken = false;
 		try
 		{
+			Monitor.Enter(_syncRoot, ref lockTaken);
 			if(!IsCanceled)
 			{
 				IsCanceled = true;
@@ -67,7 +69,7 @@ public abstract class OutputReceiverBase
 		}
 		finally
 		{
-			Monitor.Exit(_syncRoot);
+			if(lockTaken) Monitor.Exit(_syncRoot);
 		}
 	}
 
@@ -75,9 +77,10 @@ public abstract class OutputReceiverBase
 	{
 		if(IsCompleted) return;
 
-		Monitor.Enter(_syncRoot);
+		var lockTaken = false;
 		try
 		{
+			Monitor.Enter(_syncRoot, ref lockTaken);
 			if(!IsCompleted)
 			{
 				IsCompleted = true;
@@ -86,7 +89,7 @@ public abstract class OutputReceiverBase
 		}
 		finally
 		{
-			Monitor.Exit(_syncRoot);
+			if(lockTaken) Monitor.Exit(_syncRoot);
 		}
 	}
 }

@@ -20,6 +20,7 @@
 
 namespace gitter.Git;
 
+using System.Threading;
 using System.Threading.Tasks;
 
 /// <summary>Object which points to commit.</summary>
@@ -39,11 +40,12 @@ public interface IRevisionPointer
 
 	/// <summary>Evaluate commit which is targeted by this <see cref="IRevisionPointer"/>.</summary>
 	/// <returns>Commit which is pointed by this <see cref="IRevisionPointer"/>.</returns>
-	Revision Dereference();
+	Revision? Dereference();
 
 	/// <summary>Evaluate commit which is targeted by this <see cref="IRevisionPointer"/>.</summary>
+	/// <param name="cancellationToken">Cancellation token.</param>
 	/// <returns>Commit which is pointed by this <see cref="IRevisionPointer"/>.</returns>
-	ValueTask<Revision> DereferenceAsync();
+	ValueTask<Revision?> DereferenceAsync(CancellationToken cancellationToken = default);
 
 	/// <summary>Object is deleted and not valid anymore.</summary>
 	bool IsDeleted { get; }

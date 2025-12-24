@@ -23,36 +23,24 @@ namespace gitter.Framework.Controls;
 using System;
 using System.Windows.Forms;
 
-public sealed class CustomButtonAdapter : IButtonWidget
+public sealed class CustomButtonAdapter : WidgetAdapter<CustomButton>, IButtonWidget
 {
-	private readonly CustomButton _button;
-
-	public event EventHandler Click;
+	public event EventHandler? Click;
 
 	private void OnClick(EventArgs e)
 		=> Click?.Invoke(this, e);
 
 	public CustomButtonAdapter(CustomButtonRenderer renderer)
+		: base(new())
 	{
 		Verify.Argument.IsNotNull(renderer);
 
-		_button = new CustomButton()
-		{
-			Renderer = renderer,
-		};
-		_button.Click += OnButtonClick;
+		_control.Renderer = renderer;
+		_control.Click += OnButtonClick;
 	}
 
-	private void OnButtonClick(object sender, EventArgs e)
+	private void OnButtonClick(object? sender, EventArgs e)
 		=> OnClick(e);
-
-	public Control Control => _button;
-
-	public string Text
-	{
-		get => _button.Text;
-		set => _button.Text = value;
-	}
 
 	public DialogResult DialogResult { get; set; }
 
@@ -62,10 +50,4 @@ public sealed class CustomButtonAdapter : IButtonWidget
 
 	public void PerformClick()
 		=> OnButtonClick(this, EventArgs.Empty);
-
-	public void Dispose()
-	{
-		_button.Click -= OnButtonClick;
-		_button.Dispose();
-	}
 }

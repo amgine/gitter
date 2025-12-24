@@ -18,8 +18,6 @@
  */
 #endregion
 
-#nullable enable
-
 namespace gitter.Git;
 
 using System;
@@ -42,6 +40,10 @@ public sealed class RemoteBranch : BranchBase
 	{
 	}
 
+	/// <summary>Gets the type of this reference.</summary>
+	/// <value><see cref="ReferenceType.RemoteBranch"/>.</value>
+	public override ReferenceType Type => ReferenceType.RemoteBranch;
+
 	/// <summary>Gets a value indicating whether this branch is remote.</summary>
 	/// <value><c>true</c>.</value>
 	public override bool IsRemote => true;
@@ -61,7 +63,8 @@ public sealed class RemoteBranch : BranchBase
 			{
 				foreach(var remote in Repository.Remotes)
 				{
-					if(Name.StartsWith(remote.Name + "/"))
+					if(Name.Length <= remote.Name.Length + 1) continue;
+					if(Name.StartsWith(remote.Name) && Name[remote.Name.Length] == '/')
 					{
 						return remote;
 					}
@@ -71,29 +74,33 @@ public sealed class RemoteBranch : BranchBase
 		}
 	}
 
-	/// <summary>Gets the type of this reference.</summary>
-	/// <value><see cref="ReferenceType.RemoteBranch"/>.</value>
-	public override ReferenceType Type => ReferenceType.RemoteBranch;
+	private string? _cachedFullName;
 
 	/// <summary>Gets the full branch name.</summary>
 	/// <value>Full branch name.</value>
-	public override string FullName => GitConstants.RemoteBranchPrefix + Name;
+	public override string FullName
+		=> _cachedFullName ??= GitConstants.RemoteBranchPrefix + Name;
+
+	private AccessLayer.RemoveRemoteReferencesRequest CreateRemoveRemoteReferencesRequest()
+	{
+		var remote        = Remote ?? throw new GitException($"Unable to find remote for branch '{Name}'");
+		var branchName    = Name.Substring(remote.Name.Length + 1);
+		var remoteRefName = GitConstants.LocalBranchPrefix + branchName;
+
+		return new AccessLayer.RemoveRemoteReferencesRequest(
+			remote.Name, remoteRefName);
+	}
 
 	/// <summary>Delete branch from remote and local repository.</summary>
 	public void DeleteFromRemote()
 	{
 		Verify.State.IsNotDeleted(this);
 
-		var remote        = Remote ?? throw new GitException($"Unable to find remote for branch '{Name}'");
-		var branchName    = Name.Substring(remote.Name.Length + 1);
-		var remoteRefName = GitConstants.LocalBranchPrefix + branchName;
-
+		var request = CreateRemoveRemoteReferencesRequest();
 		using(Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
 		{
-			var parameters = new AccessLayer.RemoveRemoteReferencesParameters(
-				remote.Name, remoteRefName);
 			Repository.Accessor.RemoveRemoteReferences
-				.Invoke(parameters);
+				.Invoke(request);
 		}
 		if(!IsDeleted)
 		{
@@ -106,16 +113,11 @@ public sealed class RemoteBranch : BranchBase
 	{
 		Verify.State.IsNotDeleted(this);
 
-		var remote        = Remote ?? throw new GitException($"Unable to find remote for branch '{Name}'");
-		var branchName    = Name.Substring(remote.Name.Length + 1);
-		var remoteRefName = GitConstants.LocalBranchPrefix + branchName;
-
+		var request = CreateRemoveRemoteReferencesRequest();
 		using(var notificationsBlock = Repository.Monitor.BlockNotifications(RepositoryNotifications.BranchChanged))
 		{
-			var parameters = new AccessLayer.RemoveRemoteReferencesParameters(
-				remote.Name, remoteRefName);
 			await Repository.Accessor.RemoveRemoteReferences
-				.InvokeAsync(parameters, null, cancellationToken)
+				.InvokeAsync(request, null, cancellationToken)
 				.ConfigureAwait(continueOnCapturedContext: false);
 		}
 		if(!IsDeleted)

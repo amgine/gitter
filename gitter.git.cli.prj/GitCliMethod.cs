@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git.AccessLayer.CLI;
@@ -66,15 +66,15 @@ static class GitCliMethod
 			output.ThrowOnBadReturnCode();
 		}
 
-		public async Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task InvokeAsync(TParameters parameters, IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsNotNull(parameters);
 
 			var command = _commandFactory(parameters);
-			var gitOutput = await _commandExecutor
+			var output  = await _commandExecutor
 				.ExecuteCommandAsync(command, _flags, cancellationToken)
 				.ConfigureAwait(continueOnCapturedContext: false);
-			gitOutput.ThrowOnBadReturnCode();
+			output.ThrowOnBadReturnCode();
 		}
 
 		#endregion
@@ -119,7 +119,7 @@ static class GitCliMethod
 			_resultHandler(output);
 		}
 
-		public async Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task InvokeAsync(TParameters parameters, IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsNotNull(parameters);
 
@@ -172,7 +172,7 @@ static class GitCliMethod
 			_resultHandler(parameters, output);
 		}
 
-		public async Task InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task InvokeAsync(TParameters parameters, IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsNotNull(parameters);
 
@@ -225,7 +225,7 @@ static class GitCliMethod
 			return _resultParser(output);
 		}
 
-		public async Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsNotNull(parameters);
 
@@ -247,7 +247,7 @@ static class GitCliMethod
 		private readonly ICommandExecutor                      _commandExecutor;
 		private readonly Func<TParameters, Command>            _commandFactory;
 		private readonly Func<TParameters, GitOutput, TOutput> _resultParser;
-		private readonly CommandExecutionFlags                        _flags;
+		private readonly CommandExecutionFlags                 _flags;
 
 		#endregion
 
@@ -257,7 +257,7 @@ static class GitCliMethod
 			ICommandExecutor                      commandExecutor,
 			Func<TParameters, Command>            commandFactory,
 			Func<TParameters, GitOutput, TOutput> resultParser,
-			CommandExecutionFlags                        flags)
+			CommandExecutionFlags                 flags)
 		{
 			_commandExecutor = commandExecutor;
 			_commandFactory  = commandFactory;
@@ -278,7 +278,7 @@ static class GitCliMethod
 			return _resultParser(parameters, output);
 		}
 
-		public async Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public async Task<TOutput> InvokeAsync(TParameters parameters, IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
 		{
 			Verify.Argument.IsNotNull(parameters);
 
@@ -292,45 +292,14 @@ static class GitCliMethod
 		#endregion
 	}
 
-	sealed class GitFunctionImpl2<TParameters> : IGitFunction<TParameters, byte[]>
-		where TParameters : class
+	sealed class GitFunctionImpl2<TRequest>(
+		ICommandExecutor        commandExecutor,
+		Func<TRequest, Command> commandFactory,
+		CommandExecutionFlags   flags) : IGitFunction<TRequest, byte[]>
+		where TRequest : class
 	{
-		#region Data
-
-		private readonly ICommandExecutor           _commandExecutor;
-		private readonly Func<TParameters, Command> _commandFactory;
-		private readonly CommandExecutionFlags      _flags;
-
-		#endregion
-
-		#region .ctor
-
-		public GitFunctionImpl2(
-			ICommandExecutor           commandExecutor,
-			Func<TParameters, Command> commandFactory,
-			CommandExecutionFlags      flags)
+		private static byte[] ExtractOutput(int exitCode, AsyncBytesReader stdInReceiver, AsyncTextReader stdErrReceiver)
 		{
-			_commandExecutor = commandExecutor;
-			_commandFactory  = commandFactory;
-			_flags           = flags;
-		}
-
-		#endregion
-
-		#region Methods
-
-		public byte[] Invoke(TParameters parameters)
-		{
-			Verify.Argument.IsNotNull(parameters);
-
-			var command = _commandFactory(parameters);
-			var stdInReceiver = new AsyncBytesReader();
-			var stdErrReceiver = new AsyncTextReader();
-			var exitCode = _commandExecutor.ExecuteCommand(
-				command,
-				stdInReceiver,
-				stdErrReceiver,
-				CommandExecutionFlags.None);
 			if(exitCode != 0)
 			{
 				throw new GitException(stdErrReceiver.GetText());
@@ -338,51 +307,60 @@ static class GitCliMethod
 			return stdInReceiver.GetBytes();
 		}
 
-		public async Task<byte[]> InvokeAsync(TParameters parameters, IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+		public byte[] Invoke(TRequest request)
 		{
-			Verify.Argument.IsNotNull(parameters);
+			Verify.Argument.IsNotNull(request);
 
-			var command = _commandFactory(parameters);
-			var stdInReceiver = new AsyncBytesReader();
+			var command        = commandFactory(request);
+			var stdInReceiver  = new AsyncBytesReader();
 			var stdErrReceiver = new AsyncTextReader();
-			var exitCode = await _commandExecutor
+			var exitCode = commandExecutor.ExecuteCommand(
+				command,
+				stdInReceiver,
+				stdErrReceiver,
+				flags);
+			return ExtractOutput(exitCode, stdInReceiver, stdErrReceiver);
+		}
+
+		public async Task<byte[]> InvokeAsync(TRequest request, IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
+		{
+			Verify.Argument.IsNotNull(request);
+
+			var command        = commandFactory(request);
+			var stdInReceiver  = new AsyncBytesReader();
+			var stdErrReceiver = new AsyncTextReader();
+			var exitCode = await commandExecutor
 				.ExecuteCommandAsync(
 					command,
 					stdInReceiver,
 					stdErrReceiver,
-					CommandExecutionFlags.None,
+					flags,
 					cancellationToken)
 				.ConfigureAwait(continueOnCapturedContext: false);
-			if(exitCode != 0)
-			{
-				throw new GitException(stdErrReceiver.GetText());
-			}
-			return stdInReceiver.GetBytes();
+			return ExtractOutput(exitCode, stdInReceiver, stdErrReceiver);
 		}
-
-		#endregion
 	}
 
-	public static void Create<TParameters>(
-		out IGitAction<TParameters> action,
+	public static void Create<TRequest>(
+		out IGitAction<TRequest> action,
 		ICommandExecutor commandExecutor,
-		Func<TParameters, Command> commandFactory,
+		Func<TRequest, Command> commandFactory,
 		CommandExecutionFlags flags = CommandExecutionFlags.None)
-		where TParameters : class
+		where TRequest : class
 	{
-		action = new GitActionImpl0<TParameters>(
+		action = new GitActionImpl0<TRequest>(
 			commandExecutor, commandFactory, flags);
 	}
 
-	public static void Create<TParameters>(
-		out IGitAction<TParameters> action,
+	public static void Create<TRequest>(
+		out IGitAction<TRequest> action,
 		ICommandExecutor commandExecutor,
-		Func<TParameters, Command> commandFactory,
+		Func<TRequest, Command> commandFactory,
 		Action<GitOutput> resultHandler,
 		CommandExecutionFlags flags = CommandExecutionFlags.None)
-		where TParameters : class
+		where TRequest : class
 	{
-		action = new GitActionImpl1<TParameters>(
+		action = new GitActionImpl1<TRequest>(
 			commandExecutor, commandFactory, resultHandler, flags);
 	}
 
@@ -399,36 +377,36 @@ static class GitCliMethod
 	}
 
 	public static void Create(
-		out IGitAction<FetchParameters> action,
+		out IGitAction<FetchRequest> action,
 		ICommandExecutor commandExecutor,
-		Func<FetchParameters, bool, Command> commandFactory)
+		Func<FetchRequest, bool, Command> commandFactory)
 	{
-		action = new FetchOrPullAction<FetchParameters>(
+		action = new FetchOrPullAction<FetchRequest>(
 			commandExecutor, commandFactory);
 	}
 
 	public static void Create(
-		out IGitAction<PullParameters> action,
+		out IGitAction<PullRequest> action,
 		ICommandExecutor commandExecutor,
-		Func<PullParameters, bool, Command> commandFactory)
+		Func<PullRequest, bool, Command> commandFactory)
 	{
-		action = new FetchOrPullAction<PullParameters>(
+		action = new FetchOrPullAction<PullRequest>(
 			commandExecutor, commandFactory);
 	}
 
 	public static void Create(
-		out IGitAction<CloneRepositoryParameters> action,
+		out IGitAction<CloneRepositoryRequest> action,
 		ICommandExecutor commandExecutor,
-		Func<CloneRepositoryParameters, bool, Command> commandFactory)
+		Func<CloneRepositoryRequest, bool, Command> commandFactory)
 	{
 		action = new CloneAction(
 			commandExecutor, commandFactory);
 	}
 
 	public static void Create(
-		out IGitAction<InitRepositoryParameters> action,
+		out IGitAction<InitRepositoryRequest> action,
 		GitCLI gitCLI,
-		Func<InitRepositoryParameters, Command> commandFactory)
+		Func<InitRepositoryRequest, Command> commandFactory)
 	{
 		action = new InitAction(
 			gitCLI, commandFactory);
@@ -470,55 +448,55 @@ static class GitCliMethod
 	}
 
 	public static void Create(
-		out IGitFunction<PushParameters, IList<ReferencePushResult>> function,
+		out IGitFunction<PushRequest, Many<ReferencePushResult>> function,
 		ICommandExecutor commandExecutor,
-		Func<PushParameters, bool, Command> commandFactory,
-		Func<string, IList<ReferencePushResult>> resultsParser)
+		Func<PushRequest, bool, Command> commandFactory,
+		Func<string, Many<ReferencePushResult>> resultsParser)
 	{
 		function = new PushFunction(
 			commandExecutor, commandFactory, resultsParser);
 	}
 
 	public static void Create(
-		out IGitFunction<QuerySymbolicReferenceParameters, SymbolicReferenceData> function,
+		out IGitFunction<QuerySymbolicReferenceRequest, SymbolicReferenceData> function,
 		IGitRepository repository)
 	{
 		function = new QuerySymbolicReferenceFunction(repository);
 	}
 
 	public static void Create(
-		out IGitFunction<QueryReflogParameters, IList<ReflogRecordData>> function,
+		out IGitFunction<QueryReflogRequest, IList<ReflogRecordData>> function,
 		ICommandExecutor commandExecutor,
-		Func<QueryReflogParameters, Command> commandFactory)
+		Func<QueryReflogRequest, Command> commandFactory)
 	{
 		function = new QueryReflogFunction(commandExecutor, commandFactory);
 	}
 
 	public static void Create(
-		out IGitFunction<QueryStashParameters, IList<StashedStateData>> function,
+		out IGitFunction<QueryStashRequest, IList<StashedStateData>> function,
 		ICommandExecutor commandExecutor,
-		Func<QueryStashParameters, Command> commandFactory)
+		Func<QueryStashRequest, Command> commandFactory)
 	{
 		function = new QueryStashFunction(commandExecutor, commandFactory);
 	}
 
 	public static void Create(
-		out IGitFunction<QueryTagMessageParameters, string> function,
+		out IGitFunction<QueryTagMessageRequest, string> function,
 		ICommandExecutor commandExecutor,
-		Func<QueryTagMessageParameters, Command> commandFactory)
+		Func<QueryTagMessageRequest, Command> commandFactory)
 	{
 		function = new QueryTagMessageFunction(commandExecutor, commandFactory);
 	}
 
 	public static void Create(
-		out IGitFunction<FormatMergeMessageParameters, string> function,
+		out IGitFunction<FormatMergeMessageRequest, string> function,
 		ICommandExecutor commandExecutor)
 	{
 		function = new FormatMergeMessageFunction(commandExecutor);
 	}
 
 	public static void Create(
-		out IGitFunction<QueryRevisionsParameters, IList<RevisionData>> function,
+		out IGitFunction<QueryRevisionsRequest, IList<RevisionData>> function,
 		ICommandExecutor commandExecutor,
 		CommandBuilder commandBuilder)
 	{

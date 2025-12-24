@@ -82,7 +82,7 @@ public sealed class GraphColorProvider : IGraphColorProvider
 
 	/// <summary>Acquire a unique color.</summary>
 	/// <returns>Unique color.</returns>
-	public int AcquireColor()
+	public short AcquireColor()
 	{
 		var first = (_pointer + 1) % _maxColors;
 		var last  = _pointer;
@@ -93,7 +93,7 @@ public sealed class GraphColorProvider : IGraphColorProvider
 				--_availableCount;
 				_pointer = i;
 				_colors[i] = true;
-				return i;
+				return (short)i;
 			}
 		}
 		_pointer = 0;
@@ -131,15 +131,14 @@ public sealed class GraphColorProvider : IGraphColorProvider
 
 	/// <summary>Make <paramref name="color"/> available again.</summary>
 	/// <param name="color">Color that is not needed anymore.</param>
-	public void ReleaseColor(int color)
+	public void ReleaseColor(short color)
 	{
-		if(color != 0)
+		if(color == 0) return;
+
+		if(_colors[color])
 		{
-			if(_colors[color])
-			{
-				_colors[color] = false;
-				++_availableCount;
-			}
+			_colors[color] = false;
+			++_availableCount;
 		}
 	}
 }

@@ -33,7 +33,7 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 partial class HashColumnExtender : ExtenderBase
 {
-	private ICheckBoxWidget _chkAbbreviate;
+	private ICheckBoxWidget? _chkAbbreviate;
 	private bool _disableEvents;
 
 	public HashColumnExtender(HashColumnBase column)
@@ -56,11 +56,7 @@ partial class HashColumnExtender : ExtenderBase
 	{
 		if(disposing)
 		{
-			if(_chkAbbreviate is not null)
-			{
-				_chkAbbreviate.Dispose();
-				_chkAbbreviate = null;
-			}
+			DisposableUtility.Dispose(ref _chkAbbreviate);
 			UnsubscribeFromColumnEvents();
 		}
 		base.Dispose(disposing);
@@ -77,7 +73,7 @@ partial class HashColumnExtender : ExtenderBase
 		var conv = new DpiConverter(this);
 
 		_chkAbbreviate?.Dispose();
-		_chkAbbreviate = Style.CreateCheckBox();
+		_chkAbbreviate = Style.CheckBoxFactory.Create();
 		_chkAbbreviate.IsChecked = Column.Abbreviate;
 		_chkAbbreviate.IsCheckedChanged += OnAbbreviateCheckedChanged;
 		_chkAbbreviate.Text = Resources.StrAbbreviate;
@@ -98,17 +94,17 @@ partial class HashColumnExtender : ExtenderBase
 		Column.AbbreviateChanged -= OnAbbreviateChanged;
 	}
 
-	private void OnAbbreviateChanged(object sender, EventArgs e)
+	private void OnAbbreviateChanged(object? sender, EventArgs e)
 	{
 		Abbreviate = Column.Abbreviate;
 	}
 
 	public bool Abbreviate
 	{
-		get => _chkAbbreviate != null ? _chkAbbreviate.IsChecked : Column.Abbreviate;
+		get => _chkAbbreviate is not null ? _chkAbbreviate.IsChecked : Column.Abbreviate;
 		private set
 		{
-			if(_chkAbbreviate != null)
+			if(_chkAbbreviate is not null)
 			{
 				_disableEvents = true;
 				_chkAbbreviate.IsChecked = value;
@@ -117,13 +113,12 @@ partial class HashColumnExtender : ExtenderBase
 		}
 	}
 
-	private void OnAbbreviateCheckedChanged(object sender, EventArgs e)
+	private void OnAbbreviateCheckedChanged(object? sender, EventArgs e)
 	{
-		if(!_disableEvents)
-		{
-			_disableEvents = true;
-			Column.Abbreviate = _chkAbbreviate.IsChecked;
-			_disableEvents = false;
-		}
+		if(_disableEvents) return;
+
+		_disableEvents = true;
+		Column.Abbreviate = sender is ICheckBoxWidget { IsChecked: true };
+		_disableEvents = false;
 	}
 }

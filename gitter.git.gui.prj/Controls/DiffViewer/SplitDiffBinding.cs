@@ -55,7 +55,7 @@ sealed class SplitDiffBinding : AsyncDataBinding<Diff>
 
 		_allDiffPanels = new List<FileDiffPanel>();
 		_progressPanel = new FlowProgressPanel();
-		Progress = _progressPanel.ProgressMonitor;
+		Progress = _progressPanel;
 	}
 
 	#endregion
@@ -89,9 +89,9 @@ sealed class SplitDiffBinding : AsyncDataBinding<Diff>
 		DiffViewerHeaders.Panels.AddRange(panels);
 	}
 
-	protected override Task<Diff> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	protected override Task<Diff> FetchDataAsync(IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
 	{
-		Verify.State.IsFalse(IsDisposed, "DiffBinding is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		if(!DiffViewerHeaders.Created)
 		{
@@ -169,16 +169,16 @@ sealed class SplitDiffBinding : AsyncDataBinding<Diff>
 		DiffViewerFiles.VScrollBar.Value = scrollPos;
 	}
 
-	private void OnStatusFilterChanged(object sender, EventArgs e)
+	private void OnStatusFilterChanged(object? sender, EventArgs e)
 	{
-		var changedFilesPanel = (ChangedFilesPanel)sender;
+		var changedFilesPanel = (ChangedFilesPanel)sender!;
 		var index = 0;
 		DiffViewerFiles.BeginUpdate();
 		if(index < DiffViewerFiles.Panels.Count)
 		{
 			DiffViewerFiles.Panels.RemoveRange(index, DiffViewerFiles.Panels.Count - index);
 		}
-		FlowPanelSeparator separator = null;
+		var separator = default(FlowPanelSeparator);
 		for(int i = 0; i < _allDiffPanels.Count; ++i)
 		{
 			if((_allDiffPanels[i].DiffFile.Status & changedFilesPanel.StatusFilter) != FileStatus.Unknown)

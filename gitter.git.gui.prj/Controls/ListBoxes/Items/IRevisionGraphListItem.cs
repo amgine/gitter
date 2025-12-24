@@ -24,5 +24,5 @@ namespace gitter.Git.Gui.Controls;
 public interface IRevisionGraphListItem
 {
 	/// <summary>Graph data of this item.</summary>
-	GraphCell[] Graph { get; set; }
+	GraphCell[]? Graph { get; set; }
 }

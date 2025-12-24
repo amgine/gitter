@@ -1,29 +1,29 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2014  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
-
-#nullable enable
 
 namespace gitter.Git;
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 
 using gitter.Git.AccessLayer;
@@ -38,7 +38,7 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 	/// <summary><see cref="WeakReference"/> to this <see cref="Reference"/>'s <see cref="Reflog"/>.</summary>
 	private WeakReference<Reflog>? _reflogRef;
 	/// <summary>Reflog access sync object.</summary>
-	private readonly object _reflogSync;
+	private readonly LockType _reflogSync = new();
 
 	/// <summary>Reference changed pointer.</summary>
 	public event EventHandler<RevisionPointerChangedEventArgs>? PointerChanged;
@@ -51,7 +51,7 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 		=> PointerChanged?.Invoke(this, new RevisionPointerChangedEventArgs(oldPos, newPos));
 
 	/// <summary>Invoke <see cref="PositionChanged"/>.</summary>
-	protected void InvokePositionChanged(Revision oldPos, Revision newPos)
+	protected void InvokePositionChanged(Revision? oldPos, Revision? newPos)
 		=> PositionChanged?.Invoke(this, new RevisionChangedEventArgs(oldPos, newPos));
 
 	/// <summary>Reference to a reflog record.</summary>
@@ -99,7 +99,7 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 		public Revision Dereference()
 		{
 			var revisionData = _reference.Repository.Accessor.Dereference.Invoke(
-				new DereferenceParameters(FullName)
+				new DereferenceRequest(FullName)
 				{
 					LoadRevisionData = true,
 				});
@@ -107,13 +107,14 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 		}
 
 		/// <inheritdoc/>
-		public async ValueTask<Revision> DereferenceAsync()
+		public async ValueTask<Revision?> DereferenceAsync(CancellationToken cancellationToken = default)
 		{
 			var revisionData = await _reference.Repository.Accessor.Dereference.InvokeAsync(
-				new DereferenceParameters(FullName)
+				new DereferenceRequest(FullName)
 				{
 					LoadRevisionData = true,
-				}).ConfigureAwait(continueOnCapturedContext: false);
+				}, cancellationToken: cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
 			return ObjectFactories.CreateRevision(_reference.Repository, revisionData);
 		}
 
@@ -141,7 +142,8 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 	/// <param name="referenceType">Reference type.</param>
 	/// <param name="errorMessage">Error message.</param>
 	/// <returns><c>true</c> if <paramref name="name"/> is a valid reference name; otherwise, <c>false</c>.</returns>
-	public static bool ValidateName(string name, ReferenceType referenceType, out string errorMessage)
+	public static bool ValidateName(string? name, ReferenceType referenceType,
+		[MaybeNullWhen(returnValue: true)] out string errorMessage)
 	{
 		/*
 			1. They can include slash / for hierarchical (directory) grouping, but no slash-separated component can begin with a dot ..
@@ -159,7 +161,7 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 				Resources.ErrNameCannotBeEmpty, GetReferenceTypeName(referenceType));
 			return false;
 		}
-		name = name.Trim();
+		name = name!.Trim();
 		if(name[0] == '-')
 		{
 			errorMessage = string.Format(CultureInfo.InvariantCulture,
@@ -244,7 +246,7 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 					return false;
 			}
 		}
-		errorMessage = string.Empty;
+		errorMessage = default;
 		return true;
 	}
 
@@ -258,12 +260,11 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 		Verify.Argument.IsNotNull(pointer);
 
 		_pointer = PrepareInputPointer(pointer);
-		_reflogSync = new object();
 		EnterPointer(_pointer);
 		var rev = _pointer.Dereference();
-		if(rev != null)
+		if(rev is not null)
 		{
-			EnterRevision(_pointer.Dereference());
+			EnterRevision(rev);
 		}
 	}
 
@@ -323,7 +324,7 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 
 	/// <summary>Gets the <see cref="Revision"/>, pointed by this <see cref="Reference"/>.</summary>
 	/// <value><see cref="Revision"/>, pointed by this <see cref="Reference"/>.</value>
-	public Revision Revision => _pointer.Dereference();
+	public Revision? Revision => _pointer.Dereference();
 
 	/// <summary>Gets this <see cref="Reference"/>'s reflog - history of pointer modifications.</summary>
 	/// <value>Reflog of this <see cref="Reference"/>.</value>
@@ -422,10 +423,10 @@ public class Reference : GitNamedObjectWithLifetime, IRevisionPointer
 	string IRevisionPointer.Pointer => Name;
 
 	/// <inheritdoc/>
-	Revision IRevisionPointer.Dereference()
+	Revision? IRevisionPointer.Dereference()
 		=> _pointer.Dereference();
 
 	/// <inheritdoc/>
-	ValueTask<Revision> IRevisionPointer.DereferenceAsync()
-		=> _pointer.DereferenceAsync();
+	ValueTask<Revision?> IRevisionPointer.DereferenceAsync(CancellationToken cancellationToken)
+		=> _pointer.DereferenceAsync(cancellationToken);
 }

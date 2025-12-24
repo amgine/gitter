@@ -20,25 +20,21 @@
 
 namespace gitter.Git;
 
+using System.Threading;
 using System.Threading.Tasks;
 
-internal sealed class NowherePointer : GitObject, IRevisionPointer
+internal sealed class NowherePointer(Repository repository, string name)
+	: GitObject(repository), IRevisionPointer
 {
-	public NowherePointer(Repository repository, string name)
-		: base(repository)
-	{
-		Pointer = name;
-	}
-
 	ReferenceType IRevisionPointer.Type => ReferenceType.None;
 
-	public string Pointer { get; }
+	public string Pointer { get; } = name;
 
 	string IRevisionPointer.FullName => Pointer;
 
-	Revision IRevisionPointer.Dereference() => null;
+	Revision? IRevisionPointer.Dereference() => null;
 
-	ValueTask<Revision> IRevisionPointer.DereferenceAsync() => new(default(Revision));
+	ValueTask<Revision?> IRevisionPointer.DereferenceAsync(CancellationToken cancellationToken) => new(default(Revision));
 
 	bool IRevisionPointer.IsDeleted => false;
 

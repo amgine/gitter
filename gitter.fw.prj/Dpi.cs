@@ -33,6 +33,16 @@ public readonly record struct Dpi(int X, int Y) : IEquatable<Dpi>
 	public static Dpi FromControl(Control control)
 		=> new(control.DeviceDpi);
 
+	public static Dpi FromControlOrDefault(Control? control)
+		=> control is not null
+			? FromControl(control)
+			: Default;
+
+	public static Dpi FromControlOrSystem(Control? control)
+		=> control is not null
+			? FromControl(control)
+			: System;
+
 	private static Dpi GetSystemDpi()
 	{
 		switch(Environment.OSVersion.Platform)
@@ -46,7 +56,7 @@ public readonly record struct Dpi(int X, int Y) : IEquatable<Dpi>
 						var x = Native.Gdi32.GetDeviceCaps(hdc, Native.DeviceCaps.LOGPIXELSX);
 						var y = Native.Gdi32.GetDeviceCaps(hdc, Native.DeviceCaps.LOGPIXELSY);
 
-						return new Dpi(x, y);
+						return x > 0 && y > 0 ? new Dpi(x, y) : Default;
 					}
 					finally
 					{
@@ -55,7 +65,7 @@ public readonly record struct Dpi(int X, int Y) : IEquatable<Dpi>
 				}
 				break;
 		}
-		return Dpi.Default;
+		return Default;
 	}
 
 	public Dpi(int dpi) : this(dpi, dpi)
@@ -65,6 +75,10 @@ public readonly record struct Dpi(int X, int Y) : IEquatable<Dpi>
 	public Dpi(Graphics graphics) : this((int)graphics.DpiX, (int)graphics.DpiY)
 	{
 	}
+
+	public static implicit operator Size(Dpi dpi) => new(dpi.X, dpi.Y);
+
+	public static implicit operator SizeF(Dpi dpi) => new(dpi.X, dpi.Y);
 
 	public int GetValue(Orientation orientation)
 		=> orientation switch

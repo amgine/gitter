@@ -22,12 +22,7 @@ namespace gitter.TeamCity;
 
 using System;
 
-public sealed class TeamCityObjectPropertyChangedEventArgs : EventArgs
+public sealed class TeamCityObjectPropertyChangedEventArgs(TeamCityObjectProperty property) : EventArgs
 {
-	public TeamCityObjectPropertyChangedEventArgs(TeamCityObjectProperty property)
-	{
-		Property = property;
-	}
-
-	public TeamCityObjectProperty Property { get; }
+	public TeamCityObjectProperty Property { get; } = property;
 }

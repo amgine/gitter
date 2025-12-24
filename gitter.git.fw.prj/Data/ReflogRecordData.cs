@@ -20,8 +20,6 @@
 
 namespace gitter.Git.AccessLayer;
 
-using System;
-
 public sealed class ReflogRecordData
 {
 	public ReflogRecordData(int index, string message, RevisionData revision)

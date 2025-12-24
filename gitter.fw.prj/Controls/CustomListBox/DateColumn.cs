@@ -35,19 +35,19 @@ public class DateColumn : CustomListBoxColumn
 	private DateFormat _dateFormat;
 	private bool _convertToLocal;
 	private bool _showUTCOffset = true;
-	private DateColumnExtender _extender;
+	private DateColumnExtender? _extender;
 
-	public event EventHandler DateFormatChanged;
+	public event EventHandler? DateFormatChanged;
 
 	protected virtual void OnDateFormatChanged(EventArgs e)
 		=> DateFormatChanged?.Invoke(this, e);
 
-	public event EventHandler ConvertToLocalChanged;
+	public event EventHandler? ConvertToLocalChanged;
 
 	protected virtual void OnConvertToLocalChanged(EventArgs e)
 		=> ConvertToLocalChanged?.Invoke(this, e);
 
-	public event EventHandler ShowUTCOffsetChanged;
+	public event EventHandler? ShowUTCOffsetChanged;
 
 	protected virtual void OnShowUTCOffsetChanged(EventArgs e)
 		=> ShowUTCOffsetChanged?.Invoke(this, e);
@@ -65,20 +65,26 @@ public class DateColumn : CustomListBoxColumn
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		Extender = new Popup(_extender = new DateColumnExtender(this));
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
-		Extender.Dispose();
-		Extender = null;
-		_extender.Dispose();
-		_extender = null;
-		base.OnListBoxDetached();
+		if(Extender is not null)
+		{
+			Extender.Dispose();
+			Extender = null;
+		}
+		if(_extender is not null)
+		{
+			_extender.Dispose();
+			_extender = null;
+		}
+		base.OnListBoxDetached(listBox);
 	}
 
 	private static string GetString(CustomListBoxColumn column, DateTimeOffset date)

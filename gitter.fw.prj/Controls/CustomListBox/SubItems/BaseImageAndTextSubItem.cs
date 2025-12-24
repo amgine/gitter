@@ -24,20 +24,14 @@ using System;
 using System.Drawing;
 
 /// <summary>Base class for subitems with image and text.</summary>
-public abstract class BaseImageAndTextSubItem : BaseTextSubItem
+/// <param name="id">Subitem id.</param>
+public abstract class BaseImageAndTextSubItem(int id) : BaseTextSubItem(id)
 {
-	/// <summary>Create <see cref="BaseImageAndTextSubItem"/>.</summary>
-	/// <param name="id">Subitem id.</param>
-	protected BaseImageAndTextSubItem(int id)
-		: base(id)
-	{
-	}
-
 	/// <summary>Image.</summary>
-	public abstract Image Image { get; set; }
+	public abstract Image? Image { get; set; }
 
 	/// <summary>Overlay image.</summary>
-	public virtual Image OverlayImage { get { return null; } set { } }
+	public virtual Image? OverlayImage { get { return null; } set { } }
 
 	/// <summary>Paint event handler.</summary>
 	/// <param name="paintEventArgs">Paint event args.</param>

@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git.AccessLayer.CLI;
@@ -25,12 +25,12 @@ using System.Collections.Generic;
 /// <summary>Manage set of tracked repositories.</summary>
 public sealed class RemoteCommand : Command
 {
-	public static RemoteCommand FormatAddCommand(string name, string url, string master, string[] branches, bool mirror, bool fetch, bool tags)
+	public static RemoteCommand FormatAddCommand(string name, string url, string? master, string[]? branches, bool mirror, bool fetch, bool tags)
 	{
-		var args = new ICommandArgument[1+2+(master!=null?1:0)+(branches!=null?branches.Length:0)+(mirror?1:0)+(fetch?(tags?2:1):0)];
+		var args = new ICommandArgument[1+2+(master is not null?1:0)+(branches!=null?branches.Length:0)+(mirror?1:0)+(fetch?(tags?2:1):0)];
 		int id = 0;
 		args[id++] = Add();
-		if(branches != null && branches.Length != 0)
+		if(branches is { Length: not 0 })
 		{
 			foreach(var b in branches)
 			{
@@ -39,7 +39,7 @@ public sealed class RemoteCommand : Command
 		}
 		if(!string.IsNullOrEmpty(master))
 		{
-			args[id++] = Master(master);
+			args[id++] = Master(master!);
 		}
 		if(fetch)
 		{
@@ -106,7 +106,7 @@ public sealed class RemoteCommand : Command
 		=> new CommandParameter("update");
 
 	public static ICommandArgument DryRun()
-		=> new CommandFlag("--dry-run");
+		=> CommandFlag.DryRun;
 
 	public RemoteCommand()
 		: base("remote")

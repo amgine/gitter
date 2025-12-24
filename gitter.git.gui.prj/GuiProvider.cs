@@ -40,11 +40,11 @@ internal sealed class GuiProvider : IRepositoryGuiProvider, IDisposable
 
 	private readonly Notifications _notifications;
 
-	private Repository _repository;
-	private IWorkingEnvironment _environment;
-	private RepositoryExplorer _explorer;
+	private Repository? _repository;
+	private IWorkingEnvironment? _environment;
+	private RepositoryExplorer? _explorer;
 	private readonly ILifetimeScope _parentScope;
-	private ILifetimeScope _lifetimeScope;
+	private ILifetimeScope? _lifetimeScope;
 
 	#endregion
 
@@ -68,54 +68,51 @@ internal sealed class GuiProvider : IRepositoryGuiProvider, IDisposable
 
 	public RepositoryProvider RepositoryProvider { get; }
 
-	public Repository Repository
+	public Repository? Repository
 	{
 		get => _repository;
 		set
 		{
-			if(_repository != value)
+			if(_repository == value) return;
+
+			_repository = value;
+			MainToolBar.Repository = _repository;
+			foreach(var viewFactory in ViewFactories)
 			{
-				_repository = value;
-				MainToolBar.Repository    = _repository;
-				foreach(var viewFactory in ViewFactories)
+				if(!viewFactory.IsSingleton)
 				{
-					if(!viewFactory.IsSingleton)
+					viewFactory.CloseAllViews();
+					continue;
+				}
+				foreach(var view in viewFactory.CreatedViews)
+				{
+					if(view is GitViewBase gitView)
 					{
-						viewFactory.CloseAllViews();
-					}
-					else
-					{
-						foreach(var view in viewFactory.CreatedViews)
-						{
-							if(view is GitViewBase gitView)
-							{
-								gitView.Repository = value;
-							}
-						}
+						gitView.Repository = value;
 					}
 				}
-				if(_explorer is not null)
-				{
-					_explorer.Repository  = _repository;
-				}
-				Statusbar.Repository      = _repository;
-				Menus.Repository          = _repository;
-				_notifications.Repository = _repository;
 			}
+			if(_explorer is not null)
+			{
+				_explorer.Repository  = _repository;
+			}
+			Statusbar.Repository      = _repository;
+			Menus.Repository          = _repository;
+			_notifications.Repository = _repository;
 		}
 	}
 
-	IRepository IRepositoryGuiProvider.Repository
+	IRepository? IRepositoryGuiProvider.Repository
 	{
 		get => Repository;
 		set => Repository = value as Repository;
 	}
 
-	public IWorkingEnvironment Environment => _environment;
+	public IWorkingEnvironment? Environment => _environment;
 
 	public DpiBindings MainFormDpiBindings { get; } = new();
 
-	public RepositoryExplorer RepositoryExplorer { get; }
+	public RepositoryExplorer? RepositoryExplorer => _explorer;
 
 	public GitToolbar MainToolBar { get; }
 
@@ -125,13 +122,17 @@ internal sealed class GuiProvider : IRepositoryGuiProvider, IDisposable
 
 	public IReadOnlyList<IViewFactory> ViewFactories { get; }
 
-	public IRevisionPointer GetFocusedRevisionPointer()
-		=> Environment.ViewDockService.ActiveView switch
+	public IRevisionPointer? GetFocusedRevisionPointer()
+	{
+		if(Environment is null) return default;
+
+		return Environment.ViewDockService.ActiveView switch
 		{
 			HistoryView    historyView    => historyView.SelectedRevision,
 			ReferencesView referencesView => referencesView.SelectedReference,
 			_ => default,
 		};
+	}
 
 	public DialogResult StartCreateBranchDialog()
 	{
@@ -153,14 +154,20 @@ internal sealed class GuiProvider : IRepositoryGuiProvider, IDisposable
 
 	public DialogResult StartCreateBranchDialog(string startingRevision, string defaultBranchName)
 	{
-		using var dlg = new CreateBranchDialog(_repository);
-		dlg.StartingRevision.Value = startingRevision;
-		dlg.BranchName.Value       = defaultBranchName;
-		return dlg.Run(Environment.MainForm);
+		var environment = RequireEnvironment();
+		var repository  = RequireRepository();
+
+		using var dialog = new CreateBranchDialog(repository);
+		dialog.StartingRevision.Value = startingRevision;
+		dialog.BranchName.Value       = defaultBranchName;
+		return dialog.Run(environment.MainForm);
 	}
 
 	public DialogResult StartCheckoutDialog()
 	{
+		var environment = RequireEnvironment();
+		var repository  = RequireRepository();
+
 		var rev = GetFocusedRevisionPointer();
 		if(rev is Revision revision)
 		{
@@ -173,80 +180,109 @@ internal sealed class GuiProvider : IRepositoryGuiProvider, IDisposable
 				}
 			}
 		}
-		using var dlg = new CheckoutDialog(_repository);
+		using var dialog = new CheckoutDialog(repository);
 		if(rev is not null)
 		{
-			dlg.Revision.Value = rev.Pointer;
+			dialog.Revision.Value = rev.Pointer;
 		}
-		return dlg.Run(Environment.MainForm);
+		return dialog.Run(environment.MainForm);
 	}
 
 	public DialogResult StartMergeDialog(bool multiMerge = false)
 	{
-		using var dlg = new MergeDialog(_repository);
+		var environment = RequireEnvironment();
+		var repository  = RequireRepository();
+
+		using var dialog = new MergeDialog(repository);
 		if(multiMerge)
 		{
-			dlg.EnableMultipleBrunchesMerge();
+			dialog.EnableMultipleBrunchesMerge();
 		}
-		return dlg.Run(Environment.MainForm);
+		return dialog.Run(environment.MainForm);
 	}
 
 	public DialogResult StartPushDialog()
 	{
-		using var dlg = new PushDialog(_repository);
-		return dlg.Run(Environment.MainForm);
+		var environment = RequireEnvironment();
+		var repository  = RequireRepository();
+
+		using var dialog = new PushDialog(repository);
+		return dialog.Run(environment.MainForm);
 	}
 
 	public DialogResult StartApplyPatchesDialog()
 	{
-		using var dlg = new ApplyPatchesDialog(_repository);
-		return dlg.Run(Environment.MainForm);
+		var environment = RequireEnvironment();
+		var repository  = RequireRepository();
+
+		using var dialog = new ApplyPatchesDialog(repository);
+		return dialog.Run(environment.MainForm);
 	}
 
 	public DialogResult StartCreateTagDialog()
 	{
+		var environment = RequireEnvironment();
+		var repository  = RequireRepository();
+
 		var rev = GetFocusedRevisionPointer();
-		using var dlg = new CreateTagDialog(_repository);
-		dlg.Revision.Value = rev is not null ? rev.Pointer : GitConstants.HEAD;
-		return dlg.Run(Environment.MainForm);
+		using var dialog = new CreateTagDialog(repository);
+		dialog.Revision.Value = rev is not null ? rev.Pointer : GitConstants.HEAD;
+		return dialog.Run(environment.MainForm);
 	}
 
 	public DialogResult StartAddNoteDialog()
 	{
+		var environment = RequireEnvironment();
+		var repository  = RequireRepository();
+
 		var rev = GetFocusedRevisionPointer();
-		using var dlg = new AddNoteDialog(_repository);
-		dlg.Revision.Value = rev is not null ? rev.Pointer : GitConstants.HEAD;
-		return dlg.Run(Environment.MainForm);
+		using var dialog = new AddNoteDialog(repository);
+		dialog.Revision.Value = rev is not null ? rev.Pointer : GitConstants.HEAD;
+		return dialog.Run(environment.MainForm);
 	}
 
 	public DialogResult StartStageFilesDialog()
 	{
-		using var dlg = new StageDialog(_repository);
-		return dlg.Run(Environment.MainForm);
+		var environment = RequireEnvironment();
+		var repository  = RequireRepository();
+
+		using var dialog = new StageDialog(repository);
+		return dialog.Run(environment.MainForm);
 	}
 
 	public DialogResult StartStashSaveDialog()
 	{
-		using var dlg = new StashSaveDialog(_repository);
-		return dlg.Run(Environment.MainForm);
+		var environment = RequireEnvironment();
+		var repository  = RequireRepository();
+
+		using var dialog = new StashSaveDialog(repository);
+		return dialog.Run(environment.MainForm);
 	}
 
 	public DialogResult StartCleanDialog()
 	{
-		using var dlg = new CleanDialog(_repository);
-		return dlg.Run(Environment.MainForm);
+		var environment = RequireEnvironment();
+		var repository  = RequireRepository();
+
+		using var dialog = new CleanDialog(repository);
+		return dialog.Run(environment.MainForm);
 	}
 
 	public DialogResult StartResolveConflictsDialog()
 	{
-		using var dlg = new ConflictsDialog(_repository);
-		return dlg.Run(Environment.MainForm);
+		var environment = RequireEnvironment();
+		var repository  = RequireRepository();
+
+		using var dialog = new ConflictsDialog(repository);
+		return dialog.Run(environment.MainForm);
 	}
 
 	public DialogResult StartUserIdentificationDialog()
 	{
-		using var dlg = new UserIdentificationDialog(Environment, Repository);
-		var result = dlg.Run(Environment.MainForm);
+		var environment = RequireEnvironment();
+
+		using var dialog = new UserIdentificationDialog(RepositoryProvider, Repository);
+		var result = dialog.Run(environment.MainForm);
 		if(result == DialogResult.OK)
 		{
 			Statusbar.UpdateUserIdentityLabel();
@@ -256,8 +292,11 @@ internal sealed class GuiProvider : IRepositoryGuiProvider, IDisposable
 
 	public DialogResult StartAddRemoteDialog()
 	{
-		using var dlg = new AddRemoteDialog(Repository);
-		return dlg.Run(Environment.MainForm);
+		var environment = RequireEnvironment();
+		var repository  = RequireRepository();
+
+		using var dialog = new AddRemoteDialog(repository);
+		return dialog.Run(environment.MainForm);
 	}
 
 	public void SaveTo(Section section)
@@ -323,8 +362,7 @@ internal sealed class GuiProvider : IRepositoryGuiProvider, IDisposable
 		}
 		catch
 		{
-			_lifetimeScope.Dispose();
-			_lifetimeScope = default;
+			DisposableUtility.Dispose(ref _lifetimeScope);
 		}
 	}
 
@@ -345,7 +383,10 @@ internal sealed class GuiProvider : IRepositoryGuiProvider, IDisposable
 			environment.ViewDockService.UnregisterFactory(factory);
 		}
 
-		environment.RemoveRepositoryExplorerItem(_explorer.RootItem);
+		if(_explorer is not null)
+		{
+			environment.RemoveRepositoryExplorerItem(_explorer.RootItem);
+		}
 		environment.RemoveToolbar(MainToolBar);
 		for(int i = 0; i < Statusbar.LeftAlignedItems.Length; ++i)
 		{
@@ -368,19 +409,19 @@ internal sealed class GuiProvider : IRepositoryGuiProvider, IDisposable
 		_explorer = null;
 		_environment = null;
 
-		if(_lifetimeScope is not null)
-		{
-			_lifetimeScope.Dispose();
-			_lifetimeScope = default;
-		}
+		DisposableUtility.Dispose(ref _lifetimeScope);
 	}
+
+	public IWorkingEnvironment RequireEnvironment()
+		=> Environment
+		?? throw new InvalidOperationException("Provider is not attached to the environment.");
+
+	public Repository RequireRepository()
+		=> Repository
+		?? throw new InvalidOperationException("Repository is not opened.");
 
 	public void ActivateDefaultView()
-	{
-		Verify.State.IsTrue(Environment is not null);
-
-		Environment.ViewDockService.ShowView(Guids.HistoryViewGuid);
-	}
+		=> RequireEnvironment().ViewDockService.ShowView(Guids.HistoryViewGuid);
 
 	public void Dispose()
 	{

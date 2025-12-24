@@ -71,8 +71,10 @@ public partial class AddServiceDialog : PickerDialog<ServiceProviderPicker, IRep
 		}
 	}
 
-	protected override Control CreateControl(IRepositoryServiceProvider item)
-		=> item?.CreateSetupDialog(_environment.ActiveRepository);
+	protected override Control? CreateControl(IRepositoryServiceProvider item)
+		=> item is not null && _environment.ActiveRepository is { } repository
+			? item.CreateSetupDialog(repository)
+			: default;
 
 	public override bool Execute()
 	{

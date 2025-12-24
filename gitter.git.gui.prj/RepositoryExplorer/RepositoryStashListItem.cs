@@ -31,30 +31,21 @@ using gitter.Git.Gui.Views;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class RepositoryStashListItem : RepositoryExplorerItemBase
+sealed class RepositoryStashListItem(IWorkingEnvironment environment)
+	: RepositoryExplorerItemBase(Icons.Stash, Resources.StrStash)
 {
-	private readonly IWorkingEnvironment _environment;
-
-	public RepositoryStashListItem(IWorkingEnvironment environment)
-		: base(Icons.Stash, Resources.StrStash)
-	{
-		Verify.Argument.IsNotNull(environment);
-
-		_environment = environment;
-	}
-
 	/// <inheritdoc/>
 	protected override void OnActivate()
 	{
 		base.OnActivate();
-		_environment.ViewDockService.ShowView(Guids.StashViewGuid);
+		environment.ViewDockService.ShowView(Guids.StashViewGuid);
 	}
 
 	/// <inheritdoc/>
 	public override void OnDoubleClick(int x, int y) { }
 
 	/// <inheritdoc/>
-	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	public override ContextMenuStrip? GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
 		Assert.IsNotNull(requestEventArgs);
 

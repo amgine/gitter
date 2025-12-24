@@ -26,18 +26,13 @@ using System.Threading;
 
 using Resources = gitter.Updater.Properties.Resources;
 
-abstract class UpdateProcessBase : IUpdateProcess
+abstract class UpdateProcessBase(string targetDirectory) : IUpdateProcess
 {
 	protected const string MainBinaryName = "gitter.exe";
 
-	protected UpdateProcessBase(string targetDirectory)
-	{
-		TargetDirectory = targetDirectory;
-	}
+	public string TargetDirectory { get; } = targetDirectory;
 
-	public string TargetDirectory { get; }
-
-	protected UpdateProcessMonitor Monitor { get; private set; }
+	protected UpdateProcessMonitor Monitor { get; private set; } = default!;
 
 	public bool IsUpdating { get; set; }
 
@@ -80,7 +75,7 @@ abstract class UpdateProcessBase : IUpdateProcess
 		finally
 		{
 			Cleanup();
-			Monitor = null;
+			Monitor = null!;
 			IsUpdating = false;
 		}
 	}

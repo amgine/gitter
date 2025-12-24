@@ -25,35 +25,30 @@ using System.Drawing;
 
 using gitter.Framework.Controls;
 
-public class HookListItem : CustomListBoxItem<Hook>
+public class HookListItem(Hook hook) : CustomListBoxItem<Hook>(hook)
 {
-	public HookListItem(Hook hook)
-		: base(hook)
-	{
-	}
-
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		DataContext.Deleted += OnDeleted;
 		DataContext.Revived += OnRevived;
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.Deleted -= OnDeleted;
 		DataContext.Revived -= OnRevived;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
-	private void OnDeleted(object sender, EventArgs e)
+	private void OnDeleted(object? sender, EventArgs e)
 	{
 		InvalidateSafe();
 	}
 
-	private void OnRevived(object sender, EventArgs e)
+	private void OnRevived(object? sender, EventArgs e)
 	{
 		InvalidateSafe();
 	}

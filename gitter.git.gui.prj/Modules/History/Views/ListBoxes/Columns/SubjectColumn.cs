@@ -23,6 +23,7 @@ namespace gitter.Git.Gui.Controls;
 using System;
 using System.Drawing;
 
+using gitter.Framework;
 using gitter.Framework.Controls;
 using gitter.Framework.Configuration;
 
@@ -46,13 +47,13 @@ public sealed class SubjectColumn : CustomListBoxColumn
 	private bool _showTags           = DefaultShowTags;
 	private bool _showStash          = DefaultShowStash;
 
-	private SubjectColumnExtender _extender;
+	private SubjectColumnExtender? _extender;
 
-	public event EventHandler AlignToGraphChanged;
-	public event EventHandler ShowLocalBranchesChanged;
-	public event EventHandler ShowRemoteBranchesChanged;
-	public event EventHandler ShowTagsChanged;
-	public event EventHandler ShowStashChanged;
+	public event EventHandler? AlignToGraphChanged;
+	public event EventHandler? ShowLocalBranchesChanged;
+	public event EventHandler? ShowRemoteBranchesChanged;
+	public event EventHandler? ShowTagsChanged;
+	public event EventHandler? ShowStashChanged;
 
 	/// <summary>Create <see cref="SubjectColumn"/>.</summary>
 	/// <param name="painter">Painter for cell data.</param>
@@ -177,9 +178,9 @@ public sealed class SubjectColumn : CustomListBoxColumn
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		if(_enableExtender)
 		{
 			_extender = new SubjectColumnExtender(this);
@@ -188,16 +189,18 @@ public sealed class SubjectColumn : CustomListBoxColumn
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		if(_enableExtender)
 		{
-			Extender.Dispose();
-			Extender = null;
-			_extender.Dispose();
-			_extender = null;
+			if(Extender is not null)
+			{
+				Extender.Dispose();
+				Extender = null;
+			}
+			DisposableUtility.Dispose(ref _extender);
 		}
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
 	/// <inheritdoc/>

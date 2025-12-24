@@ -35,7 +35,7 @@ public sealed class ViewButton
 
 	public ViewButtonType Type { get; }
 
-	public Image Image { get; set; }
+	public Image? Image { get; set; }
 
 	internal void OnPaint(Graphics graphics, Dpi dpi, Rectangle bounds, bool focus, bool hover, bool pressed)
 	{

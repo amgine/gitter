@@ -25,24 +25,16 @@ using gitter.Framework.Controls;
 
 using Resources = gitter.GitLab.Properties.Resources;
 
-sealed class PipelinesViewFactory : ViewFactoryBase
+sealed class PipelinesViewFactory(GitLabGuiProvider guiProvider)
+	: ViewFactoryBase(Guids.PipelinesViewGuid, Resources.StrPipelines,
+		new ScaledImageProvider(CachedResources.ScaledBitmaps, @"pipelines"), singleton: true)
 {
-	public PipelinesViewFactory(GitLabGuiProvider guiProvider)
-		: base(Guids.PipelinesViewGuid, Resources.StrPipelines, new ScaledImageProvider(CachedResources.ScaledBitmaps, @"pipelines"), singleton: true)
-	{
-		Verify.Argument.IsNotNull(guiProvider);
-
-		GuiProvider = guiProvider;
-	}
-
-	private GitLabGuiProvider GuiProvider { get; }
-
 	/// <inheritdoc/>
 	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
 	{
 		return new PipelinesView(environment)
 		{
-			ServiceContext = GuiProvider.ServiceContext,
+			ServiceContext = guiProvider.ServiceContext,
 		};
 	}
 }

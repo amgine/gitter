@@ -26,43 +26,42 @@ using System.ComponentModel;
 /// <summary>Collection of <see cref="CustomListBoxItem"/>.</summary>
 public sealed class CustomListBoxItemsCollection : SafeNotifySortedCollection<CustomListBoxItem>
 {
-	private CustomListBox _listBox;
+	private CustomListBox? _listBox;
 
 	/// <summary>Create <see cref="CustomListBoxItemsCollection"/>.</summary>
 	/// <param name="listBox">Host <see cref="CustomListBox"/>.</param>
 	/// <param name="parent">Parent <see cref="CustomListBoxItem"/>.</param>
-	internal CustomListBoxItemsCollection(CustomListBox listBox, CustomListBoxItem parent)
+	internal CustomListBoxItemsCollection(CustomListBox? listBox, CustomListBoxItem? parent)
 	{
 		_listBox = listBox;
 		Parent = parent;
 	}
 
 	/// <summary><see cref="CustomListBox"/> which hosts this collection or <see cref="CustomListBoxItem"/> owning this collection.</summary>
-	internal CustomListBox ListBox
+	internal CustomListBox? ListBox
 	{
 		get => _listBox;
 		set
 		{
-			if(_listBox != value)
+			if(_listBox == value) return;
+
+			_listBox = value;
+			if(Items.Count != 0)
 			{
-				_listBox = value;
-				if(Items.Count != 0)
+				foreach(var item in Items)
 				{
-					foreach(var item in Items)
-					{
-						item.ListBox = value;
-					}
+					item.ListBox = value;
 				}
 			}
 		}
 	}
 
 	/// <summary><see cref="CustomListBoxItem"/> which owns this collection (null if collection is owned by <see cref="CustomListBox"/> itself).</summary>
-	internal CustomListBoxItem Parent { get; }
+	internal CustomListBoxItem? Parent { get; }
 
 	/// <summary>Gets the synchronization object.</summary>
 	/// <value>The synchronization object.</value>
-	protected override ISynchronizeInvoke SynchronizeInvoke => _listBox;
+	protected override ISynchronizeInvoke? SynchronizeInvoke => _listBox;
 
 	/// <summary>Frees the item.</summary>
 	/// <param name="item">The item.</param>

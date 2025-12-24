@@ -61,6 +61,6 @@ internal sealed class StashToolbar : ToolStrip
 		dpiBindings.BindImage(_saveButton, Icons.StashSave);
 	}
 
-	private void OnStashSaveButtonClick(object sender, EventArgs e)
+	private void OnStashSaveButtonClick(object? sender, EventArgs e)
 		=> _stashView.Gui.StartStashSaveDialog();
 }

@@ -26,13 +26,7 @@ using System.Text;
 /// <summary>Represents a single diff line.</summary>
 public sealed class DiffLine : ICloneable
 {
-	#region Data
-
 	private int _charPositions;
-
-	#endregion
-
-	#region .ctor
 
 	/// <summary>Create <see cref="DiffLine"/>.</summary>
 	/// <param name="state">Line state.</param>
@@ -52,8 +46,6 @@ public sealed class DiffLine : ICloneable
 		Nums	= nums;
 		Ending	= ending;
 	}
-
-	#endregion
 
 	public DiffLineState State { get; }
 
@@ -110,8 +102,6 @@ public sealed class DiffLine : ICloneable
 			_ => Text,
 		};
 
-	#region ICloneable
-
 	public DiffLine Clone() => new(
 		State,
 		(DiffLineState[])States.Clone(),
@@ -121,6 +111,4 @@ public sealed class DiffLine : ICloneable
 
 	/// <inheritdoc/>
 	object ICloneable.Clone() => Clone();
-
-	#endregion
 }

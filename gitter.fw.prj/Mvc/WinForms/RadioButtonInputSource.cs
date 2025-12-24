@@ -22,13 +22,9 @@ namespace gitter.Framework.Mvc.WinForms;
 
 using System.Windows.Forms;
 
-public class RadioButtonInputSource : ControlInputSource<RadioButton, bool>
+public class RadioButtonInputSource(RadioButton radionButton)
+	: ControlInputSource<RadioButton, bool>(radionButton)
 {
-	public RadioButtonInputSource(RadioButton radionButton)
-		: base(radionButton)
-	{
-	}
-
 	protected override bool FetchValue() => Control.Checked;
 
 	protected override void SetValue(bool value) => Control.Checked = value;
@@ -38,7 +34,7 @@ public class RadioButtonInputSource : ControlInputSource<RadioButton, bool>
 		Control.CheckedChanged += OnControlValueChanged;
 	}
 
-	protected override void UnsubscribeToValueChangeEvent()
+	protected override void UnsubscribeFromValueChangeEvent()
 	{
 		Control.CheckedChanged -= OnControlValueChanged;
 	}

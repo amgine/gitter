@@ -22,14 +22,9 @@ namespace gitter.Framework.CLI;
 
 using System;
 
-public sealed class TextLineReceivedEventArgs : EventArgs
+public sealed class TextLineReceivedEventArgs(string text) : EventArgs
 {
-	public TextLineReceivedEventArgs(string text)
-	{
-		Text = text;
-	}
-
-	public string Text { get; }
+	public string Text { get; } = text;
 
 	public override string ToString() => Text;
 }

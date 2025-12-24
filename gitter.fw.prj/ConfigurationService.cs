@@ -57,7 +57,7 @@ public sealed class ConfigurationService : IDisposable
 			{
 				Directory.CreateDirectory(_configPath);
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 				LoggingService.Global.Error(exc);
 			}
@@ -150,13 +150,13 @@ public sealed class ConfigurationService : IDisposable
 					{
 						config = new ConfigurationManager(adapter);
 					}
-					catch(Exception exc) when(!exc.IsCritical())
+					catch(Exception exc) when(!exc.IsCritical)
 					{
 						LoggingService.Global.Error(exc);
 					}
 				}
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 				LoggingService.Global.Error(exc);
 			}
@@ -179,7 +179,7 @@ public sealed class ConfigurationService : IDisposable
 				GetFullPath(configFile),
 				GetFullPath(Path.ChangeExtension(configFile, "bak")));
 		}
-		catch(Exception exc) when(!exc.IsCritical())
+		catch(Exception exc) when(!exc.IsCritical)
 		{
 			LoggingService.Global.Error(exc);
 		}

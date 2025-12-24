@@ -20,19 +20,18 @@
 
 namespace gitter.Git.Gui.Interfaces;
 
-using System.Collections.Generic;
-
+using gitter.Framework;
 using gitter.Framework.Mvc;
 
 interface IPushView : IView
 {
 	IUserInputSource<PushTo> PushTo { get; }
 
-	IUserInputSource<Remote> Remote { get; }
+	IUserInputSource<Remote?> Remote { get; }
 
-	IUserInputSource<string> Url { get; }
+	IUserInputSource<string?> Url { get; }
 
-	IUserInputSource<ICollection<Branch>> References { get; }
+	IUserInputSource<Many<Branch>> References { get; }
 
 	IUserInputSource<bool> ForceOverwrite { get; }
 

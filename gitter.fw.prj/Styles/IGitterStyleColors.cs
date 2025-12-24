@@ -26,10 +26,13 @@ public interface IGitterStyleColors
 {
 	Color WorkArea                      { get; }
 	Color Window                        { get; }
+	Color WindowFooter                  { get; }
+	Color WindowFooterSeparator         { get; }
 	Color ScrollBarSpacing              { get; }
 	Color Separator                     { get; }
 	Color Alternate                     { get; }
 	Color WindowText                    { get; }
+	Color AccentFill                    { get; }
 	Color GrayText                      { get; }
 	Color HyperlinkText                 { get; }
 	Color HyperlinkTextHotTrack         { get; }

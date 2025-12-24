@@ -112,7 +112,7 @@ public static class ArrayExtensions
 		return Array.AsReadOnly<T>(array);
 	}
 
-	public static T Find<T>(this T[] array, Predicate<T> match)
+	public static T? Find<T>(this T[] array, Predicate<T> match)
 	{
 		Verify.Argument.IsNotNull(array);
 
@@ -277,6 +277,6 @@ public static class ArrayExtensions
 	{
 		Verify.Argument.IsNotNull(array);
 
-		return Array.LastIndexOf<T>(array, value, count);
+		return Array.LastIndexOf<T>(array, value, startIndex, count);
 	}
 }

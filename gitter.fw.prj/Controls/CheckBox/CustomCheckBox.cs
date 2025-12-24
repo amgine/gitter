@@ -32,10 +32,11 @@ public class CustomCheckBox : Control
 
 	private CustomCheckBoxRenderer _renderer;
 	private CheckState _checkState;
-	private Image _image;
+	private Image? _image;
 	private bool _threeState;
 	private bool _isMouseOver;
 	private bool _isPressed;
+	private Rectangle? _bounds;
 
 	#endregion
 
@@ -57,10 +58,10 @@ public class CustomCheckBox : Control
 	}
 
 	protected virtual void OnIsCheckedChanged()
-		=> ((EventHandler)Events[IsCheckedChangedEvent])?.Invoke(this, EventArgs.Empty);
+		=> ((EventHandler?)Events[IsCheckedChangedEvent])?.Invoke(this, EventArgs.Empty);
 
 	protected virtual void OnCheckStateChanged()
-		=> ((EventHandler)Events[CheckStateChangedEvent])?.Invoke(this, EventArgs.Empty);
+		=> ((EventHandler?)Events[CheckStateChangedEvent])?.Invoke(this, EventArgs.Empty);
 
 	#endregion
 
@@ -77,7 +78,8 @@ public class CustomCheckBox : Control
 			ControlStyles.UserPaint, true);
 		SetStyle(
 			ControlStyles.ContainerControl |
-			ControlStyles.SupportsTransparentBackColor, false);
+			ControlStyles.SupportsTransparentBackColor |
+			ControlStyles.StandardDoubleClick, false);
 		_renderer = CustomCheckBoxRenderer.Default;
 		Size = new Size(86, 18);
 		TabStop = true;
@@ -123,16 +125,16 @@ public class CustomCheckBox : Control
 	}
 
 	[DefaultValue(null)]
-	public Image Image
+	public Image? Image
 	{
 		get => _image;
 		set
 		{
-			if(_image != value)
-			{
-				_image = value;
-				Invalidate();
-			}
+			if(_image == value) return;
+
+			_image = value;
+			Invalidate();
+			InvalidateBounds();
 		}
 	}
 
@@ -160,9 +162,27 @@ public class CustomCheckBox : Control
 		}
 	}
 
-	public bool IsMouseOver => _isMouseOver;
+	public bool IsMouseOver
+	{
+		get => _isMouseOver;
+		private set
+		{
+			if(_isMouseOver == value) return;
+			_isMouseOver = value;
+			Invalidate();
+		}
+	}
 
-	public bool IsPressed => _isPressed;
+	public bool IsPressed
+	{
+		get => _isPressed;
+		private set
+		{
+			if(_isPressed == value) return;
+			_isPressed = value;
+			Invalidate();
+		}
+	}
 
 	#endregion
 
@@ -186,9 +206,41 @@ public class CustomCheckBox : Control
 		}
 	}
 
+	private Rectangle GetVisualBounds()
+	{
+		if(_bounds.HasValue) return _bounds.Value;
+		_bounds = Renderer.Measure(this);
+		return _bounds.Value;
+	}
+
+	private void InvalidateBounds()
+	{
+		_bounds = default;
+	}
+
 	#endregion
 
 	#region Overrides
+
+	/// <inheritdoc/>
+	protected override void WndProc(ref Message m)
+	{
+		switch((Native.WM)m.Msg)
+		{
+			case Native.WM.NCHITTEST:
+				var x = Native.Macro.LOWORD(m.LParam);
+				var y = Native.Macro.HIWORD(m.LParam);
+				var p = PointToClient(new Point(x, y));
+				if(!GetVisualBounds().Contains(p))
+				{
+					m.Result = (IntPtr)(-1);
+					return;
+				}
+				break;
+
+		}
+		base.WndProc(ref m);
+	}
 
 	/// <inheritdoc/>
 	protected override void OnMouseClick(MouseEventArgs e)
@@ -221,8 +273,7 @@ public class CustomCheckBox : Control
 		switch(e.KeyCode)
 		{
 			case Keys.Space:
-				_isPressed = true;
-				Invalidate();
+				IsPressed = true;
 				break;
 		}
 	}
@@ -234,7 +285,7 @@ public class CustomCheckBox : Control
 		switch(e.KeyCode)
 		{
 			case Keys.Space:
-				_isPressed = false;
+				IsPressed = false;
 				CycleState();
 				break;
 		}
@@ -242,15 +293,30 @@ public class CustomCheckBox : Control
 
 	/// <inheritdoc/>
 	protected override void OnPaint(PaintEventArgs e)
-	{
-		Assert.IsNotNull(e);
+		=> Renderer.Render(e.Graphics, e.ClipRectangle, this);
 
-		Renderer.Render(e.Graphics, new Dpi(DeviceDpi), e.ClipRectangle, this);
+	/// <inheritdoc/>
+	protected override void OnPaintBackground(PaintEventArgs pevent) { }
+
+	/// <inheritdoc/>
+	protected override void OnSizeChanged(EventArgs e)
+	{
+		InvalidateBounds();
+		base.OnSizeChanged(e);
 	}
 
 	/// <inheritdoc/>
-	protected override void OnPaintBackground(PaintEventArgs pevent)
+	protected override void OnDpiChangedAfterParent(EventArgs e)
 	{
+		InvalidateBounds();
+		base.OnDpiChangedAfterParent(e);
+	}
+
+	/// <inheritdoc/>
+	protected override void OnFontChanged(EventArgs e)
+	{
+		InvalidateBounds();
+		base.OnFontChanged(e);
 	}
 
 	/// <inheritdoc/>
@@ -264,41 +330,44 @@ public class CustomCheckBox : Control
 	protected override void OnLostFocus(EventArgs e)
 	{
 		base.OnLostFocus(e);
-		_isPressed = false;
+		IsPressed = false;
 		Invalidate();
 	}
 
 	/// <inheritdoc/>
 	protected override void OnMouseEnter(EventArgs e)
 	{
-		_isMouseOver = true;
+		IsMouseOver = true;
 		base.OnMouseEnter(e);
-		Invalidate();
 	}
 
 	/// <inheritdoc/>
 	protected override void OnMouseLeave(EventArgs e)
 	{
-		_isMouseOver = false;
+		IsMouseOver = false;
 		base.OnMouseLeave(e);
-		Invalidate();
 	}
 
 	/// <inheritdoc/>
 	protected override void OnMouseDown(MouseEventArgs e)
 	{
-		_isPressed = true;
+		IsPressed = true;
 		base.OnMouseDown(e);
 		Focus();
-		Invalidate();
 	}
 
 	/// <inheritdoc/>
 	protected override void OnMouseUp(MouseEventArgs e)
 	{
-		_isPressed = false;
+		IsPressed = false;
 		base.OnMouseUp(e);
-		Invalidate();
+	}
+
+	/// <inheritdoc/>
+	protected override void OnTextChanged(EventArgs e)
+	{
+		InvalidateBounds();
+		base.OnTextChanged(e);
 	}
 
 	#endregion

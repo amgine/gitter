@@ -26,7 +26,7 @@ using System.Windows.Forms;
 
 public partial class MainForm : Form
 {
-	static Icon LoadWindowIcon()
+	static Icon? LoadWindowIcon()
 	{
 		using var stream = typeof(MainForm)
 			.Assembly
@@ -68,7 +68,7 @@ public partial class MainForm : Form
 		_process.BeginUpdate(_monitor);
 	}
 
-	private void OnUpdateSuccessful(object sender, EventArgs e)
+	private void OnUpdateSuccessful(object? sender, EventArgs e)
 	{
 		if(IsDisposed) return;
 		if(InvokeRequired)
@@ -87,7 +87,7 @@ public partial class MainForm : Form
 		}
 	}
 
-	private void OnUpdateFailed(object sender, UpdateFailedEventArgs e)
+	private void OnUpdateFailed(object? sender, UpdateFailedEventArgs e)
 	{
 		if(IsDisposed) return;
 		if(InvokeRequired)
@@ -107,7 +107,7 @@ public partial class MainForm : Form
 		}
 	}
 
-	private void OnUpdateCancelled(object sender, EventArgs e)
+	private void OnUpdateCancelled(object? sender, EventArgs e)
 	{
 		if(IsDisposed) return;
 		if(InvokeRequired)
@@ -126,7 +126,7 @@ public partial class MainForm : Form
 		}
 	}
 
-	private void OnCurrentProgressChanged(object sender, EventArgs e)
+	private void OnCurrentProgressChanged(object? sender, EventArgs e)
 	{
 		if(IsDisposed) return;
 		if(InvokeRequired)
@@ -145,7 +145,7 @@ public partial class MainForm : Form
 		}
 	}
 
-	private void OnMaximumProgressChanged(object sender, EventArgs e)
+	private void OnMaximumProgressChanged(object? sender, EventArgs e)
 	{
 		if(IsDisposed) return;
 		if(InvokeRequired)
@@ -164,7 +164,7 @@ public partial class MainForm : Form
 		}
 	}
 
-	private void OnStageChanged(object sender, EventArgs e)
+	private void OnStageChanged(object? sender, EventArgs e)
 	{
 		if(IsDisposed) return;
 		if(InvokeRequired)
@@ -183,7 +183,7 @@ public partial class MainForm : Form
 		}
 	}
 
-	private void OnCanCancelChanged(object sender, EventArgs e)
+	private void OnCanCancelChanged(object? sender, EventArgs e)
 	{
 		if(IsDisposed) return;
 		if(InvokeRequired)
@@ -205,7 +205,7 @@ public partial class MainForm : Form
 		}
 	}
 
-	private void OnCancelClick(object sender, EventArgs e)
+	private void OnCancelClick(object? sender, EventArgs e)
 	{
 		_btnCancel.Enabled = false;
 		_monitor.CancelRequested = true;

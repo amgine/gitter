@@ -35,8 +35,9 @@ partial class PipelinesView : GitLabViewBase, ISearchableView<PipelinesSearchOpt
 {
 	#region Data
 
+	private readonly PipelinesListBox _lstPipelines;
 	private readonly PipelinesToolbar _toolbar;
-	private PipelinesListBinding _dataSource;
+	private PipelinesListBinding? _dataSource;
 	private ISearchToolBarController _searchToolbar;
 	private PipelineScope? _scope;
 
@@ -47,20 +48,35 @@ partial class PipelinesView : GitLabViewBase, ISearchableView<PipelinesSearchOpt
 	public PipelinesView(IWorkingEnvironment environment)
 		: base(Guids.PipelinesViewGuid, environment)
 	{
-		InitializeComponent();
-		_lstPipelines.Text = Resources.StrsNoPipelinesToDisplay;
-
-		Text   = Resources.StrPipelines;
+		SuspendLayout();
+		Name = nameof(PipelinesView);
+		Text = Resources.StrPipelines;
+		_lstPipelines = new()
+		{
+			Dock        = DockStyle.Fill,
+			BorderStyle = BorderStyle.None,
+			Text        = Resources.StrsNoPipelinesToDisplay,
+			Parent      = this,
+		};
 		Search = new PipelinesSearch(_lstPipelines);
-
 		_searchToolbar = CreateSearchToolbarController<PipelinesView, PipelinesSearchToolBar, PipelinesSearchOptions>(this);
-
 		AddTopToolStrip(_toolbar = new PipelinesToolbar(this));
+		ResumeLayout(performLayout: false);
 
 		_lstPipelines.ItemActivated  += OnItemActivated;
 		_lstPipelines.PreviewKeyDown += OnKeyDown;
 
 		_toolbar.RefreshButton.Click += (_, _) => DataSource?.ReloadData();
+	}
+
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			DataSource = null;
+		}
+		base.Dispose(disposing);
 	}
 
 	#endregion
@@ -69,17 +85,16 @@ partial class PipelinesView : GitLabViewBase, ISearchableView<PipelinesSearchOpt
 
 	public override IImageProvider ImageProvider { get; } = new ScaledImageProvider(CachedResources.ScaledBitmaps, @"pipelines");
 
-	private PipelinesListBinding DataSource
+	private PipelinesListBinding? DataSource
 	{
 		get => _dataSource;
 		set
 		{
-			if(_dataSource != value)
-			{
-				_dataSource?.Dispose();
-				_dataSource = value;
-				_dataSource?.ReloadData();
-			}
+			if(_dataSource == value) return;
+
+			_dataSource?.Dispose();
+			_dataSource = value;
+			_dataSource?.ReloadData();
 		}
 	}
 
@@ -111,7 +126,7 @@ partial class PipelinesView : GitLabViewBase, ISearchableView<PipelinesSearchOpt
 		DataSource = new PipelinesListBinding(serviceContext, _lstPipelines);
 	}
 
-	private void OnItemActivated(object sender, ItemEventArgs e)
+	private void OnItemActivated(object? sender, ItemEventArgs e)
 	{
 		if(e.Item is PipelineListItem item)
 		{
@@ -147,7 +162,7 @@ partial class PipelinesView : GitLabViewBase, ISearchableView<PipelinesSearchOpt
 		base.OnPreviewKeyDown(e);
 	}
 
-	private void OnKeyDown(object sender, PreviewKeyDownEventArgs e)
+	private void OnKeyDown(object? sender, PreviewKeyDownEventArgs e)
 	{
 		Assert.IsNotNull(e);
 

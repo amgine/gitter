@@ -21,7 +21,6 @@
 namespace gitter.Framework.Controls;
 
 using System;
-using System.Windows.Forms;
 
 public interface IPicker<T>
 {
@@ -29,5 +28,5 @@ public interface IPicker<T>
 
 	CustomListBoxItemsCollection DropDownItems { get; }
 
-	T SelectedValue { get; set; }
+	T? SelectedValue { get; set; }
 }

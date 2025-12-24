@@ -22,8 +22,6 @@ namespace gitter.Framework.Services;
 
 using System;
 
-#nullable enable
-
 public readonly struct LogEvent
 {
 	public readonly string Source;

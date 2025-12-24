@@ -60,12 +60,12 @@ public sealed class PopupNotificationHeader : Control
 
 	#endregion
 
-	private void OnButtonClick(object sender, ViewButtonClickEventArgs e)
+	private void OnButtonClick(object? sender, ViewButtonClickEventArgs e)
 	{
 		switch(e.Button)
 		{
 			case ViewButtonType.Close:
-				FindForm().Close();
+				FindForm()?.Close();
 				break;
 		}
 	}

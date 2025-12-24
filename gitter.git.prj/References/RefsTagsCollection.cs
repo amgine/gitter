@@ -33,6 +33,30 @@ using Resources = gitter.Git.Properties.Resources;
 /// <summary>Repository tags collection ($GIT_DIR/refs/tags cache).</summary>
 public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 {
+	sealed class Updater(RefsTagsCollection collection)
+		: CacheUpdater<string, Tag, TagData>(collection._dictionary, collection.SyncRoot)
+	{
+		protected override Tag CreateObject(TagData data)
+			=> ObjectFactories.CreateTag(collection.Repository, data);
+
+		protected override void UpdateObject(Tag @object, TagData data)
+			=> ObjectFactories.UpdateTag(@object, data);
+
+		protected override string GetKey(Tag data)
+			=> data.Name;
+
+		protected override string GetKey(TagData data)
+			=> data.Name;
+
+		protected override void OnObjectAdded(Tag @object)
+			=> collection.InvokeObjectAdded(@object);
+
+		protected override void OnObjectRemoved(Tag @object)
+			=> collection.InvokeObjectRemoved(@object);
+	}
+
+	private readonly Updater _updater;
+
 	#region .ctor
 
 	/// <summary>Initializes a new instance of the <see cref="RefsTagsCollection"/> class.</summary>
@@ -41,6 +65,7 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 	internal RefsTagsCollection(Repository repository)
 		: base(repository)
 	{
+		_updater = new(this);
 	}
 
 	#endregion
@@ -65,12 +90,13 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 		Verify.Argument.IsFalse(ContainsObjectName(name), nameof(name),
 			Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat("Tag"));
 
-		var rev = revision.Dereference();
+		var rev = revision.Dereference()
+			?? throw new ArgumentException("Could not dereference the specified revision pointer.", nameof(revision));
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.TagChanged))
 		{
 			Repository.Accessor.CreateTag.Invoke(
-				new CreateTagParameters(name, revision.Pointer));
+				new CreateTagRequest(name, revision.Pointer));
 		}
 		var tag = new Tag(Repository, name, rev, TagType.Lightweight);
 		AddObject(tag);
@@ -100,12 +126,13 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 			Resources.ExcObjectWithThisNameAlreadyExists.UseAsFormat(nameof(Tag)));
 		Verify.Argument.IsNotNull(message);
 
-		var rev = revision.Dereference();
+		var rev = revision.Dereference()
+			?? throw new ArgumentException("Could not dereference the specified revision pointer.", nameof(revision));
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.TagChanged))
 		{
 			Repository.Accessor.CreateTag.Invoke(
-				new CreateTagParameters(name, revision.Pointer, message, sign));
+				new CreateTagRequest(name, revision.Pointer, MessageSpecification.FromText(message), sign));
 		}
 		var tag = new Tag(Repository, name, rev, TagType.Annotated);
 		AddObject(tag);
@@ -136,12 +163,13 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 		Verify.Argument.IsNotNull(message);
 		Verify.Argument.IsNotNull(keyId);
 
-		var rev = revision.Dereference();
+		var rev = revision.Dereference()
+			?? throw new ArgumentException("Could not dereference the specified revision pointer.", nameof(revision));
 		using(Repository.Monitor.BlockNotifications(
 			RepositoryNotifications.TagChanged))
 		{
 			Repository.Accessor.CreateTag.Invoke(
-				new CreateTagParameters(name, revision.Pointer, message, keyId));
+				new CreateTagRequest(name, revision.Pointer, MessageSpecification.FromText(message), keyId));
 		}
 		var tag = new Tag(Repository, name, rev, TagType.Annotated);
 		AddObject(tag);
@@ -171,7 +199,7 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 			RepositoryNotifications.TagChanged))
 		{
 			Repository.Accessor.DeleteTag
-				.Invoke(new DeleteTagParameters(tag.Name));
+				.Invoke(new DeleteTagRequest(tag.Name));
 		}
 		RemoveObject(tag);
 	}
@@ -195,7 +223,7 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 			RepositoryNotifications.TagChanged))
 		{
 			await Repository.Accessor.DeleteTag
-				.InvokeAsync(new DeleteTagParameters(tag.Name));
+				.InvokeAsync(new DeleteTagRequest(tag.Name));
 		}
 		RemoveObject(tag);
 	}
@@ -204,36 +232,19 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 
 	#region Refresh()
 
-	private void RefreshInternal(IEnumerable<TagData> tagDataList)
-	{
-		lock(SyncRoot)
-		{
-			CacheUpdater.UpdateObjectDictionary(
-				ObjectStorage,
-				null,
-				null,
-				tagDataList,
-				tagData => ObjectFactories.CreateTag(Repository, tagData),
-				ObjectFactories.UpdateTag,
-				InvokeObjectAdded,
-				InvokeObjectRemoved,
-				true);
-		}
-	}
-
 	/// <summary>Sync information on tags: removes non-existent, adds new, verifies positions.</summary>
 	public void Refresh()
 	{
 		var tags = Repository.Accessor.QueryTags.Invoke(
-			new QueryTagsParameters());
-		RefreshInternal(tags);
+			new QueryTagsRequest());
+		_updater.Update(tags);
 	}
 
 	internal void Refresh(IEnumerable<TagData> tagDataList)
 	{
 		Verify.Argument.IsNotNull(tagDataList);
 
-		RefreshInternal(tagDataList);
+		_updater.Update(tagDataList);
 	}
 
 	/// <summary>Refresh tag's position (remove tag if it doesn't exist anymore and recreate if position differs).</summary>
@@ -243,7 +254,7 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 		Verify.Argument.IsValidGitObject(tag, Repository);
 
 		var tagData = Repository.Accessor.QueryTag
-			.Invoke(new QueryTagParameters(tag.Name));
+			.Invoke(new QueryTagRequest(tag.Name));
 		if(tagData is not null)
 		{
 			ObjectFactories.UpdateTag(tag, tagData);
@@ -261,7 +272,7 @@ public sealed class RefsTagsCollection : GitObjectsCollection<Tag, TagEventArgs>
 		Verify.Argument.IsValidGitObject(tag, Repository);
 
 		var tagData = await Repository.Accessor.QueryTag
-			.InvokeAsync(new QueryTagParameters(tag.Name))
+			.InvokeAsync(new QueryTagRequest(tag.Name))
 			.ConfigureAwait(continueOnCapturedContext: false);
 		if(tagData is not null)
 		{

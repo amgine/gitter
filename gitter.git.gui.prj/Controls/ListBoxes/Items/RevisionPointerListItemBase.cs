@@ -22,13 +22,8 @@ namespace gitter.Git.Gui.Controls;
 
 using gitter.Framework.Controls;
 
-public abstract class RevisionPointerListItemBase<T> : CustomListBoxItem<T>, IRevisionPointerListItem
+public abstract class RevisionPointerListItemBase<T>(T data) : CustomListBoxItem<T>(data), IRevisionPointerListItem
 	where T : IRevisionPointer
 {
-	protected RevisionPointerListItemBase(T data)
-		: base(data)
-	{
-	}
-
 	IRevisionPointer IRevisionPointerListItem.RevisionPointer => DataContext;
 }

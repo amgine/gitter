@@ -50,15 +50,16 @@ public abstract class ViewFactoryBase : IViewFactory
 	/// <summary>Closes all tools, created by this factory.</summary>
 	public void CloseAllViews()
 	{
-		while(_createdViews.Count != 0)
+		while(_createdViews.First is { } view)
 		{
-			_createdViews.First.Value.Close();
+			view.Value.Close();
 		}
 	}
 
-	private void OnViewDisposed(object sender, EventArgs e)
+	private void OnViewDisposed(object? sender, EventArgs e)
 	{
-		var view = (ViewBase)sender;
+		if(sender is not ViewBase view) return;
+
 		view.Disposed -= OnViewDisposed;
 		lock(_createdViews)
 		{
@@ -78,14 +79,11 @@ public abstract class ViewFactoryBase : IViewFactory
 	{
 		Verify.Argument.IsNotNull(environment);
 
-		var view = CreateViewCore(environment);
-		if(view is not null)
+		var view = CreateViewCore(environment) ?? throw new InvalidOperationException();
+		lock(_createdViews)
 		{
-			lock(_createdViews)
-			{
-				_createdViews.AddLast(view);
-				view.Disposed += OnViewDisposed;
-			}
+			_createdViews.AddLast(view);
+			view.Disposed += OnViewDisposed;
 		}
 		return view;
 	}

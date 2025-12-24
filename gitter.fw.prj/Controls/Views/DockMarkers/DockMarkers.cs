@@ -25,8 +25,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-#nullable enable
-
 /// <summary>Manages collection of docking markers.</summary>
 /// <typeparam name="T">Type of dock marker.</typeparam>
 abstract class DockMarkers<T> : IDockMarkerProvider, IDisposable
@@ -70,12 +68,10 @@ abstract class DockMarkers<T> : IDockMarkerProvider, IDisposable
 		Verify.State.IsFalse(MarkersVisible);
 
 		_markers = CreateMarkers(dockClient);
-		if(_markers is not null)
+		if(_markers is null) return;
+		foreach(var marker in _markers)
 		{
-			foreach(var marker in _markers)
-			{
-				marker.Show();
-			}
+			marker.Show();
 		}
 	}
 
@@ -92,15 +88,13 @@ abstract class DockMarkers<T> : IDockMarkerProvider, IDisposable
 	/// </returns>
 	public bool UpdateHover(Point position)
 	{
-		bool result = false;
-		if(_markers is not null)
+		if(_markers is null) return false;
+		var result = false;
+		foreach(var marker in _markers)
 		{
-			foreach(var marker in _markers)
+			if(marker.UpdateHover(position))
 			{
-				if(marker.UpdateHover(position))
-				{
-					result = true;
-				}
+				result = true;
 			}
 		}
 		return result;
@@ -111,26 +105,23 @@ abstract class DockMarkers<T> : IDockMarkerProvider, IDisposable
 	/// </summary>
 	public void Unhover()
 	{
-		if(_markers is not null)
+		if(_markers is null) return;
+		foreach(var marker in _markers)
 		{
-			foreach(var marker in _markers)
-			{
-				marker.Unhover();
-			}
+			marker.Unhover();
 		}
 	}
 
 	/// <summary>Hides and disposes all dock markers.</summary>
 	public void Hide()
 	{
-		if(_markers is not null)
+		if(_markers is null) return;
+
+		foreach(var marker in _markers)
 		{
-			foreach(var marker in _markers)
-			{
-				marker.Dispose();
-			}
-			_markers = null;
+			marker.Dispose();
 		}
+		_markers = null;
 	}
 
 	/// <summary>
@@ -146,13 +137,11 @@ abstract class DockMarkers<T> : IDockMarkerProvider, IDisposable
 	/// <returns>Position for docking client control.</returns>
 	public DockResult HitTest(Point position)
 	{
-		if(_markers is not null)
+		if(_markers is null) return DockResult.None;
+		foreach(var marker in _markers)
 		{
-			foreach(var marker in _markers)
-			{
-				var test = marker.HitTest(position);
-				if(test != DockResult.None) return test;
-			}
+			var test = marker.HitTest(position);
+			if(test != DockResult.None) return test;
 		}
 		return DockResult.None;
 	}

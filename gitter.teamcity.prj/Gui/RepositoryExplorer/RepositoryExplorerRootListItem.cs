@@ -22,16 +22,20 @@ namespace gitter.TeamCity.Gui;
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using gitter.Framework;
 using gitter.Framework.Controls;
+using gitter.Framework.Services;
 
 using Resources = gitter.TeamCity.Properties.Resources;
 
 sealed class RepositoryExplorerRootListItem : RepositoryExplorerItemBase
 {
-	private Project _project;
+	static readonly LoggingService Log = new("TeamCity");
+
+	private Project? _project;
 
 	public RepositoryExplorerRootListItem(IWorkingEnvironment env, TeamCityGuiProvider guiProvider)
 		: base(env, guiProvider, Icons.TeamCity, Resources.StrTeamCity)
@@ -46,27 +50,10 @@ sealed class RepositoryExplorerRootListItem : RepositoryExplorerItemBase
 		return menu;
 	}
 
-	private void OnProjectBuildTypesUpdated(IAsyncResult ar)
-	{
-		var action = (Action)ar.AsyncState;
-		try
-		{
-			action.EndInvoke(ar);
-		}
-		catch
-		{
-			return;
-		}
-		var listBox = ListBox;
-		if(listBox != null)
-		{
-			listBox.BeginInvoke(new MethodInvoker(AddBuildTypes));
-		}
-	}
-
 	private void AddBuildTypes()
 	{
 		Items.Clear();
+		if(_project is null) return;
 		lock(_project.BuildTypes.SyncRoot)
 		{
 			foreach(var buildType in _project.BuildTypes)
@@ -78,34 +65,54 @@ sealed class RepositoryExplorerRootListItem : RepositoryExplorerItemBase
 		}
 	}
 
-	private void OnBuildTypeItemActivated(object sender, EventArgs e)
+	private void OnBuildTypeItemActivated(object? sender, EventArgs e)
 	{
-		var item = (BuildTypeListItem)sender;
+		if(sender is not BuildTypeListItem item) return;
+
 		var buildType = item.DataContext;
 
 		var view = WorkingEnvironment.ViewDockService.ShowView(
 			Views.Guids.BuildTypeBuildsViewGuid,
 			new Views.BuildTypeBuildsViewModel(buildType),
 			true) as TeamCityViewBase;
-		if(view != null)
+		if(view is not null)
 		{
 			view.ServiceContext = ServiceContext;
 		}
 	}
 
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 
 		Items.Clear();
 		_project = ServiceContext.Projects.Lookup(ServiceContext.DefaultProjectId);
-		var action = new Action(_project.BuildTypes.Refresh);
-		action.BeginInvoke(OnProjectBuildTypesUpdated, action);
+		Add();
 	}
 
-	protected override void OnListBoxDetached()
+	private async void Add()
 	{
-		base.OnListBoxDetached();
+		if(_project is not null)
+		{
+			try
+			{
+				await _project.BuildTypes.RefreshAsync();
+			}
+			catch(Exception exc) when(!exc.IsCritical)
+			{
+				Log.Error(exc, "Failed to fetch TeamCity build types.");
+			}
+		}
+		var listBox = ListBox;
+		if(listBox is not null)
+		{
+			AddBuildTypes();
+		}
+	}
+
+	protected override void OnListBoxDetached(CustomListBox listBox)
+	{
+		base.OnListBoxDetached(listBox);
 
 		Items.Clear();
 	}

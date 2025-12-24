@@ -31,9 +31,18 @@ public partial class ProcessOverlayControl : UserControl
 
 	public ProcessOverlayControl()
 	{
-		InitializeComponent();
-
+		AutoScaleMode = AutoScaleMode.Dpi;
 		_overlay = new ProcessOverlay(this);
+	}
+
+	/// <inheritdoc/>
+	protected override void Dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			_overlay.Dispose();
+		}
+		base.Dispose(disposing);
 	}
 
 	/// <inheritdoc/>

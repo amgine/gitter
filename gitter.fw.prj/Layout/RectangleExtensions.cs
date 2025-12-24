@@ -26,15 +26,18 @@ using System.Windows.Forms;
 
 public static class RectangleExtensions
 {
-	public static Rectangle WithPadding(this Rectangle rectangle, Padding padding) => new(
-		x: rectangle.X + padding.Left,
-		y: rectangle.Y + padding.Top,
-		width:  rectangle.Width  - padding.Horizontal,
-		height: rectangle.Height - padding.Vertical);
+	extension(Rectangle rectangle)
+	{
+		public Rectangle WithPadding(Padding padding) => new(
+			x: rectangle.X + padding.Left,
+			y: rectangle.Y + padding.Top,
+			width:  rectangle.Width  - padding.Horizontal,
+			height: rectangle.Height - padding.Vertical);
 
-	public static Rectangle WithMargin(this Rectangle rectangle, Padding margin) => new(
-		x: rectangle.X - margin.Left,
-		y: rectangle.Y - margin.Top,
-		width:  rectangle.Width  + margin.Horizontal,
-		height: rectangle.Height + margin.Vertical);
+		public Rectangle WithMargin(Padding margin) => new(
+			x: rectangle.X - margin.Left,
+			y: rectangle.Y - margin.Top,
+			width:  rectangle.Width  + margin.Horizontal,
+			height: rectangle.Height + margin.Vertical);
+	}
 }

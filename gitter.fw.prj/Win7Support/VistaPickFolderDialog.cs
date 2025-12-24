@@ -252,7 +252,7 @@ static class VistaPickFolderDialog
 		return str;
 	}
 
-	public static string Show(IWin32Window parent)
+	public static string? Show(IWin32Window parent)
 	{
 		var dialog = default(IFileDialog);
 		try

@@ -42,7 +42,7 @@ public interface IWorkingEnvironment : ISynchronizeInvoke
 
 	IEnumerable<IRepositoryProvider> RepositoryProviders { get; }
 
-	T GetRepositoryProvider<T>() where T : class, IRepositoryProvider;
+	T? GetRepositoryProvider<T>() where T : class, IRepositoryProvider;
 
 	IEnumerable<IRepositoryServiceProvider> IssueTrackerProviders { get; }
 
@@ -56,11 +56,11 @@ public interface IWorkingEnvironment : ISynchronizeInvoke
 	INotificationService NotificationService { get; }
 
 
-	IRepositoryProvider FindProviderForDirectory(string workingDirectory);
+	IRepositoryProvider? FindProviderForDirectory(string workingDirectory);
 
-	IRepositoryProvider ActiveRepositoryProvider { get; }
+	IRepositoryProvider? ActiveRepositoryProvider { get; }
 
-	IRepository ActiveRepository { get; }
+	IRepository? ActiveRepository { get; }
 
 	bool OpenRepository(string path);
 

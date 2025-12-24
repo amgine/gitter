@@ -23,13 +23,8 @@ namespace gitter.Framework.Controls;
 using System;
 using System.Collections.Generic;
 
-public class ItemsContextMenuRequestEventArgs : ContextMenuRequestEventArgs
+public class ItemsContextMenuRequestEventArgs(ICollection<CustomListBoxItem> items, CustomListBoxColumn? column, int columnIndex, int x, int y)
+	: ContextMenuRequestEventArgs(column, columnIndex, x, y)
 {
-	public ItemsContextMenuRequestEventArgs(ICollection<CustomListBoxItem> items, CustomListBoxColumn column, int columnIndex, int x, int y)
-		: base(column, columnIndex, x, y)
-	{
-		Items = items;
-	}
-
-	public ICollection<CustomListBoxItem> Items { get; }
+	public ICollection<CustomListBoxItem> Items { get; } = items;
 }

@@ -20,9 +20,6 @@
 
 namespace gitter.Redmine.Gui;
 
-using System;
-using System.Collections.Generic;
-
 interface ISearchableView<T>
 	where T : SearchOptions
 {

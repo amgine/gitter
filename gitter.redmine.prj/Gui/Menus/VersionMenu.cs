@@ -37,6 +37,8 @@ public sealed class VersionMenu : ContextMenuStrip
 	{
 		Verify.Argument.IsNotNull(version);
 
+		Renderer = GitterApplication.Style.ToolStripRenderer;
+
 		Version = version;
 
 		var dpiBindings = new DpiBindings(this);

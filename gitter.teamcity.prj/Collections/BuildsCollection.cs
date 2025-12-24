@@ -21,8 +21,12 @@
 namespace gitter.TeamCity;
 
 using System;
-using System.Collections.Generic;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
+
+using gitter.Framework;
 
 public sealed class BuildsCollection : TeamCityObjectsCache<Build>
 {
@@ -33,12 +37,46 @@ public sealed class BuildsCollection : TeamCityObjectsCache<Build>
 	{
 	}
 
-	public Build[] Query(BuildLocator locator)
+	private static string GetUrl(BuildLocator locator)
+	{
+		var url = new StringBuilder(QUERY);
+		url.Append(locator.ToString());
+		url.Append("&fields=");
+		url.Append("count");
+		url.Append(',');
+		url.Append("build(");
+		url.Append("id,");
+		url.Append("number,");
+		url.Append("buildTypeId,");
+		url.Append("branchName,");
+		url.Append("defaultBranch,");
+		url.Append("queuedDate,");
+		url.Append("startDate,");
+		url.Append("finishDate,");
+		url.Append("history,");
+		url.Append("composite,");
+		url.Append("statusText,");
+		url.Append("status,");
+		url.Append("state,");
+		url.Append("failedToStart,");
+		url.Append("personal,");
+		url.Append("detachedFromAgent,");
+		url.Append("finishOnAgentDate,");
+		url.Append("connected,");
+		url.Append("webUrl");
+		url.Append(')');
+		return url.ToString();
+	}
+
+	public async Task<Build[]> QueryAsync(BuildLocator locator, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(locator);
 
-		var xml = Context.GetXml(QUERY + locator.ToString());
+		var xml = await Context
+			.GetXmlAsync(GetUrl(locator), cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
 		var root = xml["builds"];
+		if(root is null) return Preallocated<Build>.EmptyArray;
 		var result = new Build[TeamCityUtility.LoadInt(root.Attributes["count"])];
 		int id = 0;
 		foreach(XmlElement node in root.ChildNodes)
@@ -48,21 +86,26 @@ public sealed class BuildsCollection : TeamCityObjectsCache<Build>
 		return result;
 	}
 
-	public void UpdateCache(BuildLocator locator)
+	public async Task UpdateCacheAsync(BuildLocator locator, CancellationToken cancellationToken = default)
 	{
 		Verify.Argument.IsNotNull(locator);
 
-		var xml = Context.GetXml(QUERY + locator.ToString());
-		var root = xml["builds"];
-		foreach(XmlElement node in root.ChildNodes)
+		var xml = await Context
+			.GetXmlAsync(GetUrl(locator), cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+		var builds = xml["builds"];
+		if(builds is not null)
 		{
-			Lookup(node);
+			foreach(XmlElement node in builds.ChildNodes)
+			{
+				Lookup(node);
+			}
 		}
 	}
 
 	protected override Build Create(string id)
-		=> new Build(Context, id);
+		=> new(Context, id);
 
 	protected override Build Create(XmlNode node)
-		=> new Build(Context, node);
+		=> new(Context, node);
 }

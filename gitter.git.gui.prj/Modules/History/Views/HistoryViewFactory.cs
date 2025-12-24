@@ -22,10 +22,5 @@ namespace gitter.Git.Gui.Views;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
 
-sealed class HistoryViewFactory : GitViewFactoryBase<HistoryView>
-{
-	public HistoryViewFactory()
-		: base(Guids.HistoryViewGuid, Resources.StrHistory, Icons.History, singleton: true)
-	{
-	}
-}
+sealed class HistoryViewFactory() : GitViewFactoryBase<HistoryView>(
+	Guids.HistoryViewGuid, Resources.StrHistory, Icons.History, singleton: true);

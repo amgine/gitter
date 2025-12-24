@@ -35,8 +35,8 @@ using Resources = gitter.Git.Gui.Properties.Resources;
 [ToolboxItem(false)]
 class GraphColumnExtender : ExtenderBase
 {
-	private ICheckBoxWidget _chkShowColors;
-	private ICheckBoxWidget _chkFillBackground;
+	private ICheckBoxWidget? _chkShowColors;
+	private ICheckBoxWidget? _chkFillBackground;
 	private bool _disableEvents;
 
 	/// <summary>Create <see cref="GraphColumnExtender"/>.</summary>
@@ -61,11 +61,8 @@ class GraphColumnExtender : ExtenderBase
 	{
 		if(disposing)
 		{
-			if(_chkShowColors is not null)
-			{
-				_chkShowColors.Dispose();
-				_chkShowColors = null;
-			}
+			DisposableUtility.Dispose(ref _chkShowColors);
+			DisposableUtility.Dispose(ref _chkFillBackground);
 			UnsubscribeFromColumnEvents();
 		}
 		base.Dispose(disposing);
@@ -83,13 +80,13 @@ class GraphColumnExtender : ExtenderBase
 		var conv = DpiConverter.FromDefaultTo(Dpi.FromControl(this));
 
 		_chkShowColors?.Dispose();
-		_chkShowColors = Style.CreateCheckBox();
+		_chkShowColors = Style.CheckBoxFactory.Create();
 		_chkShowColors.IsChecked = Column.ShowColors;
 		_chkShowColors.IsCheckedChanged += OnShowColorsCheckedChanged;
 		_chkShowColors.Text = Resources.StrShowColors;
 
 		_chkFillBackground?.Dispose();
-		_chkFillBackground = Style.CreateCheckBox();
+		_chkFillBackground = Style.CheckBoxFactory.Create();
 		_chkFillBackground.IsChecked = Column.FillBackground;
 		_chkFillBackground.IsCheckedChanged += OnFillBackgroundCheckedChanged;
 		_chkFillBackground.Text = Resources.StrFillBackground;
@@ -99,16 +96,16 @@ class GraphColumnExtender : ExtenderBase
 		{
 			Content = new Grid(
 				padding: DpiBoundValue.Padding(new Padding(6, 2, 6, 2)),
-				rows: new[]
-				{
+				rows:
+				[
 					SizeSpec.Absolute(23),
 					SizeSpec.Absolute(23),
-				},
-				content: new[]
-				{
+				],
+				content:
+				[
 					new GridContent(new ControlContent(_chkShowColors.Control,     marginOverride: noMargin), row: 0),
 					new GridContent(new ControlContent(_chkFillBackground.Control, marginOverride: noMargin), row: 1),
-				}),
+				]),
 		};
 
 		_chkShowColors.Control.Parent     = this;
@@ -157,33 +154,31 @@ class GraphColumnExtender : ExtenderBase
 		}
 	}
 
-	private void OnColumnShowColorsChanged(object sender, EventArgs e)
+	private void OnColumnShowColorsChanged(object? sender, EventArgs e)
 	{
 		ShowColors = Column.ShowColors;
 	}
 
-	private void OnShowColorsCheckedChanged(object sender, EventArgs e)
+	private void OnShowColorsCheckedChanged(object? sender, EventArgs e)
 	{
-		if(!_disableEvents)
-		{
-			_disableEvents = true;
-			Column.ShowColors = _chkShowColors.IsChecked;
-			_disableEvents = false;
-		}
+		if(_disableEvents) return;
+
+		_disableEvents = true;
+		Column.ShowColors = sender is ICheckBoxWidget { IsChecked: true };
+		_disableEvents = false;
 	}
 
-	private void OnColumnFillBackgroundChanged(object sender, EventArgs e)
+	private void OnColumnFillBackgroundChanged(object? sender, EventArgs e)
 	{
 		FillBackground = Column.FillBackground;
 	}
 
-	private void OnFillBackgroundCheckedChanged(object sender, EventArgs e)
+	private void OnFillBackgroundCheckedChanged(object? sender, EventArgs e)
 	{
-		if(!_disableEvents)
-		{
-			_disableEvents = true;
-			Column.FillBackground = _chkFillBackground.IsChecked;
-			_disableEvents = false;
-		}
+		if(_disableEvents) return;
+
+		_disableEvents = true;
+		Column.FillBackground = sender is ICheckBoxWidget { IsChecked: true };
+		_disableEvents = false;
 	}
 }

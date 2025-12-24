@@ -24,39 +24,40 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
+#nullable enable
+
 public static class ExceptionExtensions
 {
-	public static bool IsCritical(this Exception exception)
+	extension(Exception? exception)
 	{
-		Assert.IsNotNull(exception);
-
-		return exception
+		public bool IsCritical
+			=> exception
 			is NullReferenceException
 			or StackOverflowException
 			or OutOfMemoryException
 			or ThreadAbortException
 			or IndexOutOfRangeException
 			or AccessViolationException;
-	}
 
-	public static IEnumerable<Exception> AsEnumerable(this Exception exception)
-	{
-		while(exception is not null)
+		public IEnumerable<Exception> AsEnumerable()
 		{
-			yield return exception;
-			if(exception is AggregateException aggregate)
+			while(exception is not null)
 			{
-				foreach(var innerException in aggregate.InnerExceptions)
+				yield return exception;
+				if(exception is AggregateException aggregate)
 				{
-					foreach(var exc in innerException.AsEnumerable())
+					foreach(var innerException in aggregate.InnerExceptions)
 					{
-						yield return exc;
+						foreach(var exc in innerException.AsEnumerable())
+						{
+							yield return exc;
+						}
 					}
 				}
-			}
-			else
-			{
-				exception = exception.InnerException;
+				else
+				{
+					exception = exception.InnerException;
+				}
 			}
 		}
 	}

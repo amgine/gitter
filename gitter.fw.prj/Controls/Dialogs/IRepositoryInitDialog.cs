@@ -24,5 +24,5 @@ using gitter.Framework.Mvc;
 
 public interface IRepositoryInitDialog
 {
-	IUserInputSource<string> RepositoryPath { get; }
+	IUserInputSource<string?> RepositoryPath { get; }
 }

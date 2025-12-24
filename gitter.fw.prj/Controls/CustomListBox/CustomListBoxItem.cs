@@ -32,17 +32,17 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	#region Events
 
 	/// <summary>Item is activated.</summary>
-	public event EventHandler Activated;
+	public event EventHandler? Activated;
 	/// <summary>Item's <see cref="CheckedState"/> changed.</summary>
-	public event EventHandler CheckedStateChanged;
+	public event EventHandler? CheckedStateChanged;
 	/// <summary>Context menu requested.</summary>
-	public event EventHandler<ItemContextMenuRequestEventArgs> ContextMenuRequested;
+	public event EventHandler<ItemContextMenuRequestEventArgs>? ContextMenuRequested;
 
 	#endregion
 
 	#region Data
 
-	private CustomListBoxItem _parent;
+	private CustomListBoxItem? _parent;
 	private bool _isSelected;
 	private bool _isExpanded;
 	private CheckedState _checkedState = CheckedState.Unchecked;
@@ -65,19 +65,19 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 
 	#region Event Handlers
 
-	private void OnItemsChanging(object sender, NotifyCollectionEventArgs e)
+	private void OnItemsChanging(object? sender, NotifyCollectionEventArgs e)
 	{
-		if(IsAttachedToListBox && IsPresented)
+		if(IsPresented)
 		{
-			ListBox.OnItemsChanging(sender, e);
+			ListBox?.OnItemsChanging(sender, e);
 		}
 	}
 
-	private void OnItemsChanged(object sender, NotifyCollectionEventArgs e)
+	private void OnItemsChanged(object? sender, NotifyCollectionEventArgs e)
 	{
-		if(IsAttachedToListBox && IsPresented)
+		if(IsPresented)
 		{
-			ListBox.OnItemsChanged(sender, e);
+			ListBox?.OnItemsChanged(sender, e);
 		}
 	}
 
@@ -86,24 +86,23 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	#region Properties
 
 	/// <summary>Parent item. Null if item's root is listbox itself.</summary>
-	public CustomListBoxItem Parent
+	public CustomListBoxItem? Parent
 	{
 		get => _parent;
 		internal set
 		{
-			if(_parent != value)
-			{
-				_parent = value;
-				_cachedLevel = -1;
-				OnParentChanged();
-			}
+			if(_parent == value) return;
+
+			_parent = value;
+			_cachedLevel = -1;
+			OnParentChanged();
 		}
 	}
 
 	/// <summary>Gets the collection of items, containing this item.</summary>
 	/// <value>Collection of items, containing this item.</value>
-	private CustomListBoxItemsCollection ParentItems
-		=> _parent == null
+	private CustomListBoxItemsCollection? ParentItems
+		=> _parent is null
 			? ListBox?.Items
 			: _parent.Items;
 
@@ -111,7 +110,7 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	public CustomListBoxItemsCollection Items { get; }
 
 	/// <summary>Tooltip text for an item.</summary>
-	public string ToolTipText => GetToolTipText();
+	public string? ToolTipText => GetToolTipText();
 
 	/// <summary>Current <see cref="CheckedState"/> of this item.</summary>
 	public CheckedState CheckedState
@@ -119,12 +118,11 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 		get => _checkedState;
 		set
 		{
-			if(_checkedState != value)
-			{
-				_checkedState = value;
-				OnCheckedStateChanged();
-				Invalidate();
-			}
+			if(_checkedState == value) return;
+
+			_checkedState = value;
+			OnCheckedStateChanged();
+			Invalidate();
 		}
 	}
 
@@ -168,24 +166,23 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 		get => _isSelected;
 		set
 		{
-			if(_isSelected != value)
+			if(_isSelected == value) return;
+
+			if(IsPresented)
 			{
-				if(IsAttachedToListBox && IsPresented)
+				if(value)
 				{
-					if(value)
-					{
-						ListBox.SelectedItems.Add(this);
-					}
-					else
-					{
-						ListBox.SelectedItems.Remove(this);
-					}
-					Invalidate();
+					ListBox?.SelectedItems.Add(this);
 				}
 				else
 				{
-					_isSelected = value;
+					ListBox?.SelectedItems.Remove(this);
 				}
+				Invalidate();
+			}
+			else
+			{
+				_isSelected = value;
 			}
 		}
 	}
@@ -199,16 +196,15 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 		get => _isExpanded;
 		set
 		{
-			if(_isExpanded != value)
+			if(_isExpanded == value) return;
+
+			if(value)
 			{
-				if(value)
-				{
-					Expand();
-				}
-				else
-				{
-					Collapse();
-				}
+				Expand();
+			}
+			else
+			{
+				Collapse();
 			}
 		}
 	}
@@ -219,16 +215,15 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 		get => !_isExpanded;
 		set
 		{
-			if(_isExpanded == value)
+			if(_isExpanded != value) return;
+
+			if(value)
 			{
-				if(value)
-				{
-					Collapse();
-				}
-				else
-				{
-					Expand();
-				}
+				Collapse();
+			}
+			else
+			{
+				Expand();
 			}
 		}
 	}
@@ -252,20 +247,20 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 
 	/// <summary>Returns tooltip text for an item.</summary>
 	/// <returns>Tooltip text for an item.</returns>
-	protected virtual string GetToolTipText() => null;
+	protected virtual string? GetToolTipText() => null;
 
 	public CustomListBoxTextEditor StartTextEditor(CustomListBoxColumn column, Font font, string text)
 	{
 		Verify.State.IsTrue(IsAttachedToListBox);
 
-		return ListBox.StartTextEditor(this, column, font, text);
+		return ListBox!.StartTextEditor(this, column, font, text);
 	}
 
 	public CustomListBoxTextEditor StartTextEditor(CustomListBoxColumn column, string text)
 	{
 		Verify.State.IsTrue(IsAttachedToListBox);
 
-		return ListBox.StartTextEditor(this, column, ListBox.Font, text);
+		return ListBox!.StartTextEditor(this, column, ListBox.Font, text);
 	}
 
 	/// <summary>Called when <see cref="M:CheckedState"/> property value changes.</summary>
@@ -292,7 +287,7 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	public void Activate()
 	{
 		OnActivate();
-		if(IsAttachedToListBox) ListBox.NotifyItemActivated(this);
+		ListBox?.NotifyItemActivated(this);
 	}
 
 	/// <summary>Invokes <see cref="Activated"/> event.</summary>
@@ -336,9 +331,9 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 		if(!_isExpanded)
 		{
 			_isExpanded = true;
-			if(IsAttachedToListBox && IsPresented && Items.Count != 0)
+			if(IsPresented && Items.Count != 0)
 			{
-				ListBox.ExpandItem(this);
+				ListBox?.ExpandItem(this);
 			}
 		}
 	}
@@ -347,16 +342,15 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	public void ExpandAll()
 	{
 		if(Items.Count == 0) return;
-		bool p = IsPresented;
-		bool hasListBox = IsAttachedToListBox;
-		if(hasListBox && p)
+		bool isPresented = IsPresented;
+		if(isPresented)
 		{
-			ListBox.BeginUpdate();
+			ListBox?.BeginUpdate();
 		}
 		_expand_all(this);
-		if(hasListBox && p)
+		if(isPresented)
 		{
-			ListBox.EndUpdate();
+			ListBox?.EndUpdate();
 		}
 	}
 
@@ -366,9 +360,9 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 		if(_isExpanded)
 		{
 			_isExpanded = false;
-			if(IsAttachedToListBox && IsPresented && Items.Count != 0)
+			if(IsPresented && Items.Count != 0)
 			{
-				ListBox.CollapseItem(this);
+				ListBox?.CollapseItem(this);
 			}
 		}
 	}
@@ -377,16 +371,15 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	public void CollapseAll()
 	{
 		if(Items.Count == 0) return;
-		bool p = IsPresented;
-		bool hasListBox = IsAttachedToListBox;
-		if(hasListBox && p)
+		bool isPresented = IsPresented;
+		if(isPresented)
 		{
-			ListBox.BeginUpdate();
+			ListBox?.BeginUpdate();
 		}
 		_collapse_all(this);
-		if(hasListBox && p)
+		if(isPresented)
 		{
-			ListBox.EndUpdate();
+			ListBox?.EndUpdate();
 		}
 	}
 
@@ -395,7 +388,7 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	{
 		Verify.State.IsTrue(IsAttachedToListBox);
 
-		ListBox.FocusAndSelectItem(this);
+		ListBox!.FocusAndSelectItem(this);
 	}
 
 	/// <summary>Sets focus to this item.</summary>
@@ -403,7 +396,7 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	{
 		Verify.State.IsTrue(IsAttachedToListBox);
 
-		ListBox.FocusItem(this);
+		ListBox!.FocusItem(this);
 	}
 
 	/// <summary>Makes sure that item can be found in listbox.</summary>
@@ -419,11 +412,7 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	{
 		if(_parent is null)
 		{
-			var ctl = ListBox;
-			if(ctl is not null)
-			{
-				ctl.Items.Remove(this);
-			}
+			ListBox?.Items.Remove(this);
 		}
 		else
 		{
@@ -436,11 +425,7 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	{
 		if(_parent is null)
 		{
-			var ctl = ListBox;
-			if(ctl is not null)
-			{
-				ctl.Items.RemoveSafe(this);
-			}
+			ListBox?.Items.RemoveSafe(this);
 		}
 		else
 		{
@@ -509,10 +494,8 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	/// <summary>Repaints item.</summary>
 	public void Invalidate()
 	{
-		if(IsAttachedToListBox && IsPresented)
-		{
-			ListBox.InvalidateItem(this);
-		}
+		if(ListBox is null || !IsPresented) return;
+		ListBox.InvalidateItem(this);
 	}
 
 	/// <summary>Repaints item in a thread-safe way.</summary>
@@ -526,7 +509,7 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 				Action<CustomListBoxItem> action = listBox.InvalidateItem;
 				try
 				{
-					listBox.BeginInvoke(action, new object[] { this });
+					listBox.BeginInvoke(action, [this]);
 				}
 				catch
 				{
@@ -542,7 +525,7 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	/// <summary>Repaints subitem.</summary>
 	public void InvalidateSubItem(int id)
 	{
-		if(IsAttachedToListBox && IsPresented)
+		if(ListBox is not null && IsPresented)
 		{
 			ListBox.InvalidateSubItem(this, id);
 		}
@@ -573,26 +556,26 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
-		Items.ListBox = ListBox;
+		base.OnListBoxAttached(listBox);
+		Items.ListBox = listBox;
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		Items.ListBox = null;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
 	/// <inheritdoc/>
 	protected override void OnPaintBackground(ItemPaintEventArgs paintEventArgs)
-		=> ListBox.Renderer.OnPaintItemBackground(this, paintEventArgs);
+		=> ListBox!.Renderer.OnPaintItemBackground(this, paintEventArgs);
 
 	/// <inheritdoc/>
 	protected override void OnPaintContent(ItemPaintEventArgs paintEventArgs)
-		=> ListBox.Renderer.OnPaintItemContent(this, paintEventArgs);
+		=> ListBox!.Renderer.OnPaintItemContent(this, paintEventArgs);
 
 	internal void PaintSubItem(SubItemPaintEventArgs paintEventArgs)
 		=> OnPaintSubItem(paintEventArgs);
@@ -618,7 +601,7 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	{
 		if(Items.Count != 0)
 		{
-			if(Level != 0 || ListBox.ShowRootTreeLines || !IsExpanded)
+			if(Level != 0 || ListBox!.ShowRootTreeLines || !IsExpanded)
 			{
 				IsExpanded = !IsExpanded;
 			}
@@ -628,7 +611,7 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	/// <inheritdoc/>
 	protected override int OnHitTest(int x, int y)
 	{
-		var listBox = ListBox;
+		var listBox = ListBox!;
 		var dpi = Dpi.FromControl(listBox);
 		var level = Level;
 		var levelMargin = ListBoxConstants.LevelMargin.GetValue(dpi);
@@ -672,7 +655,7 @@ public abstract class CustomListBoxItem : CustomListBoxHostedItem
 	/// <summary>Gets the context menu.</summary>
 	///	<param name="requestEventArgs">Request parameters.</param>
 	/// <returns>Context menu for specified location.</returns>
-	public virtual ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	public virtual ContextMenuStrip? GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
 		if(requestEventArgs is null) return null;
 		ContextMenuRequested?.Invoke(this, requestEventArgs);
@@ -695,6 +678,6 @@ public abstract class CustomListBoxItem<T> : CustomListBoxItem, IDataContextProv
 	public T DataContext { get; set; }
 
 	/// <inheritdoc/>
-	public override string ToString()
-		=> "item: " + DataContext is null ? "(null)" : DataContext.ToString();
+	public override string? ToString()
+		=> "item: " + (DataContext is null ? "(null)" : DataContext.ToString());
 }

@@ -64,41 +64,52 @@ internal class TestReportListBinding : AsyncDataBinding<TestReport>
 		UpdateListBox(Data);
 	}
 
-	protected override Task<TestReport> FetchDataAsync(IProgress<OperationProgress> progress, CancellationToken cancellationToken)
+	protected override async Task<TestReport> FetchDataAsync(IProgress<OperationProgress>? progress, CancellationToken cancellationToken)
 	{
-		Verify.State.IsFalse(IsDisposed, "TestReportListBinding is disposed.");
+		Verify.State.IsNotDisposed(IsDisposed, this);
 
 		progress?.Report(new($"Fetching test report..."));
 		ListBox.Cursor = Cursors.WaitCursor;
 
-		return ServiceContext.GetTestReportAsync(PipelineId, cancellationToken);
+		var report = await ServiceContext
+			.GetTestReportAsync(PipelineId, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+
+		return report ?? throw new ApplicationException("Got empty response.");
 	}
 
-	private void UpdateListBox(TestReport data)
+	private void UpdateListBox(TestReport? data)
 	{
 		if(data is { TotalCount: > 0 })
 		{
 			ListBox.BeginUpdate();
 			ListBox.Items.Clear();
-			if(data.TestSuites.Length == 1)
+			if(data.TestSuites is { Length: not 0 } suites)
 			{
-				AddSuite(ListBox.Items, data.TestSuites[0]);
+				if(suites.Length == 1)
+				{
+					AddSuite(ListBox.Items, data.TestSuites[0]);
+				}
+				else
+				{
+					foreach(var testSuite in suites)
+					{
+						if(testSuite is null) continue;
+
+						var testSuiteItem = new TestSuiteListBoxItem(testSuite) { IsExpanded = true };
+						AddSuite(testSuiteItem.Items, testSuite);
+						if(testSuiteItem.Items.Count > 0)
+						{
+							ListBox.Items.Add(testSuiteItem);
+						}
+					}
+				}
+				ListBox.Text = string.Empty;
 			}
 			else
 			{
-				foreach(var testSuite in data.TestSuites)
-				{
-					if(testSuite is null) continue;
-
-					var testSuiteItem = new TestSuiteListBoxItem(testSuite) { IsExpanded = true };
-					AddSuite(testSuiteItem.Items, testSuite);
-					if(testSuiteItem.Items.Count > 0)
-					{
-						ListBox.Items.Add(testSuiteItem);
-					}
-				}
+				ListBox.Text = Resources.StrsNoTestsToDisplay;
 			}
-			ListBox.Text = string.Empty;
 			ListBox.EndUpdate();
 		}
 		else
@@ -110,16 +121,17 @@ internal class TestReportListBinding : AsyncDataBinding<TestReport>
 
 	private void AddSuite(CustomListBoxItemsCollection rootItems, TestSuite testSuite)
 	{
+		if(testSuite.TestCases is not { Length: not 0 } cases) return;
+
 		var classes = new Dictionary<string, TestCaseClassListBoxItem>();
-		foreach(var testCase in testSuite.TsstCases)
+		foreach(var testCase in cases)
 		{
 			if(testCase is null) continue;
 			if(Filter is not null && !Filter(testCase)) continue;
 
 			var item      = new TestCaseListBoxItem(testCase);
 			var items     = rootItems;
-			var className = testCase.ClassName;
-			if(!string.IsNullOrWhiteSpace(className))
+			if(testCase.ClassName is { Length: not 0 } className)
 			{
 				if(!classes.TryGetValue(className, out var parent))
 				{

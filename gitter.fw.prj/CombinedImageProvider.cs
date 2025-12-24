@@ -26,7 +26,7 @@ using System.Drawing;
 
 public class CombinedImageProvider : IImageProvider
 {
-	private readonly Dictionary<int, Image> _cache = new();
+	private readonly Dictionary<int, Image?> _cache = [];
 
 	public CombinedImageProvider(IImageProvider image, IImageProvider overlay)
 	{
@@ -41,8 +41,9 @@ public class CombinedImageProvider : IImageProvider
 
 	private IImageProvider Overlay { get; }
 
-	private static Image Combine(Image image, Image overlay, int size)
+	private static Image? Combine(Image? image, Image? overlay, int size)
 	{
+		if(image   is null) return overlay;
 		if(overlay is null) return image;
 		var bitmap = new Bitmap(size, size);
 		using var graphics = Graphics.FromImage(bitmap);
@@ -53,7 +54,7 @@ public class CombinedImageProvider : IImageProvider
 		return bitmap;
 	}
 
-	public Image GetImage(int size)
+	public Image? GetImage(int size)
 	{
 		Verify.Argument.IsPositive(size);
 

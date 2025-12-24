@@ -35,11 +35,11 @@ public sealed class ViewDockService
 	private readonly IWorkingEnvironment _environment;
 	private readonly Section _section;
 
-	private ViewBase _activeView;
+	private ViewBase? _activeView;
 
 	#endregion
 
-	public event EventHandler ActiveViewChanged;
+	public event EventHandler? ActiveViewChanged;
 
 	private void InvokeActiveViewChanged()
 		=> ActiveViewChanged?.Invoke(this, EventArgs.Empty);
@@ -63,7 +63,7 @@ public sealed class ViewDockService
 	public ICollection<IViewFactory> ViewFactories
 		=> _factories.Values;
 
-	public ViewBase ActiveView
+	public ViewBase? ActiveView
 	{
 		get
 		{
@@ -93,7 +93,7 @@ public sealed class ViewDockService
 		return _factories[guid];
 	}
 
-	public T GetFactory<T>()
+	public T? GetFactory<T>()
 		where T : class, IViewFactory
 	{
 		foreach(var factory in ViewFactories)
@@ -122,9 +122,9 @@ public sealed class ViewDockService
 		_factories.Remove(guid);
 	}
 
-	private void OnViewClosing(object sender, EventArgs e)
+	private void OnViewClosing(object? sender, EventArgs e)
 	{
-		var view = (ViewBase)sender;
+		var view = (ViewBase)sender!;
 		view.Closing -= OnViewClosing;
 		var section = _section.GetCreateSection(GetViewConfigId(view));
 		view.SaveViewTo(section);
@@ -165,7 +165,7 @@ public sealed class ViewDockService
 						}
 					}
 					Rescale(view);
-					host = new ViewHost(DockPanel, false, true, new[] { view })
+					host = new ViewHost(DockPanel, false, true, [view])
 					{
 						Size = DockPanel.RootHost.Size
 					};
@@ -174,49 +174,49 @@ public sealed class ViewDockService
 
 				case ViewPosition.Left:
 					Rescale(view);
-					host = new ViewHost(DockPanel, false, false, new[] { view });
+					host = new ViewHost(DockPanel, false, false, [view]);
 					DockPanel.PerformDock(host, DockResult.Left);
 					break;
 				case ViewPosition.Top:
 					Rescale(view);
-					host = new ViewHost(DockPanel, false, false, new[] { view });
+					host = new ViewHost(DockPanel, false, false, [view]);
 					DockPanel.PerformDock(host, DockResult.Top);
 					break;
 				case ViewPosition.Right:
 					Rescale(view);
-					host = new ViewHost(DockPanel, false, false, new[] { view });
+					host = new ViewHost(DockPanel, false, false, [view]);
 					DockPanel.PerformDock(host, DockResult.Right);
 					break;
 				case ViewPosition.Bottom:
 					Rescale(view);
-					host = new ViewHost(DockPanel, false, false, new[] { view });
+					host = new ViewHost(DockPanel, false, false, [view]);
 					DockPanel.PerformDock(host, DockResult.Bottom);
 					break;
 
 				case ViewPosition.LeftAutoHide:
 					Rescale(view);
-					host = new ViewHost(DockPanel, false, false, new[] { view });
+					host = new ViewHost(DockPanel, false, false, [view]);
 					host.UnpinFromLeft();
 					break;
 				case ViewPosition.TopAutoHide:
 					Rescale(view);
-					host = new ViewHost(DockPanel, false, false, new[] { view });
+					host = new ViewHost(DockPanel, false, false, [view]);
 					host.UnpinFromTop();
 					break;
 				case ViewPosition.RightAutoHide:
 					Rescale(view);
-					host = new ViewHost(DockPanel, false, false, new[] { view });
+					host = new ViewHost(DockPanel, false, false, [view]);
 					host.UnpinFromRight();
 					break;
 				case ViewPosition.BottomAutoHide:
 					Rescale(view);
-					host = new ViewHost(DockPanel, false, false, new[] { view });
+					host = new ViewHost(DockPanel, false, false, [view]);
 					host.UnpinFromBottom();
 					break;
 
 				case ViewPosition.Float:
 					Rescale(view);
-					host = new ViewHost(DockPanel, false, false, new[] { view });
+					host = new ViewHost(DockPanel, false, false, [view]);
 					var form = host.PrepareFloatingMode();
 					form.Location = DockPanel.PointToScreen(new Point(20, 20));
 					form.Show(DockPanel.TopLevelControl);
@@ -253,7 +253,7 @@ public sealed class ViewDockService
 		}
 		else
 		{
-			view.Host.SetActiveView(view);
+			view.Host!.SetActiveView(view);
 		}
 	}
 
@@ -263,24 +263,13 @@ public sealed class ViewDockService
 	}
 
 	public WebBrowserView ShowWebBrowserView(string url, bool activate)
-	{
-		return (WebBrowserView)ShowView(
-			WebBrowserViewFactory.Guid,
-			new WebBrowserViewModel(url),
-			activate);
-	}
+		=> (WebBrowserView)ShowView(WebBrowserViewFactory.Guid,
+			new WebBrowserViewModel(url), activate);
 
 	private IViewFactory GetViewFactoryByGuid(Guid guid)
-	{
-		Verify.Argument.IsTrue(
-			_factories.TryGetValue(guid, out var factory),
-			nameof(guid),
-			string.Format(
-				CultureInfo.InvariantCulture,
-				"Unknown view factory GUID: {0}",
-				guid));
-		return factory;
-	}
+		=> _factories.TryGetValue(guid, out var factory)
+			? factory
+			: throw new ArgumentException($"Unknown view factory GUID: {guid}", nameof(guid));
 
 	public ViewBase ShowView(Guid guid, bool activate = true)
 	{
@@ -392,7 +381,7 @@ public sealed class ViewDockService
 		}
 	}
 
-	public ViewBase FindView(Guid guid)
+	public ViewBase? FindView(Guid guid)
 	{
 		if(!_factories.TryGetValue(guid, out var factory))
 		{
@@ -405,7 +394,7 @@ public sealed class ViewDockService
 		return null;
 	}
 
-	public ViewBase FindView(Guid guid, object viewModel)
+	public ViewBase? FindView(Guid guid, object viewModel)
 	{
 		if(!_factories.TryGetValue(guid, out var factory))
 		{

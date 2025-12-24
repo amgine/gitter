@@ -20,15 +20,14 @@
 
 namespace gitter.Git.Gui.Interfaces;
 
-using System.Collections.Generic;
-
+using gitter.Framework;
 using gitter.Framework.Mvc;
 
 interface IMergeView : IView
 {
-	IUserInputSource<IList<IRevisionPointer>> Revisions { get; }
+	IUserInputSource<Many<IRevisionPointer>> Revisions { get; }
 
-	IUserInputSource<string> Message { get; }
+	IUserInputSource<string?> Message { get; }
 
 	IUserInputSource<bool> NoFastForward { get; }
 

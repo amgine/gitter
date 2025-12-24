@@ -23,8 +23,6 @@ namespace gitter.Framework.Controls;
 using System;
 using System.Windows.Forms;
 
-#nullable enable
-
 sealed class DockPanelDockMarkers : DockMarkers<DockPanelDockMarker>
 {
 	public DockPanelDockMarkers(DockPanel dockPanel)
@@ -42,12 +40,12 @@ sealed class DockPanelDockMarkers : DockMarkers<DockPanelDockMarker>
 	protected override DockPanelDockMarker[]? CreateMarkers(ViewHost dockClient)
 	{
 		if(dockClient.IsDocumentWell) return default;
-		return new[]
-		{
+		return
+		[
 			new DockPanelDockMarker(DockPanel, dockClient, AnchorStyles.Left),
 			new DockPanelDockMarker(DockPanel, dockClient, AnchorStyles.Top),
 			new DockPanelDockMarker(DockPanel, dockClient, AnchorStyles.Right),
 			new DockPanelDockMarker(DockPanel, dockClient, AnchorStyles.Bottom),
-		};
+		];
 	}
 }

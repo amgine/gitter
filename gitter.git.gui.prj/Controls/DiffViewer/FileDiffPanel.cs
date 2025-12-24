@@ -79,7 +79,7 @@ public class FileDiffPanel : FilePanel
 			DiffLineState.Added   => Style.Colors.LineAddedBackground,
 			DiffLineState.Removed => Style.Colors.LineRemovedBackground,
 			DiffLineState.Header  => Style.Colors.LineHeaderBackground,
-			_ => Style.Colors.LineContextBackground,
+			_                     => Style.Colors.LineContextBackground,
 		};
 
 	private Color GetLineForegroundColor(DiffLineState state)
@@ -88,7 +88,7 @@ public class FileDiffPanel : FilePanel
 			DiffLineState.Added   => Style.Colors.LineAddedForeground,
 			DiffLineState.Removed => Style.Colors.LineRemovedForeground,
 			DiffLineState.Header  => Style.Colors.LineHeaderForeground,
-			_ => Style.Colors.LineContextForeground,
+			_                     => Style.Colors.LineContextForeground,
 		};
 
 	/// <inheritdoc/>
@@ -98,7 +98,7 @@ public class FileDiffPanel : FilePanel
 		base.InvalidateSize();
 	}
 
-	private void OnLineHoverChanged(object sender, TrackingEventArgs e)
+	private void OnLineHoverChanged(object? sender, TrackingEventArgs e)
 	{
 		Invalidate(GetLineBounds(e.Index, false));
 	}
@@ -248,7 +248,10 @@ public class FileDiffPanel : FilePanel
 							_selOrigin = htr.Line;
 							SetSelection(htr.Line);
 						}
-						var menu        = new ContextMenuStrip();
+						var menu = new ContextMenuStrip
+						{
+							Renderer = GitterApplication.Style.ToolStripRenderer,
+						};
 						var dpiBindings = new DpiBindings(menu);
 						var factory     = new GuiItemFactory(dpiBindings);
 						var lines       = GetSelectedLines();
@@ -258,7 +261,7 @@ public class FileDiffPanel : FilePanel
 							bool hasModifiedLines = false;
 							foreach(var line in lines)
 							{
-								if(line.State == DiffLineState.Added || line.State == DiffLineState.Removed)
+								if(line.State is DiffLineState.Added or DiffLineState.Removed)
 								{
 									hasModifiedLines = true;
 									break;
@@ -321,7 +324,7 @@ public class FileDiffPanel : FilePanel
 	private void ApplyPatchFromSelection(bool reverse)
 	{
 		var file = DiffFile.Cut(_selStart, _selEnd - _selStart + 1);
-		var diff = new Diff(DiffType.Patch, new[] { file });
+		var diff = new Diff(DiffType.Patch, [file]);
 		try
 		{
 			_repository.Status.ApplyPatch(
@@ -340,19 +343,19 @@ public class FileDiffPanel : FilePanel
 		}
 	}
 
-	private void OnStageSelectionClick(object sender, EventArgs e)
+	private void OnStageSelectionClick(object? sender, EventArgs e)
 	{
 		ApplyPatchFromSelection(false);
 	}
 
-	private void OnUnstageSelectionClick(object sender, EventArgs e)
+	private void OnUnstageSelectionClick(object? sender, EventArgs e)
 	{
 		ApplyPatchFromSelection(true);
 	}
 
 	private void UpdateSelection(int x, int y)
 	{
-		var cellSize = GetCellSize(Dpi.FromControl(FlowControl));
+		var cellSize = GetCellSize(Dpi.FromControlOrSystem(FlowControl));
 		int line = (y - HeaderHeight) / cellSize.Height;
 		if(line < 0)
 		{
@@ -381,7 +384,7 @@ public class FileDiffPanel : FilePanel
 			if(htr.Line != -1)
 			{
 				var line = GetLine(htr.Line, out var hunk);
-				if(line.State == DiffLineState.Header)
+				if(line is { State: DiffLineState.Header } && hunk is not null)
 				{
 					SetSelection(htr.Line, htr.Line + hunk.LineCount - 1);
 				}
@@ -400,6 +403,8 @@ public class FileDiffPanel : FilePanel
 
 	private struct HitTestResults
 	{
+		public static readonly HitTestResults Nowhere = new() { Area = -1, Column = -1, Line = -1 };
+
 		public int Area;
 		public int Column;
 		public int Line;
@@ -419,17 +424,14 @@ public class FileDiffPanel : FilePanel
 
 	private HitTestResults HitTest(int x, int y)
 	{
+		if(FlowControl is null) return HitTestResults.Nowhere;
+
 		int contentWidth = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width);
 		if(DiffFile is null ||
 			x < Margin || x > contentWidth - Margin ||
 			y < 0      || y >= _size.Height)
 		{
-			return new HitTestResults
-			{
-				Area = -1,
-				Column = -1,
-				Line = -1,
-			};
+			return HitTestResults.Nowhere;
 		}
 		if(y < HeaderHeight)
 		{
@@ -468,6 +470,8 @@ public class FileDiffPanel : FilePanel
 
 	private Rectangle GetLineBounds(int line, bool includeLineHeader)
 	{
+		if(FlowControl is null) return Rectangle.Empty;
+
 		int contentWidth = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width);
 		int x = Margin;
 		int w = contentWidth - Margin * 2;
@@ -483,6 +487,8 @@ public class FileDiffPanel : FilePanel
 
 	private Rectangle GetLineBounds(int line, int count, bool includeLineHeader)
 	{
+		if(FlowControl is null) return Rectangle.Empty;
+
 		int contentWidth = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width);
 		int x = Margin;
 		int w = contentWidth - Margin * 2;
@@ -542,7 +548,7 @@ public class FileDiffPanel : FilePanel
 		return DiffFile[i][num];
 	}
 
-	private DiffLine GetLine(int num, out DiffHunk hunk)
+	private DiffLine? GetLine(int num, out DiffHunk? hunk)
 	{
 		int offset = 0;
 		int i = 0;
@@ -609,7 +615,7 @@ public class FileDiffPanel : FilePanel
 				longestLineWidth = GitterApplication.TextRenderer.MeasureText(
 					measureEventArgs.Graphics, longestLine.Text, font, int.MaxValue, ContentFormat).Width + cellSize.Width;
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 				longestLineWidth = (int)(maxLength * cellSize.Width);
 			}
@@ -621,8 +627,10 @@ public class FileDiffPanel : FilePanel
 		return _size = new Size(w, h);
 	}
 
-	private static void PaintLineColumnImage(Graphics graphics, Size cellSize, int column, int digits, Image image, int x, int y)
+	private static void PaintLineColumnImage(Graphics graphics, Size cellSize, int column, int digits, Image? image, int x, int y)
 	{
+		if(image is null) return;
+
 		var bounds = new Rectangle(x, y, image.Width, image.Height);
 		bounds.X += (column + 1) * digits * cellSize.Width - image.Width;
 		bounds.Y += (cellSize.Height - image.Height) / 2;
@@ -657,7 +665,7 @@ public class FileDiffPanel : FilePanel
 
 #endif
 
-	private void PaintLine(
+	private void PaintTextLine(
 		int lineIndex, DiffLine line, int digits, Graphics graphics, Size cellSize, Font font,
 		bool isHovered, bool isSelected, int x, int y, int width, Rectangle clipRectangle)
 	{
@@ -666,7 +674,7 @@ public class FileDiffPanel : FilePanel
 		var rcColNumbersBackground = Rectangle.Intersect(rcColNumbers, clipRectangle);
 		if(cols > 0 && rcColNumbersBackground is { Width: > 0, Height: > 0 })
 		{
-			var iconSize = new DpiConverter(FlowControl).ConvertX(16);
+			var iconSize = DpiConverter.FromDefaultTo(Dpi.FromControlOrSystem(FlowControl)).ConvertX(16);
 #if NETCOREAPP
 			Span<char> lineNumChars = stackalloc char[10];
 #endif
@@ -713,7 +721,7 @@ public class FileDiffPanel : FilePanel
 			_ => DiffFile.TargetFile,
 		};
 
-	private Bitmap GetHeaderIcon(Dpi dpi)
+	private Bitmap? GetHeaderIcon(Dpi dpi)
 		=> GraphicsUtility.QueryIcon(
 			DiffFile.Status == FileStatus.Removed
 				? DiffFile.SourceFile
@@ -723,6 +731,7 @@ public class FileDiffPanel : FilePanel
 	{
 		Assert.IsNotNull(paintEventArgs);
 
+		if(FlowControl is null) return;
 		if(DiffFile.LineCount <= 0) return;
 
 		var rect = paintEventArgs.Bounds;
@@ -766,6 +775,8 @@ public class FileDiffPanel : FilePanel
 		{
 			var lineColor = Color.Gray;
 			var brush     = IntPtr.Zero;
+			var oldBrush  = IntPtr.Zero;
+			var oldPen    = IntPtr.Zero;
 			try
 			{
 				int lineX;
@@ -791,8 +802,9 @@ public class FileDiffPanel : FilePanel
 						{
 							if(brush == IntPtr.Zero)
 							{
-								brush = Gdi.CreateSolidBrush(lineColor);
-								gdi.SelectObject(brush);
+								brush    = Gdi.CreateSolidBrush(lineColor);
+								oldBrush = gdi.SelectObject(brush);
+								oldPen   = gdi.SelectObject(Gdi.GetStockObject(GdiStockObject.NullPen));
 							}
 							gdi.Fill(rcLine);
 						}
@@ -804,8 +816,9 @@ public class FileDiffPanel : FilePanel
 					{
 						if(brush == IntPtr.Zero)
 						{
-							brush = Gdi.CreateSolidBrush(lineColor);
-							gdi.SelectObject(brush);
+							brush    = Gdi.CreateSolidBrush(lineColor);
+							oldBrush = gdi.SelectObject(brush);
+							oldPen   = gdi.SelectObject(Gdi.GetStockObject(GdiStockObject.NullPen));
 						}
 						gdi.Fill(rcLine);
 					}
@@ -816,8 +829,9 @@ public class FileDiffPanel : FilePanel
 					{
 						if(brush == IntPtr.Zero)
 						{
-							brush = Gdi.CreateSolidBrush(lineColor);
-							gdi.SelectObject(brush);
+							brush    = Gdi.CreateSolidBrush(lineColor);
+							oldBrush = gdi.SelectObject(brush);
+							oldPen   = gdi.SelectObject(Gdi.GetStockObject(GdiStockObject.NullPen));
 						}
 						gdi.Fill(rcLine);
 					}
@@ -828,14 +842,23 @@ public class FileDiffPanel : FilePanel
 				{
 					if(brush == IntPtr.Zero)
 					{
-						brush = Gdi.CreateSolidBrush(lineColor);
-						gdi.SelectObject(brush);
+						brush    = Gdi.CreateSolidBrush(lineColor);
+						oldBrush = gdi.SelectObject(brush);
+						oldPen   = gdi.SelectObject(Gdi.GetStockObject(GdiStockObject.NullPen));
 					}
 					gdi.Fill(rcLine);
 				}
 			}
 			finally
 			{
+				if(oldBrush != IntPtr.Zero)
+				{
+					gdi.SelectObject(oldBrush);
+				}
+				if(oldPen != IntPtr.Zero)
+				{
+					gdi.SelectObject(oldPen);
+				}
 				if(brush != IntPtr.Zero) Gdi.DeleteObject(brush);
 			}
 		}
@@ -901,6 +924,8 @@ public class FileDiffPanel : FilePanel
 	{
 		Assert.IsNotNull(paintEventArgs);
 
+		if(FlowControl is null) return;
+
 		PaintBackground(paintEventArgs);
 
 		var graphics = paintEventArgs.Graphics;
@@ -908,8 +933,7 @@ public class FileDiffPanel : FilePanel
 		var clip = paintEventArgs.ClipRectangle;
 		var contentWidth = Math.Max(_size.Width, FlowControl.ContentArea.Width);
 		var rcHeader = new Rectangle(rect.X + Margin, rect.Y, contentWidth - 2 * Margin, HeaderHeight);
-		var rcHeaderClip = Rectangle.Intersect(clip, rcHeader);
-		if(rcHeaderClip is { Width: > 0, Height: > 0 })
+		if(Rectangle.Intersect(clip, rcHeader) is { Width: > 0, Height: > 0 } rcHeaderClip)
 		{
 			graphics.SetClip(rcHeaderClip);
 			var overlay = FileStatusIcons.GetOverlay(DiffFile.Status)?.GetImage(new DpiConverter(FlowControl).ConvertX(16));
@@ -936,7 +960,7 @@ public class FileDiffPanel : FilePanel
 				}
 				if(y + cellSize.Height >= clip.Y)
 				{
-					PaintLine(
+					PaintTextLine(
 						lineIndex, line, digits,
 						graphics, cellSize, font, lineIndex == _lineHover.Index,
 						lineIndex >= _selStart && lineIndex <= _selEnd,

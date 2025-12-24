@@ -22,16 +22,21 @@ namespace gitter.Git.Gui.Controls;
 
 using System.Collections.Generic;
 
-/// <summary>Paints <see cref="Revision.Subject"/> for <see cref="ReflogRecordListItem"/> and <see cref="SubjectColumn"/>.</summary>
-sealed class ReflogRecordSubjectPainter : RevisionSubjectPainterBase<ReflogRecordListItem>
+/// <summary>
+/// Paints <see cref="Revision.Subject"/> for <see cref="ReflogRecordListItem"/>
+/// and <see cref="SubjectColumn"/>.
+/// </summary>
+sealed class ReflogRecordSubjectPainter(IGraphStyle graphStyle)
+	: RevisionSubjectPainterBase<ReflogRecordListItem>(graphStyle)
 {
-	public ReflogRecordSubjectPainter(IGraphStyle graphStyle)
-		: base(graphStyle)
-	{
-	}
+	protected override void SetDrawnPointers(ReflogRecordListItem item, List<PointerBounds> drawnPointers)
+		=> item.DrawnPointers = drawnPointers;
 
 	/// <inheritdoc/>
-	protected override bool TryGetData(ReflogRecordListItem item, out Revision revision, out GraphCell[] graph, out List<PointerBounds> drawnPointers)
+	protected override bool TryGetData(ReflogRecordListItem item,
+		out Revision revision,
+		out GraphCell[]? graph,
+		out List<PointerBounds>? drawnPointers)
 	{
 		Assert.IsNotNull(item);
 

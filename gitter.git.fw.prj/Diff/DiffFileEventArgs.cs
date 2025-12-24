@@ -22,12 +22,7 @@ namespace gitter.Git;
 
 using System;
 
-public class DiffFileEventArgs : EventArgs
+public class DiffFileEventArgs(DiffFile diffFile) : EventArgs
 {
-	public DiffFileEventArgs(DiffFile diffFile)
-	{
-		DiffFile = diffFile;
-	}
-
-	public DiffFile DiffFile { get; }
+	public DiffFile DiffFile { get; } = diffFile;
 }

@@ -38,7 +38,7 @@ sealed class IssueMilestoneColumn : CustomListBoxColumn
 
 	protected override Comparison<CustomListBoxItem> SortComparison => IssueListItem.CompareByMilestone;
 
-	private static string GetContent(CustomListBoxItem item)
+	private static string? GetContent(CustomListBoxItem item)
 	{
 		if(item is IssueListItem issue)
 		{

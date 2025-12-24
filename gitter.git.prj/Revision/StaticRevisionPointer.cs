@@ -21,6 +21,7 @@
 namespace gitter.Git;
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using gitter.Git.AccessLayer;
@@ -31,7 +32,7 @@ internal class StaticRevisionPointer : IRevisionPointer
 	#region Data
 
 	private readonly string _pointer;
-	private Revision _revision;
+	private Revision? _revision;
 
 	#endregion
 
@@ -64,25 +65,24 @@ internal class StaticRevisionPointer : IRevisionPointer
 
 	#region Methods
 
-	/// <inheritdoc/>
-	public virtual Revision Dereference()
+	private Revision DereferenceCore()
 	{
-		if(_revision is null)
+		var rev = Repository.Accessor.Dereference
+			.Invoke(new DereferenceRequest(Pointer));
+		lock(Repository.Revisions.SyncRoot)
 		{
-			var rev = Repository.Accessor.Dereference
-				.Invoke(new DereferenceParameters(Pointer));
-			lock(Repository.Revisions.SyncRoot)
-			{
-				_revision = Repository.Revisions.GetOrCreateRevision(rev.CommitHash);
-			}
+			return Repository.Revisions.GetOrCreateRevision(rev.CommitHash);
 		}
-		return _revision;
 	}
 
-	protected virtual async ValueTask<Revision> DereferenceCoreAsync()
+	/// <inheritdoc/>
+	public virtual Revision Dereference()
+		=> _revision ??= DereferenceCore();
+
+	protected virtual async ValueTask<Revision?> DereferenceCoreAsync(CancellationToken cancellationToken)
 	{
 		var rev = await Repository.Accessor.Dereference
-			.InvokeAsync(new DereferenceParameters(Pointer))
+			.InvokeAsync(new DereferenceRequest(Pointer), cancellationToken: cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 		lock(Repository.Revisions.SyncRoot)
 		{
@@ -92,10 +92,10 @@ internal class StaticRevisionPointer : IRevisionPointer
 	}
 
 	/// <inheritdoc/>
-	public ValueTask<Revision> DereferenceAsync()
+	public ValueTask<Revision?> DereferenceAsync(CancellationToken cancellationToken = default)
 		=> _revision is not null
 			? new(_revision)
-			: DereferenceCoreAsync();
+			: DereferenceCoreAsync(cancellationToken);
 
 	#endregion
 }

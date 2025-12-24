@@ -33,7 +33,7 @@ public sealed class BlameHunk : IReadOnlyList<BlameLine>
 		Verify.Argument.IsNotNull(lines);
 			
 		Commit = commit;
-		_lines = new List<BlameLine>(lines);
+		_lines = [.. lines];
 	}
 
 	public BlameLine this[int index] => _lines[index];

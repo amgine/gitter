@@ -24,12 +24,8 @@ using gitter.Framework;
 using gitter.Framework.Controls;
 using gitter.GitLab.Api;
 
-sealed class TestSuiteListBoxItem : CustomListBoxItem<TestSuite>
+sealed class TestSuiteListBoxItem(TestSuite testSuite) : CustomListBoxItem<TestSuite>(testSuite)
 {
-	public TestSuiteListBoxItem(TestSuite testSuite) : base(testSuite)
-	{
-	}
-
 	/// <inheritdoc/>
 	protected override void OnPaintSubItem(SubItemPaintEventArgs paintEventArgs)
 	{

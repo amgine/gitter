@@ -48,12 +48,14 @@ sealed class BlameFilePanel : FilePanel
 	private bool _selecting;
 	private int _hashColumnWidth;
 	private int _autorColumnWidth;
-	private RevisionToolTip _revisionToolTip;
+	private RevisionToolTip? _revisionToolTip;
 
 	#endregion
 
 	private struct HitTestResults
 	{
+		public static readonly HitTestResults Nowhere = new() { Area = -1, Column = -1, Line = -1 };
+
 		public int Area;
 		public int Column;
 		public int Line;
@@ -184,17 +186,14 @@ sealed class BlameFilePanel : FilePanel
 
 	private HitTestResults HitTest(int x, int y)
 	{
+		if(FlowControl is null) return HitTestResults.Nowhere;
+
 		int contentWidth = Math.Max(FlowControl.ContentSize.Width, FlowControl.ContentArea.Width);
 		if(BlameFile == null ||
 			x < Margin || x > contentWidth - Margin ||
 			y < 0 || y >= _size.Height)
 		{
-			return new HitTestResults()
-			{
-				Area = -1,
-				Column = -1,
-				Line = -1,
-			};
+			return HitTestResults.Nowhere;
 		}
 		if(ShowHeader)
 		{
@@ -302,7 +301,10 @@ sealed class BlameFilePanel : FilePanel
 							SetSelection(htr.Line);
 						}
 
-						var menu        = new ContextMenuStrip();
+						var menu = new ContextMenuStrip
+						{
+							Renderer = GitterApplication.Style.ToolStripRenderer,
+						};
 						var dpiBindings = new DpiBindings(menu);
 						var factory     = new GuiItemFactory(dpiBindings);
 
@@ -325,10 +327,10 @@ sealed class BlameFilePanel : FilePanel
 							menu.Items.Add(new ToolStripSeparator());
 							menu.Items.Add(factory.GetCopyHashToClipboardItem<ToolStripMenuItem>(Resources.StrHash, commit.Hash.ToString()));
 							menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrSummary, commit.Summary));
-							menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthor, commit.Author));
+							menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrAuthor, commit.Author.Name));
 							if(commit.Author != commit.Committer)
 							{
-								menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCommitter, commit.Committer));
+								menu.Items.Add(factory.GetCopyToClipboardItem<ToolStripMenuItem>(Resources.StrCommitter, commit.Committer.Name));
 							}
 						}
 						Utility.MarkDropDownForAutoDispose(menu);
@@ -358,7 +360,7 @@ sealed class BlameFilePanel : FilePanel
 	private void UpdateSelection(int x, int y)
 	{
 		int yOffset  = ShowHeader ? HeaderHeight : 1;
-		var cellSize = GetCellSize(Dpi.FromControl(FlowControl));
+		var cellSize = GetCellSize(Dpi.FromControlOrSystem(FlowControl));
 		int line = (y - yOffset) / cellSize.Height;
 		if(line < 0)
 		{
@@ -380,6 +382,13 @@ sealed class BlameFilePanel : FilePanel
 	protected override void OnMouseMove(int x, int y)
 	{
 		base.OnMouseMove(x, y);
+
+		if(FlowControl is null)
+		{
+			HideToolTip();
+			return;
+		}
+
 		var htr = HitTest(x, y);
 		if(_selecting)
 		{
@@ -390,17 +399,19 @@ sealed class BlameFilePanel : FilePanel
 		{
 			if(_lineHover.Index >= 0 && _lineHover.Index < BlameFile.LineCount)
 			{
-				BlameHunk blameHunk;
-				var line = GetLinesToContainingHunk(_lineHover.Index, out blameHunk);
-				Revision revision = null;
-				try
+				var line = GetLinesToContainingHunk(_lineHover.Index, out var blameHunk);
+				var revision = default(Revision);
+				if(blameHunk is not null)
 				{
-					revision = _repository.Revisions[blameHunk.Commit.Hash];
+					try
+					{
+						revision = _repository.Revisions[blameHunk.Commit.Hash];
+					}
+					catch(Exception exc) when(!exc.IsCritical)
+					{
+					}
 				}
-				catch(Exception exc) when(!exc.IsCritical())
-				{
-				}
-				if(revision is not null)
+				if(revision is not null && _revisionToolTip is not null)
 				{
 					var cellSize = GetCellSize(Dpi.FromControl(FlowControl));
 					if(_revisionToolTip.Tag is not null || _revisionToolTip.Revision != revision)
@@ -438,7 +449,7 @@ sealed class BlameFilePanel : FilePanel
 		}
 	}
 
-	private int GetLinesToContainingHunk(int lineIndex, out BlameHunk blameHunk)
+	private int GetLinesToContainingHunk(int lineIndex, out BlameHunk? blameHunk)
 	{
 		int res = 0;
 		for(int i = 0; i < BlameFile.Count; ++i)
@@ -463,6 +474,9 @@ sealed class BlameFilePanel : FilePanel
 
 	private void HideToolTip()
 	{
+		if(_revisionToolTip is null) return;
+		if(FlowControl is null) return;
+
 		_revisionToolTip.Hide(FlowControl);
 		_revisionToolTip.Tag = "hidden";
 	}
@@ -506,7 +520,7 @@ sealed class BlameFilePanel : FilePanel
 		if(_sizeDpi == dpi) return _size;
 
 		int maxLength = 0;
-		BlameLine longestLine = null;
+		var longestLine = default(BlameLine);
 		string longestAuthor = string.Empty;
 		foreach(var hunk in BlameFile)
 		{
@@ -519,9 +533,9 @@ sealed class BlameFilePanel : FilePanel
 					longestLine = line;
 				}
 			}
-			if(hunk.Commit.Author.Length > longestAuthor.Length)
+			if(hunk.Commit.Author.Name.Length > longestAuthor.Length)
 			{
-				longestAuthor = hunk.Commit.Author;
+				longestAuthor = hunk.Commit.Author.Name;
 			}
 		}
 		var digits   = GetDecimalDigits(BlameFile.LineCount) + 1;
@@ -536,7 +550,7 @@ sealed class BlameFilePanel : FilePanel
 				longestLineWidth = GitterApplication.TextRenderer.MeasureText(
 					measureEventArgs.Graphics, longestLine.Text, font, int.MaxValue, ContentFormat).Width + (cellSize.Width / 2);
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 				longestLineWidth = (int)(maxLength * cellSize.Width);
 			}
@@ -546,7 +560,7 @@ sealed class BlameFilePanel : FilePanel
 				longestAuthorWidth = GitterApplication.TextRenderer.MeasureText(
 					measureEventArgs.Graphics, longestAuthor, font, int.MaxValue, ContentFormat).Width + cellSize.Width;
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 				longestAuthorWidth = (int)(longestAuthor.Length * cellSize.Width);
 			}
@@ -646,7 +660,7 @@ sealed class BlameFilePanel : FilePanel
 				graphics, hunk.Commit.Hash.ToString(7), font, textColor,
 				rcHash.X + cellSize.Width / 2, rcHash.Y, ContentFormat);
 			GitterApplication.TextRenderer.DrawText(
-				graphics, hunk.Commit.Author, font, textColor,
+				graphics, hunk.Commit.Author.Name, font, textColor,
 				rcAuthor.X + cellSize.Width / 2, rcAuthor.Y, ContentFormat);
 		}
 
@@ -658,24 +672,25 @@ sealed class BlameFilePanel : FilePanel
 			rcLine.X, rcLine.Y, ContentFormat);
 	}
 
-	protected override void OnFlowControlAttached()
+	protected override void OnFlowControlAttached(FlowLayoutControl flowControl)
 	{
-		base.OnFlowControlAttached();
-		_revisionToolTip = new RevisionToolTip();
+		base.OnFlowControlAttached(flowControl);
+		_revisionToolTip ??= new();
 		_revisionToolTip.Tag = "hidden";
 	}
 
-	protected override void OnFlowControlDetached()
+	protected override void OnFlowControlDetached(FlowLayoutControl flowControl)
 	{
-		base.OnFlowControlDetached();
-		_revisionToolTip.Dispose();
-		_revisionToolTip = null;
+		base.OnFlowControlDetached(flowControl);
+		DisposableUtility.Dispose(ref _revisionToolTip);
 	}
 
 	/// <inheritdoc/>
 	protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
 	{
 		Assert.IsNotNull(paintEventArgs);
+
+		if(FlowControl is null) return;
 
 		var graphics = paintEventArgs.Graphics;
 		var rect = paintEventArgs.Bounds;

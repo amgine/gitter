@@ -26,7 +26,7 @@ interface IAddNoteView : IView
 {
 	IUserInputSource<string> Revision { get; }
 
-	IUserInputSource<string> Message { get; }
+	IUserInputSource<string?> Message { get; }
 
 	IUserInputErrorNotifier ErrorNotifier { get; }
 }

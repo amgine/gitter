@@ -22,8 +22,6 @@ namespace gitter.Framework.Layout;
 
 using System;
 
-#nullable enable
-
 public abstract class GridDefinition
 {
 	private ISizeSpec _sizeSpec;
@@ -50,11 +48,10 @@ public abstract class GridDefinition
 		{
 			Verify.Argument.IsNotNull(value);
 
-			if(_sizeSpec != value)
-			{
-				_sizeSpec = value;
-				OnSizeSpecChanged(EventArgs.Empty);
-			}
+			if(_sizeSpec == value) return;
+
+			_sizeSpec = value;
+			OnSizeSpecChanged(EventArgs.Empty);
 		}
 	}
 }

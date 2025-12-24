@@ -88,6 +88,7 @@ internal static class IconCache
 		[@".txt"] = @"file.text",
 
 		[@".sln"]    = @"file.vs",
+		[@".slnx"]   = @"file.vs",
 		[@".csproj"] = @"file.vs",
 
 		[@".rtf"]  = @"file.word",
@@ -109,7 +110,7 @@ internal static class IconCache
 		}
 	}
 
-	public static Bitmap GetIcon(string fileName, int size)
+	public static Bitmap? GetIcon(string fileName, int size)
 	{
 		if(!_associations.TryGetValue(GetCacheKey(fileName), out var name))
 		{

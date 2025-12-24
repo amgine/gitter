@@ -26,8 +26,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
-#nullable enable
-
 sealed class ViewSplitSlots : IReadOnlyList<ViewSplitSlot>, IDisposable
 {
 	private readonly List<ViewSplitSlot> _slots = new(capacity: 2);

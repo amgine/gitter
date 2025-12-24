@@ -27,10 +27,8 @@ public sealed class IssueCategory : NamedRedmineObject
 {
 	#region Static
 
-	public static readonly RedmineObjectProperty<Project> ProjectProperty =
-		new RedmineObjectProperty<Project>("project", "Project");
-	public static readonly RedmineObjectProperty<User> AssignedToProperty =
-		new RedmineObjectProperty<User>("assigned_to", "AssignedTo");
+	public static readonly RedmineObjectProperty<Project> ProjectProperty    = new("project",     nameof(Project));
+	public static readonly RedmineObjectProperty<User>    AssignedToProperty = new("assigned_to", nameof(AssignedTo));
 
 	#endregion
 
@@ -73,14 +71,14 @@ public sealed class IssueCategory : NamedRedmineObject
 
 	public Project Project
 	{
-		get { return _project; }
-		private set { UpdatePropertyValue(ref _project, value, ProjectProperty); }
+		get => _project;
+		private set => UpdatePropertyValue(ref _project, value, ProjectProperty);
 	}
 
 	public User AssignedTo
 	{
-		get { return _assignedTo; }
-		private set { UpdatePropertyValue(ref _assignedTo, value, AssignedToProperty); }
+		get => _assignedTo;
+		private set => UpdatePropertyValue(ref _assignedTo, value, AssignedToProperty);
 	}
 
 	#endregion

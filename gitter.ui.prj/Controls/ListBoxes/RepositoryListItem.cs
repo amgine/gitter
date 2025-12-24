@@ -77,7 +77,7 @@ internal sealed class RepositoryListItem : CustomListBoxItem<RepositoryLink>
 		}
 	}
 
-	private string Name
+	private string? Name
 	{
 		get
 		{
@@ -96,7 +96,7 @@ internal sealed class RepositoryListItem : CustomListBoxItem<RepositoryLink>
 		}
 	}
 
-	private static Bitmap GetIcon(bool available, int size, Dpi dpi)
+	private static Bitmap? GetIcon(bool available, int size, Dpi dpi)
 		=> CachedResources.ScaledBitmaps[
 			available ? @"repository" : @"repository.unavailable",
 			DpiConverter.FromDefaultTo(dpi).ConvertX(size)];

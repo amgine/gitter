@@ -25,8 +25,6 @@ using System.Xml;
 
 public sealed class IssueTracker : NamedRedmineObject
 {
-	#region .ctor
-
 	internal IssueTracker(RedmineServiceContext context, int id, string name)
 		: base(context, id, name)
 	{
@@ -36,6 +34,4 @@ public sealed class IssueTracker : NamedRedmineObject
 		: base(context, node)
 	{
 	}
-
-	#endregion
 }

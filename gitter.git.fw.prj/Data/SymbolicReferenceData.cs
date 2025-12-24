@@ -20,17 +20,11 @@
 
 namespace gitter.Git.AccessLayer;
 
-using System;
-
-public sealed class SymbolicReferenceData
+public sealed class SymbolicReferenceData(string targetObject, ReferenceType targetType)
 {
-	public SymbolicReferenceData(string targetObject, ReferenceType targetType)
-	{
-		TargetObject = targetObject;
-		TargetType   = targetType;
-	}
+	public static SymbolicReferenceData None { get; } = new("", ReferenceType.None);
 
-	public string TargetObject { get; }
+	public string TargetObject { get; } = targetObject;
 
-	public ReferenceType TargetType { get; }
+	public ReferenceType TargetType { get; } = targetType;
 }

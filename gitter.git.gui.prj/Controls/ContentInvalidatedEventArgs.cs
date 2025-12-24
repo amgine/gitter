@@ -23,9 +23,7 @@ namespace gitter.Git.Gui;
 using System;
 using System.Drawing;
 
-sealed class ContentInvalidatedEventArgs : EventArgs
+sealed class ContentInvalidatedEventArgs(Rectangle bounds) : EventArgs
 {
-	public ContentInvalidatedEventArgs(Rectangle bounds) => Bounds = bounds;
-
-	public Rectangle Bounds { get; }
+	public Rectangle Bounds { get; } = bounds;
 }

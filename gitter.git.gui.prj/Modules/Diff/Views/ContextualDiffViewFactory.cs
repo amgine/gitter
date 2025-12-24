@@ -22,7 +22,6 @@ namespace gitter.Git.Gui.Views;
 
 using Autofac;
 
-using gitter.Framework;
 using gitter.Framework.Controls;
 
 using Resources = gitter.Git.Gui.Properties.Resources;
@@ -35,6 +34,6 @@ sealed class ContextualDiffViewFactory : GitViewFactoryBase<DiffView>
 		DefaultViewPosition = ViewPosition.SecondaryDocumentHost;
 	}
 
-	protected override ViewBase CreateViewCore(IWorkingEnvironment environment)
-		=> Scope.Resolve<DiffView>(TypedParameter.From(Guids.ContextualDiffViewGuid));
+	protected override DiffView ResolveView(ILifetimeScope scope)
+		=> scope.Resolve<DiffView>(TypedParameter.From(Guids.ContextualDiffViewGuid));
 }

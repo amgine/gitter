@@ -23,7 +23,7 @@ namespace gitter.Git;
 public enum ConfigFile
 {
 	Repository,
-	User,
-	System,
+	CurrentUser,
+	LocalSystem,
 	Other,
 }

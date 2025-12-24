@@ -37,7 +37,7 @@ public sealed class DragImage : Form
 	private readonly int _dy;
 	private Action<PaintEventArgs> _paintProc;
 	private Timer _timer;
-	private LowLevelMouseHook _hook;
+	private LowLevelMouseHook? _hook;
 
 	#endregion
 
@@ -84,7 +84,7 @@ public sealed class DragImage : Form
 		_timer.Tick += OnTimerTick;
 	}
 
-	private void OnTimerTick(object sender, EventArgs e)
+	private void OnTimerTick(object? sender, EventArgs e)
 	{
 		UpdatePosition();
 	}
@@ -177,7 +177,7 @@ public sealed class DragImage : Form
 		}
 	}
 
-	private void OnControlGiveFeedback(object sender, GiveFeedbackEventArgs e)
+	private void OnControlGiveFeedback(object? sender, GiveFeedbackEventArgs e)
 	{
 		UpdatePosition();
 	}

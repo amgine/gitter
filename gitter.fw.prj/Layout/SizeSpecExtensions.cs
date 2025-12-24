@@ -50,13 +50,9 @@ public static class SizeSpecExtensions
 		}
 	}
 
-	private sealed class SizeSpecAsScalable : IDpiBoundValue<int>
+	private sealed class SizeSpecAsScalable(ISizeSpec sizeSpec) : IDpiBoundValue<int>
 	{
-		public SizeSpecAsScalable(ISizeSpec sizeSpec) => SizeSpec = sizeSpec;
-
-		private ISizeSpec SizeSpec { get; }
-
-		public int GetValue(Dpi dpi) => SizeSpec.GetSize(int.MaxValue, dpi);
+		public int GetValue(Dpi dpi) => sizeSpec.GetSize(int.MaxValue, dpi);
 	}
 
 	public static IDpiBoundValue<int> AsScalable(this ISizeSpec sizeSpec)

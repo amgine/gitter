@@ -27,43 +27,34 @@ using System.Text.RegularExpressions;
 public sealed class RegexHyperlinkExtractor : IHyperlinkExtractor
 {
 	private readonly Regex _regex;
-	private readonly IReadOnlyList<IToken> _tokens;
-	private readonly string _linkGroupName;
+	private readonly List<IToken> _tokens;
+	private readonly string? _linkGroupName;
 
 	interface IToken
 	{
 		string FetchValue(Match match);
 	}
 
-	sealed class ConstantToken : IToken
+	sealed class ConstantToken(string value) : IToken
 	{
-		public ConstantToken(string value) => Value = value;
-
-		public string Value { get; }
+		public string Value { get; } = value;
 
 		public string FetchValue(Match match) => Value;
 
 		public override string ToString() => Value;
 	}
 
-	sealed class MatchGroupValueToken : IToken
+	sealed class MatchGroupValueToken(int groupNumber) : IToken
 	{
-		public MatchGroupValueToken(int groupNumber) => GroupNumber = groupNumber;
-
-		private int GroupNumber { get; }
-
 		public string FetchValue(Match match)
-		{
-			var group = match.Groups[GroupNumber];
-			return group != null && group.Success
+			=> match.Groups[groupNumber] is { Success: true } group
 				? group.Value
 				: string.Empty;
-		}
 
-		public override string ToString() => $"<group: {GroupNumber}>";
+		public override string ToString() => $"<group: {groupNumber}>";
 	}
 
-	private static IReadOnlyList<IToken> Tokenize(Regex regex, string pattern)
+	private static List<IToken> Tokenize(Regex regex, string pattern)
 	{
 		Assert.IsNotNull(regex);
 		Assert.IsNotNull(pattern);
@@ -71,9 +62,9 @@ public sealed class RegexHyperlinkExtractor : IHyperlinkExtractor
 		var names   = regex.GetGroupNames();
 		var numbers = regex.GetGroupNumbers();
 
-		if(names == null || numbers == null || names.Length == 0 || numbers.Length == 0 || names.Length != numbers.Length || pattern.Length == 0)
+		if(names is null || numbers is null || names.Length == 0 || numbers.Length == 0 || names.Length != numbers.Length || pattern.Length == 0)
 		{
-			return new[] { new ConstantToken(pattern) };
+			return [new ConstantToken(pattern)];
 		}
 
 		var tokens = new List<IToken>();
@@ -125,7 +116,7 @@ public sealed class RegexHyperlinkExtractor : IHyperlinkExtractor
 		return tokens;
 	}
 
-	public RegexHyperlinkExtractor(string regexp, string urlPattern, string linkGroupName = null)
+	public RegexHyperlinkExtractor(string regexp, string urlPattern, string? linkGroupName = null)
 	{
 		Verify.Argument.IsNotNull(regexp);
 		Verify.Argument.IsNotNull(urlPattern);
@@ -158,7 +149,7 @@ public sealed class RegexHyperlinkExtractor : IHyperlinkExtractor
 		return string.Concat(values);
 	}
 
-	public IReadOnlyList<Hyperlink> ExtractHyperlinks(string text)
+	public IReadOnlyList<Hyperlink>? ExtractHyperlinks(string text)
 	{
 		if(text is not { Length: not 0 }) return default;
 

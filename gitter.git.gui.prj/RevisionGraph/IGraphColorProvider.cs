@@ -25,7 +25,7 @@ using System;
 /// <summary>Object for unique color allocation.</summary>
 public interface IGraphColorProvider
 {
-	int AcquireColor();
+	short AcquireColor();
 
-	void ReleaseColor(int color);
+	void ReleaseColor(short color);
 }

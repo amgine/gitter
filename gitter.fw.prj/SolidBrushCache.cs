@@ -24,8 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 
-#nullable enable
-
 public static class SolidBrushCache
 {
 	[ThreadStatic]
@@ -48,7 +46,7 @@ public static class SolidBrushCache
 			}
 		}
 
-		public Color Color
+		public readonly Color Color
 		{
 			get => _brush.Color;
 			set => _brush.Color = value;

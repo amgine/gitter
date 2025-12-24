@@ -28,9 +28,9 @@ using gitter.Native;
 
 public class LowLevelMouseHook : WindowsHook
 {
-	public event EventHandler<MouseEventArgs> MouseWheel;
+	public event EventHandler<MouseEventArgs>? MouseWheel;
 
-	public event EventHandler<MouseEventArgs> MouseMove;
+	public event EventHandler<MouseEventArgs>? MouseMove;
 
 	protected virtual void OnMouseWheel(MouseEventArgs args)
 		=> MouseWheel?.Invoke(this, args);

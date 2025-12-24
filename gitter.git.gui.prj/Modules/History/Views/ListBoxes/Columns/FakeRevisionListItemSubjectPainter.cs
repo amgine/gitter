@@ -29,10 +29,6 @@ using gitter.Framework.Controls;
 /// <summary>Paints <see cref="FakeRevisionListItem.SubjectText"/> for the <see cref="SubjectColumn"/>.</summary>
 sealed class FakeRevisionListItemSubjectPainter : ISubItemPainter
 {
-	public FakeRevisionListItemSubjectPainter()
-	{
-	}
-
 	public bool TryMeasure(SubItemMeasureEventArgs measureEventArgs, out Size size)
 	{
 		Verify.Argument.IsNotNull(measureEventArgs);
@@ -114,12 +110,15 @@ sealed class FakeRevisionListItemSubjectPainter : ISubItemPainter
 				if(item.Icons[i].Count != 0)
 				{
 					var image = item.Icons[i].Image.GetImage(paintEventArgs.Dpi.X * 16 / 96);
-					var imageRect = new Rectangle(rect.X, rect.Y - 1 + (rect.Height - iconSize.Height) / 2, iconSize.Width, iconSize.Height);
-					var dx = imageRect.Width + conv.ConvertX(2);
-					rect.X     += dx;
-					rect.Width -= dx;
-					if(rect.Width <= 0) break;
-					paintEventArgs.Graphics.DrawImage(image, imageRect);
+					if(image is not null)
+					{
+						var imageRect = new Rectangle(rect.X, rect.Y - 1 + (rect.Height - iconSize.Height) / 2, iconSize.Width, iconSize.Height);
+						var dx = imageRect.Width + conv.ConvertX(2);
+						rect.X     += dx;
+						rect.Width -= dx;
+						if(rect.Width <= 0) break;
+						paintEventArgs.Graphics.DrawImage(image, imageRect);
+					}
 					var countText = item.Icons[i].Count.ToString(CultureInfo.CurrentCulture);
 					var textW = GitterApplication.TextRenderer.MeasureText(
 						paintEventArgs.Graphics, countText, paintEventArgs.Font, int.MaxValue).Width;

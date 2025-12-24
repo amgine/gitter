@@ -20,18 +20,11 @@
 
 namespace gitter.Git.AccessLayer;
 
-using System;
-using System.Collections.Generic;
+using gitter.Framework;
 
-public sealed class RevisionGraphData
+public sealed class RevisionGraphData(string hash, Many<string> parents)
 {
-	public RevisionGraphData(string hash, IList<string> parents)
-	{
-		Hash = hash;
-		Parents = parents;
-	}
+	public string Hash { get; } = hash;
 
-	public string Hash { get; }
-
-	public IList<string> Parents { get; }
+	public Many<string> Parents { get; } = parents;
 }

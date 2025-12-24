@@ -20,14 +20,8 @@
 
 namespace gitter.Git;
 
-using System;
-
-public sealed class TreeData : TreeContentData
+public sealed class TreeData(Sha1Hash hash, int mode, string name)
+	: TreeContentData(hash, mode, name)
 {
-	public TreeData(string hash, int mode, string name)
-		: base(hash, mode, name)
-	{
-	}
-
 	public override TreeContentType Type => TreeContentType.Tree;
 }

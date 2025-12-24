@@ -27,33 +27,29 @@ using System.Windows.Forms;
 using gitter.Framework;
 using gitter.Framework.Controls;
 
-public class RemoteReferenceListItem : CustomListBoxItem<IRemoteReference>
+public class RemoteReferenceListItem(IRemoteReference reference)
+	: CustomListBoxItem<IRemoteReference>(reference)
 {
-	public RemoteReferenceListItem(IRemoteReference reference)
-		: base(reference)
-	{
-	}
-
-	private void OnDeleted(object sender, EventArgs e)
+	private void OnDeleted(object? sender, EventArgs e)
 	{
 		RemoveSafe();
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
+		base.OnListBoxAttached(listBox);
 		DataContext.Deleted += OnDeleted;
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
 		DataContext.Deleted -= OnDeleted;
-		base.OnListBoxDetached();
+		base.OnListBoxDetached(listBox);
 	}
 
-	private Image GetIcon(Dpi dpi)
+	private Image? GetIcon(Dpi dpi)
 	{
 		var icon = DataContext switch
 		{
@@ -96,11 +92,11 @@ public class RemoteReferenceListItem : CustomListBoxItem<IRemoteReference>
 	}
 
 	/// <inheritdoc/>
-	public override ContextMenuStrip GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
+	public override ContextMenuStrip? GetContextMenu(ItemContextMenuRequestEventArgs requestEventArgs)
 	{
 		Assert.IsNotNull(requestEventArgs);
 
-		ContextMenuStrip menu = DataContext switch
+		ContextMenuStrip? menu = DataContext switch
 		{
 			RemoteRepositoryBranch branch => new RemoteBranchMenu(branch),
 			RemoteRepositoryTag tag       => new RemoteTagMenu(tag),

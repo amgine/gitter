@@ -27,7 +27,7 @@ using gitter.Framework.Controls;
 
 public static class DiffHeaderPanelsProvider
 {
-	public static event EventHandler<CreatingPanelsEventArgs> CreatingPanels;
+	public static event EventHandler<CreatingPanelsEventArgs>? CreatingPanels;
 
 	internal static IReadOnlyList<FlowPanel> GetSourceSpecificPanels(IDiffSource diffSource)
 	{

@@ -35,18 +35,18 @@ public abstract class HashColumnBase : CustomListBoxColumn
 
 	public static readonly IDpiBoundValue<Font> Font = DpiBoundValue.Font(new("Consolas", 9.0f, FontStyle.Regular, GraphicsUnit.Point));
 
-	private const string NoHash = "----------------------------------------";
+	protected const string NoHash = "----------------------------------------";
 
 	#region Data
 
 	private bool _abbreviate;
-	private HashColumnExtender _extender;
+	private HashColumnExtender? _extender;
 
 	#endregion
 
 	#region Events
 
-	public event EventHandler AbbreviateChanged;
+	public event EventHandler? AbbreviateChanged;
 
 	#endregion
 
@@ -60,21 +60,18 @@ public abstract class HashColumnBase : CustomListBoxColumn
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxAttached()
+	protected override void OnListBoxAttached(CustomListBox listBox)
 	{
-		base.OnListBoxAttached();
-		_extender = new HashColumnExtender(this);
-		Extender  = new Popup(_extender);
+		base.OnListBoxAttached(listBox);
+		Extender = new Popup(_extender = new(this));
 	}
 
 	/// <inheritdoc/>
-	protected override void OnListBoxDetached()
+	protected override void OnListBoxDetached(CustomListBox listBox)
 	{
-		Extender.Dispose();
-		Extender = null;
-		_extender.Dispose();
-		_extender = null;
-		base.OnListBoxDetached();
+		DisposeExtender();
+		DisposableUtility.Dispose(ref _extender);
+		base.OnListBoxDetached(listBox);
 	}
 
 	public bool Abbreviate
@@ -82,39 +79,33 @@ public abstract class HashColumnBase : CustomListBoxColumn
 		get => _abbreviate;
 		set
 		{
-			if(_abbreviate != value)
+			if(_abbreviate == value) return;
+
+			_abbreviate = value;
+			var w = Width;
+			AutoSize();
+			if(Width != w)
 			{
-				_abbreviate = value;
-				var w = Width;
-				AutoSize();
-				if(Width != w)
-				{
-					ListBox?.Refresh();
-				}
-				AbbreviateChanged?.Invoke(this, EventArgs.Empty);
+				ListBox?.Refresh();
 			}
+			AbbreviateChanged?.Invoke(this, EventArgs.Empty);
 		}
 	}
 
-	protected virtual string GetHash(Revision revision) => revision.HashString;
+	protected virtual string GetHash(Revision revision)
+		=> revision.HashString;
+
+	private string GetOptionalHash(Revision? revision)
+		=> revision is not null ? GetHash(revision) : NoHash;
 
 	protected virtual string GetHash(CustomListBoxItem item)
-	{
-		switch(item)
+		=> item switch
 		{
-			case IDataContextProvider<Revision> revItem:
-				{
-					var revision = revItem.DataContext;
-					return revision is not null ? GetHash(revision) : NoHash;
-				}
-			case IDataContextProvider<IRevisionPointer> revPtrItem:
-				return GetHash(revPtrItem.DataContext.Dereference());
-			case IDataContextProvider<IRemoteReference> remoteRefItem:
-				return remoteRefItem.DataContext.Hash.ToString();
-			default:
-				return NoHash;
-		}
-	}
+			IDataContextProvider<Revision>         revItem       => GetOptionalHash(revItem.DataContext),
+			IDataContextProvider<IRevisionPointer> revPtrItem    => GetOptionalHash(revPtrItem.DataContext.Dereference()),
+			IDataContextProvider<IRemoteReference> remoteRefItem => remoteRefItem.DataContext.Hash.ToString(),
+			_ => NoHash,
+		};
 
 	private void PaintNoHash(SubItemPaintEventArgs subItemPaintEventArgs)
 	{

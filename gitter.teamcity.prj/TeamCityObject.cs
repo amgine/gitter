@@ -28,23 +28,23 @@ public abstract class TeamCityObject
 {
 	#region Static
 
-	public static readonly TeamCityObjectProperty<string> IdProperty     = new("id",     nameof(Id));
-	public static readonly TeamCityObjectProperty<string> WebUrlProperty = new("webUrl", nameof(WebUrl));
+	public static readonly TeamCityObjectProperty<string>  IdProperty     = new("id",     nameof(Id));
+	public static readonly TeamCityObjectProperty<string?> WebUrlProperty = new("webUrl", nameof(WebUrl));
 
 	#endregion
 
 	#region Data
 
-	private string _webUrl;
+	private string? _webUrl;
 
 	#endregion
 
 	#region Events
 
-	public event EventHandler<TeamCityObjectPropertyChangedEventArgs> PropertyChanged;
+	public event EventHandler<TeamCityObjectPropertyChangedEventArgs>? PropertyChanged;
 
 	protected void OnPropertyChanged(TeamCityObjectProperty property)
-		=> PropertyChanged?.Invoke(this, new TeamCityObjectPropertyChangedEventArgs(property));
+		=> PropertyChanged?.Invoke(this, new(property));
 
 	#endregion
 
@@ -64,8 +64,8 @@ public abstract class TeamCityObject
 		Verify.Argument.IsNotNull(node);
 
 		Context = context;
-		Id      = TeamCityUtility.LoadString(node.Attributes[IdProperty.XmlNodeName]);
-		_webUrl = TeamCityUtility.LoadString(node.Attributes[WebUrlProperty.XmlNodeName]);
+		Id      = TeamCityUtility.LoadString(node.Attributes?[IdProperty.XmlNodeName]) ?? throw new ArgumentException("ID is not defined.", nameof(node));
+		_webUrl = TeamCityUtility.LoadString(node.Attributes?[WebUrlProperty.XmlNodeName]);
 	}
 
 	#endregion
@@ -76,17 +76,13 @@ public abstract class TeamCityObject
 	{
 		Verify.Argument.IsNotNull(node);
 
-		WebUrl = TeamCityUtility.LoadString(node.Attributes[WebUrlProperty.XmlNodeName]);
+		WebUrl = TeamCityUtility.LoadString(node.Attributes?[WebUrlProperty.XmlNodeName]);
 	}
 
 	public virtual void Update() => throw new NotSupportedException();
 
-	public object GetValue(TeamCityObjectProperty property)
-	{
-		Verify.Argument.IsNotNull(property);
-
-		return GetType().GetProperty(property.Name).GetValue(this, null);
-	}
+	public object? GetValue(TeamCityObjectProperty property)
+		=> GetType().GetProperty(property.Name)?.GetValue(this, null);
 
 	protected void UpdatePropertyValue<T>(ref T field, T value, TeamCityObjectProperty<T> property)
 	{
@@ -105,7 +101,7 @@ public abstract class TeamCityObject
 
 	public TeamCityServiceContext Context { get; }
 
-	public string WebUrl
+	public string? WebUrl
 	{
 		get => _webUrl;
 		private set => UpdatePropertyValue(ref _webUrl, value, WebUrlProperty);

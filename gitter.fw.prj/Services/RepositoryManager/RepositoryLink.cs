@@ -26,7 +26,7 @@ using gitter.Framework.Configuration;
 
 public sealed class RepositoryLink
 {
-	public event EventHandler Deleted;
+	public event EventHandler? Deleted;
 
 	internal void InvokeDeleted()
 		=> Deleted?.Invoke(this, EventArgs.Empty);
@@ -35,8 +35,8 @@ public sealed class RepositoryLink
 	{
 		Verify.Argument.IsNotNull(section);
 
-		Path        = section.GetValue("Path", string.Empty);
-		Type        = section.GetValue("Type", string.Empty);
+		Path        = section.GetValue("Path", string.Empty) ?? "";
+		Type        = section.GetValue("Type", string.Empty) ?? "";
 		Description = section.GetValue("Description", string.Empty);
 	}
 
@@ -50,7 +50,7 @@ public sealed class RepositoryLink
 
 	public string Type { get; }
 
-	public string Description { get; set; }
+	public string? Description { get; set; }
 
 	public void SaveTo(Section section)
 	{

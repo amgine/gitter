@@ -1,21 +1,21 @@
 ﻿#region Copyright Notice
 /*
-* gitter - VCS repository management tool
-* Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
-* 
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-* 
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-* 
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * gitter - VCS repository management tool
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #endregion
 
 namespace gitter.Git;
@@ -37,17 +37,11 @@ public sealed class GitRepositoryUpdateChannel : IUpdateChannel
 	private readonly string _url;
 	private readonly string _branch;
 
-	sealed class UpdateVersion : IUpdateVersion
+	sealed class UpdateVersion(string url, Version version) : IUpdateVersion
 	{
-		public UpdateVersion(string url, Version version)
-		{
-			Url     = url;
-			Version = version;
-		}
+		public string Url { get; } = url;
 
-		public string Url { get; }
-
-		public Version Version { get; }
+		public Version Version { get; } = version;
 
 		private string FormatUpdaterCommand()
 		{
@@ -95,9 +89,9 @@ public sealed class GitRepositoryUpdateChannel : IUpdateChannel
 
 	/// <summary>Check latest gitter version on this channel.</summary>
 	/// <returns>Latest gitter version.</returns>
-	public async Task<IUpdateVersion> GetLatestVersionAsync(CancellationToken cancellationToken = default)
+	public async Task<IUpdateVersion?> GetLatestVersionAsync(CancellationToken cancellationToken = default)
 	{
-		Version result = null;
+		var result = default(Version);
 		var cmd = new LsRemoteCommand(
 			LsRemoteCommand.Heads(),
 			LsRemoteCommand.Tags(),

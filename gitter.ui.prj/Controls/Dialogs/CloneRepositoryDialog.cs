@@ -54,7 +54,7 @@ public partial class CloneRepositoryDialog : PickerDialog<RepositoryProviderPick
 		}
 	}
 
-	protected override Control CreateControl(IRepositoryProvider item)
+	protected override Control? CreateControl(IRepositoryProvider item)
 		=> item?.CreateCloneDialog();
 
 	public override bool Execute()
@@ -73,7 +73,7 @@ public partial class CloneRepositoryDialog : PickerDialog<RepositoryProviderPick
 			var repositoryPath = cloneDialog.RepositoryPath.Value;
 			WorkingEnvironment.BeginInvoke(
 				new Func<string, bool>(WorkingEnvironment.OpenRepository),
-				new object[] { repositoryPath });
+				[repositoryPath]);
 		}
 		return true;
 	}

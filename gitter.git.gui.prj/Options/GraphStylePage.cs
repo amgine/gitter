@@ -30,17 +30,74 @@ using gitter.Framework.Controls;
 using gitter.Framework.Layout;
 using gitter.Framework.Options;
 using gitter.Git.Gui;
+using gitter.Git.Gui.Controls;
+using gitter.Git.Gui.Properties;
 
 [ToolboxItem(false)]
 sealed class GraphStylePage : PropertyPage, IExecutableDialog
 {
 	public static readonly new Guid Guid = new("F6B1A43A-2149-4F50-9DA8-8A59FA2CE07B");
 
-	private readonly CheckBox _chkRoundedCorners;
-	private readonly NumericUpDown _numLineThickness;
-	private readonly CheckBox _chkBreakLinesAroundNodes;
-	private readonly CheckBox _chkColorNodes;
-	private readonly NumericUpDown _numNodeRadius;
+	sealed class PreviewListBox : CustomListBox
+	{
+		static readonly GraphCell[][] PreviewGraph = BuidPreviewGraph();
+
+		static GraphCell[][] BuidPreviewGraph()
+		{
+			var lines = new GraphCell[][]
+				{
+					[new()],
+					[new()],
+					[new(), new()],
+					[new(), new()],
+					[new(), new()],
+					[new()],
+				};
+
+			lines[0][0].Paint(GraphElement.Dot | GraphElement.VerticalBottom, 1);
+			lines[1][0].Paint(GraphElement.Dot | GraphElement.Vertical, 1);
+			lines[2][0].Paint(GraphElement.Dot | GraphElement.Vertical, 1);
+			lines[2][0].Paint(GraphElement.HorizontalRight, 2);
+			lines[2][1].Paint(GraphElement.LeftBottomCorner, 2);
+			lines[3][0].Paint(GraphElement.Vertical, 1);
+			lines[3][1].Paint(GraphElement.Dot | GraphElement.Vertical, 2);
+			lines[4][0].Paint(GraphElement.Dot | GraphElement.Vertical, 1);
+			lines[4][0].Paint(GraphElement.HorizontalRight, 2);
+			lines[4][1].Paint(GraphElement.LeftTopCorner, 2);
+			lines[5][0].Paint(GraphElement.Dot | GraphElement.VerticalTop, 1);
+
+			return lines;
+		}
+
+		sealed class Item : CustomListBoxItem, IRevisionGraphListItem
+		{
+			public GraphCell[]? Graph { get; set; }
+		}
+
+		public PreviewListBox(IGraphStyle graphStyle)
+		{
+			Columns.Add(Column = new(graphStyle) { SizeMode = ColumnSizeMode.Fill });
+			HeaderStyle = HeaderStyle.Hidden;
+
+			foreach(var entry in PreviewGraph)
+			{
+				Items.Add(new Item { Graph = entry });
+			}
+		}
+
+		public GraphColumn Column { get; }
+	}
+
+	private readonly ICheckBoxWidget _chkRoundedCorners;
+	private readonly TextBoxDecoratorWithUpDown _numLineThickness;
+	private readonly ICheckBoxWidget _chkBreakLinesAroundNodes;
+	private readonly ICheckBoxWidget _chkColorNodes;
+	private readonly ICheckBoxWidget _chkShowColors;
+	private readonly ICheckBoxWidget _chkFillBackground;
+	private readonly TextBoxDecoratorWithUpDown _numNodeRadius;
+	private readonly ValueSource<GraphStyleOptions> _styleOptionsSource;
+	private readonly GraphStyle _style;
+	private readonly PreviewListBox _preview;
 
 	public GraphStylePage(RepositoryProvider repositoryProvider, IValueSource<GraphStyleOptions> optionsSource)
 		: base(Guid)
@@ -51,112 +108,153 @@ sealed class GraphStylePage : PropertyPage, IExecutableDialog
 		RepositoryProvider = repositoryProvider;
 		OptionsSource      = optionsSource;
 
-		var margin = DpiBoundValue.Padding(new(3, 0, 0, 0));
-
 		GroupSeparator group0;
 		GroupSeparator group1;
+		GroupSeparator group2;
 
 		SuspendLayout();
+
+		_chkRoundedCorners = GitterApplication.Style.CheckBoxFactory.Create();
+		_chkRoundedCorners.Text = "Rounded corners";
+		_chkRoundedCorners.Margin = Padding.Empty;
+		_chkRoundedCorners.Parent = this;
+
+		_chkBreakLinesAroundNodes = GitterApplication.Style.CheckBoxFactory.Create();
+		_chkBreakLinesAroundNodes.Text = "Break lines around nodes";
+		_chkBreakLinesAroundNodes.Margin = Padding.Empty;
+		_chkBreakLinesAroundNodes.Parent = this;
+
+		_chkColorNodes = GitterApplication.Style.CheckBoxFactory.Create();
+		_chkColorNodes.Text = "Color nodes";
+		_chkColorNodes.Margin = Padding.Empty;
+		_chkColorNodes.Parent = this;
+
+		_chkShowColors = GitterApplication.Style.CheckBoxFactory.Create();
+		_chkShowColors.Text = Resources.StrShowColors;
+		_chkShowColors.Margin = Padding.Empty;
+		_chkShowColors.Parent = this;
+
+		_chkFillBackground = GitterApplication.Style.CheckBoxFactory.Create();
+		_chkFillBackground.Text = Resources.StrFillBackground;
+		_chkFillBackground.Margin = Padding.Empty;
+		_chkFillBackground.Parent = this;
+
+		_style = new(_styleOptionsSource = new(new()));
+
 		AutoScaleDimensions = new(96, 96);
 		AutoScaleMode = AutoScaleMode.Dpi;
 		int row = 0;
 		_ = new ControlLayout(this)
 		{
+
 			Content = new Grid(
-				rows: new[]
-				{
-					SizeSpec.Absolute(19),
-					SizeSpec.Absolute(23),
-					SizeSpec.Absolute(23),
-					SizeSpec.Absolute(19),
-					SizeSpec.Absolute(23),
-					SizeSpec.Absolute(23),
-					SizeSpec.Absolute(23),
+				columns:
+				[
 					SizeSpec.Everything(),
-				},
-				content: new[]
-				{
-					new GridContent(new ControlContent(group0 = new GroupSeparator
-					{
-						Text   = "Lines",
-						Margin = Padding.Empty,
-						Parent = this,
-					}), row: row++),
+					SizeSpec.Absolute(12),
+					SizeSpec.Absolute(210),
+				],
+				content:
+				[
 					new GridContent(new Grid(
-						columns: new[]
-						{
-							SizeSpec.Absolute(80),
-							SizeSpec.Absolute(50),
+						rows:
+						[
+							LayoutConstants.GroupSeparatorRowHeight,
+							LayoutConstants.TextInputRowHeight,
+							LayoutConstants.CheckBoxRowHeight,
+							LayoutConstants.GroupSeparatorRowHeight,
+							LayoutConstants.TextInputRowHeight,
+							LayoutConstants.CheckBoxRowHeight,
+							LayoutConstants.CheckBoxRowHeight,
 							SizeSpec.Everything(),
-						},
-						content: new[]
-						{
-							new GridContent(new ControlContent(new Label()
+						],
+						content:
+						[
+							new GridContent(new ControlContent(group0 = new GroupSeparator
 							{
-								AutoSize  = false,
-								Padding   = Padding.Empty,
-								TextAlign = ContentAlignment.MiddleLeft,
-								Text      = "Thickness:",
-								Margin    = Padding.Empty,
-								Parent    = this,
-							}), column: 0),
-							new GridContent(new ControlContent(_numLineThickness = new()
+								Text   = "Lines",
+								Parent = this,
+							}, marginOverride: LayoutConstants.NoMargin), row: row++),
+							new GridContent(new Grid(
+								columns:
+								[
+									SizeSpec.Absolute(80),
+									SizeSpec.Absolute(60),
+									SizeSpec.Everything(),
+								],
+								content:
+								[
+									new GridContent(new ControlContent(new LabelControl()
+									{
+										AutoSize  = false,
+										Padding   = Padding.Empty,
+										Text      = "Thickness:",
+										Margin    = Padding.Empty,
+										Parent    = this,
+									}), column: 0),
+									new GridContent(new ControlContent(_numLineThickness = new(new() { TextAlign = HorizontalAlignment.Right })
+									{
+										Minimum = 1,
+										Maximum = 5,
+										Parent  = this,
+									}, marginOverride: LayoutConstants.TextBoxMargin), column: 1),
+								]), row: row++),
+							new GridContent(new WidgetContent(_chkRoundedCorners, marginOverride: LayoutConstants.NoMargin), row: row++),
+							new GridContent(new ControlContent(group1 = new GroupSeparator
 							{
-								Minimum = 1,
-								Maximum = 5,
-								Parent  = this,
-							}, verticalContentAlignment: VerticalContentAlignment.Center), column: 1),
-						}), row: row++),
-					new GridContent(new ControlContent(_chkRoundedCorners = new()
-					{
-						Text   = "Rounded corners",
-						Margin = Padding.Empty,
-						Parent = this,
-					}, marginOverride: margin), row: row++),
-					new GridContent(new ControlContent(group1 = new GroupSeparator
-					{
-						Text   = "Nodes",
-						Margin = Padding.Empty,
-						Parent = this,
-					}), row: row++),
+								Text   = "Nodes",
+								Parent = this,
+							}, marginOverride: LayoutConstants.NoMargin), row: row++),
+							new GridContent(new Grid(
+								columns:
+								[
+									SizeSpec.Absolute(80),
+									SizeSpec.Absolute(60),
+									SizeSpec.Everything(),
+								],
+								content:
+								[
+									new GridContent(new ControlContent(new LabelControl()
+									{
+										AutoSize  = false,
+										Padding   = Padding.Empty,
+										Text      = "Radius:",
+										Margin    = Padding.Empty,
+										Parent    = this,
+									}), column: 0),
+									new GridContent(new ControlContent(_numNodeRadius = new(new() { TextAlign = HorizontalAlignment.Right })
+									{
+										Minimum = 1,
+										Maximum = 5,
+										Parent  = this,
+									}, marginOverride: LayoutConstants.TextBoxMargin), column: 1),
+								]), row: row++),
+							new GridContent(new WidgetContent(_chkBreakLinesAroundNodes, marginOverride: LayoutConstants.NoMargin), row: row++),
+							new GridContent(new WidgetContent(_chkColorNodes, marginOverride: LayoutConstants.NoMargin), row: row++),
+						]), column: 0),
 					new GridContent(new Grid(
-						columns: new[]
-						{
-							SizeSpec.Absolute(80),
-							SizeSpec.Absolute(50),
+						rows:
+						[
+							LayoutConstants.GroupSeparatorRowHeight,
 							SizeSpec.Everything(),
-						},
-						content: new[]
-						{
-							new GridContent(new ControlContent(new Label()
+							LayoutConstants.CheckBoxRowHeight,
+							LayoutConstants.CheckBoxRowHeight,
+						],
+						content:
+						[
+							new GridContent(new ControlContent(group2 = new GroupSeparator
 							{
-								AutoSize  = false,
-								Padding   = Padding.Empty,
-								TextAlign = ContentAlignment.MiddleLeft,
-								Text      = "Radius:",
-								Margin    = Padding.Empty,
-								Parent    = this,
-							}), column: 0),
-							new GridContent(new ControlContent(_numNodeRadius = new()
+								Text   = "Preview",
+								Parent = this,
+							}, marginOverride: LayoutConstants.NoMargin), row: 0),
+							new GridContent(new ControlContent(_preview = new(_style)
 							{
-								Minimum = 1,
-								Maximum = 5,
-								Parent  = this,
-							}, verticalContentAlignment: VerticalContentAlignment.Center), column: 1),
-						}), row: row++),
-					new GridContent(new ControlContent(_chkBreakLinesAroundNodes = new()
-					{
-						Text   = "Break lines around nodes",
-						Margin = Padding.Empty,
-						Parent = this,
-					}, marginOverride: margin), row: row++),
-					new GridContent(new ControlContent(_chkColorNodes = new()
-					{
-						Text   = "Color nodes",
-						Margin = Padding.Empty,
-						Parent = this,
-					}, marginOverride: margin), row: row++),
-				}),
+								Parent = this,
+							}, marginOverride: LayoutConstants.NoMargin), row: 1),
+							new GridContent(new WidgetContent(_chkShowColors, marginOverride: LayoutConstants.NoMargin), row: 2),
+							new GridContent(new WidgetContent(_chkFillBackground, marginOverride: LayoutConstants.NoMargin), row: 3),
+						]), column: 2),
+				]),
 		};
 
 		group0.SendToBack();
@@ -165,12 +263,27 @@ sealed class GraphStylePage : PropertyPage, IExecutableDialog
 		ResumeLayout(false);
 		PerformLayout();
 
-		_chkRoundedCorners.CheckedChanged += OnRoundedCornersCheckedChanged;
+		_preview.Column.ShowColors     = _chkShowColors.IsChecked;
+		_preview.Column.FillBackground = _chkFillBackground.IsChecked;
+
+		UpdateOptions();
+		_chkColorNodes.IsCheckedChanged            += (_, _) => UpdateOptions();
+		_chkRoundedCorners.IsCheckedChanged        += (_, _) => UpdateOptions();
+		_chkBreakLinesAroundNodes.IsCheckedChanged += (_, _) => UpdateOptions();
+		_numLineThickness.ValueChanged             += (_, _) => UpdateOptions();
+		_numNodeRadius.ValueChanged                += (_, _) => UpdateOptions();
+		_chkShowColors.CheckStateChanged           += (_, _) => _preview.Column.ShowColors     = _chkShowColors.IsChecked;
+		_chkFillBackground.CheckStateChanged       += (_, _) => _preview.Column.FillBackground = _chkFillBackground.IsChecked;
 	}
 
-	private void OnRoundedCornersCheckedChanged(object sender, EventArgs e)
+	private void UpdateOptions()
 	{
-		
+		_styleOptionsSource.Value = new(
+			BreakLinesWithDot: _chkBreakLinesAroundNodes.IsChecked,
+			RoundedCorners:    _chkRoundedCorners.IsChecked,
+			ColorNodes:        _chkColorNodes.IsChecked,
+			BaseLineWidth:     _numLineThickness.Value,
+			NodeRadius:        _numNodeRadius.Value);
 	}
 
 	/// <inheritdoc/>
@@ -194,25 +307,29 @@ sealed class GraphStylePage : PropertyPage, IExecutableDialog
 	{
 		Assert.IsNotNull(options);
 
-		_chkRoundedCorners.Checked        = options.RoundedCorners;
-		_numLineThickness.Value           = options.BaseLineWidth;
-		_chkBreakLinesAroundNodes.Checked = options.BreakLinesWithDot;
-		_chkColorNodes.Checked            = options.ColorNodes;
-		_numNodeRadius.Value              = options.NodeRadius;
+		_chkRoundedCorners.IsChecked        = options.RoundedCorners;
+		_numLineThickness.Value             = options.BaseLineWidth;
+		_chkBreakLinesAroundNodes.IsChecked = options.BreakLinesWithDot;
+		_chkColorNodes.IsChecked            = options.ColorNodes;
+		_numNodeRadius.Value                = options.NodeRadius;
 	}
 
 	private GraphStyleOptions MakeSnapshot() => new(
-		RoundedCorners:    _chkRoundedCorners.Checked,
-		BaseLineWidth:     (int)_numLineThickness.Value,
-		BreakLinesWithDot: _chkBreakLinesAroundNodes.Checked,
-		ColorNodes:        _chkColorNodes.Checked,
-		NodeRadius:        (int)_numNodeRadius.Value);
+		RoundedCorners:    _chkRoundedCorners.IsChecked,
+		BaseLineWidth:     _numLineThickness.Value,
+		BreakLinesWithDot: _chkBreakLinesAroundNodes.IsChecked,
+		ColorNodes:        _chkColorNodes.IsChecked,
+		NodeRadius:        _numNodeRadius.Value);
 
 	public bool Execute()
 	{
 		var options = MakeSnapshot();
 		OptionsSource.Value = options;
-		GraphStyleOptions.SaveTo(options, RepositoryProvider.ConfigSection.GetCreateSection("GraphStyle"));
+		var section = RepositoryProvider.ConfigSection?.GetCreateSection("GraphStyle");
+		if(section is not null)
+		{
+			GraphStyleOptions.SaveTo(options, section);
+		}
 		return true;
 	}
 }

@@ -18,16 +18,12 @@
  */
 #endregion
 
-#nullable enable
-
 namespace gitter.Git;
 
 using System;
 using System.Threading.Tasks;
 
 using gitter.Git.AccessLayer;
-
-using Resources = gitter.Git.Properties.Resources;
 
 /// <summary>git tag object.</summary>
 public sealed class Tag : Reference
@@ -36,7 +32,7 @@ public sealed class Tag : Reference
 	/// <param name="name">Tag name.</param>
 	/// <param name="errorMessage">Error message.</param>
 	/// <returns><c>true</c> if <paramref name="name"/> is a valid tag name; otherwise, <c>false</c>.</returns>
-	public static bool ValidateName(string name, out string? errorMessage)
+	public static bool ValidateName(string? name, out string? errorMessage)
 		=> Reference.ValidateName(name, ReferenceType.Tag, out errorMessage);
 
 	/// <summary>Annotated tag message.</summary>
@@ -57,13 +53,16 @@ public sealed class Tag : Reference
 	/// <value><see cref="ReferenceType.Tag"/>.</value>
 	public override ReferenceType Type => ReferenceType.Tag;
 
-	/// <summary>Gets the full tag name.</summary>
-	/// <value>Full tag name.</value>
-	public override string FullName => GitConstants.TagPrefix + Name;
-
 	/// <summary>Gets or sets the type of this tag.</summary>
 	/// <value>Type of this tag.</value>
 	public TagType TagType { get; internal set; }
+
+	private string? _cachedFullName;
+
+	/// <summary>Gets the full tag name.</summary>
+	/// <value>Full tag name.</value>
+	public override string FullName
+		=> _cachedFullName ??= GitConstants.TagPrefix + Name;
 
 	/// <summary>Gets the message of annotated tag.</summary>
 	/// <value>Message of annotated tag.</value>
@@ -77,9 +76,9 @@ public sealed class Tag : Reference
 				try
 				{
 					_message = Repository.Accessor.QueryTagMessage.Invoke(
-						new QueryTagMessageParameters { TagName = FullName });
+						new QueryTagMessageRequest { TagName = FullName });
 				}
-				catch(Exception exc) when(!exc.IsCritical())
+				catch(Exception exc) when(!exc.IsCritical)
 				{
 					_message = string.Empty;
 				}
@@ -95,7 +94,7 @@ public sealed class Tag : Reference
 	{
 		Verify.Argument.IsNotNull(pointer);
 
-		return pointer.Dereference();
+		return pointer.Dereference() ?? pointer;
 	}
 
 	/// <summary>Deletes this <see cref="Tag"/>.</summary>

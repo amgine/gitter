@@ -45,7 +45,7 @@ internal sealed class RecentRepositoryListItem : CustomListBoxItem<RepositoryLin
 		Verify.Argument.IsNotNull(repository);
 	}
 
-	private static Image GetIcon(Dpi dpi)
+	private static Image? GetIcon(Dpi dpi)
 		=> Icons.Repository.GetImage(DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 
 	/// <inheritdoc/>

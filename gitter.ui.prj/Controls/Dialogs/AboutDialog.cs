@@ -33,25 +33,21 @@ using Resources = gitter.Properties.Resources;
 partial class AboutDialog : DialogBase
 {
 	private readonly IUpdateChannel _updateChannel;
-	private IUpdateVersion _latestVersion;
-
-	private static Bitmap LoadImage(string name)
-	{
-		using var stream = typeof(AboutDialog)
-			.Assembly
-			.GetManifestResourceStream("gitter.Resources.images." + name + ".png");
-		if(stream is null) return default;
-		return new Bitmap(stream);
-	}
-
-	private static readonly Lazy<Bitmap> ImgLogo = new(() => LoadImage(@"start-page-logo"));
+	private IUpdateVersion? _latestVersion;
 
 	public AboutDialog(IUpdateChannel updateChannel)
 	{
 		_updateChannel = updateChannel;
 
 		InitializeComponent();
-		_logoPictureBox.Image = ImgLogo.Value;
+
+		if(GitterApplication.Style.Type == GitterStyleType.DarkBackground)
+		{
+			BackColor = Color.FromArgb(37, 37, 37);
+		}
+
+		linkLabel1.LinkColor       = GitterApplication.Style.Colors.HyperlinkText;
+		linkLabel1.ActiveLinkColor = GitterApplication.Style.Colors.HyperlinkTextHotTrack;
 
 		Text = Resources.StrAbout;
 		labelVersion.Text = $"v{AssemblyVersion}";
@@ -65,7 +61,7 @@ partial class AboutDialog : DialogBase
 
 	#region Assembly Attribute Accessors
 
-	private static T GetAssemblyAttribute<T>() where T : Attribute
+	private static T? GetAssemblyAttribute<T>() where T : Attribute
 		=> Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(T), false) is { Length: > 0 } attributes
 			? attributes[0] as T
 			: default;
@@ -74,7 +70,7 @@ partial class AboutDialog : DialogBase
 		=> GetAssemblyAttribute<AssemblyTitleAttribute>()?.Title
 		?? System.IO.Path.GetFileNameWithoutExtension(Assembly.GetExecutingAssembly().Location);
 
-	public string AssemblyVersion => Assembly.GetExecutingAssembly().GetName().Version.ToString();
+	public string? AssemblyVersion => typeof(AboutDialog).Assembly.GetName().Version?.ToString();
 
 	public string AssemblyDescription
 		=> GetAssemblyAttribute<AssemblyDescriptionAttribute>()?.Description ?? string.Empty;
@@ -96,12 +92,10 @@ partial class AboutDialog : DialogBase
 	/// <inheritdoc/>
 	public override IDpiBoundValue<Padding> ScalableMargin { get; } = DpiBoundValue.Constant(Padding.Empty);
 
-	private static void OnEmailLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-	{
-		Utility.OpenUrl(@"mailto://" + ((LinkLabel)sender).Text);
-	}
+	private static void OnEmailLinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
+		=> Utility.OpenUrl(@"mailto://" + ((LinkLabel)sender!).Text);
 
-	private async void OnCheckForUpdatesClick(object sender, EventArgs e)
+	private async void OnCheckForUpdatesClick(object? sender, EventArgs e)
 	{
 		_btnCheckForUpdates.Visible = false;
 		_lblUpdateStatus.Text = Resources.StrsCheckingForUpdates.AddEllipsis();
@@ -135,7 +129,7 @@ partial class AboutDialog : DialogBase
 		}
 	}
 
-	private void OnUpdateClick(object sender, EventArgs e)
+	private void OnUpdateClick(object? sender, EventArgs e)
 	{
 		if(!HelperExecutables.CheckIfUpdaterIsRunning())
 		{
@@ -144,7 +138,7 @@ partial class AboutDialog : DialogBase
 				_latestVersion?.Update();
 				_btnUpdate.Enabled = false;
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 			}
 		}

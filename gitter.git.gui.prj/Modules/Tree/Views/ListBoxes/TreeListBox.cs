@@ -33,8 +33,8 @@ public sealed class TreeListBox : CustomListBox
 {
 	#region Data
 
-	private IDisposable _binding;
-	private Repository _repository;
+	private IDisposable? _binding;
+	private Repository? _repository;
 
 	#endregion
 
@@ -67,7 +67,7 @@ public sealed class TreeListBox : CustomListBox
 				TreeListBoxMode.ShowPlainFileList    => new TreeBinding(Items, root, true),
 				TreeListBoxMode.ShowDirectoryContent => new TreeBinding(Items, root, false, true),
 				TreeListBoxMode.ShowDirectoryTree    => new TreeDirectoriesBinding(Items, root, true),
-				_ => throw new ArgumentException("Invalid mode.", "mode"),
+				_ => throw new ArgumentException("Invalid mode.", nameof(mode)),
 			};
 			_repository = root.Repository;
 		}
@@ -118,8 +118,10 @@ public sealed class TreeListBox : CustomListBox
 		return false;
 	}
 
-	protected override ContextMenuStrip GetMultiselectContextMenu(ItemsContextMenuRequestEventArgs requestEventArgs)
+	protected override ContextMenuStrip? GetMultiselectContextMenu(ItemsContextMenuRequestEventArgs requestEventArgs)
 	{
+		if(_repository is null) return default;
+
 		var stagedStatus = StagedStatus.None;
 		var items = new TreeItem[requestEventArgs.Items.Count];
 		int id = 0;
@@ -129,12 +131,15 @@ public sealed class TreeListBox : CustomListBox
 			items[id++] = treeItem;
 			stagedStatus |= treeItem.StagedStatus;
 		}
-		ContextMenuStrip menu;
+		ContextMenuStrip? menu;
 		switch(stagedStatus)
 		{
 			case StagedStatus.Staged:
 				{
-					menu            = new ContextMenuStrip();
+					menu = new ContextMenuStrip
+					{
+						Renderer = GitterApplication.Style.ToolStripRenderer,
+					};
 					var dpiBindings = new DpiBindings(menu);
 					var factory     = new GuiItemFactory(dpiBindings);
 					menu.Items.Add(factory.GetUnstageItem<ToolStripMenuItem>(_repository, items));
@@ -142,7 +147,10 @@ public sealed class TreeListBox : CustomListBox
 				break;
 			case StagedStatus.Unstaged:
 				{
-					menu            = new ContextMenuStrip();
+					menu = new ContextMenuStrip
+					{
+						Renderer = GitterApplication.Style.ToolStripRenderer,
+					};
 					var dpiBindings = new DpiBindings(menu);
 					var factory     = new GuiItemFactory(dpiBindings);
 					menu.Items.Add(factory.GetStageItem<ToolStripMenuItem>(_repository, items));
@@ -168,11 +176,7 @@ public sealed class TreeListBox : CustomListBox
 	{
 		if(disposing)
 		{
-			if(_binding is not null)
-			{
-				_binding.Dispose();
-				_binding = null;
-			}
+			DisposableUtility.Dispose(ref _binding);
 			_repository = null;
 		}
 		base.Dispose(disposing);

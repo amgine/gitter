@@ -20,14 +20,11 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 
-public sealed class RedmineObjectPropertyChangedEventArgs : EventArgs
+public sealed class RedmineObjectPropertyChangedEventArgs(RedmineObjectProperty property) : EventArgs
 {
-	public RedmineObjectPropertyChangedEventArgs(RedmineObjectProperty property)
-	{
-		Property = property;
-	}
-
-	public RedmineObjectProperty Property { get; }
+	public RedmineObjectProperty Property { get; } = property;
 }

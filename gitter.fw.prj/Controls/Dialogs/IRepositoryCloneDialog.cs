@@ -24,7 +24,7 @@ using gitter.Framework.Mvc;
 
 public interface IRepositoryCloneDialog
 {
-	IUserInputSource<string> Url { get; }
+	IUserInputSource<string?> Url { get; }
 
 	IUserInputSource<string> RepositoryPath { get; }
 }

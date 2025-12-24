@@ -21,47 +21,40 @@
 namespace gitter.Git;
 
 using System;
-using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+
+using gitter.Framework;
 
 public static class GitUtils
 {
-	public static bool IsValidSHA1(string hash)
+	public static bool IsValidPartialSHA1([NotNullWhen(returnValue: true)] string? hash)
 	{
-		if(hash == null) return false;
-		if(hash.Length != Hash.HexStringLength) return false;
+		if(hash is null) return false;
+		if(hash.Length  > Sha1Hash.HexStringLength) return false;
+		if(hash.Length == Sha1Hash.HexStringLength) return Sha1Hash.IsValidString(hash);
 		for(int i = 0; i < hash.Length; ++i)
 		{
+#if NET9_0_OR_GREATER
+			if(!char.IsAsciiHexDigit(hash[i])) return false;
+#else
 			if(!Uri.IsHexDigit(hash[i])) return false;
-		}
-		return true;
-	}
-
-	public static bool IsValidPartialSHA1(string hash)
-	{
-		if(hash == null) return false;
-		if(hash.Length > 40) return false;
-		for(int i = 0; i < hash.Length; ++i)
-		{
-			if(!Uri.IsHexDigit(hash[i])) return false;
+#endif
 		}
 		return true;
 	}
 
 	private static string[] RemoveTrailingEmptyStringElements(string[] elements)
 	{
-		var list = new List<string>(elements.Length);
-		for(int i = elements.Length - 1; i > -1; i--)
+		for(int i = elements.Length - 1; i >= 0; --i)
 		{
-			if(!(elements[i] == string.Empty))
+			if(elements[i] != string.Empty)
 			{
-				for(int j = 0; j <= i; ++j)
-				{
-					list.Add(elements[j]);
-				}
-				break;
+				var part = new string[i + 1];
+				Array.Copy(elements, part, i + 1);
+				return part;
 			}
 		}
-		return list.ToArray();
+		return Preallocated<string>.EmptyArray;
 	}
 
 	public static string GetHumanishName(string url)
@@ -70,18 +63,18 @@ public static class GitUtils
 		{
 			throw new InvalidOperationException("Path is either null or empty.");
 		}
-		string[] elements = url.Split(new char[] { '/' });
+		var elements = url.Split(['/'], StringSplitOptions.RemoveEmptyEntries);
 		if(elements.Length == 0)
 		{
 			throw new InvalidOperationException();
 		}
-		string[] strArray2 = RemoveTrailingEmptyStringElements(elements);
+		var strArray2 = RemoveTrailingEmptyStringElements(elements);
 		if(strArray2.Length == 0)
 		{
 			throw new InvalidOperationException();
 		}
-		string str = strArray2[strArray2.Length - 1];
-		if(".git".Equals(str))
+		var str = strArray2[strArray2.Length - 1];
+		if(".git".Equals(str) && strArray2.Length > 1)
 		{
 			return strArray2[strArray2.Length - 2];
 		}

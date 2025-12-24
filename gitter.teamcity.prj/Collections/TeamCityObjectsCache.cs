@@ -32,7 +32,7 @@ public abstract class TeamCityObjectsCache<T> : TeamCityObjectsCacheBase<T>
 
 	internal T Lookup(string id)
 	{
-		T obj;
+		T? obj;
 		lock(SyncRoot)
 		{
 			if(!Cache.TryGetValue(id, out obj))

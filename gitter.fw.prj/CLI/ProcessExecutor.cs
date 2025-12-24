@@ -25,8 +25,6 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
-#nullable enable
-
 public static class ProcessExecutor
 {
 	public static class CancellationMethods
@@ -39,7 +37,7 @@ public static class ProcessExecutor
 			{
 				process.Kill();
 			}
-			catch(Exception exc) when(!exc.IsCritical())
+			catch(Exception exc) when(!exc.IsCritical)
 			{
 			}
 		};

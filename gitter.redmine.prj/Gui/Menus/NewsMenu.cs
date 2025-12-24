@@ -37,6 +37,8 @@ public sealed class NewsMenu : ContextMenuStrip
 	{
 		Verify.Argument.IsNotNull(news);
 
+		Renderer = GitterApplication.Style.ToolStripRenderer;
+
 		News = news;
 
 		//Items.Add(GuiItemFactory.GetUpdateRedmineObjectItem<ToolStripMenuItem>(_news));

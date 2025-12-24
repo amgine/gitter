@@ -41,11 +41,10 @@ public class FlowPanelSeparator : FlowPanel
 		get => _height;
 		set
 		{
-			if(_height != value)
-			{
-				_height = value;
-				InvalidateSize();
-			}
+			if(_height == value) return;
+
+			_height = value;
+			InvalidateSize();
 		}
 	}
 
@@ -54,11 +53,10 @@ public class FlowPanelSeparator : FlowPanel
 		get => _style;
 		set
 		{
-			if(_style != value)
-			{
-				_style = value;
-				Invalidate();
-			}
+			if(_style == value) return;
+
+			_style = value;
+			Invalidate();
 		}
 	}
 
@@ -74,6 +72,8 @@ public class FlowPanelSeparator : FlowPanel
 	protected override void OnPaint(FlowPanelPaintEventArgs paintEventArgs)
 	{
 		Assert.IsNotNull(paintEventArgs);
+
+		if(FlowControl is null) return;
 
 		var graphics = paintEventArgs.Graphics;
 		var rect = paintEventArgs.Bounds;

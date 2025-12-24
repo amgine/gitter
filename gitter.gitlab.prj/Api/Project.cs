@@ -22,11 +22,6 @@ namespace gitter.GitLab.Api;
 
 using System;
 using System.Runtime.Serialization;
-#if SYSTEM_TEXT_JSON
-using System.Text.Json.Serialization;
-#elif NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
 
 [DataContract]
 class Project
@@ -43,60 +38,32 @@ class Project
 	}
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Id)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Id)]
-#endif
 	public long Id { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Name)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Name)]
-#endif
-	public string Name { get; set; }
+	public string Name { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.NameWithNamespace)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.NameWithNamespace)]
-#endif
-	public string NameWithNamespace { get; set; }
+	public string NameWithNamespace { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.Path)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.Path)]
-#endif
-	public string Path { get; set; }
+	public string Path { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.PathWithNamespace)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.PathWithNamespace)]
-#endif
-	public string PathWithNamespace { get; set; }
+	public string PathWithNamespace { get; set; } = default!;
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.SshUrlToRepo)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.SshUrlToRepo)]
-#endif
-	public string SshUrlToRepo { get; set; }
+	public string? SshUrlToRepo { get; set; }
 
 	[DataMember]
-#if SYSTEM_TEXT_JSON
 	[JsonPropertyName(Names.HttpUrlToRepo)]
-#elif NEWTONSOFT_JSON
-	[JsonProperty(Names.HttpUrlToRepo)]
-#endif
-	public string HttpUrlToRepo { get; set; }
+	public string? HttpUrlToRepo { get; set; }
 
 	public override string ToString() => NameWithNamespace;
 }

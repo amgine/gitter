@@ -20,6 +20,8 @@
 
 namespace gitter.Redmine;
 
+#nullable enable
+
 using System;
 using System.Xml;
 
@@ -27,57 +29,50 @@ static class RedmineUtility
 {
 	#region Load
 
-	public static string LoadString(XmlNode node)
-	{
-		if(node == null) return null;
-		return node.InnerText;
-	}
+	public static string? LoadString(XmlNode? node)
+		=> node?.InnerText;
 
-	public static bool LoadBoolean(XmlNode node)
-	{
-		if(node == null) return false;
-		return node.InnerText == "true";
-	}
+	public static bool LoadBoolean(XmlNode? node)
+		=> node?.InnerText == "true";
 
-	public static int LoadInt(XmlNode node)
+	public static int LoadInt(XmlNode? node)
 	{
-		if(node == null) return 0;
-		int res;
+		if(node is null) return 0;
 		if(!int.TryParse(node.InnerText,
 			System.Globalization.NumberStyles.Number,
-			System.Globalization.CultureInfo.InvariantCulture, out res))
+			System.Globalization.CultureInfo.InvariantCulture, out var res))
 		{
 			return 0;
 		}
 		return res;
 	}
 
-	public static double LoadDouble(XmlNode node)
+	public static double LoadDouble(XmlNode? node)
 	{
-		if(node == null) return 0;
-		double res;
+		if(node is null) return 0;
 		if(!double.TryParse(node.InnerText,
 			System.Globalization.NumberStyles.Number,
-			System.Globalization.CultureInfo.InvariantCulture, out res))
+			System.Globalization.CultureInfo.InvariantCulture, out var res))
 		{
 			return 0;
 		}
 		return res;
 	}
 
-	public static DateTime? LoadDate(XmlNode node)
+	public static DateTime? LoadDate(XmlNode? node)
 	{
-		if(node == null) return null;
-		DateTime res;
+		if(node is null) return null;
 		if(!DateTime.TryParse(
 			node.InnerText,
 			System.Globalization.CultureInfo.InvariantCulture,
-			System.Globalization.DateTimeStyles.AssumeUniversal, out res))
+			System.Globalization.DateTimeStyles.AssumeUniversal, out var res))
+		{
 			return null;
+		}
 		return res;
 	}
 
-	public static DateTime LoadDateForSure(XmlNode node)
+	public static DateTime LoadDateRequired(XmlNode node)
 	{
 		return DateTime.Parse(node.InnerText,
 			System.Globalization.CultureInfo.InvariantCulture,
@@ -89,10 +84,9 @@ static class RedmineUtility
 		if(node == null) return null;
 		var s = node.InnerText.Split('/');
 		if(s.Length != 3) return null;
-		int day, month, year;
-		if(!int.TryParse(s[0], out day)) return null;
-		if(!int.TryParse(s[1], out month)) return null;
-		if(!int.TryParse(s[2], out year)) return null;
+		if(!int.TryParse(s[0], out var day)) return null;
+		if(!int.TryParse(s[1], out var month)) return null;
+		if(!int.TryParse(s[2], out var year)) return null;
 		return new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Utc);
 	}
 
@@ -101,109 +95,75 @@ static class RedmineUtility
 		return new CustomFields(node, initializer);
 	}
 
-	public static T LoadObject<T>(XmlNode node, Func<int, T> initializer)
+	public static T? LoadObject<T>(XmlNode? node, Func<int, T> initializer)
 		where T : RedmineObject
 	{
-		if(node == null) return default(T);
-		var idAttr = node.Attributes[NamedRedmineObject.IdProperty.XmlNodeName];
-		if(idAttr == null) return default(T);
-		int id;
+		var idAttr = node?.Attributes?[NamedRedmineObject.IdProperty.XmlNodeName];
+		if(idAttr is null) return default;
 		if(!int.TryParse(idAttr.Value,
 			System.Globalization.NumberStyles.Number,
-			System.Globalization.CultureInfo.InvariantCulture, out id))
-			return default(T);
+			System.Globalization.CultureInfo.InvariantCulture, out var id))
+			return default;
 		return initializer(id);
 	}
 
-	public static T LoadNamedObject<T>(XmlNode node, Func<int, string, T> initializer)
+	public static T? LoadNamedObject<T>(XmlNode? node, Func<int, string, T> initializer)
 		where T : NamedRedmineObject
 	{
-		if(node == null) return default(T);
-		var nameAttr = node.Attributes[NamedRedmineObject.NameProperty.XmlNodeName];
-		if(nameAttr == null) return default(T);
-		var idAttr = node.Attributes[NamedRedmineObject.IdProperty.XmlNodeName];
-		if(idAttr == null) return default(T);
-		int id;
+		if(node is null) return default;
+		var nameAttr = node.Attributes?[NamedRedmineObject.NameProperty.XmlNodeName];
+		if(nameAttr is null) return default;
+		var idAttr = node.Attributes?[NamedRedmineObject.IdProperty.XmlNodeName];
+		if(idAttr is null) return default;
 		if(!int.TryParse(idAttr.Value,
 			System.Globalization.NumberStyles.Number,
-			System.Globalization.CultureInfo.InvariantCulture, out id))
-			return default(T);
+			System.Globalization.CultureInfo.InvariantCulture, out var id))
+			return default;
 		return initializer(id, nameAttr.Value);
 	}
 
 	public static VersionStatus LoadVersionStatus(XmlNode node)
-	{
-		switch(node.InnerText)
+		=> node.InnerText switch
 		{
-			case "open":
-				return VersionStatus.Open;
-			case "locked":
-				return VersionStatus.Locked;
-			case "closed":
-				return VersionStatus.Closed;
-			default:
-				return VersionStatus.Open;
-		}
-	}
+			"open"   => VersionStatus.Open,
+			"locked" => VersionStatus.Locked,
+			"closed" => VersionStatus.Closed,
+			_        => VersionStatus.Open,
+		};
 
 	public static IssueRelationType LoadIssueRelationType(XmlNode node)
-	{
-		switch(node.InnerText)
+		=> node.InnerText switch
 		{
-			case "blocked":
-				return IssueRelationType.Blocked;
-			case "duplicated":
-				return IssueRelationType.Duplicated;
-			case "duplicates":
-				return IssueRelationType.Blocked;
-			case "blocks":
-				return IssueRelationType.Blocks;
-			case "follows":
-				return IssueRelationType.Follows;
-			case "precedes":
-				return IssueRelationType.Precedes;
-			case "relates":
-				return IssueRelationType.Relates;
-			default:
-				return IssueRelationType.Relates;
-		}
-	}
+			"blocked"    => IssueRelationType.Blocked,
+			"duplicated" => IssueRelationType.Duplicated,
+			"duplicates" => IssueRelationType.Blocked,
+			"blocks"     => IssueRelationType.Blocks,
+			"follows"    => IssueRelationType.Follows,
+			"precedes"   => IssueRelationType.Precedes,
+			"relates"    => IssueRelationType.Relates,
+			_            => IssueRelationType.Relates,
+		};
 
 	#endregion
 
 	#region Emit
 
 	public static void EmitObjectId(XmlElement element, RedmineObject value)
-	{
-		if(value != null)
-		{
-			element.InnerText = XmlConvert.ToString(value.Id);
-		}
-		else
-		{
-			element.InnerText = string.Empty;
-		}
-	}
+		=> element.InnerText = value is not null
+			? XmlConvert.ToString(value.Id)
+			: string.Empty;
 
 	public static void EmitString(XmlElement element, string value)
-	{
-		element.InnerText = value;
-	}
+		=> element.InnerText = value;
 
 	public static void EmitBoolean(XmlElement element, bool value)
-	{
-		element.InnerText = XmlConvert.ToString(value);
-	}
+		=> element.InnerText = XmlConvert.ToString(value);
 
 	public static void EmitInt(XmlElement element, int value)
-	{
-		element.InnerText = XmlConvert.ToString(value);
-	}
+		=> element.InnerText = XmlConvert.ToString(value);
 
 	public static void EmitDouble(XmlElement element, double value)
-	{
-		element.InnerText = XmlConvert.ToString(value);
-	}
+		=> element.InnerText = XmlConvert.ToString(value);
 
 	public static void EmitDate(XmlElement element, DateTime? value)
 	{
@@ -214,9 +174,7 @@ static class RedmineUtility
 	}
 
 	public static void EmitDate(XmlElement element, DateTime value)
-	{
-		element.InnerText = XmlConvert.ToString(value, XmlDateTimeSerializationMode.Utc);
-	}
+		=> element.InnerText = XmlConvert.ToString(value, XmlDateTimeSerializationMode.Utc);
 
 	#endregion
 }
