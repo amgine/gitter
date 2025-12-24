@@ -25,14 +25,14 @@ using System.Runtime.CompilerServices;
 
 [assembly: AssemblyCompany("amgine")]
 [assembly: AssemblyProduct("gitter")]
-[assembly: AssemblyCopyright("Copyright © amgine 2024")]
+[assembly: AssemblyCopyright("Copyright © amgine 2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
 [assembly: NeutralResourcesLanguage("en-us")]
 
-[assembly: AssemblyFileVersion("1.1.5.0")]
-[assembly: AssemblyVersion("1.1.5.0")]
+[assembly: AssemblyFileVersion("1.2.0.0")]
+[assembly: AssemblyVersion("1.2.0.0")]
 
 #if NET6_0_OR_GREATER
 [module: System.Runtime.Versioning.SupportedOSPlatform("windows")]
