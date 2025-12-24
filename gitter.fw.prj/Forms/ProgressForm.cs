@@ -68,7 +68,11 @@ public partial class ProgressForm : Form, IProgress<OperationProgress>
 		AutoScaleMode = AutoScaleMode.Dpi;
 		Font = GitterApplication.FontManager.UIFont;
 		FormBorderStyle = FormBorderStyle.FixedDialog;
+#if NET6_0
+		ClientSize = DpiConverter.FromDefaultTo(this).Convert(new System.Drawing.Size(389, 104));
+#else
 		ClientSize = new(389, 104);
+#endif
 		MaximizeBox = false;
 		MinimizeBox = false;
 		Name = nameof(ProgressForm);
