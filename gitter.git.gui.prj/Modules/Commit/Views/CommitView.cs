@@ -106,12 +106,20 @@ partial class CommitView : GitViewBase
 			{
 				var column = _lstUnstaged.Columns[i];
 				column.IsVisible = column.Id == (int)ColumnId.Name;
+				if(column.IsVisible)
+				{
+					column.SizeMode = ColumnSizeMode.Auto;
+				}
 			}
 
 			for(int i = 0; i < _lstStaged.Columns.Count; ++i)
 			{
 				var column = _lstStaged.Columns[i];
 				column.IsVisible = column.Id == (int)ColumnId.Name;
+				if(column.IsVisible)
+				{
+					column.SizeMode = ColumnSizeMode.Auto;
+				}
 			}
 		}
 
@@ -198,28 +206,28 @@ partial class CommitView : GitViewBase
 					]),
 			};
 
-			_toolbar.Parent = parent;
+			_toolbar.Parent     = parent;
 			_lblUnstaged.Parent = parent;
-			_lblStaged.Parent = parent;
+			_lblStaged.Parent   = parent;
 			_lstUnstaged.Parent = parent;
-			_lstStaged.Parent = parent;
-			grip.Parent = parent;
-			_lblMessage.Parent = parent;
-			decMessage.Parent = parent;
-			_chkAmend.Parent = parent;
-			_btnCommit.Parent = parent;
+			_lstStaged.Parent   = parent;
+			grip.Parent         = parent;
+			_lblMessage.Parent  = parent;
+			decMessage.Parent   = parent;
+			_chkAmend.Parent    = parent;
+			_btnCommit.Parent   = parent;
 
 			var tabIndex = 0;
-			_toolbar.TabIndex = tabIndex++;
+			_toolbar.TabIndex     = tabIndex++;
 			_lblUnstaged.TabIndex = tabIndex++;
-			_lblStaged.TabIndex = tabIndex++;
+			_lblStaged.TabIndex   = tabIndex++;
 			_lstUnstaged.TabIndex = tabIndex++;
-			_lstStaged.TabIndex = tabIndex++;
-			grip.TabIndex = tabIndex++;
-			_lblMessage.TabIndex = tabIndex++;
-			decMessage.TabIndex = tabIndex++;
-			_chkAmend.TabIndex = tabIndex++;
-			_btnCommit.TabIndex = tabIndex++;
+			_lstStaged.TabIndex   = tabIndex++;
+			grip.TabIndex         = tabIndex++;
+			_lblMessage.TabIndex  = tabIndex++;
+			decMessage.TabIndex   = tabIndex++;
+			_chkAmend.TabIndex    = tabIndex++;
+			_btnCommit.TabIndex   = tabIndex++;
 
 			_ = new VerticalResizer(grip, grid.Rows[6], -1, DpiBoundValue.ScaleY(100));
 		}
@@ -258,14 +266,14 @@ partial class CommitView : GitViewBase
 		_controls._chkAmend.Control.PreviewKeyDown += OnKeyDown;
 		_controls._btnCommit.Control.PreviewKeyDown += OnKeyDown;
 
-		_controls._lstStaged.Columns[0].SizeMode = ColumnSizeMode.Auto;
-		_controls._lstUnstaged.Columns[0].SizeMode = ColumnSizeMode.Auto;
-
 		_controls._lstStaged.ItemActivated += OnStagedItemActivated;
 		_controls._lstUnstaged.ItemActivated += OnUnstagedItemActivated;
 
 		_controls._lstStaged.GotFocus += OnStagedGotFocus;
 		_controls._lstUnstaged.GotFocus += OnUnstagedGotFocus;
+
+		_controls._chkAmend.IsCheckedChanged += OnAmendIsCheckedChanged;
+		_controls._btnCommit.Click += OnCommitClick;
 
 		if(SpellingService.Enabled)
 		{
@@ -297,10 +305,7 @@ partial class CommitView : GitViewBase
 
 	private void SaveCommitMessage()
 	{
-		if(Repository is not null)
-		{
-			Repository.Status.SaveCommitMessage(Message);
-		}
+		Repository?.Status.SaveCommitMessage(Message);
 	}
 
 	public override bool IsDocument => true;
@@ -354,6 +359,14 @@ partial class CommitView : GitViewBase
 			}
 		}
 	}
+
+	public bool Amend
+	{
+		get => _controls._chkAmend.IsChecked;
+		set => _controls._chkAmend.IsChecked = value;
+	}
+
+	public bool HasMessage => _controls._txtMessage.TextLength != 0;
 
 	public string Message
 	{
@@ -474,28 +487,29 @@ partial class CommitView : GitViewBase
 		}
 	}
 
-	private void OnAmendCheckedChanged(object? sender, EventArgs e)
+	private void OnAmendIsCheckedChanged(object? sender, EventArgs e)
 	{
-		if(Repository is null) return;
+		if(!Amend || HasMessage) return;
+		LoadHeadCommitMessage();
+	}
 
-		if(_controls._chkAmend.IsChecked)
+	private bool LoadHeadCommitMessage()
+	{
+		if(Repository is null) return true;
+
+		var rev = Repository.Head.Revision;
+		if(rev is null) return false;
+
+		var textBox = _controls._txtMessage;
+		textBox.AppendText(Utility.ExpandNewLineCharacters(rev.Subject));
+		if(!string.IsNullOrEmpty(rev.Body))
 		{
-			if(_controls._txtMessage.TextLength == 0)
-			{
-				var rev = Repository.Head.Revision;
-				if(rev is not null)
-				{
-					_controls._txtMessage.AppendText(Utility.ExpandNewLineCharacters(rev.Subject));
-					if(!string.IsNullOrEmpty(rev.Body))
-					{
-						_controls._txtMessage.AppendText(Environment.NewLine);
-						_controls._txtMessage.AppendText(Environment.NewLine);
-						_controls._txtMessage.AppendText(Utility.ExpandNewLineCharacters(rev.Body));
-					}
-					_controls._txtMessage.SelectAll();
-				}
-			}
+			textBox.AppendText(Environment.NewLine);
+			textBox.AppendText(Environment.NewLine);
+			textBox.AppendText(Utility.ExpandNewLineCharacters(rev.Body));
 		}
+		textBox.SelectAll();
+		return true;
 	}
 
 	protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
