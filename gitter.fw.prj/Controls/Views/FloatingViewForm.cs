@@ -412,8 +412,8 @@ public class FloatingViewForm : Form
 
 	private bool OnNcHitTest(ref Message m)
 	{
-		int x = (short)Native.Macro.LOWORD(m.LParam);
-		int y = (short)Native.Macro.HIWORD(m.LParam);
+		int x = Native.Macro.GET_X_LPARAM(m.LParam);
+		int y = Native.Macro.GET_Y_LPARAM(m.LParam);
 
 		var point = PointToClient(new Point(x, y));
 		var rc = ClientRectangle;

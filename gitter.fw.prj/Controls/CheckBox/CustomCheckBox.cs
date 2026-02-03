@@ -31,11 +31,6 @@ public class CustomCheckBox : Control
 	#region Data
 
 	private CustomCheckBoxRenderer _renderer;
-	private CheckState _checkState;
-	private Image? _image;
-	private bool _threeState;
-	private bool _isMouseOver;
-	private bool _isPressed;
 	private Rectangle? _bounds;
 
 	#endregion
@@ -107,32 +102,27 @@ public class CustomCheckBox : Control
 	[DefaultValue(CheckState.Unchecked)]
 	public CheckState CheckState
 	{
-		get => _checkState;
-		set
+		get; set
 		{
-			if(_checkState != value)
+			if(field == value) return;
+			bool isCheckedChanged = (field == CheckState.Checked) != (value == CheckState.Checked);
+			field = value;
+			OnCheckStateChanged();
+			if(isCheckedChanged)
 			{
-				bool isCheckedChanged = (_checkState == CheckState.Checked) != (value == CheckState.Checked);
-				_checkState = value;
-				OnCheckStateChanged();
-				if(isCheckedChanged)
-				{
-					OnIsCheckedChanged();
-				}
-				Invalidate();
+				OnIsCheckedChanged();
 			}
+			Invalidate();
 		}
 	}
 
 	[DefaultValue(null)]
 	public Image? Image
 	{
-		get => _image;
-		set
+		get; set
 		{
-			if(_image == value) return;
-
-			_image = value;
+			if(field == value) return;
+			field = value;
 			Invalidate();
 			InvalidateBounds();
 		}
@@ -148,38 +138,33 @@ public class CustomCheckBox : Control
 	[DefaultValue(false)]
 	public bool ThreeState
 	{
-		get => _threeState;
-		set
+		get; set
 		{
-			if(_threeState != value)
+			if(field == value) return;
+			field = value;
+			if(!value && CheckState == CheckState.Indeterminate)
 			{
-				_threeState = value;
-				if(!value && CheckState == CheckState.Indeterminate)
-				{
-					CheckState = CheckState.Checked;
-				}
+				CheckState = CheckState.Checked;
 			}
 		}
 	}
 
 	public bool IsMouseOver
 	{
-		get => _isMouseOver;
-		private set
+		get; private set
 		{
-			if(_isMouseOver == value) return;
-			_isMouseOver = value;
+			if(field == value) return;
+			field = value;
 			Invalidate();
 		}
 	}
 
 	public bool IsPressed
 	{
-		get => _isPressed;
-		private set
+		get; private set
 		{
-			if(_isPressed == value) return;
-			_isPressed = value;
+			if(field == value) return;
+			field = value;
 			Invalidate();
 		}
 	}
@@ -228,8 +213,8 @@ public class CustomCheckBox : Control
 		switch((Native.WM)m.Msg)
 		{
 			case Native.WM.NCHITTEST:
-				var x = Native.Macro.LOWORD(m.LParam);
-				var y = Native.Macro.HIWORD(m.LParam);
+				var x = Native.Macro.GET_X_LPARAM(m.LParam);
+				var y = Native.Macro.GET_Y_LPARAM(m.LParam);
 				var p = PointToClient(new Point(x, y));
 				if(!GetVisualBounds().Contains(p))
 				{

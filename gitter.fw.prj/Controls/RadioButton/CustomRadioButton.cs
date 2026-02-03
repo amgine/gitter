@@ -31,10 +31,6 @@ public class CustomRadioButton : Control
 	#region Data
 
 	private CustomRadioButtonRenderer _renderer;
-	private bool _isChecked;
-	private Image? _image;
-	private bool _isMouseOver;
-	private bool _isPressed;
 	private Rectangle? _bounds;
 
 	#endregion
@@ -105,12 +101,10 @@ public class CustomRadioButton : Control
 	[DefaultValue(null)]
 	public Image? Image
 	{
-		get => _image;
-		set
+		get; set
 		{
-			if(_image == value) return;
-
-			_image = value;
+			if(field == value) return;
+			field = value;
 			Invalidate();
 			InvalidateBounds();
 		}
@@ -119,11 +113,10 @@ public class CustomRadioButton : Control
 	[DefaultValue(false)]
 	public bool IsChecked
 	{
-		get => _isChecked;
-		set
+		get; set
 		{
-			if(_isChecked == value) return;
-			_isChecked = value;
+			if(field == value) return;
+			field = value;
 			if(value)
 			{
 				var p = Parent;
@@ -145,22 +138,20 @@ public class CustomRadioButton : Control
 
 	public bool IsMouseOver
 	{
-		get => _isMouseOver;
-		private set
+		get; private set
 		{
-			if(_isMouseOver == value) return;
-			_isMouseOver = value;
+			if(field == value) return;
+			field = value;
 			Invalidate();
 		}
 	}
 
 	public bool IsPressed
 	{
-		get => _isPressed;
-		private set
+		get; private set
 		{
-			if(_isPressed == value) return;
-			_isPressed = value;
+			if(field == value) return;
+			field = value;
 			Invalidate();
 		}
 	}
@@ -187,8 +178,8 @@ public class CustomRadioButton : Control
 		switch((Native.WM)m.Msg)
 		{
 			case Native.WM.NCHITTEST:
-				var x = Native.Macro.LOWORD(m.LParam);
-				var y = Native.Macro.HIWORD(m.LParam);
+				var x = Native.Macro.GET_X_LPARAM(m.LParam);
+				var y = Native.Macro.GET_Y_LPARAM(m.LParam);
 				var p = PointToClient(new Point(x, y));
 				if(!GetVisualBounds().Contains(p))
 				{

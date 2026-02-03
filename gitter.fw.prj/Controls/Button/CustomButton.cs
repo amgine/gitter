@@ -27,14 +27,6 @@ using System.Windows.Forms;
 [System.ComponentModel.DesignerCategory("")]
 public sealed class CustomButton : Control, IButtonControl
 {
-	#region Data
-
-	private CustomButtonRenderer? _renderer;
-	private bool _isPressed;
-	private bool _isMouseOver;
-
-	#endregion
-
 	#region .ctor
 
 	public CustomButton()
@@ -59,15 +51,15 @@ public sealed class CustomButton : Control, IButtonControl
 
 	public CustomButtonRenderer Renderer
 	{
-		get => _renderer ?? CustomButtonRenderer.Default;
+		get => field ?? CustomButtonRenderer.Default;
 		set
 		{
-			if(_renderer == value) return;
+			if(field == value) return;
 
 			bool needsInvalidate =
-				!(_renderer is null && value == CustomButtonRenderer.Default) &&
-				!(_renderer == CustomButtonRenderer.Default && value is null);
-			_renderer = value;
+				!(field is null && value == CustomButtonRenderer.Default) &&
+				!(field == CustomButtonRenderer.Default && value is null);
+			field = value;
 			if(needsInvalidate)
 			{
 				Invalidate();
@@ -77,27 +69,21 @@ public sealed class CustomButton : Control, IButtonControl
 
 	public bool IsPressed
 	{
-		get => _isPressed;
-		private set
+		get; private set
 		{
-			if(_isPressed != value)
-			{
-				_isPressed = value;
-				Invalidate();
-			}
+			if(field == value) return;
+			field = value;
+			Invalidate();
 		}
 	}
 
 	public bool IsMouseOver
 	{
-		get => _isMouseOver;
-		private set
+		get; private set
 		{
-			if(_isMouseOver != value)
-			{
-				_isMouseOver = value;
-				Invalidate();
-			}
+			if(field == value) return;
+			field = value;
+			Invalidate();
 		}
 	}
 

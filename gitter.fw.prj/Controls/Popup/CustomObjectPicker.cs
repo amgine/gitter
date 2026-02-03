@@ -361,10 +361,7 @@ public abstract class CustomObjectPicker<TListBox, TItem, TValue> : BorderContro
 	protected override void OnSizeChanged(EventArgs e)
 	{
 		base.OnSizeChanged(e);
-		if(_dropDown is not null)
-		{
-			_dropDown.Width = Width;
-		}
+		_dropDown?.Width = Width;
 	}
 
 	/// <inheritdoc/>

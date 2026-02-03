@@ -83,8 +83,7 @@ public class CommandLink : Control
 	[Description("Button image")]
 	public IImageProvider? Image
 	{
-		get;
-		set
+		get; set
 		{
 			field = value;
 			Invalidate();
@@ -96,8 +95,7 @@ public class CommandLink : Control
 	[Description("Description text")]
 	public string? Description
 	{
-		get;
-		set
+		get; set
 		{
 			field = value;
 			Invalidate();

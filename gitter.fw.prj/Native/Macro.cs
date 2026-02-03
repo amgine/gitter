@@ -44,4 +44,12 @@ static class Macro
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int LOWORD(IntPtr n)
 		=> LOWORD(unchecked((int)(long)n));
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int GET_X_LPARAM(IntPtr lp)
+		=> (short)LOWORD(lp);
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static int GET_Y_LPARAM(IntPtr lp)
+		=> (short)HIWORD(lp);
 }

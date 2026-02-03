@@ -486,8 +486,8 @@ public partial class Popup : ToolStripDropDown
 
 	private bool OnNcHitTest(ref Message m, bool contentControl)
 	{
-		int x = Macro.LOWORD(m.LParam);
-		int y = Macro.HIWORD(m.LParam);
+		int x = Macro.GET_X_LPARAM(m.LParam);
+		int y = Macro.GET_Y_LPARAM(m.LParam);
 
 		var clientLocation = PointToClient(new Point(x, y));
 		var gripBounds = new GripBounds(contentControl ? Content.ClientRectangle : ClientRectangle);

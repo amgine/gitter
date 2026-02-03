@@ -28,10 +28,6 @@ using System.Windows.Forms;
 public sealed class CustomProgressBar : Control
 {
 	private CustomProgressBarRenderer? _renderer;
-	private int _minimum;
-	private int _maximum;
-	private int _value;
-	private bool _isIndeterminate;
 	private int _animationTimestamp;
 	private Timer? _animationTimer;
 
@@ -119,15 +115,14 @@ public sealed class CustomProgressBar : Control
 
 	public bool IsIndeterminate
 	{
-		get => _isIndeterminate;
-		set
+		get; set
 		{
-			if(_isIndeterminate == value) return;
+			if(field == value) return;
 			if(value)
 			{
 				_animationTimestamp = Environment.TickCount & int.MaxValue;
 			}
-			_isIndeterminate = value;
+			field = value;
 			UpdateAnimationTimer();
 			Invalidate();
 		}
@@ -135,33 +130,30 @@ public sealed class CustomProgressBar : Control
 
 	public int Minimum
 	{
-		get => _minimum;
-		set
+		get; set
 		{
-			if(_minimum == value) return;
-			_minimum = value;
+			if(field == value) return;
+			field = value;
 			Invalidate();
 		}
 	}
 
 	public int Maximum
 	{
-		get => _maximum;
-		set
+		get; set
 		{
-			if(_maximum == value) return;
-			_maximum = value;
+			if(field == value) return;
+			field = value;
 			Invalidate();
 		}
 	}
 
 	public int Value
 	{
-		get => _value;
-		set
+		get; set
 		{
-			if(_value == value) return;
-			_value = value;
+			if(field == value) return;
+			field = value;
 			Invalidate();
 		}
 	}
