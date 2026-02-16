@@ -174,10 +174,17 @@ public sealed class ConfigurationService : IDisposable
 			{
 				config.Save(adapter);
 			}
-			File.Replace(
-				GetFullPath(temp),
-				GetFullPath(configFile),
-				GetFullPath(Path.ChangeExtension(configFile, "bak")));
+			var src = GetFullPath(temp);
+			var dst = GetFullPath(configFile);
+			if(File.Exists(dst))
+			{
+				var bak = GetFullPath(Path.ChangeExtension(configFile, "bak"));
+				File.Replace(src, dst, bak);
+			}
+			else
+			{
+				File.Move(src, dst);
+			}
 		}
 		catch(Exception exc) when(!exc.IsCritical)
 		{
