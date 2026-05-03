@@ -1091,6 +1091,20 @@ sealed class CommandBuilder(GitCLI gitCLI)
 		return new RebaseCommand(arg);
 	}
 
+	public Command GetInteractiveRebaseCommand(string upstream, string? onto = null)
+	{
+		Verify.Argument.IsNeitherNullNorWhitespace(upstream);
+
+		var args = new List<ICommandArgument>();
+		if(!string.IsNullOrEmpty(onto))
+		{
+			args.Add(RebaseCommand.Onto(onto));
+		}
+		args.Add(RebaseCommand.Interactive());
+		args.Add(new CommandParameter(upstream));
+		return new RebaseCommand(args);
+	}
+
 	public Command GetQueryUsersCommand(QueryUsersRequest request)
 	{
 		Assert.IsNotNull(request);

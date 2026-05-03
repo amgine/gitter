@@ -211,6 +211,9 @@ public interface IRepositoryAccessor : IConfigAccessor
 	/// <summary>Forward-port local commits to the updated upstream head.</summary>
 	IGitAction<RebaseRequest> Rebase { get; }
 
+	/// <summary>Interactive rebase: reorder, squash, drop, reword commits.</summary>
+	IInteractiveRebaseExecutor InteractiveRebase { get; }
+
 	/// <summary>Remove remote repository.</summary>
 	IGitAction<RemoveRemoteRequest> RemoveRemote { get; }
 
