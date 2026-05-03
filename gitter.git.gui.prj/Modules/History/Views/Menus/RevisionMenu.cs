@@ -81,6 +81,7 @@ public sealed class RevisionMenu : ContextMenuStrip
 		Items.Add(factory.GetCheckoutRevisionItem<ToolStripMenuItem>(Revision, "{0}"));
 		Items.Add(factory.GetResetHeadHereItem<ToolStripMenuItem>(Revision));
 		Items.Add(factory.GetRebaseHeadHereItem<ToolStripMenuItem>(Revision));
+		Items.Add(factory.GetInteractiveRebaseItem<ToolStripMenuItem>(Revision));
 		Items.Add(factory.GetRevertItem<ToolStripMenuItem>(Revision));
 		Items.Add(factory.GetCherryPickItem<ToolStripMenuItem>(Revision, "{0}"));
 	}

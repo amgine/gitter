@@ -73,6 +73,9 @@ public sealed class Repository : IGitRepository
 
 	internal void OnUpdated() => Updated?.Invoke(this, EventArgs.Empty);
 
+	/// <summary>Raise <see cref="Updated"/> event from GUI code after a manual refresh.</summary>
+	public void NotifyUpdated() => OnUpdated();
+
 	internal void OnCommitCreated(Revision revision) => CommitCreated?.Invoke(this, new RevisionEventArgs(revision));
 
 	internal void OnDeleted() => Deleted?.Invoke(this, EventArgs.Empty);
