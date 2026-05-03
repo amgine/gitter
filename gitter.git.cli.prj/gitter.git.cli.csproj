@@ -38,4 +38,8 @@
     <Compile Include="$(SolutionDir)\shared\HttpPolyfills.cs" Link="Shared\HttpPolyfills.cs" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="gitter.tests" />
+  </ItemGroup>
+
 </Project>
