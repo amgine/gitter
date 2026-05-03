@@ -253,6 +253,22 @@ public class GuiItemFactory(DpiBindings dpiBindings)
 		return item;
 	}
 
+	public T GetInteractiveRebaseItem<T>(IRevisionPointer revision)
+		where T : ToolStripItem, new()
+	{
+		Verify.Argument.IsValidRevisionPointer(revision);
+
+		var item = new T()
+		{
+			Text    = "Rebase Interactively...",
+			Enabled = revision.Dereference() != revision.Repository.Head.Revision,
+			Tag     = revision,
+		};
+		dpiBindings.BindImage(item, Icons.Rebase);
+		item.Click += OnInteractiveRebaseClick;
+		return item;
+	}
+
 	public T GetCherryPickItem<T>(IRevisionPointer revision, string nameFormat)
 		where T : ToolStripItem, new()
 	{
@@ -670,6 +686,15 @@ public class GuiItemFactory(DpiBindings dpiBindings)
 		var parent   = Utility.GetParentControl(item);
 
 		GuiCommands.RebaseHeadTo(parent, revision);
+	}
+
+	private static async void OnInteractiveRebaseClick(object? sender, EventArgs e)
+	{
+		var item     = (ToolStripItem)sender!;
+		var revision = (IRevisionPointer)item.Tag!;
+		var parent   = Utility.GetParentControl(item);
+
+		await GuiCommands.InteractiveRebaseAsync(parent, revision);
 	}
 
 	private static void OnCherryPickClick(object? sender, EventArgs e)
