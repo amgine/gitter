@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>gitter.rebase-editor</AssemblyName>
+    <RootNamespace>gitter.Git.RebaseEditor</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PostBuildEvent>..\..\..\Properties\postbuild.cmd $(Configuration) $(TargetFramework)</PostBuildEvent>
+  </PropertyGroup>
+
+</Project>
