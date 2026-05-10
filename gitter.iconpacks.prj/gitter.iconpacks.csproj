@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>gitter.iconpacks</AssemblyName>
+    <RootNamespace>gitter.IconPacks</RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);SYSTEM_TEXT_JSON</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp" Version="3.119.0" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Win32" Version="3.119.0" />
+    <PackageReference Include="Svg.Skia" Version="3.0.4" />
+    <PackageReference Condition="'$(TargetFramework)'=='net48'" Include="System.Text.Json" Version="10.0.1" />
+  </ItemGroup>
+
+</Project>

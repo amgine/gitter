@@ -30,5 +30,6 @@
   </Folder>
   <Project Path="gitter.fw.prj/gitter.fw.csproj" />
   <Project Path="gitter.hunspell.prj/gitter.hunspell.csproj" />
+  <Project Path="gitter.iconpacks.prj/gitter.iconpacks.csproj" />
   <Project Path="gitter.ui.prj/gitter.ui.csproj" />
 </Solution>
