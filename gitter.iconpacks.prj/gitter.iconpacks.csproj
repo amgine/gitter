@@ -3,8 +3,17 @@
   <PropertyGroup>
     <AssemblyName>gitter.iconpacks</AssemblyName>
     <RootNamespace>gitter.IconPacks</RootNamespace>
+    <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\packs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\gitter.fw.prj\gitter.fw.csproj" />
+  </ItemGroup>
 
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);SYSTEM_TEXT_JSON</DefineConstants>
