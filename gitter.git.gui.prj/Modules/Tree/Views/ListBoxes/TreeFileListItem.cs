@@ -85,6 +85,9 @@ public class TreeFileListItem : TreeItemListItem<TreeFile>
 			: GraphicsUtility.QueryIcon(DataContext.FullPath, dpi);
 	}
 
+	internal static Image? QueryFolder(string folderName, Dpi dpi, bool expanded)
+		=> GraphicsUtility.QueryFolderIcon(folderName, dpi, expanded);
+
 	protected override FileSize? GetSize()
 	{
 		if(DataContext.Status == FileStatus.Cached)

@@ -49,6 +49,7 @@
     <ProjectReference Include="..\gitter.git.fw.prj\gitter.git.fw.csproj" />
     <ProjectReference Include="..\gitter.git.gui.prj\gitter.git.gui.csproj" />
     <ProjectReference Include="..\gitter.git.prj\gitter.git.csproj" />
+    <ProjectReference Include="..\gitter.iconpacks.prj\gitter.iconpacks.csproj" />
     <ProjectReference Include="..\gitter.redmine.prj\gitter.redmine.csproj" />
     <ProjectReference Include="..\gitter.teamcity.prj\gitter.teamcity.csproj" />
     <ProjectReference Include="..\gitter.gitlab.prj\gitter.gitlab.csproj" />

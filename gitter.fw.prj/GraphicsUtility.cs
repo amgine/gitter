@@ -33,7 +33,12 @@ public static class GraphicsUtility
 
 	public static Bitmap? QueryIcon(string fileName, Dpi dpi)
 	{
-		return IconCache.GetIcon(fileName, DpiConverter.FromDefaultTo(dpi).ConvertX(16));
+		return FileIconProvider.Current.GetFileIcon(fileName, dpi);
+	}
+
+	public static Bitmap? QueryFolderIcon(string folderName, Dpi dpi, bool expanded = false)
+	{
+		return FileIconProvider.Current.GetFolderIcon(folderName, dpi, expanded);
 	}
 
 	public const TextRenderingHint TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;

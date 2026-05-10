@@ -61,7 +61,7 @@ public static class FileIconProvider
 internal sealed class LegacyFileIconProvider : IFileIconProvider
 {
 	public Bitmap? GetFileIcon(string fileName, Dpi dpi, string? languageId = null)
-		=> GraphicsUtility.QueryIcon(fileName, dpi);
+		=> IconCache.GetIcon(fileName, DpiConverter.FromDefaultTo(dpi).ConvertX(16));
 
 	public Bitmap? GetFolderIcon(string folderName, Dpi dpi, bool expanded = false)
 		=> null;
