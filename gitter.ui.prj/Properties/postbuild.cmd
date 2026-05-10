@@ -10,4 +10,5 @@ if not exist "..\..\..\..\output\%1\%2\Hunspell\" @mkdir "..\..\..\..\output\%1\
 if not exist "..\..\..\..\output\%1\%2\Dictionaries\" @mkdir "..\..\..\..\output\%1\%2\Dictionaries"
 @xcopy /Y Dictionaries\*.aff "..\..\..\..\output\%1\%2\Dictionaries\" /q
 @xcopy /Y Dictionaries\*.dic "..\..\..\..\output\%1\%2\Dictionaries\" /q
+@if exist "runtimes\" @xcopy /Y /E /I runtimes "..\..\..\..\output\%1\%2\runtimes" /q
 @exit 0

@@ -40,6 +40,7 @@ internal static class Program
 			builder.RegisterAssemblyModules(typeof(Program).Assembly);
 
 			builder.RegisterModule<gitter.Framework.Module>();
+			builder.RegisterModule<gitter.IconPacks.Module>();
 
 			builder.RegisterModule<gitter.Git.Gui.Module>();
 
