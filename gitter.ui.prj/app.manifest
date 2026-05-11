@@ -7,7 +7,7 @@
 
     <assemblyIdentity type    = "win32"
                       name    = "gitter.app"
-                      version = "1.2.0.0" />
+                      version = "1.2.1.0" />
 
     <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
         <security>
