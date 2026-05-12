@@ -42,7 +42,7 @@ static class Program
 
 		pipe.Connect(30_000);
 
-		using var writer = new StreamWriter(pipe, Encoding.UTF8, leaveOpen: true);
+		using var writer = new StreamWriter(pipe, Encoding.UTF8, bufferSize: 1024, leaveOpen: true);
 		writer.WriteLine(todoFilePath);
 		writer.Flush();
 
