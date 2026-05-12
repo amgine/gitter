@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <Compile Include="$(SolutionDir)\shared\HttpPolyfills.cs" Link="Shared\HttpPolyfills.cs" />
+    <Compile Include="$(SolutionDir)\shared\RebasePolyfills.cs" Link="Shared\RebasePolyfills.cs" />
   </ItemGroup>
 
   <ItemGroup>

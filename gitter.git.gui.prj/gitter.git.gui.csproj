@@ -36,4 +36,8 @@
     <ProjectReference Include="..\gitter.git.prj\gitter.git.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="$(SolutionDir)\shared\RebasePolyfills.cs" Link="Shared\RebasePolyfills.cs" />
+  </ItemGroup>
+
 </Project>
