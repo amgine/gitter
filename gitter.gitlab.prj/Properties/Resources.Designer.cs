@@ -248,7 +248,25 @@ namespace gitter.GitLab.Properties {
                 return ResourceManager.GetString("StrAuthor", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Label.
+        /// </summary>
+        internal static string StrLabel {
+            get {
+                return ResourceManager.GetString("StrLabel", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Labels.
+        /// </summary>
+        internal static string StrLabels {
+            get {
+                return ResourceManager.GetString("StrLabels", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Branches.
         /// </summary>

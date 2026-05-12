@@ -77,6 +77,11 @@ class GitLabServiceContext
 		=> _api.GetProjectIssuesAsync(DefaultProjectId, state,
 			cancellationToken: cancellationToken);
 
+	public Task<IReadOnlyList<Label>> GetLabelsAsync(
+		bool withCounts = false,
+		CancellationToken cancellationToken = default)
+		=> _api.GetProjectLabelsAsync(DefaultProjectId, withCounts, cancellationToken);
+
 	public Task<IReadOnlyList<Project>> GetProjectsAsync()
 		=> _api.GetProjectsAsync();
 

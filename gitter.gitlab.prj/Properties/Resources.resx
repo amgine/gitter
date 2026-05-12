@@ -180,6 +180,12 @@
   <data name="StrAuthor" xml:space="preserve">
     <value>Author</value>
   </data>
+  <data name="StrLabel" xml:space="preserve">
+    <value>Label</value>
+  </data>
+  <data name="StrLabels" xml:space="preserve">
+    <value>Labels</value>
+  </data>
   <data name="StrBranches" xml:space="preserve">
     <value>Branches</value>
   </data>

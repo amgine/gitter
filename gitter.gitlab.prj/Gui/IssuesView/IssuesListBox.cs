@@ -38,6 +38,7 @@ class IssuesListBox : CustomListBox
 				new IssueCreatedAtColumn(),
 				new IssueUpdatedAtColumn(),
 				new IssueTitleColumn(),
+				new IssueLabelsColumn(),
 				new IssueAssigneeColumn(),
 				new IssueClosedByColumn(),
 				new IssueMilestoneColumn(),
