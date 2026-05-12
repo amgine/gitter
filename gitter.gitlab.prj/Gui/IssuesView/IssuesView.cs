@@ -196,6 +196,14 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 	{
 		var listNode = section.GetCreateSection("IssuesList");
 		_lstIssues.SaveViewTo(listNode);
+
+		var filterNode = section.GetCreateSection("Filter");
+		filterNode.SetValue<string>("State",     _issueState?.ToString() ?? string.Empty);
+		filterNode.SetValue<string>("Scope",     _issueScope?.ToString() ?? string.Empty);
+		filterNode.SetValue<string>("Milestone", _selectedMilestone ?? string.Empty);
+		filterNode.SetValue<string>("Labels",    _selectedLabels.Count == 0
+			? string.Empty
+			: string.Join(",", _selectedLabels));
 	}
 
 	protected override void LoadMoreViewFrom(Section section)
@@ -205,6 +213,34 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 		{
 			_lstIssues.LoadViewFrom(listNode);
 		}
+		var filterNode = section.TryGetSection("Filter");
+		if(filterNode is null) return;
+
+		var rawState = filterNode.GetValue<string>("State") ?? string.Empty;
+		_issueState = Enum.TryParse<Api.IssueState>(rawState, out var st) ? st : null;
+
+		var rawScope = filterNode.GetValue<string>("Scope") ?? string.Empty;
+		_issueScope = Enum.TryParse<Api.IssueScope>(rawScope, out var sc) ? sc : null;
+
+		var milestone = filterNode.GetValue<string>("Milestone") ?? string.Empty;
+		_selectedMilestone = milestone.Length == 0 ? null : milestone;
+
+		var labelsCsv = filterNode.GetValue<string>("Labels") ?? string.Empty;
+		_selectedLabels = labelsCsv.Length == 0
+			? new HashSet<string>(StringComparer.Ordinal)
+			: new HashSet<string>(labelsCsv.Split(','), StringComparer.Ordinal);
+	}
+
+	private DateTime _lastLabelRefresh = DateTime.MinValue;
+	private static readonly TimeSpan _labelRefreshIdle = TimeSpan.FromMinutes(5);
+
+	protected override void OnVisibleChanged(EventArgs e)
+	{
+		base.OnVisibleChanged(e);
+		if(!Visible || _labelRegistry is null) return;
+		if(DateTime.UtcNow - _lastLabelRefresh < _labelRefreshIdle) return;
+		_lastLabelRefresh = DateTime.UtcNow;
+		_ = _labelRegistry.RefreshAsync();
 	}
 
 	protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
