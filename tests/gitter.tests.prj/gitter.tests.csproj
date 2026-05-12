@@ -23,6 +23,7 @@
     <ProjectReference Include="..\..\gitter.git.cli.prj\gitter.git.cli.csproj" />
     <ProjectReference Include="..\..\gitter.git.fw.prj\gitter.git.fw.csproj" />
     <ProjectReference Include="..\..\gitter.git.prj\gitter.git.csproj" />
+    <ProjectReference Include="..\..\gitter.iconpacks.prj\gitter.iconpacks.csproj" />
   </ItemGroup>
 
   <ItemGroup>
