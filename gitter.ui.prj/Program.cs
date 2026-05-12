@@ -25,12 +25,16 @@ using System;
 using Autofac;
 
 using gitter.Framework;
+using gitter.IconPacks;
 
 internal static class Program
 {
 	/// <summary>The main entry point for the application.</summary>
 	[STAThread]
-	public static void Main() => GitterApplication.Run(
+	public static void Main()
+	{
+		IconPackBootstrap.Initialize();
+		GitterApplication.Run(
 		static builder =>
 		{
 			builder.RegisterAssemblyModules(typeof(Program).Assembly);
@@ -48,4 +52,5 @@ internal static class Program
 				.As(typeof(IFactory<>))
 				.SingleInstance();
 		});
+	}
 }
