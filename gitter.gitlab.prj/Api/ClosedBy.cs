@@ -24,6 +24,8 @@ using System;
 using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
+using gitter.Framework;
+
 [DataContract]
 sealed class ClosedBy : ModifiableObject
 {
@@ -55,4 +57,6 @@ sealed class ClosedBy : ModifiableObject
 	[DataMember]
 	[JsonPropertyName(Names.Name)]
 	public string Name { get; set; } = default!;
+
+	public IAvatar? Avatar => GitLabAvatar.For(AvatarUrl);
 }
