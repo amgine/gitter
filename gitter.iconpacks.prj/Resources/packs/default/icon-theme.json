@@ -1,0 +1,56 @@
+{
+  "iconDefinitions": {
+    "_file":          { "iconPath": "./icons/file.svg" },
+    "_folder":        { "iconPath": "./icons/folder.svg" },
+    "_folder_open":   { "iconPath": "./icons/folder-open.svg" },
+    "_json":          { "iconPath": "./icons/json.svg" },
+    "_md":            { "iconPath": "./icons/md.svg" },
+    "_cs":            { "iconPath": "./icons/cs.svg" },
+    "_xml":           { "iconPath": "./icons/xml.svg" },
+    "_yaml":          { "iconPath": "./icons/yaml.svg" },
+    "_image":         { "iconPath": "./icons/image.svg" },
+    "_archive":       { "iconPath": "./icons/archive.svg" },
+    "_code":          { "iconPath": "./icons/code.svg" },
+    "_node_modules":  { "iconPath": "./icons/folder-node.svg" }
+  },
+  "file": "_file",
+  "folder": "_folder",
+  "folderExpanded": "_folder_open",
+  "fileExtensions": {
+    "json":  "_json",
+    "json5": "_json",
+    "md":    "_md",
+    "cs":    "_cs",
+    "csx":   "_cs",
+    "csproj": "_xml",
+    "xml":   "_xml",
+    "xaml":  "_xml",
+    "yml":   "_yaml",
+    "yaml":  "_yaml",
+    "png":   "_image",
+    "jpg":   "_image",
+    "jpeg":  "_image",
+    "gif":   "_image",
+    "bmp":   "_image",
+    "svg":   "_image",
+    "zip":   "_archive",
+    "tar":   "_archive",
+    "gz":    "_archive",
+    "7z":    "_archive",
+    "js":    "_code",
+    "ts":    "_code",
+    "py":    "_code",
+    "go":    "_code",
+    "rs":    "_code",
+    "java":  "_code"
+  },
+  "fileNames": {
+    "package.json":      "_json",
+    "tsconfig.json":     "_json",
+    "appsettings.json":  "_json",
+    "readme.md":         "_md"
+  },
+  "folderNames": {
+    "node_modules": "_node_modules"
+  }
+}

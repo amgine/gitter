@@ -1,41 +1,35 @@
-﻿#region Copyright Notice
+#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2020  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
- * 
+ * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #endregion
 
+namespace gitter.IconPacks;
+
 using System;
-using System.Reflection;
-using System.Resources;
-using System.Runtime.CompilerServices;
+using System.Diagnostics;
 
-[assembly: AssemblyCompany("amgine")]
-[assembly: AssemblyProduct("gitter")]
-[assembly: AssemblyCopyright("Copyright © amgine 2025")]
-[assembly: AssemblyTrademark("")]
-[assembly: AssemblyCulture("")]
+public static class IconPackLog
+{
+	public static event Action<string, Exception?>? Message;
 
-[assembly: NeutralResourcesLanguage("en-us")]
-
-[assembly: AssemblyFileVersion("1.3.2.0")]
-[assembly: AssemblyVersion("1.3.2.0")]
-
-#if NET6_0_OR_GREATER
-[module: System.Runtime.Versioning.SupportedOSPlatform("windows")]
-#endif
-
-[assembly: InternalsVisibleTo("gitter.tests")]
+	public static void Warn(string message, Exception? exception = null)
+	{
+		Debug.WriteLine($"[iconpacks] {message}{(exception is null ? "" : " :: " + exception.Message)}");
+		Message?.Invoke(message, exception);
+	}
+}

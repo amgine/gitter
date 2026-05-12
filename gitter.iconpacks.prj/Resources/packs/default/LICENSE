@@ -1,0 +1,10 @@
+Default Icon Pack
+=================
+
+The SVG icons in this directory are simple geometric placeholders shipped with
+gitter as the bundled default icon pack. They are licensed under the same terms
+as gitter itself (GNU General Public License, version 3 or later).
+
+Users may install third-party icon packs (such as the Material Icon Theme) into
+%APPDATA%/Gitter/icon-packs/<pack-name>/ — those packs ship under their own
+license terms (typically MIT) and gitter does not bundle them.
