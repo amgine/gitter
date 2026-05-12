@@ -28,26 +28,48 @@ public static class IconPackLoader
 {
 	public const string ManifestFileName = "icon-theme.json";
 
-	/// <summary>Loads a pack from a directory containing icon-theme.json + an icons/ subfolder.</summary>
+	private static readonly string[] _candidateManifestPaths =
+	[
+		"icon-theme.json",
+		"dist/icon-theme.json",
+		"dist/material-icons.json",
+		"material-icons.json",
+	];
+
+	/// <summary>Loads a pack from a directory. Looks for the manifest at several
+	/// well-known locations; icon paths are resolved relative to the manifest's
+	/// own directory (per VSCode convention).</summary>
 	public static IconPack LoadFromDirectory(string packDir, string? name = null)
 	{
 		if(packDir is null) throw new ArgumentNullException(nameof(packDir));
 		if(!Directory.Exists(packDir))
 			throw new DirectoryNotFoundException($"Icon pack directory not found: {packDir}");
-		var manifestPath = Path.Combine(packDir, ManifestFileName);
-		if(!File.Exists(manifestPath))
-			throw new FileNotFoundException($"Manifest not found: {manifestPath}", manifestPath);
+
+		var manifestPath = FindManifest(packDir)
+			?? throw new FileNotFoundException(
+				$"Manifest not found in '{packDir}' (looked for {string.Join(", ", _candidateManifestPaths)}).");
+		var manifestDir = Path.GetDirectoryName(manifestPath) ?? packDir;
 
 		var manifest = IconPackManifestParser.ParseFile(manifestPath);
 		var packName = name ?? new DirectoryInfo(packDir).Name;
 
 		Stream? Loader(string relPath)
 		{
-			var full = Path.Combine(packDir, NormalizeRelative(relPath));
+			var full = Path.GetFullPath(Path.Combine(manifestDir, NormalizeRelative(relPath)));
 			return File.Exists(full) ? File.OpenRead(full) : null;
 		}
 
 		return new IconPack(packName, manifest, Loader);
+	}
+
+	private static string? FindManifest(string packDir)
+	{
+		foreach(var candidate in _candidateManifestPaths)
+		{
+			var full = Path.Combine(packDir, candidate.Replace('/', Path.DirectorySeparatorChar));
+			if(File.Exists(full)) return full;
+		}
+		return null;
 	}
 
 	/// <summary>Loads a pack from embedded resources where every entry is prefixed with <paramref name="resourcePrefix"/>.</summary>

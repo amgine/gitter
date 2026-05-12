@@ -29,9 +29,12 @@ public static class IconPackBootstrap
 	private static IconPackFileIconProvider? _provider;
 	private static IconPackDescriptor[]      _descriptors = Array.Empty<IconPackDescriptor>();
 
-	public static IconPackFileIconProvider? Provider   => _provider;
-	public static IconPackDescriptor[]      Available  => _descriptors;
-	public static IconPack?                 ActivePack => _provider?.Pack;
+	public static event EventHandler? PackChanged;
+
+	public static IconPackFileIconProvider? Provider       => _provider;
+	public static IconPackDescriptor[]      Available      => _descriptors;
+	public static IconPack?                 ActivePack     => _provider?.Pack;
+	public static string?                   ActivePackName => _provider?.Pack?.Name;
 
 	public static void Initialize()
 	{
@@ -56,11 +59,19 @@ public static class IconPackBootstrap
 			_descriptors = Array.Empty<IconPackDescriptor>();
 		}
 
+		var preferredName = IconPackSettings.LoadActivePackName();
 		IconPack? pack = null;
-		foreach(var desc in _descriptors)
+		if(!string.IsNullOrEmpty(preferredName))
 		{
-			try { pack = desc.Load(); break; }
-			catch(Exception ex) { IconPackLog.Warn($"Failed to load pack '{desc.Name}'", ex); }
+			pack = TryLoadByName(preferredName!);
+		}
+		if(pack is null)
+		{
+			foreach(var desc in _descriptors)
+			{
+				try { pack = desc.Load(); break; }
+				catch(Exception ex) { IconPackLog.Warn($"Failed to load pack '{desc.Name}'", ex); }
+			}
 		}
 
 		var fallback = FileIconProvider.Current;
@@ -68,28 +79,33 @@ public static class IconPackBootstrap
 		FileIconProvider.Current = _provider;
 	}
 
-	public static bool TryActivate(string packName)
+	public static bool TryActivate(string? packName)
 	{
 		if(_provider is null) return false;
+		IconPack? newPack = null;
+		if(!string.IsNullOrEmpty(packName))
+		{
+			newPack = TryLoadByName(packName!);
+			if(newPack is null) return false;
+		}
+		var old = _provider.Pack;
+		_provider.Pack = newPack;
+		IconPackSettings.SaveActivePackName(packName);
+		old?.Dispose();
+		PackChanged?.Invoke(null, EventArgs.Empty);
+		return true;
+	}
+
+	private static IconPack? TryLoadByName(string packName)
+	{
 		foreach(var desc in _descriptors)
 		{
 			if(string.Equals(desc.Name, packName, StringComparison.OrdinalIgnoreCase))
 			{
-				try
-				{
-					var pack = desc.Load();
-					var old  = _provider.Pack;
-					_provider.Pack = pack;
-					old?.Dispose();
-					return true;
-				}
-				catch(Exception ex)
-				{
-					IconPackLog.Warn($"Failed to activate pack '{packName}'", ex);
-					return false;
-				}
+				try { return desc.Load(); }
+				catch(Exception ex) { IconPackLog.Warn($"Failed to load pack '{packName}'", ex); }
 			}
 		}
-		return false;
+		return null;
 	}
 }
