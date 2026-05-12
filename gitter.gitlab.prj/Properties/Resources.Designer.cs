@@ -221,7 +221,61 @@ namespace gitter.GitLab.Properties {
                 return ResourceManager.GetString("StrAll", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to (any).
+        /// </summary>
+        internal static string StrAny {
+            get {
+                return ResourceManager.GetString("StrAny", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to (none).
+        /// </summary>
+        internal static string StrNone {
+            get {
+                return ResourceManager.GetString("StrNone", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Created by me.
+        /// </summary>
+        internal static string StrCreatedByMe {
+            get {
+                return ResourceManager.GetString("StrCreatedByMe", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Assigned to me.
+        /// </summary>
+        internal static string StrAssignedToMe {
+            get {
+                return ResourceManager.GetString("StrAssignedToMe", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Scope.
+        /// </summary>
+        internal static string StrScope {
+            get {
+                return ResourceManager.GetString("StrScope", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Filters.
+        /// </summary>
+        internal static string StrFilters {
+            get {
+                return ResourceManager.GetString("StrFilters", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Access Token.
         /// </summary>

@@ -21,6 +21,7 @@
 namespace gitter.GitLab.Gui;
 
 using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 using gitter.Framework;
@@ -40,6 +41,10 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 	private ISearchToolBarController _searchToolbar;
 	private IssuesListBinding? _dataSource;
 	private IssueState? _issueState = Api.IssueState.Opened;
+	private IssueScope? _issueScope;
+	private HashSet<string> _selectedLabels = new(StringComparer.Ordinal);
+	private string? _selectedMilestone;
+	private LabelRegistry? _labelRegistry;
 
 	#endregion
 
@@ -110,6 +115,43 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 		}
 	}
 
+	public IssueScope? IssueScope
+	{
+		get => _issueScope;
+		set
+		{
+			if(_issueScope == value) return;
+			_issueScope = value;
+			if(DataSource is not null) DataSource.IssueScope = value;
+		}
+	}
+
+	public HashSet<string> SelectedLabels => _selectedLabels;
+
+	public void SetSelectedLabels(IEnumerable<string> labels)
+	{
+		_selectedLabels = new HashSet<string>(labels, StringComparer.Ordinal);
+		if(DataSource is not null)
+		{
+			DataSource.Labels = _selectedLabels.Count == 0 ? null : _selectedLabels;
+		}
+	}
+
+	public string? SelectedMilestone
+	{
+		get => _selectedMilestone;
+		set
+		{
+			if(string.Equals(_selectedMilestone, value, StringComparison.Ordinal)) return;
+			_selectedMilestone = value;
+			if(DataSource is not null) DataSource.Milestone = value;
+		}
+	}
+
+	internal LabelRegistry? LabelRegistry => _labelRegistry;
+
+	internal CustomListBoxItemsCollection IssuesListBoxItems => _lstIssues.Items;
+
 	#endregion
 
 	#region Methods
@@ -117,11 +159,22 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 	protected override void OnContextDetached(GitLabServiceContext serviceContext)
 	{
 		DataSource = default;
+		if(_labelRegistry is not null)
+		{
+			_labelRegistry.Dispose();
+			_labelRegistry = null;
+		}
 	}
 
 	protected override void OnContextAttached(GitLabServiceContext serviceContext)
 	{
+		_labelRegistry = new LabelRegistry(serviceContext);
+		LabelRegistry.Current = _labelRegistry;
+		_ = _labelRegistry.RefreshAsync();
 		DataSource = new IssuesListBinding(serviceContext, _lstIssues, IssueState);
+		if(_issueScope        is not null) DataSource.IssueScope = _issueScope;
+		if(_selectedLabels.Count > 0)      DataSource.Labels     = _selectedLabels;
+		if(_selectedMilestone is not null) DataSource.Milestone  = _selectedMilestone;
 	}
 
 	private void OnItemActivated(object? sender, ItemEventArgs e)

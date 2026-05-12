@@ -72,9 +72,14 @@ class GitLabServiceContext
 		=> _api.GetTestReportSummaryAsync(DefaultProjectId, pipelineId, cancellationToken);
 
 	public Task<IReadOnlyList<Issue>> GetIssuesAsync(
-		IssueState? state = default,
+		IssueState? state    = default,
+		IssueScope? scope    = default,
+		IReadOnlyCollection<string>? labels = default,
+		string?     milestone = default,
 		CancellationToken cancellationToken = default)
-		=> _api.GetProjectIssuesAsync(DefaultProjectId, state,
+		=> _api.GetProjectIssuesAsync(DefaultProjectId, state, scope,
+			labels:    labels,
+			milestone: milestone,
 			cancellationToken: cancellationToken);
 
 	public Task<IReadOnlyList<Label>> GetLabelsAsync(
