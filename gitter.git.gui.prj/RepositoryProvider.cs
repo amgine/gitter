@@ -162,7 +162,7 @@ sealed class RepositoryProvider : IGitRepositoryProvider
 				OnGitAccessorDetached(_gitAccessorProvider, _gitAccessor);
 			}
 
-			_gitAccessorProvider = _gitAccessor?.Provider;
+			_gitAccessorProvider = value?.Provider;
 			_gitAccessor = value;
 		}
 	}
