@@ -169,15 +169,24 @@ public sealed class ConfigurationService : IDisposable
 		try
 		{
 			var temp = Path.ChangeExtension(configFile, "tmp");
+			var tempPath = GetFullPath(temp);
+			var configPath = GetFullPath(configFile);
 			using(var stream = CreateFile(temp))
 			using(var adapter = new XmlAdapter(stream))
 			{
 				config.Save(adapter);
 			}
-			File.Replace(
-				GetFullPath(temp),
-				GetFullPath(configFile),
-				GetFullPath(Path.ChangeExtension(configFile, "bak")));
+			if(File.Exists(configPath))
+			{
+				File.Replace(
+					tempPath,
+					configPath,
+					GetFullPath(Path.ChangeExtension(configFile, "bak")));
+			}
+			else
+			{
+				File.Move(tempPath, configPath);
+			}
 		}
 		catch(Exception exc) when(!exc.IsCritical)
 		{

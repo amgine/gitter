@@ -426,7 +426,14 @@ public partial class CliOptionsPage : PropertyPage, IExecutableDialog
 
 	public bool Execute()
 	{
-		_gitCLI.ManualGitExePath = Path.GetFullPath(_controls._txtGitPath.Text.Trim());
+		if(_controls._radSpecifyManually.IsChecked)
+		{
+			var manualGitPath = _controls._txtGitPath.Text.Trim();
+			if(!string.IsNullOrWhiteSpace(manualGitPath))
+			{
+				_gitCLI.ManualGitExePath = Path.GetFullPath(manualGitPath);
+			}
+		}
 		_gitCLI.AutodetectGitExePath = _controls._radAlwaysAutodetect.IsChecked;
 		_gitCLI.LogCalls = _controls._chkLogCLICalls.IsChecked;
 		_gitCLI.EnableAnsiCodepageFallback = _controls._chkFallbackToAnsi.IsChecked;

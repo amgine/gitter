@@ -57,6 +57,26 @@ public sealed class Module : Autofac.Module
 			.SingleInstance();
 
 		builder
+			.RegisterType<ValueSource<CommitMessageGenerationOptions>>()
+			.WithParameter(TypedParameter.From(CommitMessageGenerationOptions.Default))
+			.OnActivating(static c =>
+			{
+				var section = c.Context.Resolve<RepositoryProvider>().ConfigSection?.GetCreateSection(CommitMessageGenerationOptions.SectionName);
+				if(section is not null)
+				{
+					c.Instance.Value = CommitMessageGenerationOptions.LoadFrom(section);
+				}
+			})
+			.As<IValueProvider<CommitMessageGenerationOptions>>()
+			.As<IValueSource<CommitMessageGenerationOptions>>()
+			.SingleInstance();
+
+		builder
+			.RegisterType<OpenAICommitMessageGenerator>()
+			.As<ICommitMessageGenerator>()
+			.SingleInstance();
+
+		builder
 			.RegisterType<GraphStyle>()
 			.As<IGraphStyle>()
 			.AsSelf()
@@ -95,10 +115,11 @@ public sealed class Module : Autofac.Module
 			.RegisterTypes(
 			[
 				typeof(GitOptionsPage),
-				typeof(CurrentUserConfigurationPage),
-				typeof(LocalSystemConfigurationPage),
-				typeof(GraphStylePage),
-				typeof(VersionCheckDialog),
+					typeof(CurrentUserConfigurationPage),
+					typeof(LocalSystemConfigurationPage),
+					typeof(CommitMessageGenerationPage),
+					typeof(GraphStylePage),
+					typeof(VersionCheckDialog),
 				typeof(InitDialog),
 				typeof(CloneDialog),
 			])
@@ -140,6 +161,19 @@ public sealed class Module : Autofac.Module
 					null,
 					GitOptionsPage.Guid,
 					c.Resolve<IFactory<LocalSystemConfigurationPage>>());
+			})
+			.As<IPropertyPageFactory>()
+			.SingleInstance();
+
+		builder
+			.Register(static c =>
+			{
+				return new PropertyPageFactory<CommitMessageGenerationPage>(
+					CommitMessageGenerationPage.Guid,
+					"Commit Message Generation",
+					null,
+					GitOptionsPage.Guid,
+					c.Resolve<IFactory<CommitMessageGenerationPage>>());
 			})
 			.As<IPropertyPageFactory>()
 			.SingleInstance();

@@ -69,11 +69,12 @@ static class GitFinder
 			return default;
 		}
 
-		string gitWrapperExecutable = string.Format(@"{0}cmd{0}{1}", Path.DirectorySeparatorChar, fileName);
-		if(gitExeFullPath!.EndsWith(gitWrapperExecutable, StringComparison.OrdinalIgnoreCase))
+		var gitCmdDirectory = string.Format(@"{0}cmd{0}", Path.DirectorySeparatorChar);
+		if(gitExeFullPath!.EndsWith(gitCmdDirectory + GitCmd, StringComparison.OrdinalIgnoreCase) ||
+			gitExeFullPath!.EndsWith(gitCmdDirectory + GitExe, StringComparison.OrdinalIgnoreCase))
 		{
 			var realGitExe = Path.Combine(
-				gitExeFullPath.Substring(0, gitExeFullPath.Length - gitWrapperExecutable.Length),
+				gitExeFullPath.Substring(0, gitExeFullPath.LastIndexOf(gitCmdDirectory, StringComparison.OrdinalIgnoreCase)),
 				@"bin", GitExe);
 			if(File.Exists(realGitExe))
 			{
@@ -88,14 +89,27 @@ static class GitFinder
 #if NETCOREAPP
 		if(!OperatingSystem.IsWindows()) return default;
 #endif
-		var programFilesPath = Environment.GetFolderPath(
-			Environment.Is64BitOperatingSystem
-				? Environment.SpecialFolder.ProgramFilesX86
-				: Environment.SpecialFolder.ProgramFiles);
-		var defaultInstallationPath = Path.Combine(
-			programFilesPath, @"Git", @"bin", GitExe);
-		return File.Exists(defaultInstallationPath)
-			? defaultInstallationPath
-			: default;
+		foreach(var programFilesFolder in new[]
+		{
+			Environment.SpecialFolder.ProgramFiles,
+			Environment.SpecialFolder.ProgramFilesX86,
+		})
+		{
+			var programFilesPath = Environment.GetFolderPath(programFilesFolder);
+			if(string.IsNullOrWhiteSpace(programFilesPath)) continue;
+
+			foreach(var gitExecutablePath in new[]
+			{
+				Path.Combine(programFilesPath, @"Git", @"bin", GitExe),
+				Path.Combine(programFilesPath, @"Git", @"cmd", GitExe),
+			})
+			{
+				if(File.Exists(gitExecutablePath))
+				{
+					return gitExecutablePath;
+				}
+			}
+		}
+		return default;
 	}
 }
