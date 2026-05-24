@@ -47,6 +47,8 @@ public partial class CommitDialog : GitDialogBase, IExecutableDialog, IAsyncExec
 		public  readonly TextBox _txtMessage;
 		private readonly LabelControl _lblStagedFiles;
 		private readonly LabelControl _lblMessage;
+		public  readonly LabelControl _lblGenerationStatus;
+		public  readonly IButtonWidget _btnGenerate;
 		public  readonly ICheckBoxWidget _chkAmend;
 
 		public DialogControls(IGitterStyle? style = default)
@@ -76,7 +78,7 @@ public partial class CommitDialog : GitDialogBase, IExecutableDialog, IAsyncExec
 				AcceptsReturn = true,
 				AcceptsTab    = true,
 				Multiline     = true,
-				//ScrollBars    = ScrollBars.Vertical,
+				ScrollBars    = ScrollBars.Vertical,
 			};
 			GitterApplication.FontManager.InputFont.Apply(_txtMessage);
 
@@ -86,6 +88,10 @@ public partial class CommitDialog : GitDialogBase, IExecutableDialog, IAsyncExec
 			_lblMessage = new()
 			{
 			};
+			_lblGenerationStatus = new()
+			{
+			};
+			_btnGenerate = style.ButtonFactory.Create();
 			_chkAmend = style.CheckBoxFactory.Create();
 		}
 
@@ -93,6 +99,8 @@ public partial class CommitDialog : GitDialogBase, IExecutableDialog, IAsyncExec
 		{
 			_lblMessage.Text     = Resources.StrMessage.AddColon();
 			_lblStagedFiles.Text = Resources.StrsStagedChanges.AddColon();
+			_btnGenerate.Text    = "Generate";
+			_lblGenerationStatus.Text = string.Empty;
 			_chkAmend.Text       = Resources.StrAmend;
 		}
 
@@ -116,15 +124,29 @@ public partial class CommitDialog : GitDialogBase, IExecutableDialog, IAsyncExec
 						LayoutConstants.LabelRowSpacing,
 						SizeSpec.Everything(),
 						SizeSpec.Absolute(4),
+						LayoutConstants.ButtonRowHeight,
+						SizeSpec.Absolute(4),
 						LayoutConstants.CheckBoxRowHeight,
 					],
 					content:
 					[
 						new GridContent(new ControlContent(_lblStagedFiles,  marginOverride: noMargin), column: 0, row: 0),
-						new GridContent(new ControlContent(_lstStaged,       marginOverride: noMargin), column: 0, row: 2, rowSpan: 3),
+						new GridContent(new ControlContent(_lstStaged,       marginOverride: noMargin), column: 0, row: 2, rowSpan: 5),
 						new GridContent(new ControlContent(_lblMessage,      marginOverride: noMargin), column: 2, row: 0),
 						new GridContent(new ControlContent(messageDecorator, marginOverride: noMargin), column: 2, row: 2),
-						new GridContent(new WidgetContent(_chkAmend,         marginOverride: noMargin), column: 2, row: 4),
+						new GridContent(new Grid(
+							columns:
+							[
+								SizeSpec.Absolute(100),
+								SizeSpec.Absolute(6),
+								SizeSpec.Everything(),
+							],
+							content:
+							[
+								new GridContent(new WidgetContent(_btnGenerate, marginOverride: noMargin), column: 0),
+								new GridContent(new ControlContent(_lblGenerationStatus, marginOverride: noMargin), column: 2),
+							]), column: 2, row: 4),
+						new GridContent(new WidgetContent(_chkAmend,         marginOverride: noMargin), column: 2, row: 6),
 					]),
 			};
 
@@ -133,27 +155,42 @@ public partial class CommitDialog : GitDialogBase, IExecutableDialog, IAsyncExec
 			_lstStaged.TabIndex       = tabIndex++;
 			_lblMessage.TabIndex      = tabIndex++;
 			messageDecorator.TabIndex = tabIndex++;
+			_btnGenerate.TabIndex     = tabIndex++;
+			_lblGenerationStatus.TabIndex = tabIndex++;
 			_chkAmend.TabIndex        = tabIndex++;
 
 			_lblStagedFiles.Parent  = parent;
 			_lstStaged.Parent       = parent;
 			_lblMessage.Parent      = parent;
 			messageDecorator.Parent = parent;
+			_btnGenerate.Parent     = parent;
+			_lblGenerationStatus.Parent = parent;
 			_chkAmend.Parent        = parent;
 		}
 	}
 
 	private readonly DialogControls _controls;
 	private readonly ICommitController _controller;
+	private readonly ICommitMessageGenerator _messageGenerator;
+	private readonly IValueProvider<CommitMessageGenerationOptions> _generationOptions;
 	private readonly TextBoxSpellChecker? _speller;
 
 	public CommitDialog(Repository repository)
+		: this(repository, new OpenAICommitMessageGenerator(), new ValueSource<CommitMessageGenerationOptions>(LoadCommitMessageGenerationOptions()))
+	{
+	}
+
+	public CommitDialog(Repository repository, ICommitMessageGenerator messageGenerator, IValueProvider<CommitMessageGenerationOptions> generationOptions)
 	{
 		Verify.Argument.IsNotNull(repository);
+		Verify.Argument.IsNotNull(messageGenerator);
+		Verify.Argument.IsNotNull(generationOptions);
 
 		Name = nameof(CommitDialog);
 
 		Repository = repository;
+		_messageGenerator = messageGenerator;
+		_generationOptions = generationOptions;
 
 		SuspendLayout();
 		AutoScaleDimensions = Dpi.Default;
@@ -166,6 +203,7 @@ public partial class CommitDialog : GitDialogBase, IExecutableDialog, IAsyncExec
 		PerformLayout();
 
 		_controls._chkAmend.IsCheckedChanged += OnAmendCheckedChanged;
+		_controls._btnGenerate.Click += OnGenerateClick;
 
 		var inputs = new IUserInputSource[]
 		{
@@ -188,6 +226,15 @@ public partial class CommitDialog : GitDialogBase, IExecutableDialog, IAsyncExec
 		_controls._txtMessage.Text = repository.Status.LoadCommitMessage();
 
 		_controller = new CommitController(repository) { View = this };
+	}
+
+	private static CommitMessageGenerationOptions LoadCommitMessageGenerationOptions()
+	{
+		var repositoryProvider = GitterApplication.WorkingEnvironment?.GetRepositoryProvider<RepositoryProvider>();
+		var section = repositoryProvider?.ConfigSection?.GetCreateSection(CommitMessageGenerationOptions.SectionName);
+		return section is not null
+			? CommitMessageGenerationOptions.LoadFrom(section)
+			: CommitMessageGenerationOptions.Default;
 	}
 
 	/// <inheritdoc/>
@@ -252,6 +299,49 @@ public partial class CommitDialog : GitDialogBase, IExecutableDialog, IAsyncExec
 					_controls._txtMessage.AppendText(Utility.ExpandNewLineCharacters(rev.Body));
 				}
 				_controls._txtMessage.SelectAll();
+			}
+		}
+	}
+
+	private async void OnGenerateClick(object? sender, EventArgs e)
+	{
+		var options = _generationOptions.Value.Normalize();
+		if(string.IsNullOrWhiteSpace(options.ApiKey))
+		{
+			GitterApplication.MessageBoxService.Show(
+				this,
+				"Configure the OpenAI API key in Git options before generating commit messages.",
+				"Commit Message Generation",
+				MessageBoxButton.Close,
+				MessageBoxIcon.Warning);
+			return;
+		}
+
+		_controls._btnGenerate.Enabled = false;
+		_controls._lblGenerationStatus.Text = "Generating...";
+		try
+		{
+			var message = await _messageGenerator.GenerateAsync(Repository, options);
+			_controls._txtMessage.Text = Utility.ExpandNewLineCharacters(message);
+			_controls._txtMessage.SelectAll();
+			_controls._txtMessage.Focus();
+			_controls._lblGenerationStatus.Text = "Generated.";
+		}
+		catch(Exception exc) when(!exc.IsCritical)
+		{
+			_controls._lblGenerationStatus.Text = "Failed.";
+			GitterApplication.MessageBoxService.Show(
+				this,
+				exc.Message,
+				"Commit Message Generation",
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+		}
+		finally
+		{
+			if(!IsDisposed)
+			{
+				_controls._btnGenerate.Enabled = true;
 			}
 		}
 	}

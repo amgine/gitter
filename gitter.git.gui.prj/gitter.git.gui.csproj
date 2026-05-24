@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac" Version="9.0.0" />
+    <PackageReference Include="OpenAI" Version="2.5.0" />
   </ItemGroup>
 
   <ItemGroup>

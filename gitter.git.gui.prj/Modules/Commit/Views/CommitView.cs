@@ -22,6 +22,7 @@ namespace gitter.Git.Gui.Views;
 
 using System;
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 
 using gitter.Framework;
@@ -47,8 +48,11 @@ partial class CommitView : GitViewBase
 		public readonly TreeListBox _lstUnstaged;
 		public readonly TreeListBox _lstStaged;
 		public readonly LabelControl _lblMessage;
+		public readonly LabelControl _lblGenerationStatus;
 		public readonly ICheckBoxWidget _chkAmend;
+		public readonly IButtonWidget _btnGenerate;
 		public readonly IButtonWidget _btnCommit;
+		public readonly Font _messageFont;
 
 		public ViewControls(IGitterStyle? style, CommitView parent)
 		{
@@ -87,12 +91,22 @@ partial class CommitView : GitViewBase
 				AcceptsReturn = true,
 				AcceptsTab = true,
 				Multiline = true,
-				ScrollBars = ScrollBars.None,
+				ScrollBars = ScrollBars.Vertical,
 			};
-			_chkAmend  = style.CheckBoxFactory.Create();
-			_btnCommit = style.ButtonFactory.Create();
+			_lblGenerationStatus = new();
+			_chkAmend    = style.CheckBoxFactory.Create();
+			_btnGenerate = style.ButtonFactory.Create();
+			_btnCommit   = style.ButtonFactory.Create();
 
 			GitterApplication.FontManager.InputFont.Apply(_txtMessage);
+			_messageFont = new Font(
+				_txtMessage.Font.FontFamily,
+				Math.Max(6.0f, _txtMessage.Font.SizeInPoints - 1.0f),
+				_txtMessage.Font.Style,
+				_txtMessage.Font.Unit,
+				_txtMessage.Font.GdiCharSet,
+				_txtMessage.Font.GdiVerticalFont);
+			_txtMessage.Font = _messageFont;
 
 			if(style.Type == GitterStyleType.DarkBackground)
 			{
@@ -130,7 +144,9 @@ partial class CommitView : GitViewBase
 			_lblUnstaged.Text = Resources.StrsUnstagedChanges.AddColon();
 			_lstUnstaged.Text = Resources.StrsNoUnstagedChanges;
 			_lblMessage.Text = Resources.StrMessage.AddColon();
+			_lblGenerationStatus.Text = string.Empty;
 			_chkAmend.Text = Resources.StrAmend;
+			_btnGenerate.Text = "Generate";
 			_btnCommit.Text = Resources.StrCommit;
 		}
 
@@ -188,7 +204,7 @@ partial class CommitView : GitViewBase
 							[
 								SizeSpec.Everything(),
 								SizeSpec.Absolute(8),
-								SizeSpec.Absolute(74),
+								SizeSpec.Absolute(82),
 							],
 							rows:
 							[
@@ -196,14 +212,18 @@ partial class CommitView : GitViewBase
 								LayoutConstants.CheckBoxRowHeight,
 								LayoutConstants.RowSpacing,
 								SizeSpec.Absolute(22),
+								LayoutConstants.RowSpacing,
+								SizeSpec.Absolute(22),
 							],
 							content:
 							[
-								new GridContent(new ControlContent(decMessage, marginOverride: LayoutConstants.NoMargin), row: 0, rowSpan: 4, column: 0),
+								new GridContent(new ControlContent(decMessage, marginOverride: LayoutConstants.NoMargin), row: 0, rowSpan: 6, column: 0),
 								new GridContent(new WidgetContent(_chkAmend,  marginOverride: LayoutConstants.NoMargin), row: 1, column: 2),
-								new GridContent(new WidgetContent(_btnCommit, marginOverride: LayoutConstants.NoMargin), row: 3, column: 2),
+								new GridContent(new ControlContent(_lblGenerationStatus, marginOverride: LayoutConstants.NoMargin), row: 3, column: 0),
+								new GridContent(new WidgetContent(_btnGenerate, marginOverride: LayoutConstants.NoMargin), row: 3, column: 2),
+								new GridContent(new WidgetContent(_btnCommit, marginOverride: LayoutConstants.NoMargin), row: 5, column: 2),
 							]), row: 6),
-					]),
+				]),
 			};
 
 			_toolbar.Parent     = parent;
@@ -214,7 +234,9 @@ partial class CommitView : GitViewBase
 			grip.Parent         = parent;
 			_lblMessage.Parent  = parent;
 			decMessage.Parent   = parent;
+			_lblGenerationStatus.Parent = parent;
 			_chkAmend.Parent    = parent;
+			_btnGenerate.Parent = parent;
 			_btnCommit.Parent   = parent;
 
 			var tabIndex = 0;
@@ -227,6 +249,8 @@ partial class CommitView : GitViewBase
 			_lblMessage.TabIndex  = tabIndex++;
 			decMessage.TabIndex   = tabIndex++;
 			_chkAmend.TabIndex    = tabIndex++;
+			_btnGenerate.TabIndex = tabIndex++;
+			_lblGenerationStatus.TabIndex = tabIndex++;
 			_btnCommit.TabIndex   = tabIndex++;
 
 			_ = new VerticalResizer(grip, grid.Rows[6], -1, DpiBoundValue.ScaleY(100));
@@ -234,19 +258,34 @@ partial class CommitView : GitViewBase
 
 		public void Dispose()
 		{
+			_messageFont.Dispose();
 			_chkAmend.Dispose();
+			_btnGenerate.Dispose();
 			_btnCommit.Dispose();
 		}
 	}
 
 	private readonly ViewControls _controls;
+	private readonly ICommitMessageGenerator _messageGenerator;
+	private readonly IValueProvider<CommitMessageGenerationOptions> _generationOptions;
 	private readonly TextBoxSpellChecker? _speller;
 	private bool _treeMode;
 	private bool _suppressDiffUpdate;
 
 	public CommitView(GuiProvider gui)
+		: this(gui, new OpenAICommitMessageGenerator(), new ValueSource<CommitMessageGenerationOptions>(LoadCommitMessageGenerationOptions()))
+	{
+	}
+
+	public CommitView(GuiProvider gui, ICommitMessageGenerator messageGenerator, IValueProvider<CommitMessageGenerationOptions> generationOptions)
 		: base(Guids.CommitViewGuid, gui)
 	{
+		Verify.Argument.IsNotNull(messageGenerator);
+		Verify.Argument.IsNotNull(generationOptions);
+
+		_messageGenerator = messageGenerator;
+		_generationOptions = generationOptions;
+
 		SuspendLayout();
 		AutoScaleDimensions = Dpi.Default;
 		AutoScaleMode       = AutoScaleMode.Dpi;
@@ -264,6 +303,7 @@ partial class CommitView : GitViewBase
 		_controls._lstUnstaged.PreviewKeyDown += OnKeyDown;
 		_controls._txtMessage.PreviewKeyDown += OnKeyDown;
 		_controls._chkAmend.Control.PreviewKeyDown += OnKeyDown;
+		_controls._btnGenerate.Control.PreviewKeyDown += OnKeyDown;
 		_controls._btnCommit.Control.PreviewKeyDown += OnKeyDown;
 
 		_controls._lstStaged.ItemActivated += OnStagedItemActivated;
@@ -273,12 +313,22 @@ partial class CommitView : GitViewBase
 		_controls._lstUnstaged.GotFocus += OnUnstagedGotFocus;
 
 		_controls._chkAmend.IsCheckedChanged += OnAmendIsCheckedChanged;
+		_controls._btnGenerate.Click += OnGenerateClick;
 		_controls._btnCommit.Click += OnCommitClick;
 
 		if(SpellingService.Enabled)
 		{
 			_speller = new TextBoxSpellChecker(_controls._txtMessage, true);
 		}
+	}
+
+	private static CommitMessageGenerationOptions LoadCommitMessageGenerationOptions()
+	{
+		var repositoryProvider = GitterApplication.WorkingEnvironment?.GetRepositoryProvider<RepositoryProvider>();
+		var section = repositoryProvider?.ConfigSection?.GetCreateSection(CommitMessageGenerationOptions.SectionName);
+		return section is not null
+			? CommitMessageGenerationOptions.LoadFrom(section)
+			: CommitMessageGenerationOptions.Default;
 	}
 
 	/// <inheritdoc/>
@@ -510,6 +560,60 @@ partial class CommitView : GitViewBase
 		}
 		textBox.SelectAll();
 		return true;
+	}
+
+	private async void OnGenerateClick(object? sender, EventArgs e)
+	{
+		if(Repository is null)
+		{
+			GitterApplication.MessageBoxService.Show(
+				this,
+				"Open a repository before generating commit messages.",
+				"Commit Message Generation",
+				MessageBoxButton.Close,
+				MessageBoxIcon.Warning);
+			return;
+		}
+
+		var options = _generationOptions.Value.Normalize();
+		if(string.IsNullOrWhiteSpace(options.ApiKey))
+		{
+			GitterApplication.MessageBoxService.Show(
+				this,
+				"Configure the OpenAI API key in Git options before generating commit messages.",
+				"Commit Message Generation",
+				MessageBoxButton.Close,
+				MessageBoxIcon.Warning);
+			return;
+		}
+
+		_controls._btnGenerate.Enabled = false;
+		_controls._lblGenerationStatus.Text = "Generating...";
+		try
+		{
+			var message = await _messageGenerator.GenerateAsync(Repository, options);
+			_controls._txtMessage.Text = Utility.ExpandNewLineCharacters(message);
+			_controls._txtMessage.SelectAll();
+			_controls._txtMessage.Focus();
+			_controls._lblGenerationStatus.Text = "Generated.";
+		}
+		catch(Exception exc) when(!exc.IsCritical)
+		{
+			_controls._lblGenerationStatus.Text = "Failed.";
+			GitterApplication.MessageBoxService.Show(
+				this,
+				exc.Message,
+				"Commit Message Generation",
+				MessageBoxButton.Close,
+				MessageBoxIcon.Error);
+		}
+		finally
+		{
+			if(!IsDisposed)
+			{
+				_controls._btnGenerate.Enabled = true;
+			}
+		}
 	}
 
 	protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e)
