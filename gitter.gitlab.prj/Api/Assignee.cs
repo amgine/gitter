@@ -23,6 +23,8 @@ namespace gitter.GitLab.Api;
 using System;
 using System.Runtime.Serialization;
 
+using gitter.Framework;
+
 [DataContract]
 public sealed class Assignee
 {
@@ -64,4 +66,6 @@ public sealed class Assignee
 	[DataMember]
 	[JsonPropertyName(Names.WebUrl)]
 	public string WebUrl { get; set; } = default!;
+
+	public IAvatar? Avatar => GitLabAvatar.For(AvatarUrl);
 }

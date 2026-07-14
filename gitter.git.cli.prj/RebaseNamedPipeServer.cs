@@ -52,14 +52,18 @@ internal sealed class RebaseNamedPipeServer : IDisposable
 	{
 		await _pipe.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
 
-		using var reader = new StreamReader(_pipe, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, bufferSize: -1, leaveOpen: true);
-		var path = await reader
+		using var reader = new StreamReader(_pipe, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, bufferSize: 1024, leaveOpen: true);
 #if NET7_0_OR_GREATER
-			.ReadLineAsync(cancellationToken)
+		var path = await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
 #else
-			.ReadLineAsync()
+		// Pre-net7: ReadLineAsync has no cancellation overload. Pipe disposal cancels the
+		// underlying read; we still respect explicit cancellation by Task.WhenAny.
+		var readTask   = reader.ReadLineAsync();
+		var cancelTask = Task.Delay(System.Threading.Timeout.Infinite, cancellationToken);
+		var winner     = await Task.WhenAny(readTask, cancelTask).ConfigureAwait(false);
+		if(winner == cancelTask) cancellationToken.ThrowIfCancellationRequested();
+		var path = await readTask.ConfigureAwait(false);
 #endif
-			.ConfigureAwait(false);
 		return path ?? string.Empty;
 	}
 

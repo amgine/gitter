@@ -53,6 +53,8 @@ partial class ApiEndpoint
 		long?       assigneeId = default,
 		long?       authorId   = default,
 		SortOrder?  sort       = default,
+		System.Collections.Generic.IReadOnlyCollection<string>? labels = default,
+		string?     milestone  = default,
 		CancellationToken cancellationToken = default)
 	{
 		/*
@@ -91,6 +93,14 @@ partial class ApiEndpoint
 		if(state.HasValue)      AppendParameter(query, ref sep, @"state",       StateToString(state.Value));
 		if(scope.HasValue)      AppendParameter(query, ref sep, @"scope",       ScopeToString(scope.Value));
 		if(sort.HasValue)       AppendParameter(query, ref sep, @"sort",        SortToString(sort.Value));
+		if(labels is { Count: > 0 })
+		{
+			AppendParameter(query, ref sep, @"labels", string.Join(",", System.Linq.Enumerable.Select(labels, System.Uri.EscapeDataString)));
+		}
+		if(!string.IsNullOrEmpty(milestone))
+		{
+			AppendParameter(query, ref sep, @"milestone", System.Uri.EscapeDataString(milestone!));
+		}
 
 		return ReadPagedResultAsync<Issue>(query.ToString(), cancellationToken);
 	}

@@ -171,6 +171,24 @@
   <data name="StrAll" xml:space="preserve">
     <value>All</value>
   </data>
+  <data name="StrAny" xml:space="preserve">
+    <value>(any)</value>
+  </data>
+  <data name="StrNone" xml:space="preserve">
+    <value>(none)</value>
+  </data>
+  <data name="StrCreatedByMe" xml:space="preserve">
+    <value>Created by me</value>
+  </data>
+  <data name="StrAssignedToMe" xml:space="preserve">
+    <value>Assigned to me</value>
+  </data>
+  <data name="StrScope" xml:space="preserve">
+    <value>Scope</value>
+  </data>
+  <data name="StrFilters" xml:space="preserve">
+    <value>Filters</value>
+  </data>
   <data name="StrAPIKey" xml:space="preserve">
     <value>Access Token</value>
   </data>
@@ -179,6 +197,12 @@
   </data>
   <data name="StrAuthor" xml:space="preserve">
     <value>Author</value>
+  </data>
+  <data name="StrLabel" xml:space="preserve">
+    <value>Label</value>
+  </data>
+  <data name="StrLabels" xml:space="preserve">
+    <value>Labels</value>
   </data>
   <data name="StrBranches" xml:space="preserve">
     <value>Branches</value>

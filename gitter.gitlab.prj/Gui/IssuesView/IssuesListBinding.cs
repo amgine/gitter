@@ -36,6 +36,9 @@ using Resources = gitter.GitLab.Properties.Resources;
 sealed class IssuesListBinding : AsyncDataBinding<IReadOnlyList<Issue>>
 {
 	private IssueState? _issueState;
+	private IssueScope? _issueScope;
+	private IReadOnlyCollection<string>? _labels;
+	private string?     _milestone;
 
 	public IssuesListBinding(GitLabServiceContext serviceContext, CustomListBox issuesListBox,
 		IssueState? issueState = gitter.GitLab.Api.IssueState.Opened)
@@ -67,6 +70,42 @@ sealed class IssuesListBinding : AsyncDataBinding<IReadOnlyList<Issue>>
 		}
 	}
 
+	public IssueScope? IssueScope
+	{
+		get => _issueScope;
+		set
+		{
+			if(_issueScope != value)
+			{
+				_issueScope = value;
+				ReloadData();
+			}
+		}
+	}
+
+	public IReadOnlyCollection<string>? Labels
+	{
+		get => _labels;
+		set
+		{
+			_labels = value;
+			ReloadData();
+		}
+	}
+
+	public string? Milestone
+	{
+		get => _milestone;
+		set
+		{
+			if(!string.Equals(_milestone, value, StringComparison.Ordinal))
+			{
+				_milestone = value;
+				ReloadData();
+			}
+		}
+	}
+
 	protected override Task<IReadOnlyList<Issue>> FetchDataAsync(
 		IProgress<OperationProgress>? progress = default, CancellationToken cancellationToken = default)
 	{
@@ -75,7 +114,12 @@ sealed class IssuesListBinding : AsyncDataBinding<IReadOnlyList<Issue>>
 		progress?.Report(new("Fetching issues..."));
 		IssuesListBox.Cursor = Cursors.WaitCursor;
 
-		return ServiceContext.GetIssuesAsync(state: IssueState, cancellationToken);
+		return ServiceContext.GetIssuesAsync(
+			state:     IssueState,
+			scope:     IssueScope,
+			labels:    Labels,
+			milestone: Milestone,
+			cancellationToken: cancellationToken);
 	}
 
 	protected override void OnFetchCompleted(IReadOnlyList<Issue> issues)
