@@ -1,7 +1,7 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2026  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -148,7 +148,7 @@ public partial class InteractiveRebaseDialog : GitDialogBase, IExecutableDialog
 		}
 	}
 
-	IReadOnlyList<RebaseTodoEntry> _capturedPlan = System.Array.Empty<RebaseTodoEntry>();
+	IReadOnlyList<RebaseTodoEntry> _capturedPlan = Preallocated<RebaseTodoEntry>.EmptyArray;
 
 	/// <summary>Plan captured during <see cref="Execute"/>; readable after the dialog closes.</summary>
 	public IReadOnlyList<RebaseTodoEntry> ResultPlan => _capturedPlan;

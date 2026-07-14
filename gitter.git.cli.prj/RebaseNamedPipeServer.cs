@@ -1,7 +1,7 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2026  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,8 @@ using System.Threading.Tasks;
 /// <summary>Named pipe server for IPC with gitter.rebase-editor.exe.</summary>
 internal sealed class RebaseNamedPipeServer : IDisposable
 {
+	static readonly byte[] DoneSignal = [1];
+
 	readonly NamedPipeServerStream _pipe;
 
 	public RebaseNamedPipeServer()
@@ -50,15 +52,26 @@ internal sealed class RebaseNamedPipeServer : IDisposable
 	{
 		await _pipe.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
 
-		using var reader = new StreamReader(_pipe, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, leaveOpen: true);
-		var path = await reader.ReadLineAsync(cancellationToken).ConfigureAwait(false);
+		using var reader = new StreamReader(_pipe, Encoding.UTF8, detectEncodingFromByteOrderMarks: false, bufferSize: -1, leaveOpen: true);
+		var path = await reader
+#if NET7_0_OR_GREATER
+			.ReadLineAsync(cancellationToken)
+#else
+			.ReadLineAsync()
+#endif
+			.ConfigureAwait(false);
 		return path ?? string.Empty;
 	}
 
 	/// <summary>Send done signal so the fake editor exits and git resumes.</summary>
 	public async Task SendDoneSignalAsync(CancellationToken cancellationToken = default)
 	{
-		await _pipe.WriteAsync(new byte[] { 1 }, 0, 1, cancellationToken).ConfigureAwait(false);
+#if NETCOREAPP
+		var signal = new ReadOnlyMemory<byte>(DoneSignal);
+		await _pipe.WriteAsync(signal, cancellationToken).ConfigureAwait(false);
+#else
+		await _pipe.WriteAsync(DoneSignal, 0, DoneSignal.Length, cancellationToken).ConfigureAwait(false);
+#endif
 		await _pipe.FlushAsync(cancellationToken).ConfigureAwait(false);
 	}
 

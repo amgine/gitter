@@ -1,7 +1,7 @@
-#region Copyright Notice
+﻿#region Copyright Notice
 /*
  * gitter - VCS repository management tool
- * Copyright (C) 2013  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
+ * Copyright (C) 2026  Popovskiy Maxim Vladimirovitch <amgine.gitter@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,14 +35,14 @@ static class Program
 		var todoFilePath = args[1];
 
 		using var pipe = new NamedPipeClientStream(
-			serverName:        ".",
-			pipeName:          pipeName,
-			direction:         PipeDirection.InOut,
-			options:           PipeOptions.None);
+			serverName: ".",
+			pipeName:   pipeName,
+			direction:  PipeDirection.InOut,
+			options:    PipeOptions.None);
 
 		pipe.Connect(30_000);
 
-		using var writer = new StreamWriter(pipe, Encoding.UTF8, leaveOpen: true);
+		using var writer = new StreamWriter(pipe, Encoding.UTF8, bufferSize: -1, leaveOpen: true);
 		writer.WriteLine(todoFilePath);
 		writer.Flush();
 
