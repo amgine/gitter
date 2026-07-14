@@ -362,6 +362,81 @@ public static class GuiCommands
 		}
 	}
 
+	public static async System.Threading.Tasks.Task<GuiCommandStatus> InteractiveRebaseAsync(IWin32Window? parent, IRevisionPointer revision)
+	{
+		Verify.Argument.IsNotNull(revision);
+
+		var repository = revision.Repository;
+
+		if(repository.State != RepositoryState.Normal)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				$"Repository is in {repository.State} state. Resolve the current operation before starting an interactive rebase.",
+				"Interactive Rebase",
+				MessageBoxButton.Close,
+				MessageBoxIcon.Warning);
+			return GuiCommandStatus.Faulted;
+		}
+		var status = repository.Status;
+		var hasChanges =
+			status.StagedFiles.Count   > 0 ||
+			status.UnstagedFiles.Count > 0;
+		if(hasChanges)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent,
+				"Working tree has uncommitted changes. Commit or stash them before starting an interactive rebase.",
+				"Interactive Rebase",
+				MessageBoxButton.Close,
+				MessageBoxIcon.Warning);
+			return GuiCommandStatus.Faulted;
+		}
+
+		// suppress monitor so concurrent ops don't compete for .git/index.lock
+		var notificationBlock = ((IGitRepository)repository).Monitor.BlockNotifications(
+			RepositoryNotifications.BranchChanged,
+			RepositoryNotifications.Checkout,
+			RepositoryNotifications.IndexUpdated,
+			RepositoryNotifications.WorktreeUpdated);
+		var cmdStatus = GuiCommandStatus.Completed;
+		try
+		{
+			var controller = new gitter.Git.Gui.Controllers.InteractiveRebaseController(
+				repository.Accessor.InteractiveRebase);
+			await controller.RunAsync(revision.Pointer, onto: null, owner: parent);
+		}
+		catch(OperationCanceledException)
+		{
+			cmdStatus = GuiCommandStatus.Canceled;
+		}
+		catch(GitException exc)
+		{
+			GitterApplication.MessageBoxService.Show(
+				parent, exc.Message, Resources.ErrFailedToRebase,
+				MessageBoxButton.Close, MessageBoxIcon.Error);
+			cmdStatus = GuiCommandStatus.Faulted;
+		}
+		finally
+		{
+			// end block before refresh so events fire
+			notificationBlock.Dispose();
+			try
+			{
+				repository.Refs.RefreshBranches();
+				repository.Head.Refresh();
+				if(repository.Head.Pointer is Branch { IsRemote: false } branch)
+				{
+					branch.Refresh();
+				}
+				repository.Status.Refresh();
+				repository.NotifyUpdated();
+			}
+			catch(Exception exc) when(!exc.IsCritical) { }
+		}
+		return cmdStatus;
+	}
+
 	public static GuiCommandStatus Rebase(IWin32Window? parent, Repository repository, RebaseControl control)
 	{
 		Verify.Argument.IsNotNull(repository);

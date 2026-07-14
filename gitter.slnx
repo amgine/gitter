@@ -24,6 +24,7 @@
   </Folder>
   <Folder Name="/utility/">
     <Project Path="gitter.askpass.prj/gitter.askpass.csproj" />
+    <Project Path="gitter.rebase-editor.prj/gitter.rebase-editor.csproj" />
     <Project Path="gitter.uac.prj/gitter.uac.csproj" />
     <Project Path="gitter.updater.prj/gitter.updater.csproj" />
   </Folder>

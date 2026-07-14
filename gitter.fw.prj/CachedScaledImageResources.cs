@@ -61,7 +61,7 @@ public class CachedScaledImageResources(Assembly assembly, string root)
 
 	private static readonly int[] Sizes =
 		[
-			16, 24, 32, 48, 64, 128, 256
+			16, 24, 32, 48, 64, 128, 256, 512
 		];
 
 	private readonly Dictionary<Key, Bitmap> _cache = new(Key.EqualityComparer);

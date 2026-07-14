@@ -100,6 +100,7 @@ internal sealed partial class RepositoryCLI : IRepositoryAccessor
 	private readonly IGitAction   < RemoveFilesRequest                                        > _removeFiles;
 	private readonly IGitAction   < RemoveRemoteReferencesRequest                             > _removeRemoteReferences;
 	private readonly IGitAction   < RebaseRequest                                             > _rebase;
+	private readonly InteractiveRebaseExecutor                                                   _interactiveRebase;
 	private readonly IGitAction   < RemoveRemoteRequest                                       > _removeRemote;
 	private readonly IGitAction   < RenameConfigSectionRequest                                > _renameConfigSection;
 	private readonly IGitAction   < RenameBranchRequest                                       > _renameBranch;
@@ -199,6 +200,7 @@ internal sealed partial class RepositoryCLI : IRepositoryAccessor
 		GitCliMethod.Create(out _removeFiles,            CommandExecutor, CommandBuilder.GetRemoveFilesCommand);
 		GitCliMethod.Create(out _removeRemoteReferences, CommandExecutor, CommandBuilder.GetRemoveRemoteReferencesCommand);
 		GitCliMethod.Create(out _rebase,                 CommandExecutor, CommandBuilder.GetRebaseCommand);
+		_interactiveRebase = new InteractiveRebaseExecutor(repository.WorkingDirectory, CommandBuilder);
 		GitCliMethod.Create(out _removeRemote,           CommandExecutor, CommandBuilder.GetRemoveRemoteCommand);
 		GitCliMethod.Create(out _renameBranch,           CommandExecutor, CommandBuilder.GetRenameBranchCommand,           OutputParser.HandleRenameBranchResult);
 		GitCliMethod.Create(out _renameConfigSection,    CommandExecutor, CommandBuilder.GetRenameConfigSectionCommand,    OutputParser.HandleConfigResults);
@@ -351,7 +353,8 @@ internal sealed partial class RepositoryCLI : IRepositoryAccessor
 
 	public IGitAction<RemoveRemoteReferencesRequest> RemoveRemoteReferences => _removeRemoteReferences;
 
-	public IGitAction<RebaseRequest> Rebase => _rebase;
+	public IGitAction<RebaseRequest>        Rebase           => _rebase;
+	public IInteractiveRebaseExecutor       InteractiveRebase => _interactiveRebase;
 
 	public IGitAction<RemoveRemoteRequest> RemoveRemote => _removeRemote;
 
