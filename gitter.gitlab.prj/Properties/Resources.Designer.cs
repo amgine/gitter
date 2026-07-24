@@ -322,6 +322,33 @@ namespace gitter.GitLab.Properties {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Filter.
+        /// </summary>
+        internal static string StrFilter {
+            get {
+                return ResourceManager.GetString("StrFilter", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Clear selection.
+        /// </summary>
+        internal static string StrClearSelection {
+            get {
+                return ResourceManager.GetString("StrClearSelection", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to No labels to display.
+        /// </summary>
+        internal static string StrsNoLabelsToDisplay {
+            get {
+                return ResourceManager.GetString("StrsNoLabelsToDisplay", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Branches.
         /// </summary>
         internal static string StrBranches {
@@ -518,6 +545,51 @@ namespace gitter.GitLab.Properties {
                 return ResourceManager.GetString("StrMilestone", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Type.
+        /// </summary>
+        internal static string StrType {
+            get {
+                return ResourceManager.GetString("StrType", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Issue.
+        /// </summary>
+        internal static string StrIssue {
+            get {
+                return ResourceManager.GetString("StrIssue", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Incident.
+        /// </summary>
+        internal static string StrIncident {
+            get {
+                return ResourceManager.GetString("StrIncident", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Test case.
+        /// </summary>
+        internal static string StrTestCase {
+            get {
+                return ResourceManager.GetString("StrTestCase", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Task.
+        /// </summary>
+        internal static string StrTask {
+            get {
+                return ResourceManager.GetString("StrTask", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Name.
@@ -663,6 +735,15 @@ namespace gitter.GitLab.Properties {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Copy access tokens page link.
+        /// </summary>
+        internal static string StrsCopyAccessTokensUrl {
+            get {
+                return ResourceManager.GetString("StrsCopyAccessTokensUrl", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Manage access tokens.
         /// </summary>

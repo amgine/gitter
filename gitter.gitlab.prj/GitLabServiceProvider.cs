@@ -131,43 +131,7 @@ sealed class GitLabServiceProvider : IRepositoryServiceProvider
 
 	private static bool Match(Uri serverUrl, string remoteFetchUrl,
 		[MaybeNullWhen(returnValue: false)] out string projectId)
-	{
-		if(string.IsNullOrWhiteSpace(remoteFetchUrl))
-		{
-			projectId = default;
-			return false;
-		}
-		const string GitPrefix = "git@";
-		if(remoteFetchUrl.StartsWith(GitPrefix))
-		{
-			int sep = remoteFetchUrl.IndexOf(':');
-			if(sep > 0 & sep < remoteFetchUrl.Length - 1)
-			{
-				var host = remoteFetchUrl.Substring(GitPrefix.Length, sep - GitPrefix.Length);
-				if(serverUrl.Host == host)
-				{
-					const string DotGit = ".git";
-					projectId = remoteFetchUrl.EndsWith(DotGit)
-						? remoteFetchUrl.Substring(sep + 1, remoteFetchUrl.Length - sep - DotGit.Length - 1)
-						: remoteFetchUrl.Substring(sep + 1);
-					return true;
-				}
-			}
-		}
-		else if(Uri.TryCreate(remoteFetchUrl, UriKind.Absolute, out var remoteUri))
-		{
-			if(remoteUri.Scheme is "http" or "https")
-			{
-				if(remoteUri.Host == serverUrl.Host)
-				{
-					projectId = remoteUri.PathAndQuery.Substring(1);
-					return true;
-				}
-			}
-		}
-		projectId = default;
-		return false;
-	}
+		=> RemoteUrlParser.TryGetProjectPath(serverUrl, remoteFetchUrl, out projectId);
 
 	private bool TryMatchServer(Git.Repository git,
 		[MaybeNullWhen(returnValue: false)] out ServerInfo server,

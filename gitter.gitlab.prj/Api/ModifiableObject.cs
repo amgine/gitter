@@ -36,11 +36,11 @@ class ModifiableObject
 
 	[DataMember]
 	[JsonPropertyName(Names.Iid)]
-	public int Iid { get; set; }
+	public long Iid { get; set; }
 
 	[DataMember]
 	[JsonPropertyName(Names.Id)]
-	public int Id { get; set; }
+	public long Id { get; set; }
 
 	[DataMember]
 	[JsonPropertyName(Names.CreatedAt)]

@@ -35,10 +35,11 @@ using Resources = gitter.GitLab.Properties.Resources;
 
 sealed class IssuesListBinding : AsyncDataBinding<IReadOnlyList<Issue>>
 {
-	private IssueState? _issueState;
-	private IssueScope? _issueScope;
+	private IssueState?   _issueState;
+	private IssueScope?   _issueScope;
+	private WorkItemType? _issueType;
 	private IReadOnlyCollection<string>? _labels;
-	private string?     _milestone;
+	private string?       _milestone;
 
 	public IssuesListBinding(GitLabServiceContext serviceContext, CustomListBox issuesListBox,
 		IssueState? issueState = gitter.GitLab.Api.IssueState.Opened)
@@ -83,6 +84,19 @@ sealed class IssuesListBinding : AsyncDataBinding<IReadOnlyList<Issue>>
 		}
 	}
 
+	public WorkItemType? IssueType
+	{
+		get => _issueType;
+		set
+		{
+			if(_issueType != value)
+			{
+				_issueType = value;
+				ReloadData();
+			}
+		}
+	}
+
 	public IReadOnlyCollection<string>? Labels
 	{
 		get => _labels;
@@ -117,6 +131,7 @@ sealed class IssuesListBinding : AsyncDataBinding<IReadOnlyList<Issue>>
 		return ServiceContext.GetIssuesAsync(
 			state:     IssueState,
 			scope:     IssueScope,
+			issueType: IssueType,
 			labels:    Labels,
 			milestone: Milestone,
 			cancellationToken: cancellationToken);
@@ -154,9 +169,24 @@ sealed class IssuesListBinding : AsyncDataBinding<IReadOnlyList<Issue>>
 		}
 
 		IssuesListBox.ProgressMonitor.Report(OperationProgress.Completed);
-		IssuesListBox.Text = Resources.StrsFailedToFetchIssues;
+		IssuesListBox.Text   = FormatFailure(exception);
 		IssuesListBox.Items.Clear();
 		IssuesListBox.Cursor = Cursors.Default;
+	}
+
+	private static string FormatFailure(Exception exception)
+	{
+		var reason = exception switch
+		{
+			GitLabApiException          api  => api.Details  ?? api.Message,
+			GitLabUnauthorizedException auth => auth.Details ?? auth.Message,
+			null                             => null,
+			_                                => exception.Message,
+		};
+
+		return string.IsNullOrWhiteSpace(reason)
+			? Resources.StrsFailedToFetchIssues
+			: $"{Resources.StrsFailedToFetchIssues}{Environment.NewLine}{reason}";
 	}
 
 	protected override void Dispose(bool disposing)

@@ -204,6 +204,15 @@
   <data name="StrLabels" xml:space="preserve">
     <value>Labels</value>
   </data>
+  <data name="StrFilter" xml:space="preserve">
+    <value>Filter</value>
+  </data>
+  <data name="StrClearSelection" xml:space="preserve">
+    <value>Clear selection</value>
+  </data>
+  <data name="StrsNoLabelsToDisplay" xml:space="preserve">
+    <value>No labels to display</value>
+  </data>
   <data name="StrBranches" xml:space="preserve">
     <value>Branches</value>
   </data>
@@ -318,6 +327,9 @@
   <data name="StrSkippedTests" xml:space="preserve">
     <value>Skipped Tests</value>
   </data>
+  <data name="StrsCopyAccessTokensUrl" xml:space="preserve">
+    <value>Copy access tokens page link</value>
+  </data>
   <data name="StrsManageAccessTokens" xml:space="preserve">
     <value>Manage access tokens</value>
   </data>
@@ -347,6 +359,21 @@
   </data>
   <data name="StrTitle" xml:space="preserve">
     <value>Title</value>
+  </data>
+  <data name="StrType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="StrIssue" xml:space="preserve">
+    <value>Issue</value>
+  </data>
+  <data name="StrIncident" xml:space="preserve">
+    <value>Incident</value>
+  </data>
+  <data name="StrTestCase" xml:space="preserve">
+    <value>Test case</value>
+  </data>
+  <data name="StrTask" xml:space="preserve">
+    <value>Task</value>
   </data>
   <data name="StrUpdatedAt" xml:space="preserve">
     <value>Updated</value>

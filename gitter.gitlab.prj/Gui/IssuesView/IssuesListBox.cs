@@ -34,6 +34,7 @@ class IssuesListBox : CustomListBox
 		Columns.AddRange(
 			[
 				new IssueIdColumn(),
+				new IssueTypeColumn(),
 				new IssueAuthorColumn(),
 				new IssueCreatedAtColumn(),
 				new IssueUpdatedAtColumn(),

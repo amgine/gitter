@@ -40,8 +40,9 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 	private readonly IssuesToolbar _toolbar;
 	private ISearchToolBarController _searchToolbar;
 	private IssuesListBinding? _dataSource;
-	private IssueState? _issueState = Api.IssueState.Opened;
-	private IssueScope? _issueScope;
+	private IssueState?   _issueState = Api.IssueState.Opened;
+	private IssueScope?   _issueScope;
+	private WorkItemType? _issueType;
 	private HashSet<string> _selectedLabels = new(StringComparer.Ordinal);
 	private string? _selectedMilestone;
 	private LabelRegistry? _labelRegistry;
@@ -126,6 +127,17 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 		}
 	}
 
+	public WorkItemType? IssueType
+	{
+		get => _issueType;
+		set
+		{
+			if(_issueType == value) return;
+			_issueType = value;
+			if(DataSource is not null) DataSource.IssueType = value;
+		}
+	}
+
 	public HashSet<string> SelectedLabels => _selectedLabels;
 
 	public void SetSelectedLabels(IEnumerable<string> labels)
@@ -173,6 +185,7 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 		_ = _labelRegistry.RefreshAsync();
 		DataSource = new IssuesListBinding(serviceContext, _lstIssues, IssueState);
 		if(_issueScope        is not null) DataSource.IssueScope = _issueScope;
+		if(_issueType         is not null) DataSource.IssueType  = _issueType;
 		if(_selectedLabels.Count > 0)      DataSource.Labels     = _selectedLabels;
 		if(_selectedMilestone is not null) DataSource.Milestone  = _selectedMilestone;
 	}
@@ -200,6 +213,7 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 		var filterNode = section.GetCreateSection("Filter");
 		filterNode.SetValue<string>("State",     _issueState?.ToString() ?? string.Empty);
 		filterNode.SetValue<string>("Scope",     _issueScope?.ToString() ?? string.Empty);
+		filterNode.SetValue<string>("Type",      _issueType?.ToString()  ?? string.Empty);
 		filterNode.SetValue<string>("Milestone", _selectedMilestone ?? string.Empty);
 		filterNode.SetValue<string>("Labels",    _selectedLabels.Count == 0
 			? string.Empty
@@ -221,6 +235,9 @@ partial class IssuesView : GitLabViewBase, ISearchableView<IssuesSearchOptions>
 
 		var rawScope = filterNode.GetValue<string>("Scope") ?? string.Empty;
 		_issueScope = Enum.TryParse<Api.IssueScope>(rawScope, out var sc) ? sc : null;
+
+		var rawType = filterNode.GetValue<string>("Type") ?? string.Empty;
+		_issueType = Enum.TryParse<WorkItemType>(rawType, out var wt) && wt != WorkItemType.Unknown ? wt : null;
 
 		var milestone = filterNode.GetValue<string>("Milestone") ?? string.Empty;
 		_selectedMilestone = milestone.Length == 0 ? null : milestone;

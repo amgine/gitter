@@ -24,9 +24,11 @@ using gitter.Framework;
 
 static class UrlHelper
 {
-	static string? GetPersonalAccessTokensUrl(string? url)
+	public static string? GetPersonalAccessTokensUrl(string? url)
 	{
 		if(url is not { Length: not 0 }) return default;
+
+		url = url.Trim();
 		if(!url.StartsWith("http://") && !url.StartsWith("https://")) return default;
 
 		return url.EndsWith('/')
@@ -39,6 +41,14 @@ static class UrlHelper
 		var url = GetPersonalAccessTokensUrl(serviceUrl);
 		if(url is null) return false;
 		Utility.OpenUrl(url);
+		return true;
+	}
+
+	public static bool CopyPersonalAccessTokensUrl(string? serviceUrl)
+	{
+		var url = GetPersonalAccessTokensUrl(serviceUrl);
+		if(url is null) return false;
+		ClipboardEx.TrySetTextSafe(url);
 		return true;
 	}
 }

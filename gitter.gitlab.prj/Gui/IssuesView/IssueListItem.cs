@@ -61,6 +61,18 @@ sealed class IssueListItem : CustomListBoxItem<Issue>
 		return CompareById(i1, i2);
 	}
 
+	public static int CompareByType(IssueListItem item1, IssueListItem item2)
+		=> CompareString(
+			IssueTypeColumn.GetDisplayName(item1.DataContext.EffectiveType),
+			IssueTypeColumn.GetDisplayName(item2.DataContext.EffectiveType));
+
+	public static int CompareByType(CustomListBoxItem item1, CustomListBoxItem item2)
+	{
+		if(item1 is not IssueListItem i1) return 0;
+		if(item2 is not IssueListItem i2) return 0;
+		return CompareByType(i1, i2);
+	}
+
 	public static int CompareByTitle(IssueListItem item1, IssueListItem item2)
 		=> CompareString(item1.DataContext.Title, item2.DataContext.Title);
 
