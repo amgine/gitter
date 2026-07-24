@@ -22,6 +22,7 @@ namespace gitter.GitLab.Api;
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -39,30 +40,64 @@ using gitter.Framework;
 
 partial class ApiEndpoint
 {
+	private const int PageSize = 100;
+
 	private static string? GetNextPageUrl(HttpResponseHeaders headers)
 	{
 		Assert.IsNotNull(headers);
 
-		if(headers.TryGetValues("Link", out var links))
+		if(!headers.TryGetValues("Link", out var links)) return default;
+
+		foreach(var link in links)
 		{
-			foreach(var link in links)
+			if(string.IsNullOrWhiteSpace(link)) continue;
+
+			var pos = 0;
+			while(pos < link.Length)
 			{
-				if(string.IsNullOrWhiteSpace(link)) continue;
-				foreach(var part in link.Split(','))
+				var s = link.IndexOf('<', pos);
+				if(s < 0) break;
+				var e = link.IndexOf('>', s + 1);
+				if(e < 0) break;
+
+				var next      = link.IndexOf('<', e + 1);
+				var paramsEnd = next < 0 ? link.Length : next;
+
+				if(IsRelNext(link.Substring(e + 1, paramsEnd - e - 1)))
 				{
-					if(part.EndsWith("rel=\"next\""))
-					{
-						var s = part.IndexOf('<');
-						var e = part.IndexOf('>');
-						if(s >= 0 && e > s)
-						{
-							return part.Substring(s + 1, e - s - 1);
-						}
-					}
+					return link.Substring(s + 1, e - s - 1);
 				}
+				pos = paramsEnd;
 			}
 		}
 		return default;
+	}
+
+	private static bool IsRelNext(string parameters)
+	{
+		foreach(var part in parameters.Split(';'))
+		{
+			var p = part.Trim().TrimEnd(',').Trim();
+			var eq = p.IndexOf('=');
+			if(eq <= 0) continue;
+			if(!p.Substring(0, eq).Trim().Equals(@"rel", StringComparison.OrdinalIgnoreCase)) continue;
+
+			var value = p.Substring(eq + 1).Trim().Trim('"', '\'');
+			foreach(var token in value.Split(' '))
+			{
+				if(token.Equals(@"next", StringComparison.OrdinalIgnoreCase)) return true;
+			}
+		}
+		return false;
+	}
+
+	private static string EnsurePageSize(string url)
+	{
+		Assert.IsNeitherNullNorWhitespace(url);
+
+		if(url.IndexOf(@"per_page=", StringComparison.OrdinalIgnoreCase) >= 0) return url;
+
+		return url + (url.IndexOf('?') >= 0 ? '&' : '?') + @"per_page=" + PageSize.ToString(CultureInfo.InvariantCulture);
 	}
 
 	private static async Task<T?> ReadReponseAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken = default)
@@ -92,7 +127,7 @@ partial class ApiEndpoint
 		Assert.IsNeitherNullNorWhitespace(url);
 
 		var result = default(List<T>);
-		string? next = url;
+		string? next = EnsurePageSize(url);
 		while(true)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
@@ -103,7 +138,8 @@ partial class ApiEndpoint
 				.SendAsync(message, cancellationToken)
 				.ConfigureAwait(continueOnCapturedContext: false);
 
-			response.EnsureSuccessStatusCode();
+			await CheckResponseAsync(response, cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
 
 			var page = await ReadReponseAsync<T[]>(response, cancellationToken)
 				.ConfigureAwait(continueOnCapturedContext: false);
@@ -124,15 +160,60 @@ partial class ApiEndpoint
 		return result ?? (IReadOnlyList<T>)Preallocated<T>.EmptyArray;
 	}
 
-	private static void CheckResponse(HttpResponseMessage response)
+	private static async Task CheckResponseAsync(HttpResponseMessage response, CancellationToken cancellationToken = default)
 	{
+		Assert.IsNotNull(response);
+
 		if(response.IsSuccessStatusCode) return;
 
-		if(response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+		var details = await ReadErrorMessageAsync(response, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
+
+		throw GitLabApiException.Create(response, details);
+	}
+
+	private static async Task<string?> ReadErrorMessageAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+	{
+		string body;
+		try
 		{
-			throw new UnauthorizedAccessException();
+			body = await response.Content
+				.ReadAsStringAsync(cancellationToken)
+				.ConfigureAwait(continueOnCapturedContext: false);
 		}
-		response.EnsureSuccessStatusCode();
+		catch(OperationCanceledException)
+		{
+			throw;
+		}
+		catch
+		{
+			return default;
+		}
+
+		if(string.IsNullOrWhiteSpace(body)) return default;
+
+#if SYSTEM_TEXT_JSON
+		try
+		{
+			using var document = JsonDocument.Parse(body);
+			if(document.RootElement.ValueKind == JsonValueKind.Object)
+			{
+				foreach(var name in new[] { @"message", @"error", @"error_description" })
+				{
+					if(document.RootElement.TryGetProperty(name, out var value))
+					{
+						return value.ValueKind == JsonValueKind.String ? value.GetString() : value.ToString();
+					}
+				}
+			}
+		}
+		catch(JsonException)
+		{
+		}
+#endif
+
+		body = body.Trim();
+		return body.Length > 512 ? body.Substring(0, 512) : body;
 	}
 
 	private async Task<T?> GetAsync<T>(string url, CancellationToken cancellationToken = default)
@@ -145,7 +226,8 @@ partial class ApiEndpoint
 			.SendAsync(message, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 
-		CheckResponse(response);
+		await CheckResponseAsync(response, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
 
 		return await ReadReponseAsync<T>(response, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
@@ -161,7 +243,8 @@ partial class ApiEndpoint
 			.SendAsync(message, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
 
-		CheckResponse(response);
+		await CheckResponseAsync(response, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
 
 		return await ReadReponseAsync<T>(response, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
@@ -173,7 +256,9 @@ partial class ApiEndpoint
 		using var response = await HttpMessageInvoker
 			.SendAsync(request, cancellationToken)
 			.ConfigureAwait(continueOnCapturedContext: false);
-		response.EnsureSuccessStatusCode();
+
+		await CheckResponseAsync(response, cancellationToken)
+			.ConfigureAwait(continueOnCapturedContext: false);
 	}
 
 	public ApiEndpoint(HttpMessageInvoker httpMessageInvoker, ServerInfo server)

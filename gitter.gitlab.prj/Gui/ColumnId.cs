@@ -36,4 +36,5 @@ public enum ColumnId
 	Hash,
 	Status,
 	Labels,
+	Type,
 }

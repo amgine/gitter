@@ -46,6 +46,13 @@ sealed class Issue : ModifiableObject
 		public const string Weight         = @"weight";
 		public const string TimeStats      = @"time_stats";
 		public const string TaskCompletionStatus = @"task_completion_status";
+		public const string IssueType      = @"issue_type";
+		public const string Type           = @"type";
+		public const string Severity       = @"severity";
+		public const string HealthStatus   = @"health_status";
+		public const string References     = @"references";
+		public const string DiscussionLocked = @"discussion_locked";
+		public const string MergeRequestsCount = @"merge_requests_count";
 	}
 
 	[DataMember]
@@ -119,4 +126,35 @@ sealed class Issue : ModifiableObject
 	[DataMember]
 	[JsonPropertyName(Names.TaskCompletionStatus)]
 	public IssueTaskCompletionStatus? TaskCompletionStatus { get; set; }
+
+	[DataMember]
+	[JsonPropertyName(Names.IssueType)]
+	public WorkItemType IssueType { get; set; }
+
+	[DataMember]
+	[JsonPropertyName(Names.Type)]
+	public WorkItemType Type { get; set; }
+
+	[DataMember]
+	[JsonPropertyName(Names.Severity)]
+	public string? Severity { get; set; }
+
+	[DataMember]
+	[JsonPropertyName(Names.HealthStatus)]
+	public string? HealthStatus { get; set; }
+
+	[DataMember]
+	[JsonPropertyName(Names.References)]
+	public IssueReferences? References { get; set; }
+
+	[DataMember]
+	[JsonPropertyName(Names.DiscussionLocked)]
+	public bool? DiscussionLocked { get; set; }
+
+	[DataMember]
+	[JsonPropertyName(Names.MergeRequestsCount)]
+	public int MergeRequestsCount { get; set; }
+
+	public WorkItemType EffectiveType
+		=> IssueType != WorkItemType.Unknown ? IssueType : Type;
 }

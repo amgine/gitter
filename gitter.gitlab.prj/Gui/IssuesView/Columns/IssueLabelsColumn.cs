@@ -34,9 +34,9 @@ using Resources = gitter.GitLab.Properties.Resources;
 
 sealed class IssueLabelsColumn : CustomListBoxColumn
 {
-	private const int BaseChipHeight = 14;
-	private const int BaseChipPadX   = 4;
-	private const int BaseChipGap    = 4;
+	private const int BaseChipHeight = LabelChip.BaseHeight;
+	private const int BaseChipPadX   = LabelChip.BasePadX;
+	private const int BaseChipGap    = LabelChip.BaseGap;
 
 	public IssueLabelsColumn()
 		: base((int)ColumnId.Labels, Resources.StrLabels, visible: true)
@@ -103,54 +103,30 @@ sealed class IssueLabelsColumn : CustomListBoxColumn
 		var right  = bounds.Right - conv.ConvertX(2);
 
 		var registry = LabelRegistry.Current;
-		var oldHint  = g.TextRenderingHint;
-		var oldMode  = g.SmoothingMode;
-		g.SmoothingMode      = SmoothingMode.AntiAlias;
-		g.TextRenderingHint  = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-		try
+		using var scope = LabelChip.BeginDraw(g);
+
+		for(var i = 0; i < names.Length; i++)
 		{
-			for(var i = 0; i < names.Length; i++)
+			var name = names[i];
+			var (color, textColor) = LabelChip.GetColors(registry?.Find(name));
+
+			var chipWidth = LabelChip.MeasureWidth(g, font, name, padX);
+
+			if(x + chipWidth > right)
 			{
-				var name = names[i];
-				var label = registry?.Find(name);
-				var color = ParseColor(label?.Color) ?? Color.FromArgb(94, 110, 130);
-				var textColor = ParseColor(label?.TextColor) ?? AutoContrast(color);
-
-				var textWidth = (int)Math.Ceiling(g.MeasureString(name, font).Width);
-				var chipWidth = textWidth + 2 * padX;
-
-				if(x + chipWidth > right)
+				var remaining = names.Length - i;
+				var more = "+" + remaining.ToString(CultureInfo.InvariantCulture);
+				var moreChip = LabelChip.MeasureWidth(g, font, more, padX);
+				if(x + moreChip <= right + padX)
 				{
-					var remaining = names.Length - i;
-					var more = "+" + remaining.ToString(CultureInfo.InvariantCulture);
-					var moreW = (int)Math.Ceiling(g.MeasureString(more, font).Width);
-					var moreChip = moreW + 2 * padX;
-					if(x + moreChip <= right + padX)
-					{
-						DrawChip(g, font, x, top, moreChip, chipHeight, Color.Gray, Color.White, more, padX);
-					}
-					break;
+					LabelChip.Draw(g, font, x, top, moreChip, chipHeight, Color.Gray, Color.White, more, padX);
 				}
-
-				DrawChip(g, font, x, top, chipWidth, chipHeight, color, textColor, name, padX);
-				x += chipWidth + gap;
+				break;
 			}
-		}
-		finally
-		{
-			g.TextRenderingHint = oldHint;
-			g.SmoothingMode     = oldMode;
-		}
-	}
 
-	private static void DrawChip(Graphics g, Font font, int x, int y, int w, int h, Color fill, Color text, string label, int padX)
-	{
-		var radius = Math.Max(2, h / 2);
-		using var path = RoundedRect(new Rectangle(x, y, w, h), radius);
-		using var brush = new SolidBrush(fill);
-		g.FillPath(brush, path);
-		TextRenderer.DrawText(g, label, font, new Rectangle(x + padX, y, w - 2 * padX, h),
-			text, TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine | TextFormatFlags.NoPrefix);
+			LabelChip.Draw(g, font, x, top, chipWidth, chipHeight, color, textColor, name, padX);
+			x += chipWidth + gap;
+		}
 	}
 
 	private static int MeasureChipsTotalWidth(Graphics g, Font font, DpiConverter conv, string[] names)
@@ -160,48 +136,9 @@ sealed class IssueLabelsColumn : CustomListBoxColumn
 		var total = 0;
 		for(var i = 0; i < names.Length; i++)
 		{
-			var w = (int)Math.Ceiling(g.MeasureString(names[i], font).Width) + 2 * padX;
-			total += w;
+			total += LabelChip.MeasureWidth(g, font, names[i], padX);
 			if(i < names.Length - 1) total += gap;
 		}
 		return total + conv.ConvertX(4);
-	}
-
-	private static Color? ParseColor(string? hex)
-	{
-		if(string.IsNullOrEmpty(hex)) return null;
-		var s = hex!.TrimStart('#');
-		if(s.Length == 3)
-		{
-			// #abc -> #aabbcc
-			s = string.Concat(s[0], s[0], s[1], s[1], s[2], s[2]);
-		}
-		if(s.Length != 6) return null;
-		if(int.TryParse(s, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var rgb))
-		{
-			return Color.FromArgb(0xFF, (rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF);
-		}
-		return null;
-	}
-
-	// YIQ luminance contrast
-	internal static Color AutoContrast(Color background)
-	{
-		var yiq = (background.R * 299 + background.G * 587 + background.B * 114) / 1000;
-		return yiq >= 128 ? Color.Black : Color.White;
-	}
-
-	private static GraphicsPath RoundedRect(Rectangle rect, int radius)
-	{
-		var path = new GraphicsPath();
-		var d = radius * 2;
-		if(d > rect.Width)  d = rect.Width;
-		if(d > rect.Height) d = rect.Height;
-		path.AddArc(rect.X,                rect.Y,                d, d, 180, 90);
-		path.AddArc(rect.Right - d - 1,    rect.Y,                d, d, 270, 90);
-		path.AddArc(rect.Right - d - 1,    rect.Bottom - d - 1,   d, d,   0, 90);
-		path.AddArc(rect.X,                rect.Bottom - d - 1,   d, d,  90, 90);
-		path.CloseFigure();
-		return path;
 	}
 }

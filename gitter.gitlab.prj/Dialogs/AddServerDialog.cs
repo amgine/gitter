@@ -46,6 +46,8 @@ partial class AddServerDialog : DialogBase, IAsyncExecutableDialog, IAddServerVi
 		public  readonly TextBox _txtServiceUrl;
 		public  readonly TextBox _txtAPIKey;
 		public  readonly LinkLabel _lnkTokens;
+		public  readonly PictureBox _picCopyTokensUrl;
+		private readonly ToolTip _toolTip;
 
 		public DialogControls()
 		{
@@ -65,6 +67,16 @@ partial class AddServerDialog : DialogBase, IAsyncExecutableDialog, IAddServerVi
 			};
 			_lnkTokens.Links[0].Enabled = false;
 
+			_picCopyTokensUrl = new()
+			{
+				SizeMode = PictureBoxSizeMode.CenterImage,
+				Cursor   = Cursors.Hand,
+				Margin   = Padding.Empty,
+				Enabled  = false,
+				TabStop  = false,
+			};
+			_toolTip = new();
+
 			GitterApplication.FontManager.InputFont.Apply(_txtName, _txtServiceUrl, _txtAPIKey);
 		}
 
@@ -74,6 +86,7 @@ partial class AddServerDialog : DialogBase, IAsyncExecutableDialog, IAddServerVi
 			_lblAPIKey.Text     = Resources.StrAPIKey.AddColon();
 			_lblServiceUrl.Text = Resources.StrServiceUri.AddColon();
 			_lnkTokens.Text     = Resources.StrsManageAccessTokens;
+			_toolTip.SetToolTip(_picCopyTokensUrl, Resources.StrsCopyAccessTokensUrl);
 		}
 
 		public void Layout(Control parent)
@@ -106,7 +119,22 @@ partial class AddServerDialog : DialogBase, IAsyncExecutableDialog, IAddServerVi
 						new GridContent(new ControlContent(urlDec,         marginOverride: LayoutConstants.TextBoxMargin), row: 1, column: 1),
 						new GridContent(new ControlContent(_lblAPIKey,     marginOverride: LayoutConstants.NoMargin), row: 2),
 						new GridContent(new ControlContent(keyDec,         marginOverride: LayoutConstants.TextBoxMargin), row: 2, column: 1),
-						new GridContent(new ControlContent(_lnkTokens,     marginOverride: DpiBoundValue.Padding(new(-3, 0, 0, 0))), row: 3, column: 1),
+						new GridContent(new Grid(
+							columns:
+							[
+								SizeSpec.Absolute(20),
+								SizeSpec.Everything(),
+							],
+							content:
+							[
+								new GridContent(new ControlContent(_picCopyTokensUrl,
+									sizeOverride:               DpiBoundValue.Size(new(16, 16)),
+									marginOverride:             LayoutConstants.NoMargin,
+									horizontalContentAlignment: HorizontalContentAlignment.Left,
+									verticalContentAlignment:   VerticalContentAlignment.Center), column: 0),
+								new GridContent(new ControlContent(_lnkTokens,
+									marginOverride: LayoutConstants.NoMargin), column: 1),
+							]), row: 3, column: 1),
 					]),
 			};
 
@@ -126,6 +154,7 @@ partial class AddServerDialog : DialogBase, IAsyncExecutableDialog, IAddServerVi
 			_lblAPIKey.Parent = parent;
 			keyDec.Parent = parent;
 			_lnkTokens.Parent = parent;
+			_picCopyTokensUrl.Parent = parent;
 		}
 	}
 
@@ -157,10 +186,24 @@ partial class AddServerDialog : DialogBase, IAsyncExecutableDialog, IAddServerVi
 		};
 		UserInputErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
+		var dpiBindings = new DpiBindings(this);
+		dpiBindings.BindImage(_controls._picCopyTokensUrl, CommonIcons.ClipboardCopy);
+
 		_controls._lnkTokens.LinkClicked += OnManageAccessTokensClick;
-		_controls._txtServiceUrl.TextChanged += (_, _) => _controls._lnkTokens.Links[0].Enabled = _controls._txtServiceUrl.TextLength != 0;
+		_controls._picCopyTokensUrl.Click += OnCopyAccessTokensUrlClick;
+		_controls._txtServiceUrl.TextChanged += (_, _) => UpdateAccessTokensLinkState();
+		UpdateAccessTokensLinkState();
 
 		Controller = new AddServerController(httpMessageInvoker, servers) { View = this, };
+	}
+
+	private void UpdateAccessTokensLinkState()
+	{
+		var enabled = _controls._txtServiceUrl.TextLength != 0;
+		_controls._lnkTokens.Links[0].Enabled = enabled;
+
+		_controls._picCopyTokensUrl.Enabled = enabled;
+		_controls._picCopyTokensUrl.Visible = enabled;
 	}
 
 	/// <inheritdoc/>
@@ -191,6 +234,9 @@ partial class AddServerDialog : DialogBase, IAsyncExecutableDialog, IAddServerVi
 
 	private void OnManageAccessTokensClick(object? sender, LinkLabelLinkClickedEventArgs e)
 		=> UrlHelper.OpenPersonalAccessTokensPage(_controls._txtServiceUrl.Text.Trim());
+
+	private void OnCopyAccessTokensUrlClick(object? sender, EventArgs e)
+		=> UrlHelper.CopyPersonalAccessTokensUrl(_controls._txtServiceUrl.Text);
 
 	/// <inheritdoc/>
 	public async Task<bool> ExecuteAsync()

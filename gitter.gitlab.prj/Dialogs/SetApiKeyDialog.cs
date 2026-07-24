@@ -42,6 +42,8 @@ partial class SetApiKeyDialog : DialogBase, IAsyncExecutableDialog, ISetApiKeyVi
 		private readonly LabelControl _lblAPIKey;
 		public  readonly TextBox _txtAPIKey;
 		public  readonly LinkLabel _lnkTokens;
+		public  readonly PictureBox _picCopyTokensUrl;
+		private readonly ToolTip _toolTip;
 
 		public DialogControls()
 		{
@@ -56,6 +58,15 @@ partial class SetApiKeyDialog : DialogBase, IAsyncExecutableDialog, ISetApiKeyVi
 				Padding = default,
 			};
 
+			_picCopyTokensUrl = new()
+			{
+				SizeMode = PictureBoxSizeMode.CenterImage,
+				Cursor   = Cursors.Hand,
+				Margin   = Padding.Empty,
+				TabStop  = false,
+			};
+			_toolTip = new();
+
 			GitterApplication.FontManager.InputFont.Apply(_txtAPIKey);
 		}
 
@@ -63,6 +74,7 @@ partial class SetApiKeyDialog : DialogBase, IAsyncExecutableDialog, ISetApiKeyVi
 		{
 			_lblAPIKey.Text = Resources.StrAPIKey.AddColon();
 			_lnkTokens.Text = Resources.StrsManageAccessTokens;
+			_toolTip.SetToolTip(_picCopyTokensUrl, Resources.StrsCopyAccessTokensUrl);
 		}
 
 		public void Layout(Control parent)
@@ -87,7 +99,22 @@ partial class SetApiKeyDialog : DialogBase, IAsyncExecutableDialog, ISetApiKeyVi
 					[
 						new GridContent(new ControlContent(_lblAPIKey, marginOverride: LayoutConstants.NoMargin), row: 0),
 						new GridContent(new ControlContent(keyDec,     marginOverride: LayoutConstants.TextBoxMargin), row: 0, column: 1),
-						new GridContent(new ControlContent(_lnkTokens, marginOverride: DpiBoundValue.Padding(new(-3, 0, 0, 0))), row: 1, column: 1),
+						new GridContent(new Grid(
+							columns:
+							[
+								SizeSpec.Absolute(20),
+								SizeSpec.Everything(),
+							],
+							content:
+							[
+								new GridContent(new ControlContent(_picCopyTokensUrl,
+									sizeOverride:               DpiBoundValue.Size(new(16, 16)),
+									marginOverride:             LayoutConstants.NoMargin,
+									horizontalContentAlignment: HorizontalContentAlignment.Left,
+									verticalContentAlignment:   VerticalContentAlignment.Center), column: 0),
+								new GridContent(new ControlContent(_lnkTokens,
+									marginOverride: LayoutConstants.NoMargin), column: 1),
+							]), row: 1, column: 1),
 					]),
 			};
 
@@ -99,6 +126,7 @@ partial class SetApiKeyDialog : DialogBase, IAsyncExecutableDialog, ISetApiKeyVi
 			_lblAPIKey.Parent = parent;
 			keyDec.Parent     = parent;
 			_lnkTokens.Parent = parent;
+			_picCopyTokensUrl.Parent = parent;
 		}
 	}
 
@@ -131,7 +159,11 @@ partial class SetApiKeyDialog : DialogBase, IAsyncExecutableDialog, ISetApiKeyVi
 		};
 		UserInputErrorNotifier = new UserInputErrorNotifier(NotificationService, inputs);
 
-		_controls._lnkTokens.LinkClicked += OnManageAccessTokensClick;
+		var dpiBindings = new DpiBindings(this);
+		dpiBindings.BindImage(_controls._picCopyTokensUrl, CommonIcons.ClipboardCopy);
+
+		_controls._lnkTokens.LinkClicked  += OnManageAccessTokensClick;
+		_controls._picCopyTokensUrl.Click += OnCopyAccessTokensUrlClick;
 
 		Controller = new SetApiKeyController(httpMessageInvoker, servers) { View = this, };
 	}
@@ -159,6 +191,9 @@ partial class SetApiKeyDialog : DialogBase, IAsyncExecutableDialog, ISetApiKeyVi
 
 	private void OnManageAccessTokensClick(object? sender, LinkLabelLinkClickedEventArgs e)
 		=> UrlHelper.OpenPersonalAccessTokensPage(ServiceUri.ToString());
+
+	private void OnCopyAccessTokensUrlClick(object? sender, EventArgs e)
+		=> UrlHelper.CopyPersonalAccessTokensUrl(ServiceUri.ToString());
 
 	/// <inheritdoc/>
 	public async Task<bool> ExecuteAsync()

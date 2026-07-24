@@ -41,7 +41,7 @@ public sealed class Assignee
 
 	[DataMember]
 	[JsonPropertyName(Names.Id)]
-	public int Id { get; set; } = default!;
+	public long Id { get; set; } = default!;
 
 	[DataMember]
 	[JsonPropertyName(Names.State)]

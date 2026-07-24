@@ -43,8 +43,10 @@ internal sealed class IssuesToolbar : ToolStrip
 	private readonly ToolStripButton _btnScopeAll;
 	private readonly ToolStripButton _btnScopeCreated;
 	private readonly ToolStripButton _btnScopeAssigned;
+	private readonly ToolStripDropDownButton _btnType;
 	private readonly ToolStripDropDownButton _btnLabels;
 	private readonly ToolStripDropDownButton _btnMilestone;
+	private readonly LabelsFilterDropDown _labelsDropDown;
 	private bool _labelsChanged;
 
 	public IssuesToolbar(IssuesView view)
@@ -101,9 +103,22 @@ internal sealed class IssuesToolbar : ToolStrip
 		_btnScopeAssigned.Click += (_, _) => SetScope(Api.IssueScope.AssignedToMe);
 
 		Items.Add(new ToolStripSeparator());
-		Items.Add(_btnLabels = new ToolStripDropDownButton(Resources.StrLabels));
+		Items.Add(_btnType = new ToolStripDropDownButton(Resources.StrType));
+		_btnType.DropDownOpening += OnTypeDropDownOpening;
+		UpdateTypeCaption();
+
+		Items.Add(_btnLabels = new ToolStripDropDownButton(Resources.StrLabels)
+		{
+			DropDown = new Popup(_labelsDropDown = new LabelsFilterDropDown())
+			{
+				Resizable = false,
+			},
+			ToolTipText = Resources.StrLabels,
+		});
+		_labelsDropDown.SelectionChanged += (_, _) => _labelsChanged = true;
 		_btnLabels.DropDownOpening += OnLabelsDropDownOpening;
 		_btnLabels.DropDownClosed  += OnLabelsDropDownClosed;
+		UpdateLabelsCaption();
 
 		Items.Add(_btnMilestone = new ToolStripDropDownButton(Resources.StrMilestone));
 		_btnMilestone.DropDownOpening += OnMilestoneDropDownOpening;
@@ -127,42 +142,53 @@ internal sealed class IssuesToolbar : ToolStrip
 		_view.IssueScope          = scope;
 	}
 
-	private void OnLabelsDropDownOpening(object? sender, EventArgs e)
+	private void OnTypeDropDownOpening(object? sender, EventArgs e)
 	{
-		_btnLabels.DropDownItems.Clear();
-		_labelsChanged = false;
+		_btnType.DropDownItems.Clear();
 
-		var labels = _view.LabelRegistry?.All;
-		if(labels is null || labels.Count == 0)
+		AddTypeItem(Resources.StrAny, null);
+		_btnType.DropDownItems.Add(new ToolStripSeparator());
+		foreach(var type in Api.WorkItemTypes.Filterable)
 		{
-			_btnLabels.DropDownItems.Add(new ToolStripMenuItem("(no labels)") { Enabled = false });
-			return;
-		}
-
-		foreach(var label in labels)
-		{
-			var item = new ToolStripMenuItem(label.Name)
-			{
-				CheckOnClick = true,
-				Checked      = _view.SelectedLabels.Contains(label.Name),
-				Tag          = label.Name,
-			};
-			item.CheckedChanged += OnLabelChecked;
-			_btnLabels.DropDownItems.Add(item);
+			AddTypeItem(IssueTypeColumn.GetDisplayName(type), type);
 		}
 	}
 
-	private void OnLabelChecked(object? sender, EventArgs e) => _labelsChanged = true;
+	private void AddTypeItem(string display, Api.WorkItemType? value)
+	{
+		var item = new ToolStripMenuItem(display)
+		{
+			Checked = _view.IssueType == value,
+			Tag     = value,
+		};
+		item.Click += (_, _) =>
+		{
+			_view.IssueType = (Api.WorkItemType?)item.Tag;
+			UpdateTypeCaption();
+		};
+		_btnType.DropDownItems.Add(item);
+	}
+
+	private void UpdateTypeCaption()
+	{
+		_btnType.Text = _view.IssueType is { } type
+			? $"{Resources.StrType}: {IssueTypeColumn.GetDisplayName(type)}"
+			: Resources.StrType;
+	}
+
+	private void OnLabelsDropDownOpening(object? sender, EventArgs e)
+	{
+		_labelsChanged = false;
+		_labelsDropDown.SetSelectedLabels(_view.SelectedLabels);
+		_labelsDropDown.SetLabels(_view.LabelRegistry?.All);
+	}
 
 	private void OnLabelsDropDownClosed(object? sender, EventArgs e)
 	{
 		if(!_labelsChanged) return;
-		var selected = new List<string>();
-		foreach(ToolStripItem dd in _btnLabels.DropDownItems)
-		{
-			if(dd is ToolStripMenuItem { Checked: true, Tag: string name }) selected.Add(name);
-		}
-		_view.SetSelectedLabels(selected);
+
+		_labelsChanged = false;
+		_view.SetSelectedLabels(new List<string>(_labelsDropDown.SelectedLabels));
 		UpdateLabelsCaption();
 	}
 

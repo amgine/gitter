@@ -28,6 +28,12 @@ static class HttpContentExtensions
 			_ = cancellationToken;
 			return content.ReadAsStreamAsync();
 		}
+
+		public System.Threading.Tasks.Task<string> ReadAsStringAsync(System.Threading.CancellationToken cancellationToken)
+		{
+			_ = cancellationToken;
+			return content.ReadAsStringAsync();
+		}
 	}
 }
 #endif

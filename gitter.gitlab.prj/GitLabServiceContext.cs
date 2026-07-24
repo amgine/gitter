@@ -22,6 +22,7 @@ namespace gitter.GitLab;
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -72,14 +73,17 @@ class GitLabServiceContext
 		=> _api.GetTestReportSummaryAsync(DefaultProjectId, pipelineId, cancellationToken);
 
 	public Task<IReadOnlyList<Issue>> GetIssuesAsync(
-		IssueState? state    = default,
-		IssueScope? scope    = default,
+		IssueState?   state     = default,
+		IssueScope?   scope     = default,
+		WorkItemType? issueType = default,
 		IReadOnlyCollection<string>? labels = default,
-		string?     milestone = default,
+		string?       milestone = default,
+		string?       search    = default,
 		CancellationToken cancellationToken = default)
-		=> _api.GetProjectIssuesAsync(DefaultProjectId, state, scope,
+		=> _api.GetProjectIssuesAsync(DefaultProjectId, state, scope, issueType,
 			labels:    labels,
 			milestone: milestone,
+			search:    search,
 			cancellationToken: cancellationToken);
 
 	public Task<IReadOnlyList<Label>> GetLabelsAsync(
@@ -90,20 +94,27 @@ class GitLabServiceContext
 	public Task<IReadOnlyList<Project>> GetProjectsAsync()
 		=> _api.GetProjectsAsync();
 
+	private string FormatUrl(string path)
+	{
+		var baseUrl = ServiceUri.ToString();
+		if(!baseUrl.EndsWith("/", StringComparison.Ordinal)) baseUrl += "/";
+		return baseUrl + path;
+	}
+
 	public string FormatProjectUrl()
-		=> ServiceUri + $@"{DefaultProjectId}";
+		=> FormatUrl($@"{DefaultProjectId}");
 
 	public string FormatCommitUrl(string sha)
-		=> ServiceUri + $@"{DefaultProjectId}/-/commit/{sha}";
+		=> FormatUrl($@"{DefaultProjectId}/-/commit/{sha}");
 
 	public string FormatPipelinesUrl()
-		=> ServiceUri + $@"{DefaultProjectId}/-/pipelines";
+		=> FormatUrl($@"{DefaultProjectId}/-/pipelines");
 
 	public string FormatIssuesUrl()
-		=> ServiceUri + $@"{DefaultProjectId}/-/issues";
+		=> FormatUrl($@"{DefaultProjectId}/-/issues");
 
-	public string FormatIssueUrl(int id)
-		=> ServiceUri + $@"{DefaultProjectId}/-/issues/{id}";
+	public string FormatIssueUrl(long iid)
+		=> FormatUrl($@"{DefaultProjectId}/-/issues/{iid.ToString(CultureInfo.InvariantCulture)}");
 
 	public Uri ServiceUri => _server.ServiceUri;
 
